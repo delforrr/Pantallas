@@ -15,8 +15,9 @@ export const CierreCajaScreen = () => (
       <Grid item xs={12} md={5}>
         <Box
           sx={{
-            background: "rgba(42,34,16,0.6)",
-            border: "1px solid rgba(232,160,32,0.15)",
+            bgcolor: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
             borderRadius: "16px",
             p: 3,
           }}
@@ -35,19 +36,20 @@ export const CierreCajaScreen = () => (
               <Skeleton
                 width="45%"
                 height={20}
-                sx={{ background: "rgba(232,160,32,0.07)" }}
+                sx={{ bgcolor: "action.hover" }}
               />
               <Skeleton
                 width="30%"
                 height={20}
-                sx={{ background: "rgba(232,160,32,0.07)" }}
+                sx={{ bgcolor: "action.hover" }}
               />
             </Box>
           ))}
           <Skeleton
             height={44}
             sx={{
-              background: "rgba(39,174,96,0.15)",
+              bgcolor: "success.main",
+              opacity: 0.2,
               borderRadius: "10px",
               mt: 2,
               transform: "none",

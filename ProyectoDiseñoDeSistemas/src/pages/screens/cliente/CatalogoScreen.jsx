@@ -9,12 +9,12 @@ export const CatalogoScreen = () => (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
       {['Todos', 'Fideos', 'Rellenos', 'Salsas', 'Especiales'].map((c) => (
         <Chip key={c} label={c} clickable
-          sx={{ background: c === 'Todos' ? 'rgba(232,160,32,0.2)' : 'rgba(42,34,16,0.7)',
-            color: c === 'Todos' ? '#E8A020' : '#B8A882',
-            border: `1px solid ${c === 'Todos' ? 'rgba(232,160,32,0.4)' : 'rgba(232,160,32,0.1)'}` }} />
+          sx={{ bgcolor: c === 'Todos' ? 'action.selected' : 'background.paper',
+            color: c === 'Todos' ? 'primary.main' : 'text.secondary',
+            border: `1px solid`, borderColor: c === 'Todos' ? 'primary.main' : 'divider' }} />
       ))}
       <Button startIcon={<FilterListIcon />} size="small"
-        sx={{ ml: 'auto', color: '#B8A882', border: '1px solid rgba(232,160,32,0.15)', borderRadius: '8px' }}>
+        sx={{ ml: 'auto', color: 'text.secondary', border: '1px solid', borderColor: 'divider', borderRadius: '8px' }}>
         Filtros
       </Button>
     </Box>

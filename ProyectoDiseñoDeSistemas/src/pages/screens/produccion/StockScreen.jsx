@@ -26,8 +26,9 @@ export const StockScreen = () => (
           <Box
             key={i}
             sx={{
-              background: "rgba(192,57,43,0.1)",
-              border: "1px solid rgba(192,57,43,0.2)",
+              bgcolor: (theme) => `${theme.palette.error.main}1A`,
+              border: "1px solid",
+              borderColor: (theme) => `${theme.palette.error.main}33`,
               borderRadius: "12px",
               p: 2,
               mb: 1.5,
@@ -36,12 +37,12 @@ export const StockScreen = () => (
             <Skeleton
               width="65%"
               height={18}
-              sx={{ background: "rgba(192,57,43,0.12)" }}
+              sx={{ bgcolor: (theme) => `${theme.palette.error.main}1F` }}
             />
             <Skeleton
               width="40%"
               height={14}
-              sx={{ background: "rgba(192,57,43,0.08)", mt: 0.5 }}
+              sx={{ bgcolor: (theme) => `${theme.palette.error.main}14`, mt: 0.5 }}
             />
           </Box>
         ))}

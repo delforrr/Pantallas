@@ -17,26 +17,27 @@ export const RecetasScreen = () => (
         <Grid item xs={12} sm={6} md={4} key={i}>
           <Box
             sx={{
-              background: "rgba(42,34,16,0.55)",
-              border: "1px solid rgba(232,160,32,0.1)",
+              bgcolor: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
               borderRadius: "14px",
               overflow: "hidden",
             }}
           >
             <Skeleton
               height={130}
-              sx={{ background: "rgba(232,160,32,0.07)", transform: "none" }}
+              sx={{ bgcolor: "action.hover", transform: "none" }}
             />
             <Box sx={{ p: 2 }}>
               <Skeleton
                 width="60%"
                 height={20}
-                sx={{ background: "rgba(232,160,32,0.09)", mb: 0.5 }}
+                sx={{ bgcolor: "action.hover", mb: 0.5 }}
               />
               <Skeleton
                 width="40%"
                 height={15}
-                sx={{ background: "rgba(232,160,32,0.06)" }}
+                sx={{ bgcolor: "action.hover" }}
               />
             </Box>
           </Box>

@@ -23,8 +23,9 @@ export const OrdenProduccionScreen = () => (
         <Grid item xs={12} sm={4} key={i}>
           <Box
             sx={{
-              background: "rgba(42,34,16,0.55)",
-              border: "1px solid rgba(232,160,32,0.12)",
+              bgcolor: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
               borderRadius: "14px",
               p: 2.5,
             }}
@@ -32,17 +33,17 @@ export const OrdenProduccionScreen = () => (
             <Skeleton
               width="70%"
               height={22}
-              sx={{ background: "rgba(232,160,32,0.1)", mb: 1 }}
+              sx={{ bgcolor: "action.hover", mb: 1 }}
             />
             <Skeleton
               width="50%"
               height={16}
-              sx={{ background: "rgba(232,160,32,0.07)", mb: 1.5 }}
+              sx={{ bgcolor: "action.hover", mb: 1.5 }}
             />
             <Skeleton
               variant="rounded"
               height={8}
-              sx={{ background: "rgba(232,160,32,0.12)", borderRadius: "4px" }}
+              sx={{ bgcolor: "action.selected", borderRadius: "4px" }}
             />
           </Box>
         </Grid>

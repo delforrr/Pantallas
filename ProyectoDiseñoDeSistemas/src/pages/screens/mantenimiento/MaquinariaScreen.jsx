@@ -18,8 +18,9 @@ export const MaquinariaScreen = () => (
         <Grid item xs={12} sm={6} key={i}>
           <Box
             sx={{
-              background: "rgba(42,34,16,0.55)",
-              border: "1px solid rgba(232,160,32,0.12)",
+              bgcolor: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
               borderRadius: "14px",
               p: 2.5,
               display: "flex",
@@ -31,7 +32,7 @@ export const MaquinariaScreen = () => (
               width={56}
               height={56}
               sx={{
-                background: "rgba(232,160,32,0.1)",
+                bgcolor: "action.selected",
                 borderRadius: "12px",
                 flexShrink: 0,
               }}
@@ -40,17 +41,17 @@ export const MaquinariaScreen = () => (
               <Skeleton
                 width="60%"
                 height={20}
-                sx={{ background: "rgba(232,160,32,0.09)", mb: 0.5 }}
+                sx={{ bgcolor: "action.hover", mb: 0.5 }}
               />
               <Skeleton
                 width="40%"
                 height={15}
-                sx={{ background: "rgba(232,160,32,0.06)", mb: 1 }}
+                sx={{ bgcolor: "action.hover", mb: 1 }}
               />
               <Skeleton
                 variant="rounded"
                 height={6}
-                sx={{ background: "rgba(39,174,96,0.2)", borderRadius: "3px" }}
+                sx={{ bgcolor: "success.main", opacity: 0.3, borderRadius: "3px" }}
               />
             </Box>
           </Box>

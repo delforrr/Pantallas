@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { Box, Typography, Fade } from '@mui/material';
-import theme from './context/theme';
+import { getTheme } from './context/theme';
 import { AppProvider, useApp } from './context/AppContext';
 import LoginPage from './pages/LoginPage';
 import AppSidebar from './components/AppSidebar';
@@ -70,13 +70,13 @@ const PageContent = () => {
       <Box sx={{ flex: 1, p: { xs: 2, sm: 3 }, overflowY: 'auto' }}>
         {/* Page header */}
         <Box sx={{ mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700, color: '#F5ECD7', letterSpacing: '-0.01em' }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', letterSpacing: '-0.01em' }}>
             {label}
           </Typography>
-          <Box sx={{ width: 40, height: 3, background: 'linear-gradient(90deg, #E8A020, transparent)', borderRadius: 2, mt: 0.8 }} />
+          <Box sx={{ width: 40, height: 3, background: (theme) => `linear-gradient(90deg, ${theme.palette.primary.main}, transparent)`, borderRadius: 2, mt: 0.8 }} />
         </Box>
         {Screen ? <Screen /> : (
-          <Box sx={{ color: '#6B5F44', mt: 6, textAlign: 'center' }}>
+          <Box sx={{ color: 'text.disabled', mt: 6, textAlign: 'center' }}>
             <Typography variant="h6">Seleccioná una sección del menú</Typography>
           </Box>
         )}
@@ -98,17 +98,21 @@ const AppLayout = () => (
 
 // ── Root: switches between login and layout ─────────────────
 const AppRoot = () => {
-  const { user } = useApp();
-  return user ? <AppLayout /> : <LoginPage />;
+  const { user, themeMode } = useApp();
+  const theme = React.useMemo(() => getTheme(themeMode), [themeMode]);
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {user ? <AppLayout /> : <LoginPage />}
+    </ThemeProvider>
+  );
 };
 
 export default function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AppProvider>
-        <AppRoot />
-      </AppProvider>
-    </ThemeProvider>
+    <AppProvider>
+      <AppRoot />
+    </AppProvider>
   );
 }

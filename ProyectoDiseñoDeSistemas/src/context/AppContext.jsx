@@ -6,6 +6,9 @@ export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null); // null = not logged in
   const [currentPage, setCurrentPage] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [themeMode, setThemeMode] = useState(() => {
+    return localStorage.getItem('app-theme') || 'dark';
+  });
 
   const login = (role) => {
     if (role === 'cliente') {
@@ -28,8 +31,16 @@ export const AppProvider = ({ children }) => {
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 
+  const toggleTheme = () => {
+    setThemeMode((prev) => {
+      const nextMode = prev === 'light' ? 'dark' : 'light';
+      localStorage.setItem('app-theme', nextMode);
+      return nextMode;
+    });
+  };
+
   return (
-    <AppContext.Provider value={{ user, currentPage, sidebarOpen, login, logout, navigate, toggleSidebar }}>
+    <AppContext.Provider value={{ user, currentPage, sidebarOpen, themeMode, login, logout, navigate, toggleSidebar, toggleTheme }}>
       {children}
     </AppContext.Provider>
   );
