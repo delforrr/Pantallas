@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   AppBar, Toolbar, IconButton, Typography, InputBase,
   Box, Avatar, Menu, MenuItem, Chip, Badge, Tooltip, Divider,

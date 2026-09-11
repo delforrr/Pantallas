@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box } from '@mui/material';
 import AppSidebar from './AppSidebar';
 import AppHeader from './AppHeader';
