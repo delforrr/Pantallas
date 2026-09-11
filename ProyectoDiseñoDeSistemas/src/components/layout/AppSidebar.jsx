@@ -5,8 +5,8 @@ import {
 } from '@mui/material';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { useApp } from '../context/AppContext';
-import { CLIENT_NAV, ADMIN_NAV } from '../config/navigation';
+import { useApp } from '../../context/AppContext';
+import { CLIENT_NAV, ADMIN_NAV } from '../../config/navigation';
 
 const DRAWER_WIDTH = 260;
 const DRAWER_COLLAPSED = 72;

@@ -11,8 +11,8 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
-import { useApp } from '../context/AppContext';
-import { PAGE_LABELS } from '../config/navigation';
+import { useApp } from '../../context/AppContext';
+import { PAGE_LABELS } from '../../config/navigation';
 
 const AppHeader = () => {
   const { user, currentPage, toggleSidebar, logout, themeMode, toggleTheme } = useApp();

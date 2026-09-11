@@ -1,38 +1,37 @@
 import React from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { Box, Typography, Fade } from '@mui/material';
-import { getTheme } from './context/theme';
+import { getTheme } from './theme';
 import { AppProvider, useApp } from './context/AppContext';
 import LoginPage from './pages/LoginPage';
-import AppSidebar from './components/AppSidebar';
-import AppHeader from './components/AppHeader';
+import { AppLayout } from './components/layout';
 
 // ── All screen imports ──────────────────────────────────────
-import CatalogoScreen from './pages/screens/cliente/CatalogoScreen';
-import CarritoScreen from './pages/screens/cliente/CarritoScreen';
-import PedidosClienteScreen from './pages/screens/cliente/PedidosClienteScreen';
-import MediosPagoScreen from './pages/screens/cliente/MediosPagoScreen';
+import CatalogoScreen from './pages/cliente/CatalogoScreen';
+import CarritoScreen from './pages/cliente/CarritoScreen';
+import PedidosClienteScreen from './pages/cliente/PedidosClienteScreen';
+import MediosPagoScreen from './pages/cliente/MediosPagoScreen';
 
-import ClientesScreen from './pages/screens/ventas/ClientesScreen';
-import PedidosScreen from './pages/screens/ventas/PedidosScreen';
-import PresupuestosScreen from './pages/screens/ventas/PresupuestosScreen';
-import ComprobantesVentaScreen from './pages/screens/ventas/ComprobantesVentaScreen';
-import ComprobantesPagoScreen from './pages/screens/ventas/ComprobantesPagoScreen';
-import CierreCajaScreen from './pages/screens/ventas/CierreCajaScreen';
+import ClientesScreen from './pages/ventas/ClientesScreen';
+import PedidosScreen from './pages/ventas/PedidosScreen';
+import PresupuestosScreen from './pages/ventas/PresupuestosScreen';
+import ComprobantesVentaScreen from './pages/ventas/ComprobantesVentaScreen';
+import ComprobantesPagoScreen from './pages/ventas/ComprobantesPagoScreen';
+import CierreCajaScreen from './pages/ventas/CierreCajaScreen';
 
-import OrdenProduccionScreen from './pages/screens/produccion/OrdenProduccionScreen';
-import RecetasScreen from './pages/screens/produccion/RecetasScreen';
-import ProductosCompuestosScreen from './pages/screens/produccion/ProductosCompuestosScreen';
-import MateriaPrimaScreen from './pages/screens/produccion/MateriaPrimaScreen';
-import StockScreen from './pages/screens/produccion/StockScreen';
+import OrdenProduccionScreen from './pages/produccion/OrdenProduccionScreen';
+import RecetasScreen from './pages/produccion/RecetasScreen';
+import ProductosCompuestosScreen from './pages/produccion/ProductosCompuestosScreen';
+import MateriaPrimaScreen from './pages/produccion/MateriaPrimaScreen';
+import StockScreen from './pages/produccion/StockScreen';
 
-import ProveedoresScreen from './pages/screens/compras/ProveedoresScreen';
-import OrdenCompraScreen from './pages/screens/compras/OrdenCompraScreen';
-import PresupuestoProveedorScreen from './pages/screens/compras/PresupuestoProveedorScreen';
-import FacturasRemitosScreen from './pages/screens/compras/FacturasRemitosScreen';
+import ProveedoresScreen from './pages/compras/ProveedoresScreen';
+import OrdenCompraScreen from './pages/compras/OrdenCompraScreen';
+import PresupuestoProveedorScreen from './pages/compras/PresupuestoProveedorScreen';
+import FacturasRemitosScreen from './pages/compras/FacturasRemitosScreen';
 
-import MaquinariaScreen from './pages/screens/mantenimiento/MaquinariaScreen';
-import OrdenesMantScreen from './pages/screens/mantenimiento/OrdenesMantScreen';
+import MaquinariaScreen from './pages/mantenimiento/MaquinariaScreen';
+import OrdenesMantScreen from './pages/mantenimiento/OrdenesMantScreen';
 import { PAGE_LABELS } from './config/navigation';
 
 const SCREEN_MAP = {
@@ -85,17 +84,6 @@ const PageContent = () => {
   );
 };
 
-// ── Authenticated layout ────────────────────────────────────
-const AppLayout = () => (
-  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-    <AppSidebar />
-    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-      <AppHeader />
-      <PageContent />
-    </Box>
-  </Box>
-);
-
 // ── Root: switches between login and layout ─────────────────
 const AppRoot = () => {
   const { user, themeMode } = useApp();
@@ -104,7 +92,13 @@ const AppRoot = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {user ? <AppLayout /> : <LoginPage />}
+      {user ? (
+        <AppLayout>
+          <PageContent />
+        </AppLayout>
+      ) : (
+        <LoginPage />
+      )}
     </ThemeProvider>
   );
 };

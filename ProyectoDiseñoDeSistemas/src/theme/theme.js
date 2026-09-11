@@ -162,3 +162,5 @@ export const getTheme = (mode) => createTheme({
     },
   },
 });
+
+export default getTheme;
