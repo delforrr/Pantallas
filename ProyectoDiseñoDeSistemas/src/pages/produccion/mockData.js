@@ -1,5 +1,16 @@
 // Datos iniciales para el módulo de Producción
 
+export const PRODUCTOS_FABRICABLES = [
+  { codigo: 'PRD-001', nombre: 'Ravioles de Ricota y Parmesano', categoria: 'Pastas Rellenas' },
+  { codigo: 'PRD-002', nombre: 'Tallarines al Huevo Clásicos', categoria: 'Pastas Simples' },
+  { codigo: 'PRD-003', nombre: 'Ravioles de Espinaca y Ricota', categoria: 'Pastas Rellenas' },
+  { codigo: 'PRD-004', nombre: 'Capeletis de Carne Braseada', categoria: 'Pastas Rellenas' },
+  { codigo: 'PRD-005', nombre: 'Ñoquis de Papa Tradicionales', categoria: 'Pastas Simples' },
+  { codigo: 'PRD-006', nombre: 'Sorrentinos de Jamón y Mozzarella', categoria: 'Pastas Rellenas' },
+  { codigo: 'PRD-007', nombre: 'Cintas al Huevo con Espinaca', categoria: 'Pastas Simples' },
+  { codigo: 'PRD-008', nombre: 'Canelones de Verdura y Ricota', categoria: 'Pastas Rellenas' },
+];
+
 export const MATERIAS_PRIMAS_INICIALES = [
   {
     id: 'MP-001',
