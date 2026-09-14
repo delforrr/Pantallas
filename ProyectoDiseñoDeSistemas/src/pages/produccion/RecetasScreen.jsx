@@ -341,9 +341,9 @@ export const RecetasScreen = () => {
                   <TableCell>
                     <Chip
                       size="small"
+                      variant="outlined"
                       label={receta.categoria}
                       color={receta.categoria === 'Pastas Rellenas' ? 'primary' : 'default'}
-                      variant={receta.categoria === 'Pastas Rellenas' ? 'filled' : 'outlined'}
                       sx={{ fontWeight: 600, fontSize: '0.75rem' }}
                     />
                   </TableCell>
@@ -383,7 +383,7 @@ export const RecetasScreen = () => {
                         <IconButton
                           size="small"
                           onClick={() => setDeleteConfirmId(receta.id)}
-                          sx={{ color: 'error.main' }}
+                          sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -678,8 +678,8 @@ export const RecetasScreen = () => {
                         </Typography>
                         <IconButton
                           size="small"
-                          color="error"
                           onClick={() => handleRemoveIngrediente(ing.materiaPrimaId)}
+                          sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>

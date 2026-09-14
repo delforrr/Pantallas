@@ -68,7 +68,7 @@ export const RecetaCard = ({ receta, onEdit, onDelete }) => {
               </IconButton>
             </Tooltip>
             <Tooltip title="Eliminar receta">
-              <IconButton size="small" onClick={() => onDelete(receta.id)} sx={{ color: 'error.main' }}>
+              <IconButton size="small" onClick={() => onDelete(receta.id)} sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
