@@ -24,8 +24,9 @@ import {
   DialogContent,
   DialogActions,
   Grid,
-  Divider,
   Alert,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
@@ -38,6 +39,16 @@ import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
+import CloseIcon from '@mui/icons-material/Close';
+import BusinessIcon from '@mui/icons-material/Business';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import PaymentOutlinedIcon from '@mui/icons-material/PaymentOutlined';
+import StarRateIcon from '@mui/icons-material/StarRate';
 
 import { INITIAL_PRESUPUESTOS, INITIAL_PROVEEDORES } from './mockData';
 
@@ -53,6 +64,7 @@ export const PresupuestoProveedorScreen = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [tipoFilter, setTipoFilter] = useState('TODOS');
+  const [viewMode, setViewMode] = useState('table');
 
   // Modales
   const [openDetail, setOpenDetail] = useState(false);
@@ -238,116 +250,127 @@ export const PresupuestoProveedorScreen = () => {
         Los insumos frescos se cotizan semanalmente con proveedores locales.
       </Alert>
 
-      {/* Tarjetas de Métricas */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={6} sm={3}>
-          <Paper
-            elevation={1}
-            sx={{
-              p: 2,
-              borderRadius: '14px',
-              border: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-            }}
-          >
-            <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'primary.main', color: 'white', display: 'flex' }}>
-              <RequestQuoteIcon />
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Total Presupuestos
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                {stats.total}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
+      {/* Tarjetas de Métricas Rápidas - Responsivas con igual ancho apiladas */}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(4, 1fr)',
+          },
+          gap: 2,
+          mb: 3,
+        }}
+      >
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'primary.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+            <RequestQuoteIcon />
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+              Total Presupuestos
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              {stats.total}
+            </Typography>
+          </Box>
+        </Paper>
 
-        <Grid item xs={6} sm={3}>
-          <Paper
-            elevation={1}
-            sx={{
-              p: 2,
-              borderRadius: '14px',
-              border: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-            }}
-          >
-            <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'warning.main', color: 'white', display: 'flex' }}>
-              <HourglassEmptyIcon />
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Pendientes de Decisión
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.main' }}>
-                {stats.pendientes}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'warning.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+            <HourglassEmptyIcon />
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+              Pendientes de Decisión
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.main' }}>
+              {stats.pendientes}
+            </Typography>
+          </Box>
+        </Paper>
 
-        <Grid item xs={6} sm={3}>
-          <Paper
-            elevation={1}
-            sx={{
-              p: 2,
-              borderRadius: '14px',
-              border: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-            }}
-          >
-            <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'success.main', color: 'white', display: 'flex' }}>
-              <VerifiedIcon />
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Presupuestos Aprobados
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
-                {stats.aprobados}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'success.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+            <VerifiedIcon />
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+              Presupuestos Aprobados
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
+              {stats.aprobados}
+            </Typography>
+          </Box>
+        </Paper>
 
-        <Grid item xs={6} sm={3}>
-          <Paper
-            elevation={1}
-            sx={{
-              p: 2,
-              borderRadius: '14px',
-              border: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-            }}
-          >
-            <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'info.main', color: 'white', display: 'flex' }}>
-              <PriceCheckIcon />
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Compromiso Aprobado
-              </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                ${stats.montoAprobado.toLocaleString('es-AR')}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'info.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+            <PriceCheckIcon />
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+              Compromiso Aprobado
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              ${stats.montoAprobado.toLocaleString('es-AR')}
+            </Typography>
+          </Box>
+        </Paper>
+      </Box>
 
       {/* Barra de Filtros y Acción */}
       <Box
@@ -407,106 +430,207 @@ export const PresupuestoProveedorScreen = () => {
           </FormControl>
         </Box>
 
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleOpenCreate}
-          sx={{ whiteSpace: 'nowrap' }}
-        >
-          Cargar Presupuesto
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+          <ToggleButtonGroup
+            value={viewMode}
+            exclusive
+            onChange={(e, val) => val && setViewMode(val)}
+            size="small"
+            sx={{ bgcolor: 'background.paper' }}
+          >
+            <ToggleButton value="table" aria-label="vista tabla">
+              <Tooltip title="Vista Tabla">
+                <ViewListIcon fontSize="small" />
+              </Tooltip>
+            </ToggleButton>
+            <ToggleButton value="grid" aria-label="vista tarjetas">
+              <Tooltip title="Vista Cuadrícula / Móvil">
+                <ViewModuleIcon fontSize="small" />
+              </Tooltip>
+            </ToggleButton>
+          </ToggleButtonGroup>
+
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={handleOpenCreate}
+            sx={{ whiteSpace: 'nowrap' }}
+          >
+            Cargar Presupuesto
+          </Button>
+        </Box>
       </Box>
 
-      {/* Tabla de Presupuestos */}
-      <TableContainer
-        component={Paper}
-        elevation={1}
-        sx={{
-          borderRadius: '14px',
-          border: '1px solid',
-          borderColor: 'divider',
-          overflow: 'hidden',
-        }}
-      >
-        <Table sx={{ minWidth: 750 }}>
-          <TableHead sx={{ bgcolor: 'action.hover' }}>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Nº Presupuesto</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Proveedor & CUIT</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Tipo de Compra</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Validez Hasta</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Total Cotizado</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Calidad</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700 }}>
-                Acciones
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredPresupuestos.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
-                  <Typography variant="body2">No se encontraron cotizaciones</Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredPresupuestos.map((row) => (
-                <TableRow key={row.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontFamily: 'monospace' }}>
-                    {row.id}
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {row.proveedorNombre}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      CUIT: {row.cuit}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="caption" sx={{ fontWeight: 600, display: 'block' }}>
-                      {row.tipoCompra}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Pago: {row.condicionPago}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>{row.validezHasta}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>
-                    ${row.total.toLocaleString('es-AR')}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      size="small"
-                      label={row.calificacion}
-                      color={row.calificacion === 'Excelente' ? 'success' : row.calificacion === 'Alta' ? 'info' : 'default'}
-                      sx={{ fontWeight: 600, fontSize: '0.72rem' }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={row.estado}
-                      size="small"
-                      color={STATUS_COLOR_MAP[row.estado] || 'default'}
-                      sx={{ fontWeight: 600, fontSize: '0.72rem' }}
-                    />
-                  </TableCell>
-                  <TableCell align="right">
-                    <Tooltip title="Ver desglose de cotización">
-                      <IconButton size="small" onClick={() => handleOpenDetail(row)} sx={{ color: 'text.secondary' }}>
-                        <VisibilityOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+      {/* Vista de Cuadrícula / Tarjetas Responsiva */}
+      {viewMode === 'grid' ? (
+        filteredPresupuestos.length === 0 ? (
+          <Paper
+            elevation={1}
+            sx={{
+              p: 6,
+              textAlign: 'center',
+              borderRadius: '16px',
+              border: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            <Typography variant="body1" color="text.secondary">
+              No se encontraron cotizaciones con los filtros aplicados.
+            </Typography>
+          </Paper>
+        ) : (
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                lg: 'repeat(3, 1fr)',
+              },
+              gap: 2.5,
+              alignItems: 'stretch',
+            }}
+          >
+            {filteredPresupuestos.map((item) => (
+              <Paper
+                key={item.id}
+                elevation={1}
+                sx={{
+                  p: 2.5,
+                  borderRadius: '16px',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  transition: 'box-shadow 0.2s ease-in-out',
+                  '&:hover': {
+                    boxShadow: 4,
+                  },
+                }}
+              >
+                {/* Cabecera de la Tarjeta */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                  <Chip
+                    label={item.id}
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    sx={{ fontWeight: 800, fontFamily: 'monospace' }}
+                  />
+                  <Chip
+                    label={item.estado}
+                    size="small"
+                    color={STATUS_COLOR_MAP[item.estado] || 'default'}
+                    sx={{ fontWeight: 700, fontSize: '0.72rem' }}
+                  />
+                </Box>
 
-                    {row.estado === 'Pendiente' && (
+                {/* Proveedor y CUIT */}
+                <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '1.05rem', lineHeight: 1.3, mb: 0.5 }}>
+                  {item.proveedorNombre}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                  CUIT: {item.cuit}
+                </Typography>
+
+                {/* Modalidad y Calificación */}
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                  <Chip
+                    size="small"
+                    icon={<StarRateIcon sx={{ fontSize: '0.9rem !important' }} />}
+                    label={`Calidad: ${item.calificacion}`}
+                    color={item.calificacion === 'Excelente' ? 'success' : item.calificacion === 'Alta' ? 'info' : 'default'}
+                    sx={{ fontWeight: 600, fontSize: '0.72rem' }}
+                  />
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    label={item.tipoCompra.includes('Semestral') ? 'Semestral' : 'Local'}
+                    sx={{ fontSize: '0.72rem', fontWeight: 600 }}
+                  />
+                </Box>
+
+                {/* Resumen de Insumos */}
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    p: 1.5,
+                    borderRadius: '10px',
+                    bgcolor: 'action.hover',
+                    mb: 2,
+                  }}
+                >
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block' }}>
+                    MATERIA PRIMA PRINCIPAL:
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mt: 0.3 }}>
+                    {item.items[0]?.materiaPrima || 'Insumo varios'}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Cantidad: {item.items[0]?.cantidad} {item.items[0]?.unidad} · Unit: ${item.items[0]?.precioUnitario?.toLocaleString('es-AR')}
+                  </Typography>
+                </Paper>
+
+                {/* Monto Total Cotizado */}
+                <Box
+                  sx={{
+                    p: 1.5,
+                    borderRadius: '10px',
+                    bgcolor: 'primary.50',
+                    border: '1px dashed',
+                    borderColor: 'primary.200',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    mb: 2,
+                  }}
+                >
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                    TOTAL COTIZADO
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main' }}>
+                    ${item.total.toLocaleString('es-AR')}
+                  </Typography>
+                </Box>
+
+                {/* Fechas y Condiciones */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                    <CalendarMonthOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography variant="caption" color="text.secondary">
+                      Validez: <strong>{item.validezHasta}</strong>
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                    <PaymentOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography variant="caption" color="text.secondary">
+                      Pago: <strong>{item.condicionPago}</strong>
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* Acciones al Pie fijadas abajo */}
+                <Box
+                  sx={{
+                    mt: 'auto',
+                    pt: 1.5,
+                    borderTop: '1px solid',
+                    borderColor: 'divider',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    {item.estado === 'Pendiente' && (
                       <>
-                        <Tooltip title="Aprobar para compra">
+                        <Tooltip title="Aprobar presupuesto">
                           <IconButton
                             size="small"
-                            onClick={() => handleAprobarPresupuesto(row.id)}
-                            sx={{ color: 'success.main' }}
+                            onClick={() => handleAprobarPresupuesto(item.id)}
+                            sx={{ color: 'success.main', bgcolor: 'success.50' }}
                           >
                             <CheckCircleOutlineIcon fontSize="small" />
                           </IconButton>
@@ -514,138 +638,332 @@ export const PresupuestoProveedorScreen = () => {
                         <Tooltip title="Rechazar presupuesto">
                           <IconButton
                             size="small"
-                            onClick={() => handleRechazarPresupuesto(row.id)}
-                            sx={{ color: 'error.main' }}
+                            onClick={() => handleRechazarPresupuesto(item.id)}
+                            sx={{ color: 'error.main', bgcolor: 'error.50' }}
                           >
                             <HighlightOffIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       </>
                     )}
+                  </Box>
 
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <Tooltip title="Ver detalle completo">
+                      <IconButton size="small" onClick={() => handleOpenDetail(item)} sx={{ color: 'text.secondary' }}>
+                        <VisibilityOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title="Editar">
-                      <IconButton size="small" onClick={() => handleOpenEdit(row)} sx={{ color: 'primary.main' }}>
+                      <IconButton size="small" onClick={() => handleOpenEdit(item)} sx={{ color: 'primary.main' }}>
                         <EditOutlinedIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Eliminar">
-                      <IconButton size="small" onClick={() => handleOpenDelete(row)} sx={{ color: 'error.main' }}>
+                      <IconButton size="small" onClick={() => handleOpenDelete(item)} sx={{ color: 'error.main' }}>
                         <DeleteOutlineIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
+                  </Box>
+                </Box>
+              </Paper>
+            ))}
+          </Box>
+        )
+      ) : (
+        /* Vista Tabla Estándar */
+        <TableContainer
+          component={Paper}
+          elevation={1}
+          sx={{
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            overflow: 'hidden',
+          }}
+        >
+          <Table sx={{ minWidth: 750 }}>
+            <TableHead sx={{ bgcolor: 'action.hover' }}>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 700 }}>Nº Presupuesto</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Proveedor & CUIT</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Tipo de Compra</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Validez Hasta</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Total Cotizado</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Calidad</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700 }}>
+                  Acciones
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredPresupuestos.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                    <Typography variant="body2">No se encontraron cotizaciones</Typography>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ) : (
+                filteredPresupuestos.map((row) => (
+                  <TableRow key={row.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontFamily: 'monospace' }}>
+                      {row.id}
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        {row.proveedorNombre}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        CUIT: {row.cuit}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption" sx={{ fontWeight: 600, display: 'block' }}>
+                        {row.tipoCompra}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Pago: {row.condicionPago}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{row.validezHasta}</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      ${row.total.toLocaleString('es-AR')}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        label={row.calificacion}
+                        color={row.calificacion === 'Excelente' ? 'success' : row.calificacion === 'Alta' ? 'info' : 'default'}
+                        sx={{ fontWeight: 600, fontSize: '0.72rem' }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={row.estado}
+                        size="small"
+                        color={STATUS_COLOR_MAP[row.estado] || 'default'}
+                        sx={{ fontWeight: 600, fontSize: '0.72rem' }}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Tooltip title="Ver desglose de cotización">
+                        <IconButton size="small" onClick={() => handleOpenDetail(row)} sx={{ color: 'text.secondary' }}>
+                          <VisibilityOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
 
-      {/* Modal Dialog: Detalle Completo de Presupuesto */}
+                      {row.estado === 'Pendiente' && (
+                        <>
+                          <Tooltip title="Aprobar para compra">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleAprobarPresupuesto(row.id)}
+                              sx={{ color: 'success.main' }}
+                            >
+                              <CheckCircleOutlineIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Rechazar presupuesto">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleRechazarPresupuesto(row.id)}
+                              sx={{ color: 'error.main' }}
+                            >
+                              <HighlightOffIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </>
+                      )}
+
+                      <Tooltip title="Editar">
+                        <IconButton size="small" onClick={() => handleOpenEdit(row)} sx={{ color: 'primary.main' }}>
+                          <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Eliminar">
+                        <IconButton size="small" onClick={() => handleOpenDelete(row)} sx={{ color: 'error.main' }}>
+                          <DeleteOutlineIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      {/* Modal Dialog: Detalle Completo de Presupuesto - UI Estilizada y Prolija */}
       <Dialog
         open={openDetail}
         onClose={() => setOpenDetail(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '16px' } }}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          },
+        }}
       >
-        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span>Detalle de Cotización #{selectedPresupuesto?.id}</span>
-          <Chip
-            label={selectedPresupuesto?.estado}
-            size="small"
-            color={STATUS_COLOR_MAP[selectedPresupuesto?.estado] || 'default'}
-          />
+        <DialogTitle
+          sx={{
+            p: 2.5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            bgcolor: 'action.hover',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 42,
+                height: 42,
+                borderRadius: '12px',
+                bgcolor: 'primary.main',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 2,
+              }}
+            >
+              <RequestQuoteIcon />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                Cotización #{selectedPresupuesto?.id}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {selectedPresupuesto?.proveedorNombre} · CUIT: {selectedPresupuesto?.cuit}
+              </Typography>
+            </Box>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Chip
+              label={selectedPresupuesto?.estado}
+              size="small"
+              color={STATUS_COLOR_MAP[selectedPresupuesto?.estado] || 'default'}
+              sx={{ fontWeight: 700 }}
+            />
+            <IconButton onClick={() => setOpenDetail(false)} size="small">
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
         </DialogTitle>
-        <DialogContent dividers>
+
+        <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedPresupuesto && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="caption" color="text.secondary">Proveedor</Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                    {selectedPresupuesto.proveedorNombre}
+            <>
+              {/* Sección 1: Información Comercial */}
+              <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                    Condiciones Comerciales y Evaluación
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    CUIT: {selectedPresupuesto.cuit}
-                  </Typography>
+                </Box>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" color="text.secondary">Modalidad de Compra</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {selectedPresupuesto.tipoCompra}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" color="text.secondary">Forma de Pago</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {selectedPresupuesto.condicionPago}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} sm={3}>
+                    <Typography variant="caption" color="text.secondary">Fecha de Emisión</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {selectedPresupuesto.fechaEmision}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} sm={3}>
+                    <Typography variant="caption" color="text.secondary">Validez de Oferta</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {selectedPresupuesto.validezHasta}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" color="text.secondary">Calificación Histórica</Typography>
+                    <Box sx={{ mt: 0.5 }}>
+                      <Chip
+                        size="small"
+                        label={selectedPresupuesto.calificacion}
+                        color={selectedPresupuesto.calificacion === 'Excelente' ? 'success' : selectedPresupuesto.calificacion === 'Alta' ? 'info' : 'default'}
+                        sx={{ fontWeight: 600 }}
+                      />
+                    </Box>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="caption" color="text.secondary">Condición Comercial</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {selectedPresupuesto.tipoCompra}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Forma de Pago: {selectedPresupuesto.condicionPago}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6} sm={3}>
-                  <Typography variant="caption" color="text.secondary">Fecha de Emisión</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPresupuesto.fechaEmision}</Typography>
-                </Grid>
-                <Grid item xs={6} sm={3}>
-                  <Typography variant="caption" color="text.secondary">Validez de Oferta</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPresupuesto.validezHasta}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="caption" color="text.secondary">Evaluación de Calidad del Proveedor</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                    {selectedPresupuesto.calificacion}
-                  </Typography>
-                </Grid>
-              </Grid>
+              </Paper>
 
-              <Divider sx={{ my: 1 }}>
-                <Typography variant="caption" color="text.secondary">
-                  DETALLE DE MATERIAS PRIMAS COTIZADAS
-                </Typography>
-              </Divider>
-
-              <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px' }}>
-                <Table size="small">
-                  <TableHead sx={{ bgcolor: 'action.hover' }}>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 700 }}>Materia Prima / Insumo</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Cantidad</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Precio Unit.</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700 }}>Subtotal</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {selectedPresupuesto.items.map((item, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell sx={{ fontWeight: 600 }}>{item.materiaPrima}</TableCell>
-                        <TableCell>{item.cantidad} {item.unidad}</TableCell>
-                        <TableCell>${item.precioUnitario.toLocaleString('es-AR')}</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 700 }}>
-                          ${item.subtotal.toLocaleString('es-AR')}
+              {/* Sección 2: Desglose de Insumos */}
+              <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <ShoppingCartOutlinedIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                    Materias Primas Cotizadas
+                  </Typography>
+                </Box>
+                <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px' }}>
+                  <Table size="small">
+                    <TableHead sx={{ bgcolor: 'action.hover' }}>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 700 }}>Materia Prima / Insumo</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>Cantidad</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>Precio Unitario</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 700 }}>Subtotal</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {selectedPresupuesto.items.map((item, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell sx={{ fontWeight: 600 }}>{item.materiaPrima}</TableCell>
+                          <TableCell>{item.cantidad} {item.unidad}</TableCell>
+                          <TableCell>${item.precioUnitario.toLocaleString('es-AR')}</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>
+                            ${item.subtotal.toLocaleString('es-AR')}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow sx={{ bgcolor: 'action.hover' }}>
+                        <TableCell colSpan={3} sx={{ fontWeight: 700, textAlign: 'right' }}>
+                          TOTAL COTIZADO:
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 800, color: 'primary.main', fontSize: '1.1rem' }}>
+                          ${selectedPresupuesto.total.toLocaleString('es-AR')}
                         </TableCell>
                       </TableRow>
-                    ))}
-                    <TableRow sx={{ bgcolor: 'action.hover' }}>
-                      <TableCell colSpan={3} sx={{ fontWeight: 700, textAlign: 'right' }}>
-                        TOTAL COTIZADO:
-                      </TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 800, color: 'primary.main', fontSize: '1rem' }}>
-                        ${selectedPresupuesto.total.toLocaleString('es-AR')}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Paper>
 
               {selectedPresupuesto.observaciones && (
-                <Box sx={{ p: 1.5, bgcolor: 'action.hover', borderRadius: '8px' }}>
+                <Box sx={{ p: 2, bgcolor: 'action.hover', borderRadius: '12px', border: '1px solid', borderColor: 'divider' }}>
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block' }}>
-                    Observaciones Técnicas / Dominio:
+                    Justificación y Observaciones de Compra:
                   </Typography>
-                  <Typography variant="body2">{selectedPresupuesto.observaciones}</Typography>
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                    {selectedPresupuesto.observaciones}
+                  </Typography>
                 </Box>
               )}
-            </Box>
+            </>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
+        <DialogActions sx={{ px: 3, py: 2, bgcolor: 'action.hover', borderTop: '1px solid', borderColor: 'divider' }}>
           {selectedPresupuesto?.estado === 'Pendiente' && (
             <>
               <Button
@@ -653,14 +971,14 @@ export const PresupuestoProveedorScreen = () => {
                 color="error"
                 variant="outlined"
               >
-                Rechazar
+                Rechazar Oferta
               </Button>
               <Button
                 onClick={() => handleAprobarPresupuesto(selectedPresupuesto.id)}
                 color="success"
                 variant="contained"
               >
-                Aprobar Presupuesto
+                Aprobar Cotización
               </Button>
             </>
           )}
@@ -670,186 +988,274 @@ export const PresupuestoProveedorScreen = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal Dialog: Alta / Edición de Presupuesto */}
+      {/* Modal Dialog: Alta / Edición de Presupuesto - UI Estilizada y Prolija */}
       <Dialog
         open={openForm}
         onClose={() => setOpenForm(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '16px' } }}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          },
+        }}
       >
         <form onSubmit={handleSaveForm}>
-          <DialogTitle sx={{ fontWeight: 700 }}>
-            {isEditing ? `Editar Cotización ${selectedPresupuesto?.id}` : 'Registrar Cotización de Proveedor'}
+          <DialogTitle
+            sx={{
+              p: 2.5,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              bgcolor: 'action.hover',
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box
+                sx={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: '12px',
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: 2,
+                }}
+              >
+                <RequestQuoteIcon />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                  {isEditing ? `Editar Cotización · ${selectedPresupuesto?.id}` : 'Registrar Cotización de Proveedor'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Carga comparativa semestral (marzo/diciembre) o reposición rápida de materias primas
+                </Typography>
+              </Box>
+            </Box>
+            <IconButton onClick={() => setOpenForm(false)} size="small">
+              <CloseIcon fontSize="small" />
+            </IconButton>
           </DialogTitle>
-          <DialogContent dividers>
-            <Grid container spacing={2} sx={{ mt: 0.5 }}>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Proveedor Emisor</InputLabel>
-                  <Select
-                    value={formData.proveedorId}
-                    label="Proveedor Emisor"
-                    onChange={(e) => setFormData({ ...formData, proveedorId: e.target.value })}
+
+          <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            {/* Sección 1: Proveedor y Modalidad Comercial */}
+            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                  1. Proveedor y Modalidad Comercial
+                </Typography>
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Proveedor Emisor</InputLabel>
+                    <Select
+                      value={formData.proveedorId}
+                      label="Proveedor Emisor"
+                      onChange={(e) => setFormData({ ...formData, proveedorId: e.target.value })}
+                    >
+                      {INITIAL_PROVEEDORES.map((p) => (
+                        <MenuItem key={p.id} value={p.id}>
+                          {p.razonSocial} ({p.categoria})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Modalidad de Compra</InputLabel>
+                    <Select
+                      value={formData.tipoCompra}
+                      label="Modalidad de Compra"
+                      onChange={(e) => setFormData({ ...formData, tipoCompra: e.target.value })}
+                    >
+                      <MenuItem value="Semestral (Marzo - Temporada Baja)">Semestral (Marzo - Temporada Baja)</MenuItem>
+                      <MenuItem value="Semestral (Diciembre - Temporada Baja)">Semestral (Diciembre - Temporada Baja)</MenuItem>
+                      <MenuItem value="Insumos Locales / Reposición">Insumos Locales / Reposición</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Condición de Pago Acordada"
+                    placeholder="Ej: Contado contra entrega, 30 días FF..."
+                    value={formData.condicionPago}
+                    onChange={(e) => setFormData({ ...formData, condicionPago: e.target.value })}
+                    required
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+
+            {/* Sección 2: Vigencia, Plazos y Calidad */}
+            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <EventNoteIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                  2. Vigencia, Calidad y Estado
+                </Typography>
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Fecha de Emisión"
+                    type="date"
+                    value={formData.fechaEmision}
+                    onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
+                    InputLabelProps={{ shrink: true }}
+                    required
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Validez de Oferta Hasta"
+                    type="date"
+                    value={formData.validezHasta}
+                    onChange={(e) => setFormData({ ...formData, validezHasta: e.target.value })}
+                    InputLabelProps={{ shrink: true }}
+                    required
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Calidad Evaluada</InputLabel>
+                    <Select
+                      value={formData.calificacion}
+                      label="Calidad Evaluada"
+                      onChange={(e) => setFormData({ ...formData, calificacion: e.target.value })}
+                    >
+                      <MenuItem value="Excelente">Excelente</MenuItem>
+                      <MenuItem value="Alta">Alta</MenuItem>
+                      <MenuItem value="Media">Media</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Estado Inicial</InputLabel>
+                    <Select
+                      value={formData.estado}
+                      label="Estado Inicial"
+                      onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                    >
+                      <MenuItem value="Pendiente">Pendiente</MenuItem>
+                      <MenuItem value="Aprobado">Aprobado</MenuItem>
+                      <MenuItem value="Rechazado">Rechazado</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </Paper>
+
+            {/* Sección 3: Materias Primas Cotizadas */}
+            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <ShoppingCartOutlinedIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                  3. Detalle de Materia Prima Cotizada y Justificación
+                </Typography>
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={5}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Materia Prima o Insumo"
+                    value={formData.itemMateriaPrima}
+                    onChange={(e) => setFormData({ ...formData, itemMateriaPrima: e.target.value })}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={6} sm={2}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Cantidad"
+                    type="number"
+                    value={formData.itemCantidad}
+                    onChange={(e) => setFormData({ ...formData, itemCantidad: e.target.value })}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={6} sm={2}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Unidad"
+                    value={formData.itemUnidad}
+                    onChange={(e) => setFormData({ ...formData, itemUnidad: e.target.value })}
+                    placeholder="Bolsas, Kg, etc."
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Precio Unitario ($)"
+                    type="number"
+                    value={formData.itemPrecioUnitario}
+                    onChange={(e) => setFormData({ ...formData, itemPrecioUnitario: e.target.value })}
+                    required
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: '10px',
+                      bgcolor: 'action.hover',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
                   >
-                    {INITIAL_PROVEEDORES.map((p) => (
-                      <MenuItem key={p.id} value={p.id}>
-                        {p.razonSocial} ({p.categoria})
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                      SUBTOTAL PREVISTO COTIZADO:
+                    </Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'primary.main' }}>
+                      ${(Number(formData.itemCantidad || 0) * Number(formData.itemPrecioUnitario || 0)).toLocaleString('es-AR')}
+                    </Typography>
+                  </Box>
+                </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Tipo de Compra</InputLabel>
-                  <Select
-                    value={formData.tipoCompra}
-                    label="Tipo de Compra"
-                    onChange={(e) => setFormData({ ...formData, tipoCompra: e.target.value })}
-                  >
-                    <MenuItem value="Semestral (Marzo - Temporada Baja)">Semestral (Marzo - Temporada Baja)</MenuItem>
-                    <MenuItem value="Semestral (Diciembre - Temporada Baja)">Semestral (Diciembre - Temporada Baja)</MenuItem>
-                    <MenuItem value="Insumos Locales / Reposición">Insumos Locales / Reposición</MenuItem>
-                  </Select>
-                </FormControl>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    multiline
+                    rows={2}
+                    label="Observaciones y Justificación de Compra"
+                    placeholder="Fundamentación de precio o estacionalidad según requerimientos de producción..."
+                    value={formData.observaciones}
+                    onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                  />
+                </Grid>
               </Grid>
-
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Fecha de Emisión"
-                  type="date"
-                  value={formData.fechaEmision}
-                  onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
-                  InputLabelProps={{ shrink: true }}
-                  required
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Validez de Oferta Hasta"
-                  type="date"
-                  value={formData.validezHasta}
-                  onChange={(e) => setFormData({ ...formData, validezHasta: e.target.value })}
-                  InputLabelProps={{ shrink: true }}
-                  required
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Calidad Evaluada</InputLabel>
-                  <Select
-                    value={formData.calificacion}
-                    label="Calidad Evaluada"
-                    onChange={(e) => setFormData({ ...formData, calificacion: e.target.value })}
-                  >
-                    <MenuItem value="Excelente">Excelente</MenuItem>
-                    <MenuItem value="Alta">Alta</MenuItem>
-                    <MenuItem value="Media">Media</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Condición de Pago Acordada"
-                  placeholder="Ej: Contado contra entrega, 30 días FF..."
-                  value={formData.condicionPago}
-                  onChange={(e) => setFormData({ ...formData, condicionPago: e.target.value })}
-                  required
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Estado Inicial</InputLabel>
-                  <Select
-                    value={formData.estado}
-                    label="Estado Inicial"
-                    onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                  >
-                    <MenuItem value="Pendiente">Pendiente</MenuItem>
-                    <MenuItem value="Aprobado">Aprobado</MenuItem>
-                    <MenuItem value="Rechazado">Rechazado</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Divider sx={{ my: 1 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    MATERIA PRIMA COTIZADA (DETALLE DE PRESUPUESTO PROVEEDOR)
-                  </Typography>
-                </Divider>
-              </Grid>
-
-              <Grid item xs={12} sm={5}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Materia Prima o Insumo"
-                  value={formData.itemMateriaPrima}
-                  onChange={(e) => setFormData({ ...formData, itemMateriaPrima: e.target.value })}
-                  required
-                />
-              </Grid>
-              <Grid item xs={6} sm={2}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Cantidad"
-                  type="number"
-                  value={formData.itemCantidad}
-                  onChange={(e) => setFormData({ ...formData, itemCantidad: e.target.value })}
-                  required
-                />
-              </Grid>
-              <Grid item xs={6} sm={2}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Unidad"
-                  value={formData.itemUnidad}
-                  onChange={(e) => setFormData({ ...formData, itemUnidad: e.target.value })}
-                  placeholder="Bolsas, Kg, etc."
-                />
-              </Grid>
-              <Grid item xs={12} sm={3}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Precio Unitario ($)"
-                  type="number"
-                  value={formData.itemPrecioUnitario}
-                  onChange={(e) => setFormData({ ...formData, itemPrecioUnitario: e.target.value })}
-                  required
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  multiline
-                  rows={2}
-                  label="Observaciones y Justificación de Compra"
-                  placeholder="Fundamentación de precio o estacionalidad según requerimientos..."
-                  value={formData.observaciones}
-                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-                />
-              </Grid>
-            </Grid>
+            </Paper>
           </DialogContent>
-          <DialogActions sx={{ px: 3, py: 2 }}>
+
+          <DialogActions sx={{ px: 3, py: 2, bgcolor: 'action.hover', borderTop: '1px solid', borderColor: 'divider' }}>
             <Button onClick={() => setOpenForm(false)} color="inherit">
               Cancelar
             </Button>
@@ -866,22 +1272,31 @@ export const PresupuestoProveedorScreen = () => {
         onClose={() => setOpenDelete(false)}
         maxWidth="xs"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '14px' } }}
+        PaperProps={{
+          sx: {
+            borderRadius: '18px',
+            p: 1,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          },
+        }}
       >
-        <DialogTitle sx={{ fontWeight: 700 }}>Eliminar Presupuesto</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <WarningAmberIcon color="warning" />
+          <span>Eliminar Cotización</span>
+        </DialogTitle>
         <DialogContent>
-          <Typography variant="body2">
-            ¿Confirma que desea eliminar el presupuesto <strong>{selectedPresupuesto?.id}</strong> de{' '}
-            <strong>{selectedPresupuesto?.proveedorNombre}</strong> por $
-            {selectedPresupuesto?.total?.toLocaleString('es-AR')}?
+          <Typography variant="body2" color="text.secondary">
+            ¿Confirma que desea eliminar la cotización <strong>{selectedPresupuesto?.id}</strong> de{' '}
+            <strong>{selectedPresupuesto?.proveedorNombre}</strong> por valor de{' '}
+            <strong>${selectedPresupuesto?.total?.toLocaleString('es-AR')}</strong>? Esta acción no se puede deshacer.
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
+        <DialogActions sx={{ px: 2, pb: 1.5 }}>
           <Button onClick={() => setOpenDelete(false)} color="inherit">
             Cancelar
           </Button>
           <Button onClick={handleDeleteConfirm} variant="contained" color="error">
-            Eliminar
+            Eliminar Definitivamente
           </Button>
         </DialogActions>
       </Dialog>
