@@ -46,17 +46,17 @@ export const MaquinariaCard = ({
         p: 2.5,
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
         height: '100%',
+        width: '100%',
         bgcolor: 'background.paper',
         position: 'relative',
         transition: 'transform 0.2s, box-shadow 0.2s',
         '&:hover': {
           boxShadow: (theme) =>
             theme.palette.mode === 'dark'
-              ? '0 6px 20px rgba(0,0,0,0.6)'
-              : '0 6px 20px rgba(0,0,0,0.08)',
-          transform: 'translateY(-2px)',
+              ? '0 8px 24px rgba(0,0,0,0.6)'
+              : '0 8px 24px rgba(0,0,0,0.09)',
+          transform: 'translateY(-3px)',
         },
       }}
     >
@@ -71,19 +71,19 @@ export const MaquinariaCard = ({
             p: 1,
             bgcolor: 'error.main',
             color: 'white',
-            borderRadius: '8px',
-            fontSize: '0.75rem',
+            borderRadius: '10px',
+            fontSize: '0.74rem',
             fontWeight: 700,
           }}
         >
-          <WarningAmberIcon fontSize="small" />
-          <span>ALERTA DOMINIO: Avería mecánica &gt; 24hs (Riesgo parada de planta)</span>
+          <WarningAmberIcon sx={{ fontSize: 18 }} />
+          <span>ALERTA DOMINIO: Avería mecánica &gt; 24hs (Riesgo de parada)</span>
         </Box>
       )}
 
       {/* Header de Tarjeta */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
           <Box
             sx={{
               width: 44,
@@ -104,15 +104,26 @@ export const MaquinariaCard = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              flexShrink: 0,
             }}
           >
             <PrecisionManufacturingIcon />
           </Box>
-          <Box>
-            <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 700, color: 'text.secondary' }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 700, color: 'text.secondary', display: 'block' }}>
               {maquinaria.codigo}
             </Typography>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.25,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+              title={maquinaria.nombre}
+            >
               {maquinaria.nombre}
             </Typography>
           </Box>
@@ -122,7 +133,7 @@ export const MaquinariaCard = ({
           label={maquinaria.estado}
           size="small"
           color={STATUS_COLOR_MAP[maquinaria.estado] || 'default'}
-          sx={{ fontWeight: 700, fontSize: '0.72rem' }}
+          sx={{ fontWeight: 700, fontSize: '0.72rem', flexShrink: 0, ml: 1 }}
         />
       </Box>
 
@@ -196,8 +207,18 @@ export const MaquinariaCard = ({
         </Box>
       </Box>
 
-      {/* Acciones de Tarjeta */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+      {/* Acciones de Tarjeta - Pinned to bottom */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          pt: 1.5,
+          mt: 'auto',
+          borderTop: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
         <Button
           size="small"
           variant="outlined"
@@ -232,3 +253,4 @@ export const MaquinariaCard = ({
 };
 
 export default MaquinariaCard;
+

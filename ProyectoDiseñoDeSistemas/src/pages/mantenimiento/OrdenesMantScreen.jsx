@@ -24,7 +24,8 @@ import {
   DialogContent,
   DialogActions,
   Grid,
-  Divider,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
@@ -37,6 +38,12 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import BuildCircleIcon from '@mui/icons-material/BuildCircle';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import CloseIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
+import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 import {
   INITIAL_ORDENES_MANTENIMIENTO,
@@ -59,6 +66,7 @@ const PRIORITY_COLOR_MAP = {
 
 export const OrdenesMantScreen = () => {
   const [ordenes, setOrdenes] = useState(INITIAL_ORDENES_MANTENIMIENTO);
+  const [viewMode, setViewMode] = useState('table'); // 'table' o 'grid'
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [tipoFilter, setTipoFilter] = useState('TODOS');
@@ -247,116 +255,127 @@ export const OrdenesMantScreen = () => {
 
   return (
     <Box>
-      {/* Tarjetas de Métricas Rápidas */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={6} sm={3}>
-          <Paper
-            elevation={1}
-            sx={{
-              p: 2,
-              borderRadius: '14px',
-              border: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-            }}
-          >
-            <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'primary.main', color: 'white', display: 'flex' }}>
-              <AssignmentIcon />
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Total Órdenes
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                {stats.total}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
+      {/* Tarjetas de Métricas Rápidas - Responsivas con igual ancho apiladas */}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(4, 1fr)',
+          },
+          gap: 2,
+          mb: 3,
+        }}
+      >
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'primary.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+            <AssignmentIcon />
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+              Total Órdenes
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              {stats.total}
+            </Typography>
+          </Box>
+        </Paper>
 
-        <Grid item xs={6} sm={3}>
-          <Paper
-            elevation={1}
-            sx={{
-              p: 2,
-              borderRadius: '14px',
-              border: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-            }}
-          >
-            <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'info.main', color: 'white', display: 'flex' }}>
-              <EngineeringIcon />
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                En Ejecución Ahora
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: 'info.main' }}>
-                {stats.enProceso}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'info.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+            <EngineeringIcon />
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+              En Ejecución Ahora
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'info.main' }}>
+              {stats.enProceso}
+            </Typography>
+          </Box>
+        </Paper>
 
-        <Grid item xs={6} sm={3}>
-          <Paper
-            elevation={1}
-            sx={{
-              p: 2,
-              borderRadius: '14px',
-              border: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-            }}
-          >
-            <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'success.main', color: 'white', display: 'flex' }}>
-              <BuildCircleIcon />
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Mantenimientos Preventivos
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
-                {stats.preventivos}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'success.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+            <BuildCircleIcon />
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+              Mantenimientos Preventivos
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
+              {stats.preventivos}
+            </Typography>
+          </Box>
+        </Paper>
 
-        <Grid item xs={6} sm={3}>
-          <Paper
-            elevation={1}
-            sx={{
-              p: 2,
-              borderRadius: '14px',
-              border: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-            }}
-          >
-            <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'error.main', color: 'white', display: 'flex' }}>
-              <WarningAmberIcon />
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Correctivos / Averías
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: 'error.main' }}>
-                {stats.correctivos}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'error.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+            <WarningAmberIcon />
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+              Correctivos / Averías
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'error.main' }}>
+              {stats.correctivos}
+            </Typography>
+          </Box>
+        </Paper>
+      </Box>
 
       {/* Barra de Filtros y Acción */}
       <Box
@@ -431,246 +450,467 @@ export const OrdenesMantScreen = () => {
           </FormControl>
         </Box>
 
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleOpenCreate}
-          sx={{ whiteSpace: 'nowrap' }}
-        >
-          Nueva Orden de Mantenimiento
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+          <ToggleButtonGroup
+            value={viewMode}
+            exclusive
+            onChange={(e, val) => val && setViewMode(val)}
+            size="small"
+            sx={{ bgcolor: 'background.paper' }}
+          >
+            <ToggleButton value="table" aria-label="vista tabla">
+              <Tooltip title="Vista Tabla">
+                <ViewListIcon fontSize="small" />
+              </Tooltip>
+            </ToggleButton>
+            <ToggleButton value="grid" aria-label="vista cuadrícula">
+              <Tooltip title="Vista Cuadrícula">
+                <ViewModuleIcon fontSize="small" />
+              </Tooltip>
+            </ToggleButton>
+          </ToggleButtonGroup>
+
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={handleOpenCreate}
+            sx={{ whiteSpace: 'nowrap' }}
+          >
+            Nueva Orden
+          </Button>
+        </Box>
       </Box>
 
+      {/* Vista de Cuadrícula (Cards) para Dispositivos Móviles y Escritorio */}
+      {viewMode === 'grid' && (
+        <Box sx={{ mb: 2 }}>
+          {filteredOrdenes.length === 0 ? (
+            <Paper sx={{ p: 6, textAlign: 'center', borderRadius: '14px', border: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="body2" color="text.secondary">
+                No se encontraron órdenes de mantenimiento para los filtros seleccionados
+              </Typography>
+            </Paper>
+          ) : (
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: {
+                  xs: '1fr',
+                  sm: 'repeat(2, 1fr)',
+                  lg: 'repeat(3, 1fr)',
+                },
+                gap: 2.5,
+                alignItems: 'stretch',
+              }}
+            >
+              {filteredOrdenes.map((orden) => (
+                <Paper
+                  key={orden.id}
+                  elevation={1}
+                  sx={{
+                    p: 2.5,
+                    borderRadius: '16px',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
+                    width: '100%',
+                    bgcolor: 'background.paper',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    '&:hover': {
+                      boxShadow: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? '0 8px 24px rgba(0,0,0,0.6)'
+                          : '0 8px 24px rgba(0,0,0,0.08)',
+                      transform: 'translateY(-2px)',
+                    },
+                  }}
+                >
+                  {/* Header */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                    <Box>
+                      <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 800, color: 'primary.main', display: 'block' }}>
+                        {orden.id}
+                      </Typography>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.25 }}>
+                        {orden.maquinariaNombre}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {orden.maquinariaCodigo} • {orden.tipo}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-end' }}>
+                      <Chip
+                        label={orden.estado}
+                        size="small"
+                        color={STATUS_COLOR_MAP[orden.estado] || 'default'}
+                        sx={{ fontWeight: 700, fontSize: '0.72rem' }}
+                      />
+                      <Chip
+                        label={`Prioridad ${orden.prioridad}`}
+                        size="small"
+                        color={PRIORITY_COLOR_MAP[orden.prioridad] || 'default'}
+                        variant="outlined"
+                        sx={{ fontWeight: 600, fontSize: '0.68rem', height: 20 }}
+                      />
+                    </Box>
+                  </Box>
+
+                  {/* Body */}
+                  <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <EngineeringIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                      <Typography variant="caption" color="text.secondary">
+                        Técnico: <strong>{orden.tecnicoNombre}</strong>
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <CalendarMonthIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                      <Typography variant="caption" color="text.secondary">
+                        Emisión: {orden.fechaEmision} {orden.fechaInicio ? `· Inicio: ${orden.fechaInicio.split(' ')[0]}` : ''}
+                      </Typography>
+                    </Box>
+
+                    <Paper variant="outlined" sx={{ p: 1.5, borderRadius: '10px', bgcolor: 'action.hover', mt: 0.5 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          color: 'text.secondary',
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {orden.tareaRealizada || 'Sin diagnóstico registrado.'}
+                      </Typography>
+                    </Paper>
+
+                    {orden.repuestos && orden.repuestos.length > 0 && (
+                      <Chip
+                        label={`${orden.repuestos.length} repuesto(s) registrado(s)`}
+                        size="small"
+                        sx={{ alignSelf: 'flex-start', fontSize: '0.7rem' }}
+                      />
+                    )}
+                  </Box>
+
+                  {/* Actions Footer */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1.5, mt: 'auto', borderTop: '1px solid', borderColor: 'divider' }}>
+                    {orden.estado === 'Pendiente' ? (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="info"
+                        startIcon={<PlayArrowIcon />}
+                        onClick={() => handleCambiarEstado(orden.id, 'En Proceso')}
+                        sx={{ borderRadius: '8px', fontSize: '0.74rem' }}
+                      >
+                        Iniciar
+                      </Button>
+                    ) : orden.estado === 'En Proceso' ? (
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="success"
+                        startIcon={<CheckCircleIcon />}
+                        onClick={() => handleCambiarEstado(orden.id, 'Finalizada')}
+                        sx={{ borderRadius: '8px', fontSize: '0.74rem' }}
+                      >
+                        Finalizar
+                      </Button>
+                    ) : (
+                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                        Completada
+                      </Typography>
+                    )}
+
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      <Tooltip title="Ver detalle de intervención">
+                        <IconButton size="small" onClick={() => handleOpenDetail(orden)} sx={{ color: 'text.secondary' }}>
+                          <VisibilityOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Editar orden">
+                        <IconButton size="small" onClick={() => handleOpenEdit(orden)} sx={{ color: 'primary.main' }}>
+                          <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Eliminar orden">
+                        <IconButton size="small" onClick={() => handleOpenDelete(orden)} sx={{ color: 'error.main' }}>
+                          <DeleteOutlineIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </Box>
+                </Paper>
+              ))}
+            </Box>
+          )}
+        </Box>
+      )}
+
       {/* Tabla de Órdenes de Mantenimiento */}
-      <TableContainer
-        component={Paper}
-        elevation={1}
-        sx={{
-          borderRadius: '14px',
-          border: '1px solid',
-          borderColor: 'divider',
-          overflow: 'hidden',
-        }}
-      >
-        <Table sx={{ minWidth: 750 }}>
-          <TableHead sx={{ bgcolor: 'action.hover' }}>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Nº Orden</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Maquinaria Afectada</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Tipo de Mant.</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Prioridad</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Técnico Responsable</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Fechas (Emisión / Inicio)</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700 }}>
-                Acciones
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredOrdenes.length === 0 ? (
+      {viewMode === 'table' && (
+        <TableContainer
+          component={Paper}
+          elevation={1}
+          sx={{
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            overflow: 'hidden',
+          }}
+        >
+          <Table sx={{ minWidth: 780 }}>
+            <TableHead sx={{ bgcolor: 'action.hover' }}>
               <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
-                  <Typography variant="body2">No se encontraron órdenes de mantenimiento</Typography>
+                <TableCell sx={{ fontWeight: 700 }}>Nro Orden</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Maquinaria</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Tipo</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Prioridad</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Técnico</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Fecha Emisión</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700 }}>
+                  Acciones
                 </TableCell>
               </TableRow>
-            ) : (
-              filteredOrdenes.map((row) => (
-                <TableRow key={row.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell sx={{ fontWeight: 700, fontFamily: 'monospace', color: 'primary.main' }}>
-                    {row.id}
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {row.maquinariaNombre}
-                    </Typography>
-                    <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
-                      {row.maquinariaCodigo}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={row.tipo}
-                      size="small"
-                      color={row.tipo === 'Preventivo' ? 'success' : 'error'}
-                      variant="outlined"
-                      sx={{ fontWeight: 600, fontSize: '0.72rem' }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={row.prioridad}
-                      size="small"
-                      color={PRIORITY_COLOR_MAP[row.prioridad] || 'default'}
-                      sx={{ fontWeight: 600, fontSize: '0.72rem' }}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>{row.tecnicoNombre}</TableCell>
-                  <TableCell>
-                    <Typography variant="caption" sx={{ display: 'block', fontWeight: 600 }}>
-                      Emisión: {row.fechaEmision}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Inicio: {row.fechaInicio || 'No iniciado'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={row.estado}
-                      size="small"
-                      color={STATUS_COLOR_MAP[row.estado] || 'default'}
-                      sx={{ fontWeight: 600, fontSize: '0.72rem' }}
-                    />
-                  </TableCell>
-                  <TableCell align="right">
-                    <Tooltip title="Ver orden y repuestos">
-                      <IconButton size="small" onClick={() => handleOpenDetail(row)} sx={{ color: 'text.secondary' }}>
-                        <VisibilityOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-
-                    {row.estado === 'Pendiente' && (
-                      <Tooltip title="Iniciar trabajo de mantenimiento">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleCambiarEstado(row.id, 'En Proceso')}
-                          sx={{ color: 'info.main' }}
-                        >
-                          <PlayArrowIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-
-                    {row.estado === 'En Proceso' && (
-                      <Tooltip title="Concluir y firmar orden">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleCambiarEstado(row.id, 'Finalizada')}
-                          sx={{ color: 'success.main' }}
-                        >
-                          <CheckCircleIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-
-                    <Tooltip title="Editar orden">
-                      <IconButton size="small" onClick={() => handleOpenEdit(row)} sx={{ color: 'primary.main' }}>
-                        <EditOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Eliminar orden">
-                      <IconButton size="small" onClick={() => handleOpenDelete(row)} sx={{ color: 'error.main' }}>
-                        <DeleteOutlineIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+            </TableHead>
+            <TableBody>
+              {filteredOrdenes.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                    <Typography variant="body2">No se encontraron órdenes de mantenimiento</Typography>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ) : (
+                filteredOrdenes.map((row) => (
+                  <TableRow key={row.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell sx={{ fontWeight: 700, fontFamily: 'monospace', color: 'primary.main' }}>
+                      {row.id}
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        {row.maquinariaNombre}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {row.maquinariaCodigo}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.85rem' }}>{row.tipo}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={row.prioridad}
+                        size="small"
+                        color={PRIORITY_COLOR_MAP[row.prioridad] || 'default'}
+                        variant="outlined"
+                        sx={{ fontWeight: 600, fontSize: '0.72rem' }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>{row.tecnicoNombre}</TableCell>
+                    <TableCell>{row.fechaEmision}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={row.estado}
+                        size="small"
+                        color={STATUS_COLOR_MAP[row.estado] || 'default'}
+                        sx={{ fontWeight: 600, fontSize: '0.72rem' }}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Tooltip title="Ver detalle de intervención">
+                        <IconButton size="small" onClick={() => handleOpenDetail(row)} sx={{ color: 'text.secondary' }}>
+                          <VisibilityOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
 
-      {/* Modal Dialog: Detalle de Orden */}
+                      {row.estado === 'Pendiente' && (
+                        <Tooltip title="Iniciar trabajo de mantenimiento">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleCambiarEstado(row.id, 'En Proceso')}
+                            sx={{ color: 'info.main' }}
+                          >
+                            <PlayArrowIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+
+                      {row.estado === 'En Proceso' && (
+                        <Tooltip title="Concluir y firmar orden">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleCambiarEstado(row.id, 'Finalizada')}
+                            sx={{ color: 'success.main' }}
+                          >
+                            <CheckCircleIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+
+                      <Tooltip title="Editar orden">
+                        <IconButton size="small" onClick={() => handleOpenEdit(row)} sx={{ color: 'primary.main' }}>
+                          <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Eliminar orden">
+                        <IconButton size="small" onClick={() => handleOpenDelete(row)} sx={{ color: 'error.main' }}>
+                          <DeleteOutlineIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      {/* Modal Dialog: Detalle de Orden - UI Estilizada */}
       <Dialog
         open={openDetail}
         onClose={() => setOpenDetail(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '16px' } }}
+        PaperProps={{ sx: { borderRadius: '20px', overflow: 'hidden' } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span>Detalle de Orden de Mantenimiento #{selectedOrden?.id}</span>
-          <Chip label={selectedOrden?.estado} size="small" color={STATUS_COLOR_MAP[selectedOrden?.estado] || 'default'} />
+        <DialogTitle
+          sx={{
+            p: 2.5,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            bgcolor: 'action.hover',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '10px',
+                bgcolor: 'primary.main',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <AssignmentIcon />
+            </Box>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                Orden de Mantenimiento · {selectedOrden?.id}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Intervención: {selectedOrden?.tipo} — Prioridad {selectedOrden?.prioridad}
+              </Typography>
+            </Box>
+          </Box>
+          <Chip
+            label={selectedOrden?.estado}
+            size="small"
+            color={STATUS_COLOR_MAP[selectedOrden?.estado] || 'default'}
+            sx={{ fontWeight: 700 }}
+          />
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedOrden && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="caption" color="text.secondary">Maquinaria Intervenida</Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                    {selectedOrden.maquinariaNombre}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Código: {selectedOrden.maquinariaCodigo}
-                  </Typography>
-                </Grid>
+            <>
+              {/* Sección Datos de Intervención */}
+              <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Maquinaria Intervenida</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 800 }}>
+                      {selectedOrden.maquinariaNombre}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Código: {selectedOrden.maquinariaCodigo}
+                    </Typography>
+                  </Grid>
 
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="caption" color="text.secondary">Técnico Asignado (Planta)</Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                    {selectedOrden.tecnicoNombre}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Prioridad: {selectedOrden.prioridad} • Tipo: {selectedOrden.tipo}
-                  </Typography>
-                </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Técnico Responsable</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 800 }}>
+                      {selectedOrden.tecnicoNombre}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Turno y área de mantenimiento industrial
+                    </Typography>
+                  </Grid>
 
-                <Grid item xs={6} sm={3}>
-                  <Typography variant="caption" color="text.secondary">Fecha de Emisión</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedOrden.fechaEmision}</Typography>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Fecha de Emisión</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedOrden.fechaEmision}</Typography>
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Fecha y Hora Inicio</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedOrden.fechaInicio || 'Pendiente de inicio'}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Fecha y Hora Fin</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: selectedOrden.fechaFin ? 'success.main' : 'text.secondary' }}>
+                      {selectedOrden.fechaFin || 'En curso / Pendiente'}
+                    </Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={6} sm={3}>
-                  <Typography variant="caption" color="text.secondary">Fecha de Inicio</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedOrden.fechaInicio || 'Pendiente'}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="caption" color="text.secondary">Fecha de Culminación</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: selectedOrden.fechaFin ? 'success.main' : 'text.secondary' }}>
-                    {selectedOrden.fechaFin || 'En curso / Pendiente'}
-                  </Typography>
-                </Grid>
-              </Grid>
-
-              <Divider sx={{ my: 1 }}>
-                <Typography variant="caption" color="text.secondary">
-                  DIAGNÓSTICO Y TAREAS REALIZADAS (DETALLE DE ORDEN DE MANTENIMIENTO)
-                </Typography>
-              </Divider>
-
-              <Paper variant="outlined" sx={{ p: 2, borderRadius: '10px', bgcolor: 'action.hover' }}>
-                <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                  {selectedOrden.tareaRealizada || 'Sin especificaciones detalladas.'}
-                </Typography>
               </Paper>
 
-              <Divider sx={{ my: 1 }}>
-                <Typography variant="caption" color="text.secondary">
-                  REPUESTOS Y PIEZAS UTILIZADAS
+              {/* Sección Diagnóstico */}
+              <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                  Diagnóstico y Tareas Realizadas
                 </Typography>
-              </Divider>
+                <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px', bgcolor: 'action.hover' }}>
+                  <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
+                    {selectedOrden.tareaRealizada || 'Sin especificaciones registradas en la orden.'}
+                  </Typography>
+                </Paper>
+              </Paper>
 
-              {selectedOrden.repuestos && selectedOrden.repuestos.length > 0 ? (
-                <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px' }}>
-                  <Table size="small">
-                    <TableHead sx={{ bgcolor: 'action.hover' }}>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 700 }}>Código de Pieza</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>Descripción del Repuesto</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 700 }}>Cantidad</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {selectedOrden.repuestos.map((r, i) => (
-                        <TableRow key={i}>
-                          <TableCell sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{r.codigo}</TableCell>
-                          <TableCell>{r.descripcion}</TableCell>
-                          <TableCell align="right" sx={{ fontWeight: 700 }}>{r.cantidad}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              ) : (
-                <Typography variant="caption" color="text.secondary">
-                  No se requirió cambio de piezas o repuestos en esta orden.
+              {/* Sección Repuestos */}
+              <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                  Repuestos y Piezas Utilizadas
                 </Typography>
-              )}
+                {selectedOrden.repuestos && selectedOrden.repuestos.length > 0 ? (
+                  <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px' }}>
+                    <Table size="small">
+                      <TableHead sx={{ bgcolor: 'action.hover' }}>
+                        <TableRow>
+                          <TableCell sx={{ fontWeight: 700 }}>Código de Pieza</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>Descripción del Repuesto</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>Cantidad</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {selectedOrden.repuestos.map((r, i) => (
+                          <TableRow key={i}>
+                            <TableCell sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{r.codigo}</TableCell>
+                            <TableCell>{r.descripcion}</TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 700 }}>{r.cantidad}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  <Typography variant="caption" color="text.secondary">
+                    No se requirió recambio de piezas ni repuestos para esta orden.
+                  </Typography>
+                )}
+              </Paper>
 
               {selectedOrden.observaciones && (
-                <Box sx={{ mt: 1 }}>
+                <Box sx={{ px: 1 }}>
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block' }}>
                     Observaciones Finales / Recomendaciones al Operario:
                   </Typography>
@@ -679,16 +919,17 @@ export const OrdenesMantScreen = () => {
                   </Typography>
                 </Box>
               )}
-            </Box>
+            </>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
           {selectedOrden?.estado === 'Pendiente' && (
             <Button
               onClick={() => handleCambiarEstado(selectedOrden.id, 'En Proceso')}
               variant="contained"
               color="info"
               startIcon={<PlayArrowIcon />}
+              sx={{ fontWeight: 700 }}
             >
               Iniciar Trabajo
             </Button>
@@ -699,6 +940,7 @@ export const OrdenesMantScreen = () => {
               variant="contained"
               color="success"
               startIcon={<CheckCircleIcon />}
+              sx={{ fontWeight: 700 }}
             >
               Concluir y Firmar Orden
             </Button>
@@ -709,203 +951,286 @@ export const OrdenesMantScreen = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal Dialog: Alta / Edición de Orden */}
+      {/* Modal Dialog: Alta / Edición de Orden - UI Estilizada */}
       <Dialog
         open={openForm}
         onClose={() => setOpenForm(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '16px' } }}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+          },
+        }}
       >
         <form onSubmit={handleSaveForm}>
-          <DialogTitle sx={{ fontWeight: 700 }}>
-            {isEditing ? `Editar Orden de Mantenimiento ${selectedOrden?.id}` : 'Generar Orden de Mantenimiento'}
+          <DialogTitle
+            sx={{
+              p: 2.5,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              bgcolor: 'action.hover',
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box
+                sx={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: '12px',
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: 2,
+                }}
+              >
+                <EngineeringIcon />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                  {isEditing ? `Editar Orden de Mantenimiento · ${selectedOrden?.id}` : 'Generar Nueva Orden de Mantenimiento'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Asignación a técnicos de planta, repuestos y control preventivo/correctivo
+                </Typography>
+              </Box>
+            </Box>
+            <IconButton onClick={() => setOpenForm(false)} size="small">
+              <CloseIcon fontSize="small" />
+            </IconButton>
           </DialogTitle>
-          <DialogContent dividers>
-            <Grid container spacing={2} sx={{ mt: 0.5 }}>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Maquinaria Afectada</InputLabel>
-                  <Select
-                    value={formData.maquinariaId}
-                    label="Maquinaria Afectada"
-                    onChange={(e) => setFormData({ ...formData, maquinariaId: e.target.value })}
-                  >
-                    {INITIAL_MAQUINARIAS.map((m) => (
-                      <MenuItem key={m.id} value={m.id}>
-                        {m.codigo} - {m.nombre} ({m.estado})
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Técnico Responsable</InputLabel>
-                  <Select
-                    value={formData.empleadoId}
-                    label="Técnico Responsable"
-                    onChange={(e) => setFormData({ ...formData, empleadoId: e.target.value })}
-                  >
-                    {INITIAL_TECNICOS.map((t) => (
-                      <MenuItem key={t.id} value={t.id}>
-                        {t.nombre} ({t.especialidad})
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+          <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            {/* Sección 1: Equipo y Técnico */}
+            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <PrecisionManufacturingIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  1. Maquinaria y Asignación de Técnico
+                </Typography>
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Maquinaria Afectada</InputLabel>
+                    <Select
+                      value={formData.maquinariaId}
+                      label="Maquinaria Afectada"
+                      onChange={(e) => setFormData({ ...formData, maquinariaId: e.target.value })}
+                    >
+                      {INITIAL_MAQUINARIAS.map((m) => (
+                        <MenuItem key={m.id} value={m.id}>
+                          {m.codigo} - {m.nombre} ({m.estado})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Tipo de Mantenimiento</InputLabel>
-                  <Select
-                    value={formData.tipo}
-                    label="Tipo de Mantenimiento"
-                    onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-                  >
-                    <MenuItem value="Preventivo">Preventivo (Programado / Fin Jornada)</MenuItem>
-                    <MenuItem value="Correctivo">Correctivo (Reparación de Falla)</MenuItem>
-                  </Select>
-                </FormControl>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Técnico Responsable Asignado</InputLabel>
+                    <Select
+                      value={formData.empleadoId}
+                      label="Técnico Responsable Asignado"
+                      onChange={(e) => setFormData({ ...formData, empleadoId: e.target.value })}
+                    >
+                      {INITIAL_TECNICOS.map((t) => (
+                        <MenuItem key={t.id} value={t.id}>
+                          {t.nombre} ({t.especialidad})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
               </Grid>
+            </Paper>
 
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Prioridad de Intervención</InputLabel>
-                  <Select
-                    value={formData.prioridad}
-                    label="Prioridad de Intervención"
-                    onChange={(e) => setFormData({ ...formData, prioridad: e.target.value })}
-                  >
-                    <MenuItem value="Alta">Alta (Avería que frena producción)</MenuItem>
-                    <MenuItem value="Media">Media</MenuItem>
-                    <MenuItem value="Baja">Baja</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+            {/* Sección 2: Clasificación y Tiempos */}
+            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <CalendarMonthIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  2. Clasificación, Estado y Fechas
+                </Typography>
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Tipo de Mantenimiento</InputLabel>
+                    <Select
+                      value={formData.tipo}
+                      label="Tipo de Mantenimiento"
+                      onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
+                    >
+                      <MenuItem value="Preventivo">Preventivo (Programado)</MenuItem>
+                      <MenuItem value="Correctivo">Correctivo (Reparación de Falla)</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Estado de la Orden</InputLabel>
-                  <Select
-                    value={formData.estado}
-                    label="Estado de la Orden"
-                    onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                  >
-                    <MenuItem value="Pendiente">Pendiente</MenuItem>
-                    <MenuItem value="En Proceso">En Proceso</MenuItem>
-                    <MenuItem value="Finalizada">Finalizada</MenuItem>
-                    <MenuItem value="Cancelada">Cancelada</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+                <Grid item xs={12} sm={4}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Prioridad</InputLabel>
+                    <Select
+                      value={formData.prioridad}
+                      label="Prioridad"
+                      onChange={(e) => setFormData({ ...formData, prioridad: e.target.value })}
+                    >
+                      <MenuItem value="Alta">Alta (Avería crítica)</MenuItem>
+                      <MenuItem value="Media">Media (Planificada)</MenuItem>
+                      <MenuItem value="Baja">Baja (Mantenimiento menor)</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Fecha Emisión"
-                  type="date"
-                  value={formData.fechaEmision}
-                  onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
-                  InputLabelProps={{ shrink: true }}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Fecha y Hora Inicio"
-                  value={formData.fechaInicio}
-                  placeholder="AAAA-MM-DD HH:MM"
-                  onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Fecha y Hora Fin"
-                  value={formData.fechaFin}
-                  placeholder="AAAA-MM-DD HH:MM"
-                  onChange={(e) => setFormData({ ...formData, fechaFin: e.target.value })}
-                />
-              </Grid>
+                <Grid item xs={12} sm={4}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Estado de la Orden</InputLabel>
+                    <Select
+                      value={formData.estado}
+                      label="Estado de la Orden"
+                      onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                    >
+                      <MenuItem value="Pendiente">Pendiente</MenuItem>
+                      <MenuItem value="En Proceso">En Proceso</MenuItem>
+                      <MenuItem value="Finalizada">Finalizada</MenuItem>
+                      <MenuItem value="Cancelada">Cancelada</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  multiline
-                  rows={2}
-                  label="Descripción de la Tarea / Fallo Observado"
-                  placeholder="Detalle la rutina de lubricación o causa raíz de avería según diagrama de dominio..."
-                  value={formData.tareaRealizada}
-                  onChange={(e) => setFormData({ ...formData, tareaRealizada: e.target.value })}
-                  required
-                />
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Fecha Emisión"
+                    type="date"
+                    value={formData.fechaEmision}
+                    onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
+                    InputLabelProps={{ shrink: true }}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Fecha y Hora Inicio"
+                    value={formData.fechaInicio}
+                    placeholder="AAAA-MM-DD HH:MM"
+                    onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Fecha y Hora Fin"
+                    value={formData.fechaFin}
+                    placeholder="AAAA-MM-DD HH:MM"
+                    onChange={(e) => setFormData({ ...formData, fechaFin: e.target.value })}
+                  />
+                </Grid>
               </Grid>
+            </Paper>
 
-              <Grid item xs={12}>
-                <Divider sx={{ my: 1 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    REPUESTO UTILIZADO (OPCIONAL)
-                  </Typography>
-                </Divider>
-              </Grid>
+            {/* Sección 3: Diagnóstico y Repuestos */}
+            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <BuildCircleIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  3. Diagnóstico y Repuestos Requeridos
+                </Typography>
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    multiline
+                    rows={2}
+                    label="Descripción de la Tarea / Fallo Observado"
+                    placeholder="Detalle la rutina o causa raíz según el dominio..."
+                    value={formData.tareaRealizada}
+                    onChange={(e) => setFormData({ ...formData, tareaRealizada: e.target.value })}
+                    required
+                  />
+                </Grid>
 
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Código Repuesto"
-                  placeholder="Ej: SKF-6204, CORR-8M"
-                  value={formData.repuestoCodigo}
-                  onChange={(e) => setFormData({ ...formData, repuestoCodigo: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={5}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Descripción del Repuesto / Insumo"
-                  placeholder="Ej: Rulemán blindado, grasa alimenticia"
-                  value={formData.repuestoDescripcion}
-                  onChange={(e) => setFormData({ ...formData, repuestoDescripcion: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={3}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Cantidad"
-                  placeholder="Ej: 2 unidades, 500 gr"
-                  value={formData.repuestoCantidad}
-                  onChange={(e) => setFormData({ ...formData, repuestoCantidad: e.target.value })}
-                />
-              </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Código de Repuesto (Opcional)"
+                    placeholder="Ej: SKF-6204"
+                    value={formData.repuestoCodigo}
+                    onChange={(e) => setFormData({ ...formData, repuestoCodigo: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={5}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Descripción de Repuesto / Insumo"
+                    placeholder="Ej: Rulemán blindado, grasa de litio"
+                    value={formData.repuestoDescripcion}
+                    onChange={(e) => setFormData({ ...formData, repuestoDescripcion: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Cantidad"
+                    placeholder="Ej: 2 unidades"
+                    value={formData.repuestoCantidad}
+                    onChange={(e) => setFormData({ ...formData, repuestoCantidad: e.target.value })}
+                  />
+                </Grid>
 
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  multiline
-                  rows={2}
-                  label="Observaciones y Recomendaciones Técnicas"
-                  value={formData.observaciones}
-                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-                />
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    multiline
+                    rows={2}
+                    label="Observaciones y Recomendaciones Técnicas"
+                    placeholder="Comentarios adicionales para el equipo operativo..."
+                    value={formData.observaciones}
+                    onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                  />
+                </Grid>
               </Grid>
-            </Grid>
+            </Paper>
           </DialogContent>
-          <DialogActions sx={{ px: 3, py: 2 }}>
-            <Button onClick={() => setOpenForm(false)} color="inherit">
+
+          <DialogActions
+            sx={{
+              px: 3,
+              py: 2,
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              bgcolor: 'action.hover',
+            }}
+          >
+            <Button onClick={() => setOpenForm(false)} color="inherit" sx={{ fontWeight: 600 }}>
               Cancelar
             </Button>
-            <Button type="submit" variant="contained" color="primary">
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              startIcon={<SaveIcon />}
+              sx={{ px: 3, fontWeight: 700 }}
+            >
               {isEditing ? 'Guardar Cambios' : 'Emitir Orden'}
             </Button>
           </DialogActions>
@@ -918,21 +1243,28 @@ export const OrdenesMantScreen = () => {
         onClose={() => setOpenDelete(false)}
         maxWidth="xs"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '14px' } }}
+        PaperProps={{ sx: { borderRadius: '16px', overflow: 'hidden' } }}
       >
-        <DialogTitle sx={{ fontWeight: 700 }}>Eliminar Orden</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2">
+        <DialogTitle sx={{ p: 2.5, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'error.main', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <WarningAmberIcon fontSize="small" />
+          </Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Confirmar Baja de Orden
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          <Typography variant="body2" color="text.secondary">
             ¿Confirma que desea eliminar la orden de mantenimiento <strong>{selectedOrden?.id}</strong> sobre{' '}
             <strong>{selectedOrden?.maquinariaNombre}</strong>?
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
           <Button onClick={() => setOpenDelete(false)} color="inherit">
             Cancelar
           </Button>
-          <Button onClick={handleDeleteConfirm} variant="contained" color="error">
-            Eliminar
+          <Button onClick={handleDeleteConfirm} variant="contained" color="error" sx={{ fontWeight: 700 }}>
+            Eliminar Orden
           </Button>
         </DialogActions>
       </Dialog>
