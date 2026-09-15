@@ -344,10 +344,10 @@ export const MaquinariaScreen = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ minWidth: { xs: '100%', sm: 260 }, bgcolor: 'background.paper' }}
+            sx={{ minWidth: { xs: '100%', sm: 260 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}
           />
 
-          <FormControl size="small" sx={{ minWidth: 170, bgcolor: 'background.paper' }}>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
             <InputLabel id="linea-filter-label">Línea de Producción</InputLabel>
             <Select
               labelId="linea-filter-label"
@@ -364,7 +364,7 @@ export const MaquinariaScreen = () => {
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 150, bgcolor: 'background.paper' }}>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
             <InputLabel id="estado-filter-label">Estado Operativo</InputLabel>
             <Select
               labelId="estado-filter-label"
@@ -598,7 +598,7 @@ export const MaquinariaScreen = () => {
             </IconButton>
           </DialogTitle>
 
-          <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {/* Sección 1: Datos de Identificación y Fabricante */}
             <Paper
               variant="outlined"
@@ -616,7 +616,7 @@ export const MaquinariaScreen = () => {
                 </Typography>
               </Box>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -627,7 +627,7 @@ export const MaquinariaScreen = () => {
                     required
                   />
                 </Grid>
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -752,7 +752,7 @@ export const MaquinariaScreen = () => {
                 </Typography>
               </Box>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -763,27 +763,33 @@ export const MaquinariaScreen = () => {
                     InputProps={{ endAdornment: <InputAdornment position="end">hs</InputAdornment> }}
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Último Mantenimiento"
-                    type="date"
-                    value={formData.ultimoMantenimiento}
-                    onChange={(e) => setFormData({ ...formData, ultimoMantenimiento: e.target.value })}
-                    InputLabelProps={{ shrink: true }}
-                  />
+                <Grid item xs={12} sm={6}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
+                      Último Mantenimiento
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={formData.ultimoMantenimiento}
+                      onChange={(e) => setFormData({ ...formData, ultimoMantenimiento: e.target.value })}
+                    />
+                  </Box>
                 </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Próximo Preventivo"
-                    type="date"
-                    value={formData.proximoMantenimiento}
-                    onChange={(e) => setFormData({ ...formData, proximoMantenimiento: e.target.value })}
-                    InputLabelProps={{ shrink: true }}
-                  />
+                <Grid item xs={12} sm={6}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
+                      Próximo Preventivo
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={formData.proximoMantenimiento}
+                      onChange={(e) => setFormData({ ...formData, proximoMantenimiento: e.target.value })}
+                    />
+                  </Box>
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
@@ -860,7 +866,7 @@ export const MaquinariaScreen = () => {
           </Box>
           <Chip label={selectedMaq?.estado} size="small" color={STATUS_COLOR_MAP[selectedMaq?.estado] || 'default'} sx={{ fontWeight: 700 }} />
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedMaq && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
               <Box>
@@ -965,7 +971,7 @@ export const MaquinariaScreen = () => {
             <CloseIcon fontSize="small" />
           </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>

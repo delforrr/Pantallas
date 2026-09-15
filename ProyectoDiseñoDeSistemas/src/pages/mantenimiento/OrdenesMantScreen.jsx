@@ -401,10 +401,10 @@ export const OrdenesMantScreen = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ minWidth: { xs: '100%', sm: 260 }, bgcolor: 'background.paper' }}
+            sx={{ minWidth: { xs: '100%', sm: 260 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}
           />
 
-          <FormControl size="small" sx={{ minWidth: 150, bgcolor: 'background.paper' }}>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
             <InputLabel id="tipo-filter-label">Tipo</InputLabel>
             <Select
               labelId="tipo-filter-label"
@@ -418,7 +418,7 @@ export const OrdenesMantScreen = () => {
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 150, bgcolor: 'background.paper' }}>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
             <InputLabel id="estado-filter-label">Estado</InputLabel>
             <Select
               labelId="estado-filter-label"
@@ -434,7 +434,7 @@ export const OrdenesMantScreen = () => {
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 140, bgcolor: 'background.paper' }}>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
             <InputLabel id="prioridad-filter-label">Prioridad</InputLabel>
             <Select
               labelId="prioridad-filter-label"
@@ -821,7 +821,7 @@ export const OrdenesMantScreen = () => {
             sx={{ fontWeight: 700 }}
           />
         </DialogTitle>
-        <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedOrden && (
             <>
               {/* Sección Datos de Intervención */}
@@ -1007,7 +1007,7 @@ export const OrdenesMantScreen = () => {
             </IconButton>
           </DialogTitle>
 
-          <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {/* Sección 1: Equipo y Técnico */}
             <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -1062,7 +1062,7 @@ export const OrdenesMantScreen = () => {
                 </Typography>
               </Box>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small">
                     <InputLabel>Tipo de Mantenimiento</InputLabel>
                     <Select
@@ -1076,7 +1076,7 @@ export const OrdenesMantScreen = () => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small">
                     <InputLabel>Prioridad</InputLabel>
                     <Select
@@ -1091,7 +1091,7 @@ export const OrdenesMantScreen = () => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small">
                     <InputLabel>Estado de la Orden</InputLabel>
                     <Select
@@ -1107,19 +1107,23 @@ export const OrdenesMantScreen = () => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Fecha Emisión"
-                    type="date"
-                    value={formData.fechaEmision}
-                    onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
+                <Grid item xs={12} sm={6}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
+                      Fecha Emisión *
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={formData.fechaEmision}
+                      onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
+                      required
+                    />
+                  </Box>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -1129,7 +1133,8 @@ export const OrdenesMantScreen = () => {
                     onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -1165,7 +1170,7 @@ export const OrdenesMantScreen = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -1175,7 +1180,7 @@ export const OrdenesMantScreen = () => {
                     onChange={(e) => setFormData({ ...formData, repuestoCodigo: e.target.value })}
                   />
                 </Grid>
-                <Grid item xs={12} sm={5}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -1185,7 +1190,7 @@ export const OrdenesMantScreen = () => {
                     onChange={(e) => setFormData({ ...formData, repuestoDescripcion: e.target.value })}
                   />
                 </Grid>
-                <Grid item xs={12} sm={3}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
