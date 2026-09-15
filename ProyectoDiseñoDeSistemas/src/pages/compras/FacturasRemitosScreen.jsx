@@ -388,9 +388,9 @@ export const FacturasRemitosScreen = () => {
                     </InputAdornment>
                   ),
                 }}
-                sx={{ minWidth: { xs: '100%', sm: 300 }, bgcolor: 'background.paper' }}
+                sx={{ minWidth: { xs: '100%', sm: 300 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}
               />
-              <FormControl size="small" sx={{ minWidth: 180, bgcolor: 'background.paper' }}>
+              <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
                 <InputLabel>Estado de Pago</InputLabel>
                 <Select value={statusFilter} label="Estado de Pago" onChange={(e) => setStatusFilter(e.target.value)}>
                   <MenuItem value="TODOS">Todos los Estados</MenuItem>
@@ -627,9 +627,9 @@ export const FacturasRemitosScreen = () => {
                     </InputAdornment>
                   ),
                 }}
-                sx={{ minWidth: { xs: '100%', sm: 300 }, bgcolor: 'background.paper' }}
+                sx={{ minWidth: { xs: '100%', sm: 300 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}
               />
-              <FormControl size="small" sx={{ minWidth: 180, bgcolor: 'background.paper' }}>
+              <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
                 <InputLabel>Estado de Recepción</InputLabel>
                 <Select value={statusFilter} label="Estado de Recepción" onChange={(e) => setStatusFilter(e.target.value)}>
                   <MenuItem value="TODOS">Todos los Estados</MenuItem>
@@ -816,7 +816,7 @@ export const FacturasRemitosScreen = () => {
                     </InputAdornment>
                   ),
                 }}
-                sx={{ minWidth: { xs: '100%', sm: 300 }, bgcolor: 'background.paper' }}
+                sx={{ minWidth: { xs: '100%', sm: 300 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}
               />
             </Box>
 
@@ -1024,7 +1024,7 @@ export const FacturasRemitosScreen = () => {
             </IconButton>
           </DialogTitle>
 
-          <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {/* Sección 1: Identificación */}
             <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -1095,28 +1095,34 @@ export const FacturasRemitosScreen = () => {
               </Box>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Fecha de Emisión"
-                    type="date"
-                    value={facturaForm.fechaEmision}
-                    onChange={(e) => setFacturaForm({ ...facturaForm, fechaEmision: e.target.value })}
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
+                      Fecha de Emisión *
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={facturaForm.fechaEmision}
+                      onChange={(e) => setFacturaForm({ ...facturaForm, fechaEmision: e.target.value })}
+                      required
+                    />
+                  </Box>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Fecha de Vencimiento"
-                    type="date"
-                    value={facturaForm.fechaVencimiento}
-                    onChange={(e) => setFacturaForm({ ...facturaForm, fechaVencimiento: e.target.value })}
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
+                      Fecha de Vencimiento *
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={facturaForm.fechaVencimiento}
+                      onChange={(e) => setFacturaForm({ ...facturaForm, fechaVencimiento: e.target.value })}
+                      required
+                    />
+                  </Box>
                 </Grid>
               </Grid>
             </Paper>
@@ -1239,7 +1245,7 @@ export const FacturasRemitosScreen = () => {
             </IconButton>
           </DialogTitle>
 
-          <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {/* Sección 1: Datos de Transporte */}
             <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -1311,16 +1317,19 @@ export const FacturasRemitosScreen = () => {
               </Box>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Fecha de Entrega Real"
-                    type="date"
-                    value={remitoForm.fechaEntregaReal}
-                    onChange={(e) => setRemitoForm({ ...remitoForm, fechaEntregaReal: e.target.value })}
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
+                      Fecha de Entrega Real *
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={remitoForm.fechaEntregaReal}
+                      onChange={(e) => setRemitoForm({ ...remitoForm, fechaEntregaReal: e.target.value })}
+                      required
+                    />
+                  </Box>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small">
@@ -1413,7 +1422,7 @@ export const FacturasRemitosScreen = () => {
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedItem && (
             <>
               <Box sx={{ p: 2, bgcolor: 'success.50', borderRadius: '12px', border: '1px solid', borderColor: 'success.200' }}>
@@ -1540,7 +1549,7 @@ export const FacturasRemitosScreen = () => {
           </Box>
         </DialogTitle>
 
-        <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedItem && (
             <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px' }}>
               <Grid container spacing={2}>

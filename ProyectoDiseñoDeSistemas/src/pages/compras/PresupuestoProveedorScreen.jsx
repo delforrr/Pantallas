@@ -396,10 +396,10 @@ export const PresupuestoProveedorScreen = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ minWidth: { xs: '100%', sm: 280 }, bgcolor: 'background.paper' }}
+            sx={{ minWidth: { xs: '100%', sm: 280 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}
           />
 
-          <FormControl size="small" sx={{ minWidth: 160, bgcolor: 'background.paper' }}>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
             <InputLabel id="estado-pres-label">Estado</InputLabel>
             <Select
               labelId="estado-pres-label"
@@ -415,7 +415,7 @@ export const PresupuestoProveedorScreen = () => {
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 180, bgcolor: 'background.paper' }}>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
             <InputLabel id="tipo-pres-label">Modalidad de Compra</InputLabel>
             <Select
               labelId="tipo-pres-label"
@@ -858,7 +858,7 @@ export const PresupuestoProveedorScreen = () => {
           </Box>
         </DialogTitle>
 
-        <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedPresupuesto && (
             <>
               {/* Sección 1: Información Comercial */}
@@ -1044,7 +1044,7 @@ export const PresupuestoProveedorScreen = () => {
             </IconButton>
           </DialogTitle>
 
-          <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {/* Sección 1: Proveedor y Modalidad Comercial */}
             <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -1109,33 +1109,39 @@ export const PresupuestoProveedorScreen = () => {
                 </Typography>
               </Box>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Fecha de Emisión"
-                    type="date"
-                    value={formData.fechaEmision}
-                    onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
+                <Grid item xs={12} sm={6}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
+                      Fecha de Emisión *
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={formData.fechaEmision}
+                      onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
+                      required
+                    />
+                  </Box>
                 </Grid>
 
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Validez de Oferta Hasta"
-                    type="date"
-                    value={formData.validezHasta}
-                    onChange={(e) => setFormData({ ...formData, validezHasta: e.target.value })}
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
+                <Grid item xs={12} sm={6}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
+                      Validez de Oferta Hasta *
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={formData.validezHasta}
+                      onChange={(e) => setFormData({ ...formData, validezHasta: e.target.value })}
+                      required
+                    />
+                  </Box>
                 </Grid>
 
-                <Grid item xs={12} sm={3}>
+                <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small">
                     <InputLabel>Calidad Evaluada</InputLabel>
                     <Select
@@ -1150,7 +1156,7 @@ export const PresupuestoProveedorScreen = () => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12} sm={3}>
+                <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small">
                     <InputLabel>Estado Inicial</InputLabel>
                     <Select
@@ -1176,7 +1182,7 @@ export const PresupuestoProveedorScreen = () => {
                 </Typography>
               </Box>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={5}>
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     size="small"
@@ -1186,7 +1192,7 @@ export const PresupuestoProveedorScreen = () => {
                     required
                   />
                 </Grid>
-                <Grid item xs={6} sm={2}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -1197,7 +1203,7 @@ export const PresupuestoProveedorScreen = () => {
                     required
                   />
                 </Grid>
-                <Grid item xs={6} sm={2}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -1207,7 +1213,7 @@ export const PresupuestoProveedorScreen = () => {
                     placeholder="Bolsas, Kg, etc."
                   />
                 </Grid>
-                <Grid item xs={12} sm={3}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"

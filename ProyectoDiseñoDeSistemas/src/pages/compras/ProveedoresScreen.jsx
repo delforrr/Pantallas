@@ -304,10 +304,10 @@ export const ProveedoresScreen = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ minWidth: { xs: '100%', sm: 280 }, bgcolor: 'background.paper' }}
+            sx={{ minWidth: { xs: '100%', sm: 280 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}
           />
 
-          <FormControl size="small" sx={{ minWidth: 180, bgcolor: 'background.paper' }}>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
             <InputLabel id="categoria-select-label">Categoría</InputLabel>
             <Select
               labelId="categoria-select-label"
@@ -322,7 +322,7 @@ export const ProveedoresScreen = () => {
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 140, bgcolor: 'background.paper' }}>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
             <InputLabel id="estado-select-label">Estado</InputLabel>
             <Select
               labelId="estado-select-label"
@@ -710,7 +710,7 @@ export const ProveedoresScreen = () => {
             </IconButton>
           </DialogTitle>
 
-          <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {/* Sección 1: Datos Fiscales */}
             <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -782,7 +782,7 @@ export const ProveedoresScreen = () => {
                 </Typography>
               </Box>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -793,7 +793,7 @@ export const ProveedoresScreen = () => {
                     required
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -804,7 +804,7 @@ export const ProveedoresScreen = () => {
                     required
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -828,7 +828,7 @@ export const ProveedoresScreen = () => {
                 </Typography>
               </Box>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -837,7 +837,7 @@ export const ProveedoresScreen = () => {
                     onChange={(e) => setFormData({ ...formData, calle: e.target.value })}
                   />
                 </Grid>
-                <Grid item xs={12} sm={2}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -846,7 +846,7 @@ export const ProveedoresScreen = () => {
                     onChange={(e) => setFormData({ ...formData, altura: e.target.value })}
                   />
                 </Grid>
-                <Grid item xs={12} sm={3}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -855,7 +855,7 @@ export const ProveedoresScreen = () => {
                     onChange={(e) => setFormData({ ...formData, localidad: e.target.value })}
                   />
                 </Grid>
-                <Grid item xs={12} sm={3}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -865,7 +865,7 @@ export const ProveedoresScreen = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     size="small"
@@ -875,7 +875,7 @@ export const ProveedoresScreen = () => {
                     onChange={(e) => setFormData({ ...formData, insumosPrincipales: e.target.value })}
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small">
                     <InputLabel>Estado Operativo</InputLabel>
                     <Select
@@ -951,7 +951,7 @@ export const ProveedoresScreen = () => {
           </Box>
           <Chip label={selectedProveedor?.estado} size="small" color={selectedProveedor?.estado === 'Activo' ? 'success' : 'default'} sx={{ fontWeight: 700 }} />
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedProveedor && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
               <Box>

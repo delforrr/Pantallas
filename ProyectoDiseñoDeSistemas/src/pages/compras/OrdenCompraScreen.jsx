@@ -366,10 +366,10 @@ export const OrdenCompraScreen = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ minWidth: { xs: '100%', sm: 300 }, bgcolor: 'background.paper' }}
+            sx={{ minWidth: { xs: '100%', sm: 300 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}
           />
 
-          <FormControl size="small" sx={{ minWidth: 170, bgcolor: 'background.paper' }}>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
             <InputLabel id="orden-status-filter-label">Estado de Orden</InputLabel>
             <Select
               labelId="orden-status-filter-label"
@@ -803,7 +803,7 @@ export const OrdenCompraScreen = () => {
           </Box>
         </DialogTitle>
 
-        <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedOrden && (
             <>
               {/* Sección 1: Información de Emisión */}
@@ -980,7 +980,7 @@ export const OrdenCompraScreen = () => {
             </IconButton>
           </DialogTitle>
 
-          <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {/* Sección 1: Proveedor y Presupuesto */}
             <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -1048,31 +1048,37 @@ export const OrdenCompraScreen = () => {
                 </Typography>
               </Box>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Fecha de Emisión"
-                    type="date"
-                    value={formData.fechaEmision}
-                    onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
+                <Grid item xs={12} sm={6}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
+                      Fecha de Emisión *
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={formData.fechaEmision}
+                      onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
+                      required
+                    />
+                  </Box>
                 </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Fecha Estimada de Entrega"
-                    type="date"
-                    value={formData.fechaEntregaEstimada}
-                    onChange={(e) => setFormData({ ...formData, fechaEntregaEstimada: e.target.value })}
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
+                <Grid item xs={12} sm={6}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
+                      Fecha Estimada de Entrega *
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={formData.fechaEntregaEstimada}
+                      onChange={(e) => setFormData({ ...formData, fechaEntregaEstimada: e.target.value })}
+                      required
+                    />
+                  </Box>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small">
                     <InputLabel>Estado de la Orden</InputLabel>
                     <Select
@@ -1100,7 +1106,7 @@ export const OrdenCompraScreen = () => {
                 </Typography>
               </Box>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={5}>
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     size="small"
@@ -1110,7 +1116,7 @@ export const OrdenCompraScreen = () => {
                     required
                   />
                 </Grid>
-                <Grid item xs={6} sm={2}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -1121,7 +1127,7 @@ export const OrdenCompraScreen = () => {
                     required
                   />
                 </Grid>
-                <Grid item xs={6} sm={2}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -1130,7 +1136,7 @@ export const OrdenCompraScreen = () => {
                     onChange={(e) => setFormData({ ...formData, itemUnidad: e.target.value })}
                   />
                 </Grid>
-                <Grid item xs={12} sm={3}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
