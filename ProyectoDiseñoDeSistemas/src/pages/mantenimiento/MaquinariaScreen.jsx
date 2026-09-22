@@ -53,6 +53,13 @@ const STATUS_COLOR_MAP = {
   'Fuera de Servicio': 'default',
 };
 
+const getWearLevel = (hours) => {
+  const h = Number(hours) || 0;
+  if (h < 1000) return { label: 'Bajo', color: 'success', text: 'Desgaste Bajo (< 1.000 hs)' };
+  if (h <= 3000) return { label: 'Medio', color: 'warning', text: 'Desgaste Medio (1.000 - 3.000 hs)' };
+  return { label: 'Alto', color: 'error', text: 'Desgaste Alto (> 3.000 hs)' };
+};
+
 export const MaquinariaScreen = () => {
   const [maquinarias, setMaquinarias] = useState(INITIAL_MAQUINARIAS);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' o 'table'
@@ -542,297 +549,362 @@ export const MaquinariaScreen = () => {
         </TableContainer>
       )}
 
-      {/* Modal Dialog: Alta / Edición de Maquinaria - UI Estilizada y Prolija */}
+      {/* Modal: Alta / Edición de Maquinaria */}
       <Dialog
         open={openForm}
         onClose={() => setOpenForm(false)}
         maxWidth="md"
         fullWidth
         PaperProps={{
+          component: 'form',
+          onSubmit: handleSaveForm,
           sx: {
             borderRadius: '20px',
             overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.45)',
+            maxHeight: '92vh',
+            display: 'flex',
+            flexDirection: 'column',
           },
         }}
       >
-        <form onSubmit={handleSaveForm}>
-          <DialogTitle
+        <DialogTitle
+          sx={{
+            p: 2.5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            bgcolor: 'action.hover',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 42,
+                height: 42,
+                borderRadius: '12px',
+                bgcolor: 'primary.main',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 2,
+              }}
+            >
+              <PrecisionManufacturingIcon />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                {isEditing ? `Editar Maquinaria · ${selectedMaq?.codigo}` : 'Registrar Nueva Maquinaria Industrial'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Ficha técnica, ubicación en planta y parametrización de mantenimiento preventivo
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => setOpenForm(false)} size="small" sx={{ color: 'text.secondary' }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5, overflowY: 'auto' }}>
+          {/* 1. Identificación y Fabricante */}
+          <Paper
+            variant="outlined"
             sx={{
               p: 2.5,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              bgcolor: 'action.hover',
-              borderBottom: '1px solid',
+              borderRadius: '14px',
+              bgcolor: 'background.paper',
               borderColor: 'divider',
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box
-                sx={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: '12px',
-                  bgcolor: 'primary.main',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: 2,
-                }}
-              >
-                <PrecisionManufacturingIcon />
-              </Box>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-                  {isEditing ? `Editar Maquinaria · ${selectedMaq?.codigo}` : 'Registrar Nueva Maquinaria Industrial'}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Ficha técnica, ubicación en planta y parametrización de mantenimiento preventivo
-                </Typography>
-              </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <PrecisionManufacturingIcon fontSize="small" sx={{ color: 'primary.main' }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                1. Identificación y Fabricante
+              </Typography>
             </Box>
-            <IconButton onClick={() => setOpenForm(false)} size="small" sx={{ color: 'text.secondary' }}>
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </DialogTitle>
-
-          <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            {/* Sección 1: Datos de Identificación y Fabricante */}
-            <Paper
-              variant="outlined"
-              sx={{
-                p: 2.5,
-                borderRadius: '14px',
-                bgcolor: 'background.paper',
-                borderColor: 'divider',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <PrecisionManufacturingIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                  1. Identificación y Fabricante
-                </Typography>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Código de Equipo"
-                    placeholder="Ej: MAQ-001"
-                    value={formData.codigo}
-                    onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Nombre de la Máquina"
-                    placeholder="Ej: Amasadora Industrial Doble Espiral"
-                    value={formData.nombre}
-                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Marca / Fabricante"
-                    placeholder="Ej: ItalPast Tech"
-                    value={formData.marca}
-                    onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Modelo Industrial"
-                    placeholder="Ej: IP-A250 Pro"
-                    value={formData.modelo}
-                    onChange={(e) => setFormData({ ...formData, modelo: e.target.value })}
-                    required
-                  />
-                </Grid>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Código de Equipo"
+                  placeholder="Ej: MAQ-001"
+                  value={formData.codigo}
+                  onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
+                  slotProps={{
+                    input: {
+                      startAdornment: <InputAdornment position="start">#</InputAdornment>,
+                    },
+                  }}
+                  required
+                />
               </Grid>
-            </Paper>
-
-            {/* Sección 2: Operación y Ubicación en Planta */}
-            <Paper
-              variant="outlined"
-              sx={{
-                p: 2.5,
-                borderRadius: '14px',
-                bgcolor: 'background.paper',
-                borderColor: 'divider',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <PlaceIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                  2. Línea de Producción y Operación
-                </Typography>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Línea de Producción</InputLabel>
-                    <Select
-                      value={formData.linea}
-                      label="Línea de Producción"
-                      onChange={(e) => setFormData({ ...formData, linea: e.target.value })}
-                    >
-                      <MenuItem value="Elaboración de Masas">Elaboración de Masas</MenuItem>
-                      <MenuItem value="Armado y Relleno">Armado y Relleno</MenuItem>
-                      <MenuItem value="Corte y Fraccionado">Corte y Fraccionado</MenuItem>
-                      <MenuItem value="Envasado y Empaque">Envasado y Empaque</MenuItem>
-                      <MenuItem value="Cocina de Salsas">Cocina de Salsas</MenuItem>
-                      <MenuItem value="Secado y Curado">Secado y Curado</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Estado Operativo</InputLabel>
-                    <Select
-                      value={formData.estado}
-                      label="Estado Operativo"
-                      onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                    >
-                      <MenuItem value="Operativa">Operativa</MenuItem>
-                      <MenuItem value="En Mantenimiento">En Mantenimiento</MenuItem>
-                      <MenuItem value="En Reparación">En Reparación</MenuItem>
-                      <MenuItem value="Fuera de Servicio">Fuera de Servicio</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Capacidad Nominal"
-                    placeholder="Ej: 50 kg por bachada, 120 kg/h"
-                    value={formData.capacidad}
-                    onChange={(e) => setFormData({ ...formData, capacidad: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Ubicación Física en Planta"
-                    placeholder="Ej: Nave 1 - Sector Producción"
-                    value={formData.ubicacion}
-                    onChange={(e) => setFormData({ ...formData, ubicacion: e.target.value })}
-                  />
-                </Grid>
+              <Grid size={{ xs: 12, sm: 8 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Nombre de la Máquina"
+                  placeholder="Ej: Amasadora Industrial Doble Espiral"
+                  value={formData.nombre}
+                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                  required
+                />
               </Grid>
-            </Paper>
-
-            {/* Sección 3: Plan de Mantenimiento y Horas de Uso */}
-            <Paper
-              variant="outlined"
-              sx={{
-                p: 2.5,
-                borderRadius: '14px',
-                bgcolor: 'background.paper',
-                borderColor: 'divider',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <CalendarMonthIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                  3. Plan de Mantenimiento y Registro de Uso
-                </Typography>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Horas de Operación"
-                    type="number"
-                    value={formData.horasUso}
-                    onChange={(e) => setFormData({ ...formData, horasUso: Number(e.target.value) })}
-                    InputProps={{ endAdornment: <InputAdornment position="end">hs</InputAdornment> }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
-                      Último Mantenimiento
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      type="date"
-                      value={formData.ultimoMantenimiento}
-                      onChange={(e) => setFormData({ ...formData, ultimoMantenimiento: e.target.value })}
-                    />
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
-                      Próximo Preventivo
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      type="date"
-                      value={formData.proximoMantenimiento}
-                      onChange={(e) => setFormData({ ...formData, proximoMantenimiento: e.target.value })}
-                    />
-                  </Box>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    multiline
-                    rows={2}
-                    label="Observaciones Técnicas y Recomendaciones"
-                    placeholder="Instrucciones especiales para técnicos o lubricantes sugeridos..."
-                    value={formData.observaciones}
-                    onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-                  />
-                </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Marca / Fabricante"
+                  placeholder="Ej: ItalPast Tech"
+                  value={formData.marca}
+                  onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
+                  required
+                />
               </Grid>
-            </Paper>
-          </DialogContent>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Modelo Industrial"
+                  placeholder="Ej: IP-A250 Pro"
+                  value={formData.modelo}
+                  onChange={(e) => setFormData({ ...formData, modelo: e.target.value })}
+                  required
+                />
+              </Grid>
+            </Grid>
+          </Paper>
 
-          <DialogActions
+          {/* 2. Línea de Producción y Operación */}
+          <Paper
+            variant="outlined"
             sx={{
-              px: 3,
-              py: 2,
-              borderTop: '1px solid',
+              p: 2.5,
+              borderRadius: '14px',
+              bgcolor: 'background.paper',
               borderColor: 'divider',
-              bgcolor: 'action.hover',
             }}
           >
-            <Button onClick={() => setOpenForm(false)} color="inherit" sx={{ fontWeight: 600 }}>
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              startIcon={<SaveIcon />}
-              sx={{ px: 3, fontWeight: 700 }}
-            >
-              {isEditing ? 'Guardar Cambios' : 'Registrar Equipo'}
-            </Button>
-          </DialogActions>
-        </form>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <PlaceIcon fontSize="small" sx={{ color: 'primary.main' }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                2. Línea de Producción y Operación
+              </Typography>
+            </Box>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="form-linea-label">Línea de Producción</InputLabel>
+                  <Select
+                    labelId="form-linea-label"
+                    value={formData.linea}
+                    label="Línea de Producción"
+                    onChange={(e) => setFormData({ ...formData, linea: e.target.value })}
+                  >
+                    <MenuItem value="Elaboración de Masas">Elaboración de Masas</MenuItem>
+                    <MenuItem value="Armado y Relleno">Armado y Relleno</MenuItem>
+                    <MenuItem value="Corte y Fraccionado">Corte y Fraccionado</MenuItem>
+                    <MenuItem value="Envasado y Empaque">Envasado y Empaque</MenuItem>
+                    <MenuItem value="Cocina de Salsas">Cocina de Salsas</MenuItem>
+                    <MenuItem value="Secado y Curado">Secado y Curado</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="form-estado-label">Estado Operativo</InputLabel>
+                  <Select
+                    labelId="form-estado-label"
+                    value={formData.estado}
+                    label="Estado Operativo"
+                    onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                    renderValue={(val) => (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Chip
+                          label={val}
+                          size="small"
+                          color={STATUS_COLOR_MAP[val] || 'default'}
+                          sx={{ height: 22, fontSize: '0.75rem', fontWeight: 700 }}
+                        />
+                      </Box>
+                    )}
+                  >
+                    <MenuItem value="Operativa">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Operativa (Producción Normal)</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="En Mantenimiento">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'warning.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>En Mantenimiento (Parada Programada)</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="En Reparación">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'error.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>En Reparación (Avería / Correctivo)</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Fuera de Servicio">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'text.disabled' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Fuera de Servicio (Inactiva)</Typography>
+                      </Box>
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Capacidad Nominal"
+                  placeholder="Ej: 50 kg por bachada, 120 kg/h"
+                  value={formData.capacidad}
+                  onChange={(e) => setFormData({ ...formData, capacidad: e.target.value })}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Ubicación Física en Planta"
+                  placeholder="Ej: Nave 1 - Sector Producción"
+                  value={formData.ubicacion}
+                  onChange={(e) => setFormData({ ...formData, ubicacion: e.target.value })}
+                />
+              </Grid>
+            </Grid>
+          </Paper>
+
+          {/* 3. Plan de Mantenimiento y Registro de Uso */}
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2.5,
+              borderRadius: '14px',
+              bgcolor: 'background.paper',
+              borderColor: 'divider',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <CalendarMonthIcon fontSize="small" sx={{ color: 'primary.main' }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                3. Plan de Mantenimiento y Registro de Uso
+              </Typography>
+            </Box>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Horas de Operación"
+                  type="number"
+                  value={formData.horasUso}
+                  onChange={(e) => setFormData({ ...formData, horasUso: Math.max(0, Number(e.target.value)) })}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Chip
+                            label={getWearLevel(formData.horasUso).label}
+                            size="small"
+                            color={getWearLevel(formData.horasUso).color}
+                            sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700 }}
+                          />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  helperText={getWearLevel(formData.horasUso).text}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type="date"
+                  label="Último Mantenimiento"
+                  value={formData.ultimoMantenimiento}
+                  onChange={(e) => setFormData({ ...formData, ultimoMantenimiento: e.target.value })}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type="date"
+                  label="Próximo Preventivo"
+                  value={formData.proximoMantenimiento}
+                  onChange={(e) => setFormData({ ...formData, proximoMantenimiento: e.target.value })}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="form-responsable-label">Técnico Responsable Habitual</InputLabel>
+                  <Select
+                    labelId="form-responsable-label"
+                    value={formData.responsable}
+                    label="Técnico Responsable Habitual"
+                    onChange={(e) => setFormData({ ...formData, responsable: e.target.value })}
+                  >
+                    {INITIAL_TECNICOS.map((t) => (
+                      <MenuItem key={t.id} value={t.nombre}>
+                        {t.nombre} — {t.especialidad} (Turno {t.turno})
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  multiline
+                  rows={2}
+                  label="Observaciones Técnicas y Recomendaciones"
+                  placeholder="Instrucciones especiales para técnicos o lubricantes sugeridos..."
+                  value={formData.observaciones}
+                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                />
+              </Grid>
+            </Grid>
+          </Paper>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            px: 3.5,
+            py: 2,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'action.hover',
+          }}
+        >
+          <Button onClick={() => setOpenForm(false)} color="inherit" sx={{ fontWeight: 600 }}>
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            startIcon={<SaveIcon />}
+            sx={{ px: 3, fontWeight: 700 }}
+          >
+            {isEditing ? 'Guardar Cambios' : 'Registrar Equipo'}
+          </Button>
+        </DialogActions>
       </Dialog>
 
-      {/* Modal Dialog: Ficha Técnica Completa */}
+      {/* Modal: Ficha Técnica */}
       <Dialog
         open={openDetail}
         onClose={() => setOpenDetail(false)}
@@ -866,7 +938,7 @@ export const MaquinariaScreen = () => {
           </Box>
           <Chip label={selectedMaq?.estado} size="small" color={STATUS_COLOR_MAP[selectedMaq?.estado] || 'default'} sx={{ fontWeight: 700 }} />
         </DialogTitle>
-        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedMaq && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
               <Box>
@@ -880,27 +952,27 @@ export const MaquinariaScreen = () => {
 
               <Paper variant="outlined" sx={{ p: 2, borderRadius: '12px' }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Línea de Producción</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedMaq.linea}</Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Ubicación en Planta</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedMaq.ubicacion}</Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Capacidad de Trabajo</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedMaq.capacidad}</Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Horas de Operación</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedMaq.horasUso} horas</Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Última Revisión</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedMaq.ultimoMantenimiento}</Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Próximo Preventivo</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
                       {selectedMaq.proximoMantenimiento}
@@ -926,7 +998,7 @@ export const MaquinariaScreen = () => {
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
+        <DialogActions sx={{ px: 3.5, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
           <Button
             onClick={() => {
               setOpenDetail(false);
@@ -945,13 +1017,20 @@ export const MaquinariaScreen = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal Dialog: Crear Orden Rápida para esta máquina */}
+      {/* Modal: Generar Orden Rápida */}
       <Dialog
         open={openQuickOrder}
         onClose={() => setOpenQuickOrder(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '20px', overflow: 'hidden' } }}
+        PaperProps={{
+          component: 'form',
+          onSubmit: (e) => {
+            e.preventDefault();
+            handleConfirmQuickOrder();
+          },
+          sx: { borderRadius: '20px', overflow: 'hidden' },
+        }}
       >
         <DialogTitle sx={{ p: 2.5, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -971,13 +1050,14 @@ export const MaquinariaScreen = () => {
             <CloseIcon fontSize="small" />
           </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Tipo de Mantenimiento</InputLabel>
+                  <InputLabel id="quick-tipo-label">Tipo de Mantenimiento</InputLabel>
                   <Select
+                    labelId="quick-tipo-label"
                     value={quickOrderForm.tipo}
                     label="Tipo de Mantenimiento"
                     onChange={(e) => setQuickOrderForm({ ...quickOrderForm, tipo: e.target.value })}
@@ -988,25 +1068,53 @@ export const MaquinariaScreen = () => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Prioridad</InputLabel>
+                  <InputLabel id="quick-prioridad-label">Prioridad</InputLabel>
                   <Select
+                    labelId="quick-prioridad-label"
                     value={quickOrderForm.prioridad}
                     label="Prioridad"
                     onChange={(e) => setQuickOrderForm({ ...quickOrderForm, prioridad: e.target.value })}
+                    renderValue={(val) => {
+                      const col = val === 'Alta' ? 'error' : val === 'Media' ? 'warning' : 'info';
+                      return (
+                        <Chip
+                          label={val}
+                          size="small"
+                          color={col}
+                          sx={{ height: 22, fontSize: '0.75rem', fontWeight: 700 }}
+                        />
+                      );
+                    }}
                   >
-                    <MenuItem value="Baja">Baja</MenuItem>
-                    <MenuItem value="Media">Media</MenuItem>
-                    <MenuItem value="Alta">Alta (Urgente)</MenuItem>
+                    <MenuItem value="Alta">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'error.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'error.main' }}>Alta (Urgente)</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Media">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'warning.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'warning.main' }}>Media (Planificada)</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Baja">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'info.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'info.main' }}>Baja (Régimen habitual)</Typography>
+                      </Box>
+                    </MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Técnico Responsable Asignado</InputLabel>
+                  <InputLabel id="quick-tecnico-label">Técnico Responsable Asignado</InputLabel>
                   <Select
+                    labelId="quick-tecnico-label"
                     value={quickOrderForm.tecnico}
                     label="Técnico Responsable Asignado"
                     onChange={(e) => setQuickOrderForm({ ...quickOrderForm, tecnico: e.target.value })}
@@ -1020,7 +1128,7 @@ export const MaquinariaScreen = () => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth
                   size="small"
@@ -1030,22 +1138,23 @@ export const MaquinariaScreen = () => {
                   placeholder="Detallar diagnóstico o tareas a realizar..."
                   value={quickOrderForm.tarea}
                   onChange={(e) => setQuickOrderForm({ ...quickOrderForm, tarea: e.target.value })}
+                  required
                 />
               </Grid>
             </Grid>
           </Paper>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
+        <DialogActions sx={{ px: 3.5, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
           <Button onClick={() => setOpenQuickOrder(false)} color="inherit">
             Cancelar
           </Button>
-          <Button onClick={handleConfirmQuickOrder} variant="contained" color="primary" sx={{ fontWeight: 700 }}>
+          <Button type="submit" variant="contained" color="primary" sx={{ fontWeight: 700 }}>
             Emitir Orden
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Modal Dialog: Confirmar Eliminación */}
+      {/* Modal: Confirmar Baja */}
       <Dialog
         open={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -1061,7 +1170,7 @@ export const MaquinariaScreen = () => {
             Confirmar Baja de Equipo
           </Typography>
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogContent sx={{ px: 3, pt: '24px !important', pb: 2 }}>
           <Typography variant="body2" color="text.secondary">
             ¿Está seguro de que desea eliminar la maquinaria <strong>{selectedMaq?.codigo} - {selectedMaq?.nombre}</strong> del catálogo activo de planta?
           </Typography>
