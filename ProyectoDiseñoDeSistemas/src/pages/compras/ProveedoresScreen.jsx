@@ -654,267 +654,360 @@ export const ProveedoresScreen = () => {
         </TableContainer>
       )}
 
-      {/* Modal Dialog: Alta / Edición de Proveedor - UI Estilizada y Prolija */}
+      {/* Modal Dialog: Alta / Edición de Proveedor */}
       <Dialog
         open={openForm}
         onClose={() => setOpenForm(false)}
         maxWidth="md"
         fullWidth
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: 'blur(8px)',
+              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(15, 23, 42, 0.45)',
+            },
+          },
+        }}
         PaperProps={{
+          component: 'form',
+          onSubmit: handleSaveForm,
           sx: {
             borderRadius: '20px',
             overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+            boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 24px 60px rgba(0,0,0,0.6)' : '0 24px 60px rgba(15, 23, 42, 0.2)',
+            maxHeight: '92vh',
+            display: 'flex',
+            flexDirection: 'column',
           },
         }}
       >
-        <form onSubmit={handleSaveForm}>
-          <DialogTitle
+        <DialogTitle
+          sx={{
+            p: 2.5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 42,
+                height: 42,
+                borderRadius: '12px',
+                bgcolor: 'primary.main',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 2,
+              }}
+            >
+              <StorefrontIcon />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                {isEditing ? `Editar Proveedor · ${selectedProveedor?.razonSocial}` : 'Registrar Nuevo Proveedor'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Alta fiscal, condiciones de entrega y categoría de suministro de insumos
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => setOpenForm(false)} size="small">
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5, overflowY: 'auto' }}>
+          {/* Sección 1: Datos Fiscales */}
+          <Paper
+            variant="outlined"
             sx={{
               p: 2.5,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              bgcolor: 'action.hover',
-              borderBottom: '1px solid',
-              borderColor: 'divider',
+              borderRadius: '14px',
+              bgcolor: (theme) => theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff',
+              border: '1px solid',
+              borderColor: (theme) => theme.palette.mode === 'dark' ? 'divider' : '#e2e8f0',
+              boxShadow: (theme) => theme.palette.mode === 'dark' ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box
-                sx={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: '12px',
-                  bgcolor: 'primary.main',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: 2,
-                }}
-              >
-                <StorefrontIcon />
-              </Box>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-                  {isEditing ? `Editar Proveedor · ${selectedProveedor?.razonSocial}` : 'Registrar Nuevo Proveedor'}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Alta fiscal, condiciones de entrega y categoría de suministro de insumos
-                </Typography>
-              </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                1. Datos Fiscales y Razón Social
+              </Typography>
             </Box>
-            <IconButton onClick={() => setOpenForm(false)} size="small">
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </DialogTitle>
-
-          <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            {/* Sección 1: Datos Fiscales */}
-            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                  1. Datos Fiscales y Razón Social
-                </Typography>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="CUIT"
-                    placeholder="30-XXXXXXXX-X"
-                    value={formData.cuit}
-                    onChange={(e) => setFormData({ ...formData, cuit: e.target.value })}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Razón Social"
-                    placeholder="Ej: Molino Harinero Central S.A."
-                    value={formData.razonSocial}
-                    onChange={(e) => setFormData({ ...formData, razonSocial: e.target.value })}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Categoría de Proveedor</InputLabel>
-                    <Select
-                      value={formData.categoria}
-                      label="Categoría de Proveedor"
-                      onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                    >
-                      <MenuItem value="Materia Prima Principal (Semestral)">Materia Prima Principal (Semestral)</MenuItem>
-                      <MenuItem value="Insumos Locales / Frescos">Insumos Locales / Frescos</MenuItem>
-                      <MenuItem value="Descartables & Packaging">Descartables & Packaging</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Evaluación de Calidad</InputLabel>
-                    <Select
-                      value={formData.calificacion}
-                      label="Evaluación de Calidad"
-                      onChange={(e) => setFormData({ ...formData, calificacion: e.target.value })}
-                    >
-                      <MenuItem value="Excelente">Excelente</MenuItem>
-                      <MenuItem value="Alta">Alta</MenuItem>
-                      <MenuItem value="Media">Media</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="CUIT"
+                  placeholder="30-XXXXXXXX-X"
+                  value={formData.cuit}
+                  onChange={(e) => setFormData({ ...formData, cuit: e.target.value })}
+                  required
+                />
               </Grid>
-            </Paper>
-
-            {/* Sección 2: Contacto Comercial */}
-            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <PhoneIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                  2. Contacto Comercial y Comunicación
-                </Typography>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Persona de Contacto"
-                    placeholder="Ej: Marcelo Gómez"
-                    value={formData.contacto}
-                    onChange={(e) => setFormData({ ...formData, contacto: e.target.value })}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Teléfono"
-                    placeholder="Ej: (02392) 42-8819"
-                    value={formData.telefono}
-                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Correo Electrónico"
-                    type="email"
-                    placeholder="ventas@molinoharinas.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                  />
-                </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Razón Social"
+                  placeholder="Ej: Molino Harinero Central S.A."
+                  value={formData.razonSocial}
+                  onChange={(e) => setFormData({ ...formData, razonSocial: e.target.value })}
+                  required
+                />
               </Grid>
-            </Paper>
-
-            {/* Sección 3: Domicilio e Insumos */}
-            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <PlaceIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                  3. Domicilio Fiscal e Insumos Suministrados
-                </Typography>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Calle"
-                    value={formData.calle}
-                    onChange={(e) => setFormData({ ...formData, calle: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Altura / Nro"
-                    value={formData.altura}
-                    onChange={(e) => setFormData({ ...formData, altura: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Localidad"
-                    value={formData.localidad}
-                    onChange={(e) => setFormData({ ...formData, localidad: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Provincia"
-                    value={formData.provincia}
-                    onChange={(e) => setFormData({ ...formData, provincia: e.target.value })}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Insumos Principales Suministrados"
-                    placeholder="Ej: Harina 0000 Especial, Levadura fresca, Huevos campo"
-                    value={formData.insumosPrincipales}
-                    onChange={(e) => setFormData({ ...formData, insumosPrincipales: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Estado Operativo</InputLabel>
-                    <Select
-                      value={formData.estado}
-                      label="Estado Operativo"
-                      onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                    >
-                      <MenuItem value="Activo">Activo</MenuItem>
-                      <MenuItem value="Inactivo">Inactivo</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="prov-cat-label">Categoría de Proveedor</InputLabel>
+                  <Select
+                    labelId="prov-cat-label"
+                    value={formData.categoria}
+                    label="Categoría de Proveedor"
+                    onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                  >
+                    <MenuItem value="Materia Prima Principal (Semestral)">Materia Prima Principal (Semestral)</MenuItem>
+                    <MenuItem value="Insumos Locales / Frescos">Insumos Locales / Frescos</MenuItem>
+                    <MenuItem value="Descartables & Packaging">Descartables & Packaging</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
-            </Paper>
-          </DialogContent>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="prov-calif-label">Evaluación de Calidad</InputLabel>
+                  <Select
+                    labelId="prov-calif-label"
+                    value={formData.calificacion}
+                    label="Evaluación de Calidad"
+                    onChange={(e) => setFormData({ ...formData, calificacion: e.target.value })}
+                    renderValue={(val) => {
+                      const color = val === 'Excelente' ? 'success' : val === 'Alta' ? 'info' : 'warning';
+                      return (
+                        <Chip
+                          label={val}
+                          size="small"
+                          color={color}
+                          sx={{ height: 22, fontSize: '0.75rem', fontWeight: 700 }}
+                        />
+                      );
+                    }}
+                  >
+                    <MenuItem value="Excelente">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Excelente (Certificada)</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Alta">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'info.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Alta (Conforme PastaFab)</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Media">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'warning.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Media (Estándar)</Typography>
+                      </Box>
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Paper>
 
-          <DialogActions
+          {/* Sección 2: Contacto Comercial */}
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2.5,
+              borderRadius: '14px',
+              bgcolor: (theme) => theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff',
+              border: '1px solid',
+              borderColor: (theme) => theme.palette.mode === 'dark' ? 'divider' : '#e2e8f0',
+              boxShadow: (theme) => theme.palette.mode === 'dark' ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <PhoneIcon fontSize="small" sx={{ color: 'primary.main' }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                2. Contacto Comercial y Comunicación
+              </Typography>
+            </Box>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Persona de Contacto"
+                  placeholder="Ej: Marcelo Gómez"
+                  value={formData.contacto}
+                  onChange={(e) => setFormData({ ...formData, contacto: e.target.value })}
+                  required
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Teléfono"
+                  placeholder="Ej: (02392) 42-8819"
+                  value={formData.telefono}
+                  onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                  required
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Correo Electrónico"
+                  type="email"
+                  placeholder="ventas@molinoharinas.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </Grid>
+            </Grid>
+          </Paper>
+
+          {/* Sección 3: Domicilio e Insumos */}
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2.5,
+              borderRadius: '14px',
+              bgcolor: (theme) => theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff',
+              border: '1px solid',
+              borderColor: (theme) => theme.palette.mode === 'dark' ? 'divider' : '#e2e8f0',
+              boxShadow: (theme) => theme.palette.mode === 'dark' ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <PlaceIcon fontSize="small" sx={{ color: 'primary.main' }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                3. Domicilio Fiscal e Insumos Suministrados
+              </Typography>
+            </Box>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Calle"
+                  value={formData.calle}
+                  onChange={(e) => setFormData({ ...formData, calle: e.target.value })}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Altura / Nro"
+                  value={formData.altura}
+                  onChange={(e) => setFormData({ ...formData, altura: e.target.value })}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Localidad"
+                  value={formData.localidad}
+                  onChange={(e) => setFormData({ ...formData, localidad: e.target.value })}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Provincia"
+                  value={formData.provincia}
+                  onChange={(e) => setFormData({ ...formData, provincia: e.target.value })}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Insumos Principales Suministrados"
+                  placeholder="Ej: Harina 0000 Especial, Levadura fresca, Huevos campo"
+                  value={formData.insumosPrincipales}
+                  onChange={(e) => setFormData({ ...formData, insumosPrincipales: e.target.value })}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="prov-form-estado-label">Estado Operativo</InputLabel>
+                  <Select
+                    labelId="prov-form-estado-label"
+                    value={formData.estado}
+                    label="Estado Operativo"
+                    onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                    renderValue={(val) => (
+                      <Chip
+                        label={val}
+                        size="small"
+                        color={val === 'Activo' ? 'success' : 'default'}
+                        sx={{ height: 22, fontSize: '0.75rem', fontWeight: 700 }}
+                      />
+                    )}
+                  >
+                    <MenuItem value="Activo">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Activo (Proveedor Habilitado)</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Inactivo">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'text.disabled' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Inactivo (Suspendido)</Typography>
+                      </Box>
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Paper>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            px: 3.5,
+            py: 2,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc',
+          }}
+        >
+          <Button onClick={() => setOpenForm(false)} color="inherit" sx={{ fontWeight: 600 }}>
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            startIcon={<SaveIcon />}
             sx={{
               px: 3,
-              py: 2,
-              borderTop: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'action.hover',
+              fontWeight: 700,
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': { transform: 'translateY(-1px)' },
             }}
           >
-            <Button onClick={() => setOpenForm(false)} color="inherit" sx={{ fontWeight: 600 }}>
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              startIcon={<SaveIcon />}
-              sx={{ px: 3, fontWeight: 700 }}
-            >
-              {isEditing ? 'Guardar Cambios' : 'Registrar Proveedor'}
-            </Button>
-          </DialogActions>
-        </form>
+            {isEditing ? 'Guardar Cambios' : 'Registrar Proveedor'}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Modal Dialog: Detalle de Proveedor */}
@@ -923,7 +1016,21 @@ export const ProveedoresScreen = () => {
         onClose={() => setOpenDetail(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '20px', overflow: 'hidden' } }}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: 'blur(8px)',
+              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(15, 23, 42, 0.45)',
+            },
+          },
+        }}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            overflow: 'hidden',
+            boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 24px 60px rgba(0,0,0,0.6)' : '0 24px 60px rgba(15, 23, 42, 0.2)',
+          },
+        }}
       >
         <DialogTitle
           sx={{
@@ -931,7 +1038,7 @@ export const ProveedoresScreen = () => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            bgcolor: 'action.hover',
+            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc',
             borderBottom: '1px solid',
             borderColor: 'divider',
           }}
@@ -951,7 +1058,7 @@ export const ProveedoresScreen = () => {
           </Box>
           <Chip label={selectedProveedor?.estado} size="small" color={selectedProveedor?.estado === 'Activo' ? 'success' : 'default'} sx={{ fontWeight: 700 }} />
         </DialogTitle>
-        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedProveedor && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
               <Box>
@@ -965,37 +1072,37 @@ export const ProveedoresScreen = () => {
 
               <Paper variant="outlined" sx={{ p: 2, borderRadius: '12px' }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Contacto Comercial</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedProveedor.contacto}</Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Teléfono</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedProveedor.telefono}</Typography>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Correo Electrónico</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedProveedor.email}</Typography>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Domicilio Fiscal Registrado</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>
                       {selectedProveedor.calle} {selectedProveedor.altura}, {selectedProveedor.localidad}, {selectedProveedor.provincia}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Insumos y Materias Primas Provistas</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>
                       {selectedProveedor.insumosPrincipales}
                     </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Calificación de Calidad</Typography>
                     <Box sx={{ mt: 0.5 }}>
                       <Chip label={selectedProveedor.calificacion} size="small" color="info" sx={{ fontWeight: 700 }} />
                     </Box>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Estado en Sistema</Typography>
                     <Box sx={{ mt: 0.5 }}>
                       <Chip label={selectedProveedor.estado} size="small" color={selectedProveedor.estado === 'Activo' ? 'success' : 'default'} sx={{ fontWeight: 700 }} />
@@ -1006,7 +1113,7 @@ export const ProveedoresScreen = () => {
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: (theme) => theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc' }}>
           <Button onClick={() => setOpenDetail(false)} variant="contained" color="primary" sx={{ fontWeight: 700 }}>
             Cerrar
           </Button>
@@ -1019,9 +1126,23 @@ export const ProveedoresScreen = () => {
         onClose={() => setOpenDelete(false)}
         maxWidth="xs"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '16px', overflow: 'hidden' } }}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: 'blur(8px)',
+              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(15, 23, 42, 0.45)',
+            },
+          },
+        }}
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            overflow: 'hidden',
+            boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 24px 60px rgba(0,0,0,0.6)' : '0 24px 60px rgba(15, 23, 42, 0.2)',
+          },
+        }}
       >
-        <DialogTitle sx={{ p: 2.5, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <DialogTitle sx={{ p: 2.5, bgcolor: (theme) => theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'error.main', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <WarningAmberIcon fontSize="small" />
           </Box>
@@ -1029,14 +1150,14 @@ export const ProveedoresScreen = () => {
             Confirmar Baja de Proveedor
           </Typography>
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogContent sx={{ px: 3, pt: '24px !important', pb: 2 }}>
           <Typography variant="body2" color="text.secondary">
             ¿Está seguro de que desea dar de baja al proveedor{' '}
             <strong>{selectedProveedor?.razonSocial}</strong> (CUIT {selectedProveedor?.cuit})?
             Esta acción se reflejará en memoria inmediatamente.
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: (theme) => theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc' }}>
           <Button onClick={() => setOpenDelete(false)} color="inherit">
             Cancelar
           </Button>
