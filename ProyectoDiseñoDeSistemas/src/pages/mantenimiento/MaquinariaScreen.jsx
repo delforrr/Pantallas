@@ -555,6 +555,17 @@ export const MaquinariaScreen = () => {
         onClose={() => setOpenForm(false)}
         maxWidth="md"
         fullWidth
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: 'blur(8px)',
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? 'rgba(0, 0, 0, 0.7)'
+                  : 'rgba(15, 23, 42, 0.45)',
+            },
+          },
+        }}
         PaperProps={{
           component: 'form',
           onSubmit: handleSaveForm,
@@ -574,7 +585,8 @@ export const MaquinariaScreen = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            bgcolor: 'action.hover',
+            bgcolor: (theme) =>
+              theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc',
             borderBottom: '1px solid',
             borderColor: 'divider',
           }}
@@ -910,6 +922,17 @@ export const MaquinariaScreen = () => {
         onClose={() => setOpenDetail(false)}
         maxWidth="sm"
         fullWidth
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: 'blur(8px)',
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? 'rgba(0, 0, 0, 0.7)'
+                  : 'rgba(15, 23, 42, 0.45)',
+            },
+          },
+        }}
         PaperProps={{ sx: { borderRadius: '20px', overflow: 'hidden' } }}
       >
         <DialogTitle
@@ -918,7 +941,8 @@ export const MaquinariaScreen = () => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            bgcolor: 'action.hover',
+            bgcolor: (theme) =>
+              theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc',
             borderBottom: '1px solid',
             borderColor: 'divider',
           }}
@@ -1023,6 +1047,17 @@ export const MaquinariaScreen = () => {
         onClose={() => setOpenQuickOrder(false)}
         maxWidth="sm"
         fullWidth
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: 'blur(8px)',
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? 'rgba(0, 0, 0, 0.7)'
+                  : 'rgba(15, 23, 42, 0.45)',
+            },
+          },
+        }}
         PaperProps={{
           component: 'form',
           onSubmit: (e) => {
@@ -1032,7 +1067,18 @@ export const MaquinariaScreen = () => {
           sx: { borderRadius: '20px', overflow: 'hidden' },
         }}
       >
-        <DialogTitle sx={{ p: 2.5, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <DialogTitle
+          sx={{
+            p: 2.5,
+            bgcolor: (theme) =>
+              theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ width: 38, height: 38, borderRadius: '10px', bgcolor: 'warning.main', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <BuildIcon fontSize="small" />
@@ -1160,9 +1206,31 @@ export const MaquinariaScreen = () => {
         onClose={() => setOpenDelete(false)}
         maxWidth="xs"
         fullWidth
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: 'blur(8px)',
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? 'rgba(0, 0, 0, 0.7)'
+                  : 'rgba(15, 23, 42, 0.45)',
+            },
+          },
+        }}
         PaperProps={{ sx: { borderRadius: '16px', overflow: 'hidden' } }}
       >
-        <DialogTitle sx={{ p: 2.5, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <DialogTitle
+          sx={{
+            p: 2.5,
+            bgcolor: (theme) =>
+              theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+          }}
+        >
           <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'error.main', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <WarningAmberIcon fontSize="small" />
           </Box>

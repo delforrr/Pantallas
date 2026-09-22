@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo } from "react";
 import {
   Box,
   Paper,
@@ -26,43 +26,47 @@ import {
   Grid,
   ToggleButtonGroup,
   ToggleButton,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import SendIcon from '@mui/icons-material/Send';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import ViewListIcon from '@mui/icons-material/ViewList';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
-import CloseIcon from '@mui/icons-material/Close';
-import BusinessIcon from '@mui/icons-material/Business';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
-import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import PaymentOutlinedIcon from '@mui/icons-material/PaymentOutlined';
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import AddIcon from "@mui/icons-material/Add";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import SendIcon from "@mui/icons-material/Send";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import ViewListIcon from "@mui/icons-material/ViewList";
+import ViewModuleIcon from "@mui/icons-material/ViewModule";
+import CloseIcon from "@mui/icons-material/Close";
+import BusinessIcon from "@mui/icons-material/Business";
+import EventNoteIcon from "@mui/icons-material/EventNote";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
 
-import { INITIAL_ORDENES_COMPRA, INITIAL_PROVEEDORES, INITIAL_PRESUPUESTOS } from './mockData';
-import { DetalleItemsTable } from '../../components/compras';
+import {
+  INITIAL_ORDENES_COMPRA,
+  INITIAL_PROVEEDORES,
+  INITIAL_PRESUPUESTOS,
+} from "./mockData";
+import { DetalleItemsTable } from "../../components/compras";
 
 const STATUS_COLOR_MAP = {
-  Cumplida: 'success',
-  Enviada: 'info',
-  'Recibida Parcial': 'warning',
-  Pendiente: 'warning',
-  Cancelada: 'error',
+  Cumplida: "success",
+  Enviada: "info",
+  "Recibida Parcial": "warning",
+  Pendiente: "warning",
+  Cancelada: "error",
 };
 
 export const OrdenCompraScreen = () => {
   const [ordenes, setOrdenes] = useState(INITIAL_ORDENES_COMPRA);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('TODOS');
-  const [viewMode, setViewMode] = useState('table');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("TODOS");
+  const [viewMode, setViewMode] = useState("table");
 
   // Modales
   const [openDetail, setOpenDetail] = useState(false);
@@ -76,17 +80,17 @@ export const OrdenCompraScreen = () => {
   // Form State
   const initialFormState = {
     proveedorId: 1,
-    presupuestoId: 'PP-2026-001',
-    fechaEmision: new Date().toISOString().split('T')[0],
-    fechaEntregaEstimada: '',
-    formaPago: 'Transferencia Bancaria a 30 días',
-    estado: 'Pendiente',
-    observaciones: '',
+    presupuestoId: "PP-2026-001",
+    fechaEmision: new Date().toISOString().split("T")[0],
+    fechaEntregaEstimada: "",
+    formaPago: "Transferencia Bancaria a 30 días",
+    estado: "Pendiente",
+    observaciones: "",
     items: [
       {
         id: 1,
-        materiaPrima: 'Harina 0000 Especial Pastas (bolsa 50kg)',
-        unidad: 'Bolsas',
+        materiaPrima: "Harina 0000 Especial Pastas (bolsa 50kg)",
+        unidad: "Bolsas",
         cantidad: 80,
         precioUnitario: 32000,
         subtotal: 2560000,
@@ -101,9 +105,11 @@ export const OrdenCompraScreen = () => {
       const matchesSearch =
         o.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         o.proveedorNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (o.presupuestoId && o.presupuestoId.toLowerCase().includes(searchTerm.toLowerCase()));
+        (o.presupuestoId &&
+          o.presupuestoId.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      const matchesStatus = statusFilter === 'TODOS' || o.estado === statusFilter;
+      const matchesStatus =
+        statusFilter === "TODOS" || o.estado === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
@@ -112,9 +118,11 @@ export const OrdenCompraScreen = () => {
   // Métricas
   const stats = useMemo(() => {
     const total = ordenes.length;
-    const enviadas = ordenes.filter((o) => o.estado === 'Enviada').length;
-    const cumplidas = ordenes.filter((o) => o.estado === 'Cumplida').length;
-    const pendientes = ordenes.filter((o) => o.estado === 'Pendiente' || o.estado === 'Recibida Parcial').length;
+    const enviadas = ordenes.filter((o) => o.estado === "Enviada").length;
+    const cumplidas = ordenes.filter((o) => o.estado === "Cumplida").length;
+    const pendientes = ordenes.filter(
+      (o) => o.estado === "Pendiente" || o.estado === "Recibida Parcial",
+    ).length;
     return { total, enviadas, cumplidas, pendientes };
   }, [ordenes]);
 
@@ -127,7 +135,9 @@ export const OrdenCompraScreen = () => {
   const handleOpenCreate = () => {
     setIsEditing(false);
     // Cargar ítems del presupuesto inicial por defecto si existe
-    const defaultPresupuesto = INITIAL_PRESUPUESTOS.find((p) => p.id === 'PP-2026-001');
+    const defaultPresupuesto = INITIAL_PRESUPUESTOS.find(
+      (p) => p.id === "PP-2026-001",
+    );
     setFormData({
       ...initialFormState,
       items: defaultPresupuesto?.items
@@ -142,22 +152,25 @@ export const OrdenCompraScreen = () => {
     setSelectedOrden(orden);
     setFormData({
       proveedorId: orden.proveedorId,
-      presupuestoId: orden.presupuestoId || '',
+      presupuestoId: orden.presupuestoId || "",
       fechaEmision: orden.fechaEmision,
       fechaEntregaEstimada: orden.fechaEntregaEstimada,
       formaPago: orden.formaPago,
       estado: orden.estado,
-      observaciones: orden.observaciones || '',
-      items: orden.items && orden.items.length > 0
-        ? orden.items.map((it, idx) => ({ ...it, id: it.id || idx + 1 }))
-        : [...initialFormState.items],
+      observaciones: orden.observaciones || "",
+      items:
+        orden.items && orden.items.length > 0
+          ? orden.items.map((it, idx) => ({ ...it, id: it.id || idx + 1 }))
+          : [...initialFormState.items],
     });
     setOpenForm(true);
   };
 
   const handleImportarPresupuesto = () => {
     if (!formData.presupuestoId) return;
-    const p = INITIAL_PRESUPUESTOS.find((item) => item.id === formData.presupuestoId);
+    const p = INITIAL_PRESUPUESTOS.find(
+      (item) => item.id === formData.presupuestoId,
+    );
     if (p && p.items && p.items.length > 0) {
       setFormData((prev) => ({
         ...prev,
@@ -174,7 +187,7 @@ export const OrdenCompraScreen = () => {
 
   const handleCambiarEstado = (id, nuevoEstado) => {
     setOrdenes((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, estado: nuevoEstado } : o))
+      prev.map((o) => (o.id === id ? { ...o, estado: nuevoEstado } : o)),
     );
     if (selectedOrden?.id === id) {
       setSelectedOrden((prev) => ({ ...prev, estado: nuevoEstado }));
@@ -184,11 +197,16 @@ export const OrdenCompraScreen = () => {
   const handleSaveForm = (e) => {
     e.preventDefault();
     if (!formData.items || formData.items.length === 0) {
-      alert('Debe incluir al menos un insumo en la orden de compra.');
+      alert("Debe incluir al menos un insumo en la orden de compra.");
       return;
     }
-    const prov = INITIAL_PROVEEDORES.find((p) => p.id === Number(formData.proveedorId));
-    const total = formData.items.reduce((acc, it) => acc + (Number(it.subtotal) || 0), 0);
+    const prov = INITIAL_PROVEEDORES.find(
+      (p) => p.id === Number(formData.proveedorId),
+    );
+    const total = formData.items.reduce(
+      (acc, it) => acc + (Number(it.subtotal) || 0),
+      0,
+    );
 
     if (isEditing && selectedOrden) {
       setOrdenes((prev) =>
@@ -197,7 +215,7 @@ export const OrdenCompraScreen = () => {
             ? {
                 ...o,
                 proveedorId: prov?.id || 1,
-                proveedorNombre: prov?.razonSocial || 'Proveedor',
+                proveedorNombre: prov?.razonSocial || "Proveedor",
                 presupuestoId: formData.presupuestoId || null,
                 fechaEmision: formData.fechaEmision,
                 fechaEntregaEstimada: formData.fechaEntregaEstimada,
@@ -207,18 +225,18 @@ export const OrdenCompraScreen = () => {
                 items: formData.items,
                 total,
               }
-            : o
-        )
+            : o,
+        ),
       );
     } else {
       const nextNum = 100 + ordenes.length + 1;
       const newOrden = {
         id: `OC-2026-0${nextNum}`,
         proveedorId: prov?.id || 1,
-        proveedorNombre: prov?.razonSocial || 'Proveedor',
+        proveedorNombre: prov?.razonSocial || "Proveedor",
         presupuestoId: formData.presupuestoId || null,
         fechaEmision: formData.fechaEmision,
-        fechaEntregaEstimada: formData.fechaEntregaEstimada || '2026-03-25',
+        fechaEntregaEstimada: formData.fechaEntregaEstimada || "2026-03-25",
         formaPago: formData.formaPago,
         estado: formData.estado,
         observaciones: formData.observaciones,
@@ -241,11 +259,11 @@ export const OrdenCompraScreen = () => {
       {/* Tarjetas de Métricas Rápidas - Responsivas con igual ancho apiladas */}
       <Box
         sx={{
-          display: 'grid',
+          display: "grid",
           gridTemplateColumns: {
-            xs: '1fr',
-            sm: 'repeat(2, 1fr)',
-            md: 'repeat(4, 1fr)',
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(4, 1fr)",
           },
           gap: 2,
           mb: 3,
@@ -255,21 +273,34 @@ export const OrdenCompraScreen = () => {
           elevation={1}
           sx={{
             p: 2,
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
+            borderRadius: "14px",
+            border: "1px solid",
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
             gap: 1.5,
-            width: '100%',
-            height: '100%',
+            width: "100%",
+            height: "100%",
           }}
         >
-          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'primary.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: "10px",
+              bgcolor: "primary.main",
+              color: "white",
+              display: "flex",
+              flexShrink: 0,
+            }}
+          >
             <ShoppingCartIcon />
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 600, display: "block" }}
+            >
               Total Órdenes
             </Typography>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
@@ -282,24 +313,40 @@ export const OrdenCompraScreen = () => {
           elevation={1}
           sx={{
             p: 2,
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
+            borderRadius: "14px",
+            border: "1px solid",
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
             gap: 1.5,
-            width: '100%',
-            height: '100%',
+            width: "100%",
+            height: "100%",
           }}
         >
-          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'info.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: "10px",
+              bgcolor: "info.main",
+              color: "white",
+              display: "flex",
+              flexShrink: 0,
+            }}
+          >
             <LocalShippingIcon />
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 600, display: "block" }}
+            >
               En Tránsito / Enviadas
             </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: 'info.main' }}>
+            <Typography
+              variant="h5"
+              sx={{ fontWeight: 700, color: "info.main" }}
+            >
               {stats.enviadas}
             </Typography>
           </Box>
@@ -309,24 +356,40 @@ export const OrdenCompraScreen = () => {
           elevation={1}
           sx={{
             p: 2,
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
+            borderRadius: "14px",
+            border: "1px solid",
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
             gap: 1.5,
-            width: '100%',
-            height: '100%',
+            width: "100%",
+            height: "100%",
           }}
         >
-          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'success.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: "10px",
+              bgcolor: "success.main",
+              color: "white",
+              display: "flex",
+              flexShrink: 0,
+            }}
+          >
             <AssignmentTurnedInIcon />
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 600, display: "block" }}
+            >
               Cumplidas / En Planta
             </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
+            <Typography
+              variant="h5"
+              sx={{ fontWeight: 700, color: "success.main" }}
+            >
               {stats.cumplidas}
             </Typography>
           </Box>
@@ -336,24 +399,40 @@ export const OrdenCompraScreen = () => {
           elevation={1}
           sx={{
             p: 2,
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
+            borderRadius: "14px",
+            border: "1px solid",
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
             gap: 1.5,
-            width: '100%',
-            height: '100%',
+            width: "100%",
+            height: "100%",
           }}
         >
-          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'warning.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: "10px",
+              bgcolor: "warning.main",
+              color: "white",
+              display: "flex",
+              flexShrink: 0,
+            }}
+          >
             <WarningAmberIcon />
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 600, display: "block" }}
+            >
               Pendientes / Parciales
             </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.main' }}>
+            <Typography
+              variant="h5"
+              sx={{ fontWeight: 700, color: "warning.main" }}
+            >
               {stats.pendientes}
             </Typography>
           </Box>
@@ -363,15 +442,23 @@ export const OrdenCompraScreen = () => {
       {/* Barra de Filtros y Acción */}
       <Box
         sx={{
-          display: 'flex',
+          display: "flex",
           gap: 2,
           mb: 3,
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', flex: 1, minWidth: 260 }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            flexWrap: "wrap",
+            flex: 1,
+            minWidth: 260,
+          }}
+        >
           <TextField
             size="small"
             placeholder="Buscar por Nº Orden, Proveedor o Presupuesto..."
@@ -380,15 +467,35 @@ export const OrdenCompraScreen = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                  <SearchIcon
+                    fontSize="small"
+                    sx={{ color: "text.secondary" }}
+                  />
                 </InputAdornment>
               ),
             }}
-            sx={{ minWidth: { xs: '100%', sm: 300 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}
+            sx={{
+              minWidth: { xs: "100%", sm: 300 },
+              "& .MuiOutlinedInput-root": {
+                bgcolor: "background.paper",
+                borderRadius: "10px",
+              },
+            }}
           />
 
-          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
-            <InputLabel id="orden-status-filter-label">Estado de Orden</InputLabel>
+          <FormControl
+            size="small"
+            sx={{
+              minWidth: { xs: "100%", sm: 220, md: 240 },
+              "& .MuiOutlinedInput-root": {
+                bgcolor: "background.paper",
+                borderRadius: "10px",
+              },
+            }}
+          >
+            <InputLabel id="orden-status-filter-label">
+              Estado de Orden
+            </InputLabel>
             <Select
               labelId="orden-status-filter-label"
               value={statusFilter}
@@ -405,13 +512,13 @@ export const OrdenCompraScreen = () => {
           </FormControl>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
           <ToggleButtonGroup
             value={viewMode}
             exclusive
             onChange={(e, val) => val && setViewMode(val)}
             size="small"
-            sx={{ bgcolor: 'background.paper' }}
+            sx={{ bgcolor: "background.paper" }}
           >
             <ToggleButton value="table" aria-label="vista tabla">
               <Tooltip title="Vista Tabla">
@@ -430,7 +537,7 @@ export const OrdenCompraScreen = () => {
             color="primary"
             startIcon={<AddIcon />}
             onClick={handleOpenCreate}
-            sx={{ whiteSpace: 'nowrap' }}
+            sx={{ whiteSpace: "nowrap" }}
           >
             Nueva Orden de Compra
           </Button>
@@ -438,16 +545,16 @@ export const OrdenCompraScreen = () => {
       </Box>
 
       {/* Vista de Cuadrícula / Tarjetas Responsiva */}
-      {viewMode === 'grid' ? (
+      {viewMode === "grid" ? (
         filteredOrdenes.length === 0 ? (
           <Paper
             elevation={1}
             sx={{
               p: 6,
-              textAlign: 'center',
-              borderRadius: '16px',
-              border: '1px solid',
-              borderColor: 'divider',
+              textAlign: "center",
+              borderRadius: "16px",
+              border: "1px solid",
+              borderColor: "divider",
             }}
           >
             <Typography variant="body1" color="text.secondary">
@@ -457,14 +564,14 @@ export const OrdenCompraScreen = () => {
         ) : (
           <Box
             sx={{
-              display: 'grid',
+              display: "grid",
               gridTemplateColumns: {
-                xs: '1fr',
-                sm: 'repeat(2, 1fr)',
-                lg: 'repeat(3, 1fr)',
+                xs: "1fr",
+                sm: "repeat(2, 1fr)",
+                lg: "repeat(3, 1fr)",
               },
               gap: 2.5,
-              alignItems: 'stretch',
+              alignItems: "stretch",
             }}
           >
             {filteredOrdenes.map((orden) => (
@@ -473,37 +580,52 @@ export const OrdenCompraScreen = () => {
                 elevation={1}
                 sx={{
                   p: 2.5,
-                  borderRadius: '16px',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  height: '100%',
-                  transition: 'box-shadow 0.2s ease-in-out',
-                  '&:hover': {
+                  borderRadius: "16px",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "100%",
+                  transition: "box-shadow 0.2s ease-in-out",
+                  "&:hover": {
                     boxShadow: 4,
                   },
                 }}
               >
                 {/* Cabecera de la Tarjeta */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 1.5,
+                  }}
+                >
                   <Chip
                     label={orden.id}
                     size="small"
                     variant="outlined"
                     color="primary"
-                    sx={{ fontWeight: 800, fontFamily: 'monospace' }}
+                    sx={{ fontWeight: 800, fontFamily: "monospace" }}
                   />
                   <Chip
                     label={orden.estado}
                     size="small"
-                    color={STATUS_COLOR_MAP[orden.estado] || 'default'}
-                    sx={{ fontWeight: 700, fontSize: '0.72rem' }}
+                    color={STATUS_COLOR_MAP[orden.estado] || "default"}
+                    sx={{ fontWeight: 700, fontSize: "0.72rem" }}
                   />
                 </Box>
 
                 {/* Proveedor y Presupuesto Referencia */}
-                <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '1.05rem', lineHeight: 1.3, mb: 0.5 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 800,
+                    fontSize: "1.05rem",
+                    lineHeight: 1.3,
+                    mb: 0.5,
+                  }}
+                >
                   {orden.proveedorNombre}
                 </Typography>
                 <Box sx={{ mb: 1.5 }}>
@@ -512,7 +634,7 @@ export const OrdenCompraScreen = () => {
                       label={`Ref: ${orden.presupuestoId}`}
                       size="small"
                       variant="outlined"
-                      sx={{ fontFamily: 'monospace', fontSize: '0.72rem' }}
+                      sx={{ fontFamily: "monospace", fontSize: "0.72rem" }}
                     />
                   ) : (
                     <Typography variant="caption" color="text.secondary">
@@ -526,19 +648,25 @@ export const OrdenCompraScreen = () => {
                   variant="outlined"
                   sx={{
                     p: 1.5,
-                    borderRadius: '10px',
-                    bgcolor: 'action.hover',
+                    borderRadius: "10px",
+                    bgcolor: "action.hover",
                     mb: 2,
                   }}
                 >
-                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block' }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ fontWeight: 700, display: "block" }}
+                  >
                     MATERIA PRIMA SOLICITADA:
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600, mt: 0.3 }}>
-                    {orden.items[0]?.materiaPrima || 'Insumos varios'}
+                    {orden.items[0]?.materiaPrima || "Insumos varios"}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Cantidad: {orden.items[0]?.cantidad} {orden.items[0]?.unidad} · Unit: ${orden.items[0]?.precioUnitario?.toLocaleString('es-AR')}
+                    Cantidad: {orden.items[0]?.cantidad}{" "}
+                    {orden.items[0]?.unidad} · Unit: $
+                    {orden.items[0]?.precioUnitario?.toLocaleString("es-AR")}
                   </Typography>
                 </Paper>
 
@@ -546,34 +674,52 @@ export const OrdenCompraScreen = () => {
                 <Box
                   sx={{
                     p: 1.5,
-                    borderRadius: '10px',
-                    bgcolor: 'primary.50',
-                    border: '1px dashed',
-                    borderColor: 'primary.200',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                    borderRadius: "10px",
+                    bgcolor: "primary.50",
+                    border: "1px dashed",
+                    borderColor: "primary.200",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
                     mb: 2,
                   }}
                 >
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ fontWeight: 700, color: "text.secondary" }}
+                  >
                     TOTAL DE LA ORDEN
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main' }}>
-                    ${orden.total.toLocaleString('es-AR')}
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 800, color: "primary.main" }}
+                  >
+                    ${orden.total.toLocaleString("es-AR")}
                   </Typography>
                 </Box>
 
                 {/* Fechas y Condiciones */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                    <CalendarMonthOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 0.5,
+                    mb: 2,
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                    <CalendarMonthOutlinedIcon
+                      sx={{ fontSize: 16, color: "text.secondary" }}
+                    />
                     <Typography variant="caption" color="text.secondary">
-                      Emisión: {orden.fechaEmision} · Entrega: <strong>{orden.fechaEntregaEstimada}</strong>
+                      Emisión: {orden.fechaEmision} · Entrega:{" "}
+                      <strong>{orden.fechaEntregaEstimada}</strong>
                     </Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                    <PaymentOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                    <PaymentOutlinedIcon
+                      sx={{ fontSize: 16, color: "text.secondary" }}
+                    />
                     <Typography variant="caption" color="text.secondary">
                       Pago: <strong>{orden.formaPago}</strong>
                     </Typography>
@@ -583,34 +729,39 @@ export const OrdenCompraScreen = () => {
                 {/* Acciones al Pie fijadas abajo */}
                 <Box
                   sx={{
-                    mt: 'auto',
+                    mt: "auto",
                     pt: 1.5,
-                    borderTop: '1px solid',
-                    borderColor: 'divider',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                    borderTop: "1px solid",
+                    borderColor: "divider",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
                   }}
                 >
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    {orden.estado === 'Pendiente' && (
+                  <Box sx={{ display: "flex", gap: 0.5 }}>
+                    {orden.estado === "Pendiente" && (
                       <Tooltip title="Marcar como Enviada al Proveedor">
                         <IconButton
                           size="small"
-                          onClick={() => handleCambiarEstado(orden.id, 'Enviada')}
-                          sx={{ color: 'info.main', bgcolor: 'info.50' }}
+                          onClick={() =>
+                            handleCambiarEstado(orden.id, "Enviada")
+                          }
+                          sx={{ color: "info.main", bgcolor: "info.50" }}
                         >
                           <SendIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                     )}
 
-                    {(orden.estado === 'Enviada' || orden.estado === 'Recibida Parcial') && (
+                    {(orden.estado === "Enviada" ||
+                      orden.estado === "Recibida Parcial") && (
                       <Tooltip title="Conformar recepción total (Cumplida)">
                         <IconButton
                           size="small"
-                          onClick={() => handleCambiarEstado(orden.id, 'Cumplida')}
-                          sx={{ color: 'success.main', bgcolor: 'success.50' }}
+                          onClick={() =>
+                            handleCambiarEstado(orden.id, "Cumplida")
+                          }
+                          sx={{ color: "success.main", bgcolor: "success.50" }}
                         >
                           <CheckCircleIcon fontSize="small" />
                         </IconButton>
@@ -618,19 +769,31 @@ export const OrdenCompraScreen = () => {
                     )}
                   </Box>
 
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  <Box sx={{ display: "flex", gap: 0.5 }}>
                     <Tooltip title="Ver desglose y materias primas">
-                      <IconButton size="small" onClick={() => handleOpenDetail(orden)} sx={{ color: 'text.secondary' }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleOpenDetail(orden)}
+                        sx={{ color: "text.secondary" }}
+                      >
                         <VisibilityOutlinedIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Editar orden">
-                      <IconButton size="small" onClick={() => handleOpenEdit(orden)} sx={{ color: 'primary.main' }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleOpenEdit(orden)}
+                        sx={{ color: "primary.main" }}
+                      >
                         <EditOutlinedIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Cancelar orden">
-                      <IconButton size="small" onClick={() => handleOpenDelete(orden)} sx={{ color: 'error.main' }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleOpenDelete(orden)}
+                        sx={{ color: "error.main" }}
+                      >
                         <DeleteOutlineIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -646,19 +809,23 @@ export const OrdenCompraScreen = () => {
           component={Paper}
           elevation={1}
           sx={{
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            overflow: 'hidden',
+            borderRadius: "14px",
+            border: "1px solid",
+            borderColor: "divider",
+            overflow: "hidden",
           }}
         >
           <Table sx={{ minWidth: 720 }}>
-            <TableHead sx={{ bgcolor: 'action.hover' }}>
+            <TableHead sx={{ bgcolor: "action.hover" }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>Nº Orden</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Proveedor</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Presupuesto Vinculado</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Emisión / Entrega</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>
+                  Presupuesto Vinculado
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>
+                  Emisión / Entrega
+                </TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Condición Pago</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Total</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
@@ -670,20 +837,44 @@ export const OrdenCompraScreen = () => {
             <TableBody>
               {filteredOrdenes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
-                    <Typography variant="body2">No se encontraron órdenes de compra</Typography>
+                  <TableCell
+                    colSpan={8}
+                    align="center"
+                    sx={{ py: 6, color: "text.secondary" }}
+                  >
+                    <Typography variant="body2">
+                      No se encontraron órdenes de compra
+                    </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredOrdenes.map((row) => (
-                  <TableRow key={row.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell sx={{ fontWeight: 700, fontFamily: 'monospace', color: 'primary.main' }}>
+                  <TableRow
+                    key={row.id}
+                    hover
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontFamily: "monospace",
+                        color: "primary.main",
+                      }}
+                    >
                       {row.id}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>{row.proveedorNombre}</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      {row.proveedorNombre}
+                    </TableCell>
                     <TableCell>
                       {row.presupuestoId ? (
-                        <Chip label={row.presupuestoId} size="small" variant="outlined" color="primary" sx={{ fontFamily: 'monospace' }} />
+                        <Chip
+                          label={row.presupuestoId}
+                          size="small"
+                          variant="outlined"
+                          color="primary"
+                          sx={{ fontFamily: "monospace" }}
+                        />
                       ) : (
                         <Typography variant="caption" color="text.secondary">
                           Compra Directa Local
@@ -691,48 +882,64 @@ export const OrdenCompraScreen = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Typography variant="caption" sx={{ display: 'block', fontWeight: 600 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{ display: "block", fontWeight: 600 }}
+                      >
                         Emisión: {row.fechaEmision}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         Entrega: {row.fechaEntregaEstimada}
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>{row.formaPago}</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>${row.total.toLocaleString('es-AR')}</TableCell>
+                    <TableCell sx={{ fontSize: "0.8rem" }}>
+                      {row.formaPago}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      ${row.total.toLocaleString("es-AR")}
+                    </TableCell>
                     <TableCell>
                       <Chip
                         label={row.estado}
                         size="small"
-                        color={STATUS_COLOR_MAP[row.estado] || 'default'}
-                        sx={{ fontWeight: 600, fontSize: '0.72rem' }}
+                        color={STATUS_COLOR_MAP[row.estado] || "default"}
+                        sx={{ fontWeight: 600, fontSize: "0.72rem" }}
                       />
                     </TableCell>
                     <TableCell align="right">
                       <Tooltip title="Ver desglose y materias primas">
-                        <IconButton size="small" onClick={() => handleOpenDetail(row)} sx={{ color: 'text.secondary' }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenDetail(row)}
+                          sx={{ color: "text.secondary" }}
+                        >
                           <VisibilityOutlinedIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
 
-                      {row.estado === 'Pendiente' && (
+                      {row.estado === "Pendiente" && (
                         <Tooltip title="Marcar como Enviada al Proveedor">
                           <IconButton
                             size="small"
-                            onClick={() => handleCambiarEstado(row.id, 'Enviada')}
-                            sx={{ color: 'info.main' }}
+                            onClick={() =>
+                              handleCambiarEstado(row.id, "Enviada")
+                            }
+                            sx={{ color: "info.main" }}
                           >
                             <SendIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       )}
 
-                      {(row.estado === 'Enviada' || row.estado === 'Recibida Parcial') && (
+                      {(row.estado === "Enviada" ||
+                        row.estado === "Recibida Parcial") && (
                         <Tooltip title="Conformar recepción total (Cumplida)">
                           <IconButton
                             size="small"
-                            onClick={() => handleCambiarEstado(row.id, 'Cumplida')}
-                            sx={{ color: 'success.main' }}
+                            onClick={() =>
+                              handleCambiarEstado(row.id, "Cumplida")
+                            }
+                            sx={{ color: "success.main" }}
                           >
                             <CheckCircleIcon fontSize="small" />
                           </IconButton>
@@ -740,12 +947,20 @@ export const OrdenCompraScreen = () => {
                       )}
 
                       <Tooltip title="Editar orden">
-                        <IconButton size="small" onClick={() => handleOpenEdit(row)} sx={{ color: 'primary.main' }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenEdit(row)}
+                          sx={{ color: "primary.main" }}
+                        >
                           <EditOutlinedIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Cancelar orden">
-                        <IconButton size="small" onClick={() => handleOpenDelete(row)} sx={{ color: 'error.main' }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenDelete(row)}
+                          sx={{ color: "error.main" }}
+                        >
                           <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -764,43 +979,61 @@ export const OrdenCompraScreen = () => {
         onClose={() => setOpenDetail(false)}
         maxWidth="md"
         fullWidth
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(8px)",
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(0, 0, 0, 0.7)"
+                  : "rgba(15, 23, 42, 0.45)",
+            },
+          },
+        }}
         PaperProps={{
           sx: {
-            borderRadius: '20px',
-            overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            borderRadius: "20px",
+            overflow: "hidden",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 24px 60px rgba(0,0,0,0.6)"
+                : "0 24px 60px rgba(15, 23, 42, 0.2)",
           },
         }}
       >
         <DialogTitle
           sx={{
             p: 2.5,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            bgcolor: 'action.hover',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
+            borderBottom: "1px solid",
+            borderColor: "divider",
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Box
               sx={{
                 width: 42,
                 height: 42,
-                borderRadius: '12px',
-                bgcolor: 'primary.main',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                borderRadius: "12px",
+                bgcolor: "primary.main",
+                color: "white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 boxShadow: 2,
               }}
             >
               <ShoppingCartIcon />
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 800, lineHeight: 1.2 }}
+              >
                 Orden de Compra #{selectedOrden?.id}
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -808,11 +1041,11 @@ export const OrdenCompraScreen = () => {
               </Typography>
             </Box>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Chip
               label={selectedOrden?.estado}
               size="small"
-              color={STATUS_COLOR_MAP[selectedOrden?.estado] || 'default'}
+              color={STATUS_COLOR_MAP[selectedOrden?.estado] || "default"}
               sx={{ fontWeight: 700 }}
             />
             <IconButton onClick={() => setOpenDetail(false)} size="small">
@@ -821,38 +1054,75 @@ export const OrdenCompraScreen = () => {
           </Box>
         </DialogTitle>
 
-        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        <DialogContent
+          sx={{
+            px: 3.5,
+            pt: "24px !important",
+            pb: 2.5,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2.5,
+          }}
+        >
           {selectedOrden && (
             <>
               {/* Información de Emisión */}
-              <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2.5,
+                  borderRadius: "14px",
+                  bgcolor: "background.paper",
+                }}
+              >
+                <Box
+                  sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
+                >
+                  <BusinessIcon
+                    fontSize="small"
+                    sx={{ color: "primary.main" }}
+                  />
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.02em",
+                    }}
+                  >
                     Condiciones Comerciales y Logística
                   </Typography>
                 </Box>
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary">Proveedor Asignado</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Proveedor Asignado
+                    </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 700 }}>
                       {selectedOrden.proveedorNombre}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Presupuesto Base: {selectedOrden.presupuestoId || 'Compra Directa Inmediata'}
+                      Presupuesto Base:{" "}
+                      {selectedOrden.presupuestoId ||
+                        "Compra Directa Inmediata"}
                     </Typography>
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary">Condición de Pago Acordada</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Condición de Pago Acordada
+                    </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {selectedOrden.formaPago}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Fecha Estimada de Entrega: <strong>{selectedOrden.fechaEntregaEstimada}</strong>
+                      Fecha Estimada de Entrega:{" "}
+                      <strong>{selectedOrden.fechaEntregaEstimada}</strong>
                     </Typography>
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary">Fecha de Emisión</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Fecha de Emisión
+                    </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {selectedOrden.fechaEmision}
                     </Typography>
@@ -861,40 +1131,81 @@ export const OrdenCompraScreen = () => {
               </Paper>
 
               {/* Sección 2: Desglose de Insumos */}
-              <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <ShoppingCartOutlinedIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2.5,
+                  borderRadius: "14px",
+                  bgcolor: "background.paper",
+                }}
+              >
+                <Box
+                  sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
+                >
+                  <ShoppingCartOutlinedIcon
+                    fontSize="small"
+                    sx={{ color: "primary.main" }}
+                  />
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ fontWeight: 700, textTransform: "uppercase" }}
+                  >
                     Insumos Solicitados para Producción
                   </Typography>
                 </Box>
-                <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px' }}>
+                <TableContainer
+                  component={Paper}
+                  variant="outlined"
+                  sx={{ borderRadius: "10px" }}
+                >
                   <Table size="small">
-                    <TableHead sx={{ bgcolor: 'action.hover' }}>
+                    <TableHead sx={{ bgcolor: "action.hover" }}>
                       <TableRow>
-                        <TableCell sx={{ fontWeight: 700 }}>Materia Prima / Insumo</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>
+                          Materia Prima / Insumo
+                        </TableCell>
                         <TableCell sx={{ fontWeight: 700 }}>Cantidad</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>Precio Unitario</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 700 }}>Subtotal</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>
+                          Precio Unitario
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 700 }}>
+                          Subtotal
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {selectedOrden.items.map((item, idx) => (
                         <TableRow key={idx}>
-                          <TableCell sx={{ fontWeight: 600 }}>{item.materiaPrima}</TableCell>
-                          <TableCell>{item.cantidad} {item.unidad}</TableCell>
-                          <TableCell>${item.precioUnitario.toLocaleString('es-AR')}</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>
+                            {item.materiaPrima}
+                          </TableCell>
+                          <TableCell>
+                            {item.cantidad} {item.unidad}
+                          </TableCell>
+                          <TableCell>
+                            ${item.precioUnitario.toLocaleString("es-AR")}
+                          </TableCell>
                           <TableCell align="right" sx={{ fontWeight: 700 }}>
-                            ${item.subtotal.toLocaleString('es-AR')}
+                            ${item.subtotal.toLocaleString("es-AR")}
                           </TableCell>
                         </TableRow>
                       ))}
-                      <TableRow sx={{ bgcolor: 'action.hover' }}>
-                        <TableCell colSpan={3} sx={{ fontWeight: 700, textAlign: 'right' }}>
+                      <TableRow sx={{ bgcolor: "action.hover" }}>
+                        <TableCell
+                          colSpan={3}
+                          sx={{ fontWeight: 700, textAlign: "right" }}
+                        >
                           TOTAL DE LA ORDEN:
                         </TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 800, color: 'primary.main', fontSize: '1.1rem' }}>
-                          ${selectedOrden.total.toLocaleString('es-AR')}
+                        <TableCell
+                          align="right"
+                          sx={{
+                            fontWeight: 800,
+                            color: "primary.main",
+                            fontSize: "1.1rem",
+                          }}
+                        >
+                          ${selectedOrden.total.toLocaleString("es-AR")}
                         </TableCell>
                       </TableRow>
                     </TableBody>
@@ -903,8 +1214,20 @@ export const OrdenCompraScreen = () => {
               </Paper>
 
               {selectedOrden.observaciones && (
-                <Box sx={{ p: 2, bgcolor: 'action.hover', borderRadius: '12px', border: '1px solid', borderColor: 'divider' }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block' }}>
+                <Box
+                  sx={{
+                    p: 2,
+                    bgcolor: "action.hover",
+                    borderRadius: "12px",
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ fontWeight: 700, display: "block" }}
+                  >
                     Instrucciones de Recepción y Control en Planta:
                   </Typography>
                   <Typography variant="body2" sx={{ mt: 0.5 }}>
@@ -915,10 +1238,18 @@ export const OrdenCompraScreen = () => {
             </>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2, bgcolor: 'action.hover', borderTop: '1px solid', borderColor: 'divider' }}>
-          {selectedOrden?.estado === 'Pendiente' && (
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            bgcolor: "action.hover",
+            borderTop: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          {selectedOrden?.estado === "Pendiente" && (
             <Button
-              onClick={() => handleCambiarEstado(selectedOrden.id, 'Enviada')}
+              onClick={() => handleCambiarEstado(selectedOrden.id, "Enviada")}
               variant="contained"
               color="info"
               startIcon={<SendIcon />}
@@ -926,9 +1257,10 @@ export const OrdenCompraScreen = () => {
               Enviar al Proveedor
             </Button>
           )}
-          {(selectedOrden?.estado === 'Enviada' || selectedOrden?.estado === 'Recibida Parcial') && (
+          {(selectedOrden?.estado === "Enviada" ||
+            selectedOrden?.estado === "Recibida Parcial") && (
             <Button
-              onClick={() => handleCambiarEstado(selectedOrden.id, 'Cumplida')}
+              onClick={() => handleCambiarEstado(selectedOrden.id, "Cumplida")}
               variant="contained"
               color="success"
               startIcon={<CheckCircleIcon />}
@@ -948,52 +1280,70 @@ export const OrdenCompraScreen = () => {
         onClose={() => setOpenForm(false)}
         maxWidth="lg"
         fullWidth
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(8px)",
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(0, 0, 0, 0.7)"
+                  : "rgba(15, 23, 42, 0.45)",
+            },
+          },
+        }}
         PaperProps={{
-          component: 'form',
+          component: "form",
           onSubmit: handleSaveForm,
           sx: {
-            borderRadius: '20px',
-            overflow: 'hidden',
-            boxShadow: '0 24px 60px rgba(0,0,0,0.45)',
-            maxHeight: '92vh',
-            display: 'flex',
-            flexDirection: 'column',
+            borderRadius: "20px",
+            overflow: "hidden",
+            boxShadow: "0 24px 60px rgba(0,0,0,0.45)",
+            maxHeight: "92vh",
+            display: "flex",
+            flexDirection: "column",
           },
         }}
       >
         <DialogTitle
           sx={{
             p: 2.5,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            bgcolor: 'action.hover',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
+            borderBottom: "1px solid",
+            borderColor: "divider",
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Box
               sx={{
                 width: 42,
                 height: 42,
-                borderRadius: '12px',
-                bgcolor: 'primary.main',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                borderRadius: "12px",
+                bgcolor: "primary.main",
+                color: "white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 boxShadow: 2,
               }}
             >
               <ShoppingCartIcon />
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-                {isEditing ? `Editar Orden · ${selectedOrden?.id}` : 'Crear Nueva Orden de Compra'}
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 800, lineHeight: 1.2 }}
+              >
+                {isEditing
+                  ? `Editar Orden · ${selectedOrden?.id}`
+                  : "Crear Nueva Orden de Compra"}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Emisión contractual para abastecimiento y control de ingresos a planta
+                Emisión contractual para abastecimiento y control de ingresos a
+                planta
               </Typography>
             </Box>
           </Box>
@@ -1002,12 +1352,32 @@ export const OrdenCompraScreen = () => {
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5, overflowY: 'auto' }}>
+        <DialogContent
+          sx={{
+            px: 3.5,
+            pt: "24px !important",
+            pb: 2.5,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2.5,
+            overflowY: "auto",
+          }}
+        >
           {/* 1. Proveedor y Presupuesto */}
-          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+          <Paper
+            variant="outlined"
+            sx={{ p: 2.5, borderRadius: "14px", bgcolor: "background.paper" }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+              <BusinessIcon fontSize="small" sx={{ color: "primary.main" }} />
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.02em",
+                }}
+              >
                 1. Proveedor y Presupuesto de Referencia
               </Typography>
             </Box>
@@ -1019,7 +1389,9 @@ export const OrdenCompraScreen = () => {
                     labelId="orden-proveedor-label"
                     value={formData.proveedorId}
                     label="Proveedor"
-                    onChange={(e) => setFormData({ ...formData, proveedorId: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, proveedorId: e.target.value })
+                    }
                   >
                     {INITIAL_PROVEEDORES.map((p) => (
                       <MenuItem key={p.id} value={p.id}>
@@ -1032,30 +1404,43 @@ export const OrdenCompraScreen = () => {
 
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth size="small">
-                  <InputLabel id="orden-presupuesto-label">Presupuesto Aprobado de Referencia</InputLabel>
+                  <InputLabel id="orden-presupuesto-label">
+                    Presupuesto Aprobado de Referencia
+                  </InputLabel>
                   <Select
                     labelId="orden-presupuesto-label"
                     value={formData.presupuestoId}
                     label="Presupuesto Aprobado de Referencia"
                     onChange={(e) => {
                       const val = e.target.value;
-                      const p = INITIAL_PRESUPUESTOS.find((item) => item.id === val);
+                      const p = INITIAL_PRESUPUESTOS.find(
+                        (item) => item.id === val,
+                      );
                       if (p && p.items && p.items.length > 0) {
                         setFormData((prev) => ({
                           ...prev,
                           presupuestoId: val,
                           proveedorId: p.proveedorId || prev.proveedorId,
-                          items: p.items.map((it, idx) => ({ ...it, id: idx + 1 })),
+                          items: p.items.map((it, idx) => ({
+                            ...it,
+                            id: idx + 1,
+                          })),
                         }));
                       } else {
-                        setFormData((prev) => ({ ...prev, presupuestoId: val }));
+                        setFormData((prev) => ({
+                          ...prev,
+                          presupuestoId: val,
+                        }));
                       }
                     }}
                   >
-                    <MenuItem value="">Sin presupuesto (Compra Directa Faltante)</MenuItem>
+                    <MenuItem value="">
+                      Sin presupuesto (Compra Directa Faltante)
+                    </MenuItem>
                     {INITIAL_PRESUPUESTOS.map((p) => (
                       <MenuItem key={p.id} value={p.id}>
-                        {p.id} - {p.proveedorNombre} (${p.total.toLocaleString('es-AR')})
+                        {p.id} - {p.proveedorNombre} ($
+                        {p.total.toLocaleString("es-AR")})
                       </MenuItem>
                     ))}
                   </Select>
@@ -1069,7 +1454,9 @@ export const OrdenCompraScreen = () => {
                   label="Forma de Pago Acordada"
                   placeholder="Ej: Transferencia 30 días, Contado contra entrega, Cuenta Corriente..."
                   value={formData.formaPago}
-                  onChange={(e) => setFormData({ ...formData, formaPago: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, formaPago: e.target.value })
+                  }
                   required
                 />
               </Grid>
@@ -1077,10 +1464,20 @@ export const OrdenCompraScreen = () => {
           </Paper>
 
           {/* 2. Plazos y Estado de Entrega */}
-          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <EventNoteIcon fontSize="small" sx={{ color: 'primary.main' }} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+          <Paper
+            variant="outlined"
+            sx={{ p: 2.5, borderRadius: "14px", bgcolor: "background.paper" }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+              <EventNoteIcon fontSize="small" sx={{ color: "primary.main" }} />
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.02em",
+                }}
+              >
                 2. Plazos y Estado de Entrega
               </Typography>
             </Box>
@@ -1092,7 +1489,9 @@ export const OrdenCompraScreen = () => {
                   type="date"
                   label="Fecha de Emisión"
                   value={formData.fechaEmision}
-                  onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, fechaEmision: e.target.value })
+                  }
                   slotProps={{ inputLabel: { shrink: true } }}
                   required
                 />
@@ -1104,56 +1503,124 @@ export const OrdenCompraScreen = () => {
                   type="date"
                   label="Fecha Estimada de Entrega"
                   value={formData.fechaEntregaEstimada}
-                  onChange={(e) => setFormData({ ...formData, fechaEntregaEstimada: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      fechaEntregaEstimada: e.target.value,
+                    })
+                  }
                   slotProps={{ inputLabel: { shrink: true } }}
                   required
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 4 }}>
                 <FormControl fullWidth size="small">
-                  <InputLabel id="orden-estado-label">Estado de la Orden</InputLabel>
+                  <InputLabel id="orden-estado-label">
+                    Estado de la Orden
+                  </InputLabel>
                   <Select
                     labelId="orden-estado-label"
                     value={formData.estado}
                     label="Estado de la Orden"
-                    onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, estado: e.target.value })
+                    }
                     renderValue={(val) => (
                       <Chip
                         label={val}
                         size="small"
-                        color={STATUS_COLOR_MAP[val] || 'default'}
-                        sx={{ height: 22, fontSize: '0.75rem', fontWeight: 700 }}
+                        color={STATUS_COLOR_MAP[val] || "default"}
+                        sx={{
+                          height: 22,
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                        }}
                       />
                     )}
                   >
                     <MenuItem value="Pendiente">
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'warning.main' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Pendiente</Typography>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                      >
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            bgcolor: "warning.main",
+                          }}
+                        />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          Pendiente
+                        </Typography>
                       </Box>
                     </MenuItem>
                     <MenuItem value="Enviada">
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'info.main' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Enviada al Proveedor</Typography>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                      >
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            bgcolor: "info.main",
+                          }}
+                        />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          Enviada al Proveedor
+                        </Typography>
                       </Box>
                     </MenuItem>
                     <MenuItem value="Recibida Parcial">
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'warning.light' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Recibida Parcial</Typography>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                      >
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            bgcolor: "warning.light",
+                          }}
+                        />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          Recibida Parcial
+                        </Typography>
                       </Box>
                     </MenuItem>
                     <MenuItem value="Cumplida">
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Cumplida (Recepción Total)</Typography>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                      >
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            bgcolor: "success.main",
+                          }}
+                        />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          Cumplida (Recepción Total)
+                        </Typography>
                       </Box>
                     </MenuItem>
                     <MenuItem value="Cancelada">
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'error.main' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Cancelada</Typography>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                      >
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            bgcolor: "error.main",
+                          }}
+                        />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          Cancelada
+                        </Typography>
                       </Box>
                     </MenuItem>
                   </Select>
@@ -1163,17 +1630,39 @@ export const OrdenCompraScreen = () => {
           </Paper>
 
           {/* 3. Detalle de Insumos Solicitados */}
-          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <ShoppingCartOutlinedIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+          <Paper
+            variant="outlined"
+            sx={{ p: 2.5, borderRadius: "14px", bgcolor: "background.paper" }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 2,
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <ShoppingCartOutlinedIcon
+                  fontSize="small"
+                  sx={{ color: "primary.main" }}
+                />
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.02em",
+                  }}
+                >
                   3. Detalle de Insumos Solicitados
                 </Typography>
               </Box>
               <Chip
                 size="small"
-                label={`${formData.items?.length || 0} ${formData.items?.length === 1 ? 'insumo' : 'insumos'}`}
+                label={`${formData.items?.length || 0} ${formData.items?.length === 1 ? "insumo" : "insumos"}`}
                 color="primary"
                 variant="outlined"
                 sx={{ fontWeight: 700 }}
@@ -1182,7 +1671,9 @@ export const OrdenCompraScreen = () => {
 
             <DetalleItemsTable
               items={formData.items || []}
-              onChange={(newItems) => setFormData((prev) => ({ ...prev, items: newItems }))}
+              onChange={(newItems) =>
+                setFormData((prev) => ({ ...prev, items: newItems }))
+              }
               presupuestoDisponible={Boolean(formData.presupuestoId)}
               onImportPresupuesto={handleImportarPresupuesto}
             />
@@ -1196,18 +1687,37 @@ export const OrdenCompraScreen = () => {
                 label="Instrucciones de Recepción y Control en Planta"
                 placeholder="Verificar temperatura en frío, estibar en depósito de secos, inspección bromatológica..."
                 value={formData.observaciones}
-                onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, observaciones: e.target.value })
+                }
               />
             </Box>
           </Paper>
         </DialogContent>
 
-        <DialogActions sx={{ px: 3.5, py: 2, bgcolor: 'action.hover', borderTop: '1px solid', borderColor: 'divider' }}>
-          <Button onClick={() => setOpenForm(false)} color="inherit" sx={{ fontWeight: 600 }}>
+        <DialogActions
+          sx={{
+            px: 3.5,
+            py: 2,
+            bgcolor: "action.hover",
+            borderTop: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Button
+            onClick={() => setOpenForm(false)}
+            color="inherit"
+            sx={{ fontWeight: 600 }}
+          >
             Cancelar
           </Button>
-          <Button type="submit" variant="contained" color="primary" sx={{ px: 3, fontWeight: 700 }}>
-            {isEditing ? 'Guardar Cambios' : 'Emitir Orden de Compra'}
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            sx={{ px: 3, fontWeight: 700 }}
+          >
+            {isEditing ? "Guardar Cambios" : "Emitir Orden de Compra"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1218,34 +1728,81 @@ export const OrdenCompraScreen = () => {
         onClose={() => setOpenDelete(false)}
         maxWidth="xs"
         fullWidth
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(8px)",
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(0, 0, 0, 0.7)"
+                  : "rgba(15, 23, 42, 0.45)",
+            },
+          },
+        }}
         PaperProps={{
           sx: {
-            borderRadius: '16px',
-            overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            borderRadius: "16px",
+            overflow: "hidden",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
           },
         }}
       >
-        <DialogTitle sx={{ p: 2.5, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'error.main', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <DialogTitle
+          sx={{
+            p: 2.5,
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+          }}
+        >
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: "10px",
+              bgcolor: "error.main",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <WarningAmberIcon fontSize="small" />
           </Box>
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             Cancelar Orden de Compra
           </Typography>
         </DialogTitle>
-        <DialogContent sx={{ px: 3, pt: '24px !important', pb: 2 }}>
+        <DialogContent sx={{ px: 3, pt: "24px !important", pb: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            ¿Confirma que desea cancelar o eliminar la orden <strong>{selectedOrden?.id}</strong> a{' '}
-            <strong>{selectedOrden?.proveedorNombre}</strong> por valor de{' '}
-            <strong>${selectedOrden?.total?.toLocaleString('es-AR')}</strong>?
+            ¿Confirma que desea cancelar o eliminar la orden{" "}
+            <strong>{selectedOrden?.id}</strong> a{" "}
+            <strong>{selectedOrden?.proveedorNombre}</strong> por valor de{" "}
+            <strong>${selectedOrden?.total?.toLocaleString("es-AR")}</strong>?
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            borderTop: "1px solid",
+            borderColor: "divider",
+            bgcolor: "action.hover",
+          }}
+        >
           <Button onClick={() => setOpenDelete(false)} color="inherit">
             Volver
           </Button>
-          <Button onClick={handleDeleteConfirm} variant="contained" color="error" sx={{ fontWeight: 700 }}>
+          <Button
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            color="error"
+            sx={{ fontWeight: 700 }}
+          >
             Confirmar Baja
           </Button>
         </DialogActions>
