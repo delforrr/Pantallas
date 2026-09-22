@@ -54,7 +54,7 @@ const STATUS_COLOR_MAP = {
   Cumplida: 'success',
   Enviada: 'info',
   'Recibida Parcial': 'warning',
-  Pendiente: 'default',
+  Pendiente: 'warning',
   Cancelada: 'error',
 };
 
@@ -821,19 +821,19 @@ export const OrdenCompraScreen = () => {
           </Box>
         </DialogTitle>
 
-        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedOrden && (
             <>
-              {/* Sección 1: Información de Emisión */}
+              {/* Información de Emisión */}
               <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                     Condiciones Comerciales y Logística
                   </Typography>
                 </Box>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="caption" color="text.secondary">Proveedor Asignado</Typography>
                     <Typography variant="body1" sx={{ fontWeight: 700 }}>
                       {selectedOrden.proveedorNombre}
@@ -842,7 +842,7 @@ export const OrdenCompraScreen = () => {
                       Presupuesto Base: {selectedOrden.presupuestoId || 'Compra Directa Inmediata'}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="caption" color="text.secondary">Condición de Pago Acordada</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {selectedOrden.formaPago}
@@ -851,7 +851,7 @@ export const OrdenCompraScreen = () => {
                       Fecha Estimada de Entrega: <strong>{selectedOrden.fechaEntregaEstimada}</strong>
                     </Typography>
                   </Grid>
-                  <Grid item xs={6} sm={3}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="caption" color="text.secondary">Fecha de Emisión</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {selectedOrden.fechaEmision}
@@ -942,242 +942,274 @@ export const OrdenCompraScreen = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal Dialog: Alta / Edición de Orden de Compra - UI Estilizada y Prolija */}
+      {/* Modal: Alta / Edición de Orden de Compra */}
       <Dialog
         open={openForm}
         onClose={() => setOpenForm(false)}
         maxWidth="lg"
         fullWidth
         PaperProps={{
+          component: 'form',
+          onSubmit: handleSaveForm,
           sx: {
             borderRadius: '20px',
             overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.45)',
+            maxHeight: '92vh',
+            display: 'flex',
+            flexDirection: 'column',
           },
         }}
       >
-        <form onSubmit={handleSaveForm}>
-          <DialogTitle
-            sx={{
-              p: 2.5,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              bgcolor: 'action.hover',
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box
-                sx={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: '12px',
-                  bgcolor: 'primary.main',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: 2,
-                }}
-              >
-                <ShoppingCartIcon />
-              </Box>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-                  {isEditing ? `Editar Orden · ${selectedOrden?.id}` : 'Crear Nueva Orden de Compra'}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Emisión contractual para abastecimiento y control de ingresos a planta
-                </Typography>
-              </Box>
+        <DialogTitle
+          sx={{
+            p: 2.5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            bgcolor: 'action.hover',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 42,
+                height: 42,
+                borderRadius: '12px',
+                bgcolor: 'primary.main',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 2,
+              }}
+            >
+              <ShoppingCartIcon />
             </Box>
-            <IconButton onClick={() => setOpenForm(false)} size="small">
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </DialogTitle>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                {isEditing ? `Editar Orden · ${selectedOrden?.id}` : 'Crear Nueva Orden de Compra'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Emisión contractual para abastecimiento y control de ingresos a planta
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => setOpenForm(false)} size="small">
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
 
-          <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            {/* Sección 1: Proveedor y Presupuesto */}
-            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
-                  1. Proveedor y Presupuesto de Referencia
-                </Typography>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Proveedor</InputLabel>
-                    <Select
-                      value={formData.proveedorId}
-                      label="Proveedor"
-                      onChange={(e) => setFormData({ ...formData, proveedorId: e.target.value })}
-                    >
-                      {INITIAL_PROVEEDORES.map((p) => (
-                        <MenuItem key={p.id} value={p.id}>
-                          {p.razonSocial}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Presupuesto Aprobado de Referencia</InputLabel>
-                    <Select
-                      value={formData.presupuestoId}
-                      label="Presupuesto Aprobado de Referencia"
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        const p = INITIAL_PRESUPUESTOS.find((item) => item.id === val);
-                        if (p && p.items && p.items.length > 0) {
-                          setFormData((prev) => ({
-                            ...prev,
-                            presupuestoId: val,
-                            proveedorId: p.proveedorId || prev.proveedorId,
-                            items: p.items.map((it, idx) => ({ ...it, id: idx + 1 })),
-                          }));
-                        } else {
-                          setFormData((prev) => ({ ...prev, presupuestoId: val }));
-                        }
-                      }}
-                    >
-                      <MenuItem value="">Sin presupuesto (Compra Directa Faltante)</MenuItem>
-                      {INITIAL_PRESUPUESTOS.map((p) => (
-                        <MenuItem key={p.id} value={p.id}>
-                          {p.id} - {p.proveedorNombre} (${p.total.toLocaleString('es-AR')})
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Forma de Pago Acordada"
-                    placeholder="Ej: Transferencia 30 días, Contado contra entrega, Cuenta Corriente..."
-                    value={formData.formaPago}
-                    onChange={(e) => setFormData({ ...formData, formaPago: e.target.value })}
-                    required
-                  />
-                </Grid>
+        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5, overflowY: 'auto' }}>
+          {/* 1. Proveedor y Presupuesto */}
+          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                1. Proveedor y Presupuesto de Referencia
+              </Typography>
+            </Box>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="orden-proveedor-label">Proveedor</InputLabel>
+                  <Select
+                    labelId="orden-proveedor-label"
+                    value={formData.proveedorId}
+                    label="Proveedor"
+                    onChange={(e) => setFormData({ ...formData, proveedorId: e.target.value })}
+                  >
+                    {INITIAL_PROVEEDORES.map((p) => (
+                      <MenuItem key={p.id} value={p.id}>
+                        {p.razonSocial}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
-            </Paper>
 
-            {/* Sección 2: Fechas y Logística */}
-            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <EventNoteIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
-                  2. Plazos y Estado de Entrega
-                </Typography>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
-                      Fecha de Emisión *
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      type="date"
-                      value={formData.fechaEmision}
-                      onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
-                      required
-                    />
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
-                      Fecha Estimada de Entrega *
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      type="date"
-                      value={formData.fechaEntregaEstimada}
-                      onChange={(e) => setFormData({ ...formData, fechaEntregaEstimada: e.target.value })}
-                      required
-                    />
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Estado de la Orden</InputLabel>
-                    <Select
-                      value={formData.estado}
-                      label="Estado de la Orden"
-                      onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                    >
-                      <MenuItem value="Pendiente">Pendiente</MenuItem>
-                      <MenuItem value="Enviada">Enviada</MenuItem>
-                      <MenuItem value="Recibida Parcial">Recibida Parcial</MenuItem>
-                      <MenuItem value="Cumplida">Cumplida</MenuItem>
-                      <MenuItem value="Cancelada">Cancelada</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="orden-presupuesto-label">Presupuesto Aprobado de Referencia</InputLabel>
+                  <Select
+                    labelId="orden-presupuesto-label"
+                    value={formData.presupuestoId}
+                    label="Presupuesto Aprobado de Referencia"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const p = INITIAL_PRESUPUESTOS.find((item) => item.id === val);
+                      if (p && p.items && p.items.length > 0) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          presupuestoId: val,
+                          proveedorId: p.proveedorId || prev.proveedorId,
+                          items: p.items.map((it, idx) => ({ ...it, id: idx + 1 })),
+                        }));
+                      } else {
+                        setFormData((prev) => ({ ...prev, presupuestoId: val }));
+                      }
+                    }}
+                  >
+                    <MenuItem value="">Sin presupuesto (Compra Directa Faltante)</MenuItem>
+                    {INITIAL_PRESUPUESTOS.map((p) => (
+                      <MenuItem key={p.id} value={p.id}>
+                        {p.id} - {p.proveedorNombre} (${p.total.toLocaleString('es-AR')})
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
-            </Paper>
 
-            {/* Sección 3: Insumos Solicitados - Tabla Dinámica Ergonómica */}
-            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <ShoppingCartOutlinedIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
-                    3. Detalle de Insumos Solicitados
-                  </Typography>
-                </Box>
-                <Chip
-                  size="small"
-                  label={`${formData.items?.length || 0} ${formData.items?.length === 1 ? 'insumo' : 'insumos'}`}
-                  color="primary"
-                  variant="outlined"
-                  sx={{ fontWeight: 700 }}
-                />
-              </Box>
-
-              <DetalleItemsTable
-                items={formData.items || []}
-                onChange={(newItems) => setFormData((prev) => ({ ...prev, items: newItems }))}
-                presupuestoDisponible={Boolean(formData.presupuestoId)}
-                onImportPresupuesto={handleImportarPresupuesto}
-              />
-
-              <Box sx={{ mt: 2.5 }}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth
                   size="small"
-                  multiline
-                  rows={2}
-                  label="Instrucciones de Recepción y Control en Planta"
-                  placeholder="Verificar temperatura en frío, estibar en depósito de secos, inspección bromatológica..."
-                  value={formData.observaciones}
-                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                  label="Forma de Pago Acordada"
+                  placeholder="Ej: Transferencia 30 días, Contado contra entrega, Cuenta Corriente..."
+                  value={formData.formaPago}
+                  onChange={(e) => setFormData({ ...formData, formaPago: e.target.value })}
+                  required
                 />
+              </Grid>
+            </Grid>
+          </Paper>
+
+          {/* 2. Plazos y Estado de Entrega */}
+          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <EventNoteIcon fontSize="small" sx={{ color: 'primary.main' }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                2. Plazos y Estado de Entrega
+              </Typography>
+            </Box>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type="date"
+                  label="Fecha de Emisión"
+                  value={formData.fechaEmision}
+                  onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  required
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type="date"
+                  label="Fecha Estimada de Entrega"
+                  value={formData.fechaEntregaEstimada}
+                  onChange={(e) => setFormData({ ...formData, fechaEntregaEstimada: e.target.value })}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  required
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="orden-estado-label">Estado de la Orden</InputLabel>
+                  <Select
+                    labelId="orden-estado-label"
+                    value={formData.estado}
+                    label="Estado de la Orden"
+                    onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                    renderValue={(val) => (
+                      <Chip
+                        label={val}
+                        size="small"
+                        color={STATUS_COLOR_MAP[val] || 'default'}
+                        sx={{ height: 22, fontSize: '0.75rem', fontWeight: 700 }}
+                      />
+                    )}
+                  >
+                    <MenuItem value="Pendiente">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'warning.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Pendiente</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Enviada">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'info.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Enviada al Proveedor</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Recibida Parcial">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'warning.light' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Recibida Parcial</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Cumplida">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Cumplida (Recepción Total)</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Cancelada">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'error.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Cancelada</Typography>
+                      </Box>
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Paper>
+
+          {/* 3. Detalle de Insumos Solicitados */}
+          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <ShoppingCartOutlinedIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                  3. Detalle de Insumos Solicitados
+                </Typography>
               </Box>
-            </Paper>
-          </DialogContent>
+              <Chip
+                size="small"
+                label={`${formData.items?.length || 0} ${formData.items?.length === 1 ? 'insumo' : 'insumos'}`}
+                color="primary"
+                variant="outlined"
+                sx={{ fontWeight: 700 }}
+              />
+            </Box>
 
+            <DetalleItemsTable
+              items={formData.items || []}
+              onChange={(newItems) => setFormData((prev) => ({ ...prev, items: newItems }))}
+              presupuestoDisponible={Boolean(formData.presupuestoId)}
+              onImportPresupuesto={handleImportarPresupuesto}
+            />
 
-          <DialogActions sx={{ px: 3, py: 2, bgcolor: 'action.hover', borderTop: '1px solid', borderColor: 'divider' }}>
-            <Button onClick={() => setOpenForm(false)} color="inherit">
-              Cancelar
-            </Button>
-            <Button type="submit" variant="contained" color="primary">
-              {isEditing ? 'Guardar Cambios' : 'Emitir Orden de Compra'}
-            </Button>
-          </DialogActions>
-        </form>
+            <Box sx={{ mt: 2.5 }}>
+              <TextField
+                fullWidth
+                size="small"
+                multiline
+                rows={2}
+                label="Instrucciones de Recepción y Control en Planta"
+                placeholder="Verificar temperatura en frío, estibar en depósito de secos, inspección bromatológica..."
+                value={formData.observaciones}
+                onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+              />
+            </Box>
+          </Paper>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3.5, py: 2, bgcolor: 'action.hover', borderTop: '1px solid', borderColor: 'divider' }}>
+          <Button onClick={() => setOpenForm(false)} color="inherit" sx={{ fontWeight: 600 }}>
+            Cancelar
+          </Button>
+          <Button type="submit" variant="contained" color="primary" sx={{ px: 3, fontWeight: 700 }}>
+            {isEditing ? 'Guardar Cambios' : 'Emitir Orden de Compra'}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Modal Dialog: Confirmar Cancelación/Eliminación */}
@@ -1188,28 +1220,32 @@ export const OrdenCompraScreen = () => {
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: '18px',
-            p: 1,
+            borderRadius: '16px',
+            overflow: 'hidden',
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
           },
         }}
       >
-        <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <WarningAmberIcon color="warning" />
-          <span>Cancelar Orden de Compra</span>
+        <DialogTitle sx={{ p: 2.5, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'error.main', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <WarningAmberIcon fontSize="small" />
+          </Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Cancelar Orden de Compra
+          </Typography>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ px: 3, pt: '24px !important', pb: 2 }}>
           <Typography variant="body2" color="text.secondary">
             ¿Confirma que desea cancelar o eliminar la orden <strong>{selectedOrden?.id}</strong> a{' '}
             <strong>{selectedOrden?.proveedorNombre}</strong> por valor de{' '}
             <strong>${selectedOrden?.total?.toLocaleString('es-AR')}</strong>?
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 2, pb: 1.5 }}>
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
           <Button onClick={() => setOpenDelete(false)} color="inherit">
             Volver
           </Button>
-          <Button onClick={handleDeleteConfirm} variant="contained" color="error">
+          <Button onClick={handleDeleteConfirm} variant="contained" color="error" sx={{ fontWeight: 700 }}>
             Confirmar Baja
           </Button>
         </DialogActions>

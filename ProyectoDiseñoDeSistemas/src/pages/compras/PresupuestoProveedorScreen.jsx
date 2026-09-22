@@ -865,7 +865,7 @@ export const PresupuestoProveedorScreen = () => {
           </Box>
         </DialogTitle>
 
-        <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {selectedPresupuesto && (
             <>
               {/* Sección 1: Información Comercial */}
@@ -877,31 +877,31 @@ export const PresupuestoProveedorScreen = () => {
                   </Typography>
                 </Box>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="caption" color="text.secondary">Modalidad de Compra</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {selectedPresupuesto.tipoCompra}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="caption" color="text.secondary">Forma de Pago</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {selectedPresupuesto.condicionPago}
                     </Typography>
                   </Grid>
-                  <Grid item xs={6} sm={3}>
+                  <Grid size={{ xs: 6, sm: 3 }}>
                     <Typography variant="caption" color="text.secondary">Fecha de Emisión</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {selectedPresupuesto.fechaEmision}
                     </Typography>
                   </Grid>
-                  <Grid item xs={6} sm={3}>
+                  <Grid size={{ xs: 6, sm: 3 }}>
                     <Typography variant="caption" color="text.secondary">Validez de Oferta</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {selectedPresupuesto.validezHasta}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="caption" color="text.secondary">Calificación Histórica</Typography>
                     <Box sx={{ mt: 0.5 }}>
                       <Chip
@@ -995,239 +995,296 @@ export const PresupuestoProveedorScreen = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal Dialog: Alta / Edición de Presupuesto - UI Estilizada y Prolija */}
+      {/* Modal Dialog: Alta / Edición de Presupuesto */}
       <Dialog
         open={openForm}
         onClose={() => setOpenForm(false)}
         maxWidth="lg"
         fullWidth
         PaperProps={{
+          component: 'form',
+          onSubmit: handleSaveForm,
           sx: {
             borderRadius: '20px',
             overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.45)',
+            maxHeight: '92vh',
+            display: 'flex',
+            flexDirection: 'column',
           },
         }}
       >
-        <form onSubmit={handleSaveForm}>
-          <DialogTitle
-            sx={{
-              p: 2.5,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              bgcolor: 'action.hover',
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box
-                sx={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: '12px',
-                  bgcolor: 'primary.main',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: 2,
-                }}
-              >
-                <RequestQuoteIcon />
-              </Box>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-                  {isEditing ? `Editar Cotización · ${selectedPresupuesto?.id}` : 'Registrar Cotización de Proveedor'}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Carga comparativa semestral (marzo/diciembre) o reposición rápida de materias primas
-                </Typography>
-              </Box>
+        <DialogTitle
+          sx={{
+            p: 2.5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            bgcolor: 'action.hover',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 42,
+                height: 42,
+                borderRadius: '12px',
+                bgcolor: 'primary.main',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 2,
+              }}
+            >
+              <RequestQuoteIcon />
             </Box>
-            <IconButton onClick={() => setOpenForm(false)} size="small">
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </DialogTitle>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                {isEditing ? `Editar Cotización · ${selectedPresupuesto?.id}` : 'Registrar Cotización de Proveedor'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Carga comparativa semestral (marzo/diciembre) o reposición rápida de materias primas
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => setOpenForm(false)} size="small">
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
 
-          <DialogContent sx={{ px: 3.5, pt: 3.5, pb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            {/* Sección 1: Proveedor y Modalidad Comercial */}
-            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
-                  1. Proveedor y Modalidad Comercial
-                </Typography>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Proveedor Emisor</InputLabel>
-                    <Select
-                      value={formData.proveedorId}
-                      label="Proveedor Emisor"
-                      onChange={(e) => setFormData({ ...formData, proveedorId: e.target.value })}
-                    >
-                      {INITIAL_PROVEEDORES.map((p) => (
-                        <MenuItem key={p.id} value={p.id}>
-                          {p.razonSocial} ({p.categoria})
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Modalidad de Compra</InputLabel>
-                    <Select
-                      value={formData.tipoCompra}
-                      label="Modalidad de Compra"
-                      onChange={(e) => setFormData({ ...formData, tipoCompra: e.target.value })}
-                    >
-                      <MenuItem value="Semestral (Marzo - Temporada Baja)">Semestral (Marzo - Temporada Baja)</MenuItem>
-                      <MenuItem value="Semestral (Diciembre - Temporada Baja)">Semestral (Diciembre - Temporada Baja)</MenuItem>
-                      <MenuItem value="Insumos Locales / Reposición">Insumos Locales / Reposición</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Condición de Pago Acordada"
-                    placeholder="Ej: Contado contra entrega, 30 días FF..."
-                    value={formData.condicionPago}
-                    onChange={(e) => setFormData({ ...formData, condicionPago: e.target.value })}
-                    required
-                  />
-                </Grid>
+        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5, overflowY: 'auto' }}>
+          {/* Sección 1: Proveedor y Modalidad Comercial */}
+          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                1. Proveedor y Modalidad Comercial
+              </Typography>
+            </Box>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="prov-emisor-label">Proveedor Emisor</InputLabel>
+                  <Select
+                    labelId="prov-emisor-label"
+                    value={formData.proveedorId}
+                    label="Proveedor Emisor"
+                    onChange={(e) => setFormData({ ...formData, proveedorId: e.target.value })}
+                  >
+                    {INITIAL_PROVEEDORES.map((p) => (
+                      <MenuItem key={p.id} value={p.id}>
+                        {p.razonSocial} ({p.categoria})
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
-            </Paper>
 
-            {/* Sección 2: Vigencia, Plazos y Calidad */}
-            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <EventNoteIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
-                  2. Vigencia, Calidad y Estado
-                </Typography>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
-                      Fecha de Emisión *
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      type="date"
-                      value={formData.fechaEmision}
-                      onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
-                      required
-                    />
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.6, display: 'block' }}>
-                      Validez de Oferta Hasta *
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      type="date"
-                      value={formData.validezHasta}
-                      onChange={(e) => setFormData({ ...formData, validezHasta: e.target.value })}
-                      required
-                    />
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Calidad Evaluada</InputLabel>
-                    <Select
-                      value={formData.calificacion}
-                      label="Calidad Evaluada"
-                      onChange={(e) => setFormData({ ...formData, calificacion: e.target.value })}
-                    >
-                      <MenuItem value="Excelente">Excelente</MenuItem>
-                      <MenuItem value="Alta">Alta</MenuItem>
-                      <MenuItem value="Media">Media</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Estado Inicial</InputLabel>
-                    <Select
-                      value={formData.estado}
-                      label="Estado Inicial"
-                      onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                    >
-                      <MenuItem value="Pendiente">Pendiente</MenuItem>
-                      <MenuItem value="Aprobado">Aprobado</MenuItem>
-                      <MenuItem value="Rechazado">Rechazado</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="modalidad-compra-label">Modalidad de Compra</InputLabel>
+                  <Select
+                    labelId="modalidad-compra-label"
+                    value={formData.tipoCompra}
+                    label="Modalidad de Compra"
+                    onChange={(e) => setFormData({ ...formData, tipoCompra: e.target.value })}
+                  >
+                    <MenuItem value="Semestral (Marzo - Temporada Baja)">Semestral (Marzo - Temporada Baja)</MenuItem>
+                    <MenuItem value="Semestral (Diciembre - Temporada Baja)">Semestral (Diciembre - Temporada Baja)</MenuItem>
+                    <MenuItem value="Insumos Locales / Reposición">Insumos Locales / Reposición</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
-            </Paper>
 
-            {/* Sección 3: Materias Primas Cotizadas - Tabla Dinámica Ergonómica */}
-            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <ShoppingCartOutlinedIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
-                    3. Detalle de Materias Primas Cotizadas
-                  </Typography>
-                </Box>
-                <Chip
-                  size="small"
-                  label={`${formData.items?.length || 0} ${formData.items?.length === 1 ? 'insumo' : 'insumos'}`}
-                  color="primary"
-                  variant="outlined"
-                  sx={{ fontWeight: 700 }}
-                />
-              </Box>
-
-              <DetalleItemsTable
-                items={formData.items || []}
-                onChange={(newItems) => setFormData((prev) => ({ ...prev, items: newItems }))}
-              />
-
-              <Box sx={{ mt: 2.5 }}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth
                   size="small"
-                  multiline
-                  rows={2}
-                  label="Observaciones y Justificación de Compra"
-                  placeholder="Fundamentación de precio o estacionalidad según requerimientos de producción..."
-                  value={formData.observaciones}
-                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                  label="Condición de Pago Acordada"
+                  placeholder="Ej: Contado contra entrega, 30 días FF..."
+                  value={formData.condicionPago}
+                  onChange={(e) => setFormData({ ...formData, condicionPago: e.target.value })}
+                  required
                 />
+              </Grid>
+            </Grid>
+          </Paper>
+
+          {/* Sección 2: Vigencia, Plazos y Calidad */}
+          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <EventNoteIcon fontSize="small" sx={{ color: 'primary.main' }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                2. Vigencia, Calidad y Estado
+              </Typography>
+            </Box>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type="date"
+                  label="Fecha de Emisión"
+                  value={formData.fechaEmision}
+                  onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  required
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type="date"
+                  label="Validez de Oferta Hasta"
+                  value={formData.validezHasta}
+                  onChange={(e) => setFormData({ ...formData, validezHasta: e.target.value })}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  required
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="calidad-eval-label">Calidad Evaluada</InputLabel>
+                  <Select
+                    labelId="calidad-eval-label"
+                    value={formData.calificacion}
+                    label="Calidad Evaluada"
+                    onChange={(e) => setFormData({ ...formData, calificacion: e.target.value })}
+                    renderValue={(val) => {
+                      const col = val === 'Excelente' ? 'success' : val === 'Alta' ? 'info' : 'warning';
+                      return (
+                        <Chip
+                          label={val}
+                          size="small"
+                          color={col}
+                          sx={{ height: 22, fontSize: '0.75rem', fontWeight: 700 }}
+                        />
+                      );
+                    }}
+                  >
+                    <MenuItem value="Excelente">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>Excelente (Alta Pureza / Certificada)</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Alta">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'info.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'info.main' }}>Alta (Estándar Industrial PastaFab)</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Media">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'warning.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'warning.main' }}>Media (Calidad Básica / Apta)</Typography>
+                      </Box>
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="estado-inicial-label">Estado Inicial</InputLabel>
+                  <Select
+                    labelId="estado-inicial-label"
+                    value={formData.estado}
+                    label="Estado Inicial"
+                    onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                    renderValue={(val) => (
+                      <Chip
+                        label={val}
+                        size="small"
+                        color={STATUS_COLOR_MAP[val] || 'default'}
+                        sx={{ height: 22, fontSize: '0.75rem', fontWeight: 700 }}
+                      />
+                    )}
+                  >
+                    <MenuItem value="Pendiente">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'warning.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Pendiente</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Aprobado">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Aprobado</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="Rechazado">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'error.main' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Rechazado</Typography>
+                      </Box>
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Paper>
+
+          {/* Sección 3: Materias Primas Cotizadas - Tabla Dinámica Ergonómica */}
+          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <ShoppingCartOutlinedIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  3. Detalle de Materias Primas Cotizadas
+                </Typography>
               </Box>
-            </Paper>
-          </DialogContent>
+              <Chip
+                size="small"
+                label={`${formData.items?.length || 0} ${formData.items?.length === 1 ? 'insumo' : 'insumos'}`}
+                color="primary"
+                variant="outlined"
+                sx={{ fontWeight: 700 }}
+              />
+            </Box>
 
+            <DetalleItemsTable
+              items={formData.items || []}
+              onChange={(newItems) => setFormData((prev) => ({ ...prev, items: newItems }))}
+            />
 
-          <DialogActions sx={{ px: 3, py: 2, bgcolor: 'action.hover', borderTop: '1px solid', borderColor: 'divider' }}>
-            <Button onClick={() => setOpenForm(false)} color="inherit">
-              Cancelar
-            </Button>
-            <Button type="submit" variant="contained" color="primary">
-              {isEditing ? 'Guardar Cambios' : 'Registrar Cotización'}
-            </Button>
-          </DialogActions>
-        </form>
+            <Box sx={{ mt: 2.5 }}>
+              <TextField
+                fullWidth
+                size="small"
+                multiline
+                rows={2}
+                label="Observaciones y Justificación de Compra"
+                placeholder="Fundamentación de precio o estacionalidad según requerimientos de producción..."
+                value={formData.observaciones}
+                onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+              />
+            </Box>
+          </Paper>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            px: 3.5,
+            py: 2,
+            bgcolor: 'action.hover',
+            borderTop: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Button onClick={() => setOpenForm(false)} color="inherit" sx={{ fontWeight: 600 }}>
+            Cancelar
+          </Button>
+          <Button type="submit" variant="contained" color="primary" sx={{ px: 3, fontWeight: 700 }}>
+            {isEditing ? 'Guardar Cambios' : 'Registrar Cotización'}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Modal Dialog: Confirmar Eliminación */}
@@ -1238,28 +1295,32 @@ export const PresupuestoProveedorScreen = () => {
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: '18px',
-            p: 1,
+            borderRadius: '16px',
+            overflow: 'hidden',
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
           },
         }}
       >
-        <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <WarningAmberIcon color="warning" />
-          <span>Eliminar Cotización</span>
+        <DialogTitle sx={{ p: 2.5, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'error.main', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <WarningAmberIcon fontSize="small" />
+          </Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Eliminar Cotización
+          </Typography>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ px: 3, pt: '24px !important', pb: 2 }}>
           <Typography variant="body2" color="text.secondary">
             ¿Confirma que desea eliminar la cotización <strong>{selectedPresupuesto?.id}</strong> de{' '}
             <strong>{selectedPresupuesto?.proveedorNombre}</strong> por valor de{' '}
             <strong>${selectedPresupuesto?.total?.toLocaleString('es-AR')}</strong>? Esta acción no se puede deshacer.
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 2, pb: 1.5 }}>
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
           <Button onClick={() => setOpenDelete(false)} color="inherit">
             Cancelar
           </Button>
-          <Button onClick={handleDeleteConfirm} variant="contained" color="error">
+          <Button onClick={handleDeleteConfirm} variant="contained" color="error" sx={{ fontWeight: 700 }}>
             Eliminar Definitivamente
           </Button>
         </DialogActions>
