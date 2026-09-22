@@ -21,3 +21,22 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* ── Overlay Sidebar Drawer (Responsividad y despliegue por encima) ── */
+nav {
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  z-index: 1300 !important;
+  width: 280px !important;
+  transform: translateX(-100%) !important;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: none !important;
+}
+
+body.sidebar-open nav {
+  transform: translateX(0) !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5) !important;
+}

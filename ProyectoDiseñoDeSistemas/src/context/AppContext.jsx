@@ -5,10 +5,15 @@ const AppContext = createContext(null);
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null); // null = not logged in
   const [currentPage, setCurrentPage] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [themeMode, setThemeMode] = useState(() => {
     return localStorage.getItem('app-theme') || 'dark';
   });
+
+  // Sincronizar clase en body para comportamiento overlay del drawer
+  if (typeof document !== 'undefined') {
+    document.body.classList.toggle('sidebar-open', sidebarOpen);
+  }
 
   const login = (role) => {
     if (role === 'cliente') {
@@ -27,6 +32,7 @@ export const AppProvider = ({ children }) => {
 
   const navigate = (page) => {
     setCurrentPage(page);
+    setSidebarOpen(false);
   };
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
