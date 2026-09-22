@@ -48,6 +48,7 @@ import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined
 import PaymentOutlinedIcon from '@mui/icons-material/PaymentOutlined';
 
 import { INITIAL_ORDENES_COMPRA, INITIAL_PROVEEDORES, INITIAL_PRESUPUESTOS } from './mockData';
+import { DetalleItemsTable } from '../../components/compras';
 
 const STATUS_COLOR_MAP = {
   Cumplida: 'success',
@@ -81,10 +82,16 @@ export const OrdenCompraScreen = () => {
     formaPago: 'Transferencia Bancaria a 30 días',
     estado: 'Pendiente',
     observaciones: '',
-    itemMateriaPrima: 'Harina 0000 Especial Pastas (bolsa 50kg)',
-    itemCantidad: 80,
-    itemPrecioUnitario: 32000,
-    itemUnidad: 'Bolsas',
+    items: [
+      {
+        id: 1,
+        materiaPrima: 'Harina 0000 Especial Pastas (bolsa 50kg)',
+        unidad: 'Bolsas',
+        cantidad: 80,
+        precioUnitario: 32000,
+        subtotal: 2560000,
+      },
+    ],
   };
   const [formData, setFormData] = useState(initialFormState);
 
@@ -119,7 +126,14 @@ export const OrdenCompraScreen = () => {
 
   const handleOpenCreate = () => {
     setIsEditing(false);
-    setFormData(initialFormState);
+    // Cargar ítems del presupuesto inicial por defecto si existe
+    const defaultPresupuesto = INITIAL_PRESUPUESTOS.find((p) => p.id === 'PP-2026-001');
+    setFormData({
+      ...initialFormState,
+      items: defaultPresupuesto?.items
+        ? defaultPresupuesto.items.map((it, idx) => ({ ...it, id: idx + 1 }))
+        : [...initialFormState.items],
+    });
     setOpenForm(true);
   };
 
@@ -133,13 +147,24 @@ export const OrdenCompraScreen = () => {
       fechaEntregaEstimada: orden.fechaEntregaEstimada,
       formaPago: orden.formaPago,
       estado: orden.estado,
-      observaciones: orden.observaciones,
-      itemMateriaPrima: orden.items[0]?.materiaPrima || '',
-      itemCantidad: orden.items[0]?.cantidad || 1,
-      itemPrecioUnitario: orden.items[0]?.precioUnitario || 0,
-      itemUnidad: orden.items[0]?.unidad || 'Unidades',
+      observaciones: orden.observaciones || '',
+      items: orden.items && orden.items.length > 0
+        ? orden.items.map((it, idx) => ({ ...it, id: it.id || idx + 1 }))
+        : [...initialFormState.items],
     });
     setOpenForm(true);
+  };
+
+  const handleImportarPresupuesto = () => {
+    if (!formData.presupuestoId) return;
+    const p = INITIAL_PRESUPUESTOS.find((item) => item.id === formData.presupuestoId);
+    if (p && p.items && p.items.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        proveedorId: p.proveedorId || prev.proveedorId,
+        items: p.items.map((it, idx) => ({ ...it, id: idx + 1 })),
+      }));
+    }
   };
 
   const handleOpenDelete = (orden) => {
@@ -158,19 +183,12 @@ export const OrdenCompraScreen = () => {
 
   const handleSaveForm = (e) => {
     e.preventDefault();
+    if (!formData.items || formData.items.length === 0) {
+      alert('Debe incluir al menos un insumo en la orden de compra.');
+      return;
+    }
     const prov = INITIAL_PROVEEDORES.find((p) => p.id === Number(formData.proveedorId));
-    const subtotal = Number(formData.itemCantidad) * Number(formData.itemPrecioUnitario);
-
-    const items = [
-      {
-        id: 1,
-        materiaPrima: formData.itemMateriaPrima,
-        unidad: formData.itemUnidad,
-        cantidad: Number(formData.itemCantidad),
-        precioUnitario: Number(formData.itemPrecioUnitario),
-        subtotal,
-      },
-    ];
+    const total = formData.items.reduce((acc, it) => acc + (Number(it.subtotal) || 0), 0);
 
     if (isEditing && selectedOrden) {
       setOrdenes((prev) =>
@@ -186,8 +204,8 @@ export const OrdenCompraScreen = () => {
                 formaPago: formData.formaPago,
                 estado: formData.estado,
                 observaciones: formData.observaciones,
-                items,
-                total: subtotal,
+                items: formData.items,
+                total,
               }
             : o
         )
@@ -204,8 +222,8 @@ export const OrdenCompraScreen = () => {
         formaPago: formData.formaPago,
         estado: formData.estado,
         observaciones: formData.observaciones,
-        items,
-        total: subtotal,
+        items: formData.items,
+        total,
       };
       setOrdenes((prev) => [newOrden, ...prev]);
     }
@@ -928,7 +946,7 @@ export const OrdenCompraScreen = () => {
       <Dialog
         open={openForm}
         onClose={() => setOpenForm(false)}
-        maxWidth="md"
+        maxWidth="lg"
         fullWidth
         PaperProps={{
           sx: {
@@ -1013,7 +1031,20 @@ export const OrdenCompraScreen = () => {
                     <Select
                       value={formData.presupuestoId}
                       label="Presupuesto Aprobado de Referencia"
-                      onChange={(e) => setFormData({ ...formData, presupuestoId: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const p = INITIAL_PRESUPUESTOS.find((item) => item.id === val);
+                        if (p && p.items && p.items.length > 0) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            presupuestoId: val,
+                            proveedorId: p.proveedorId || prev.proveedorId,
+                            items: p.items.map((it, idx) => ({ ...it, id: idx + 1 })),
+                          }));
+                        } else {
+                          setFormData((prev) => ({ ...prev, presupuestoId: val }));
+                        }
+                      }}
                     >
                       <MenuItem value="">Sin presupuesto (Compra Directa Faltante)</MenuItem>
                       {INITIAL_PRESUPUESTOS.map((p) => (
@@ -1097,92 +1128,46 @@ export const OrdenCompraScreen = () => {
               </Grid>
             </Paper>
 
-            {/* Sección 3: Insumos Solicitados */}
+            {/* Sección 3: Insumos Solicitados - Tabla Dinámica Ergonómica */}
             <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <ShoppingCartOutlinedIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
-                  3. Insumos Solicitados e Instrucciones de Recepción
-                </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <ShoppingCartOutlinedIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                    3. Detalle de Insumos Solicitados
+                  </Typography>
+                </Box>
+                <Chip
+                  size="small"
+                  label={`${formData.items?.length || 0} ${formData.items?.length === 1 ? 'insumo' : 'insumos'}`}
+                  color="primary"
+                  variant="outlined"
+                  sx={{ fontWeight: 700 }}
+                />
               </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Materia Prima o Insumo"
-                    value={formData.itemMateriaPrima}
-                    onChange={(e) => setFormData({ ...formData, itemMateriaPrima: e.target.value })}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Cantidad"
-                    type="number"
-                    value={formData.itemCantidad}
-                    onChange={(e) => setFormData({ ...formData, itemCantidad: e.target.value })}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Unidad"
-                    value={formData.itemUnidad}
-                    onChange={(e) => setFormData({ ...formData, itemUnidad: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Precio Unitario ($)"
-                    type="number"
-                    value={formData.itemPrecioUnitario}
-                    onChange={(e) => setFormData({ ...formData, itemPrecioUnitario: e.target.value })}
-                    required
-                  />
-                </Grid>
 
-                <Grid item xs={12}>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: '10px',
-                      bgcolor: 'action.hover',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
-                      SUBTOTAL PREVISTO:
-                    </Typography>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'primary.main' }}>
-                      ${(Number(formData.itemCantidad || 0) * Number(formData.itemPrecioUnitario || 0)).toLocaleString('es-AR')}
-                    </Typography>
-                  </Box>
-                </Grid>
+              <DetalleItemsTable
+                items={formData.items || []}
+                onChange={(newItems) => setFormData((prev) => ({ ...prev, items: newItems }))}
+                presupuestoDisponible={Boolean(formData.presupuestoId)}
+                onImportPresupuesto={handleImportarPresupuesto}
+              />
 
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    multiline
-                    rows={2}
-                    label="Instrucciones de Recepción y Control"
-                    placeholder="Verificar temperatura en frío, estibar en depósito de secos, inspección bromatológica..."
-                    value={formData.observaciones}
-                    onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-                  />
-                </Grid>
-              </Grid>
+              <Box sx={{ mt: 2.5 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  multiline
+                  rows={2}
+                  label="Instrucciones de Recepción y Control en Planta"
+                  placeholder="Verificar temperatura en frío, estibar en depósito de secos, inspección bromatológica..."
+                  value={formData.observaciones}
+                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                />
+              </Box>
             </Paper>
           </DialogContent>
+
 
           <DialogActions sx={{ px: 3, py: 2, bgcolor: 'action.hover', borderTop: '1px solid', borderColor: 'divider' }}>
             <Button onClick={() => setOpenForm(false)} color="inherit">
