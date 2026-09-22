@@ -92,9 +92,14 @@ export const OrdenesMantScreen = () => {
     fechaFin: '',
     estado: 'Pendiente',
     tareaRealizada: '',
-    repuestoCodigo: '',
-    repuestoDescripcion: '',
-    repuestoCantidad: '',
+    repuestos: [
+      {
+        id: 1,
+        codigo: 'SKF-6204',
+        descripcion: 'Rulemán blindado 2RS',
+        cantidad: '2 unidades',
+      },
+    ],
     observaciones: '',
   };
   const [formData, setFormData] = useState(initialFormState);
@@ -150,9 +155,9 @@ export const OrdenesMantScreen = () => {
       fechaFin: orden.fechaFin || '',
       estado: orden.estado,
       tareaRealizada: orden.tareaRealizada || '',
-      repuestoCodigo: orden.repuestos[0]?.codigo || '',
-      repuestoDescripcion: orden.repuestos[0]?.descripcion || '',
-      repuestoCantidad: orden.repuestos[0]?.cantidad || '',
+      repuestos: orden.repuestos && orden.repuestos.length > 0
+        ? orden.repuestos.map((r, idx) => ({ ...r, id: r.id || idx + 1 }))
+        : [],
       observaciones: orden.observaciones || '',
     });
     setOpenForm(true);
@@ -187,17 +192,7 @@ export const OrdenesMantScreen = () => {
     e.preventDefault();
     const maq = INITIAL_MAQUINARIAS.find((m) => m.id === Number(formData.maquinariaId));
     const tec = INITIAL_TECNICOS.find((t) => t.id === Number(formData.empleadoId));
-
-    const repuestos = formData.repuestoDescripcion
-      ? [
-          {
-            id: 1,
-            codigo: formData.repuestoCodigo || 'REP-GEN',
-            descripcion: formData.repuestoDescripcion,
-            cantidad: formData.repuestoCantidad || '1 unidad',
-          },
-        ]
-      : [];
+    const repuestos = (formData.repuestos || []).filter((r) => r.descripcion && r.descripcion.trim() !== '');
 
     if (isEditing && selectedOrden) {
       setOrdenes((prev) =>
@@ -955,7 +950,7 @@ export const OrdenesMantScreen = () => {
       <Dialog
         open={openForm}
         onClose={() => setOpenForm(false)}
-        maxWidth="md"
+        maxWidth="lg"
         fullWidth
         PaperProps={{
           sx: {
@@ -1147,75 +1142,170 @@ export const OrdenesMantScreen = () => {
               </Grid>
             </Paper>
 
-            {/* Sección 3: Diagnóstico y Repuestos */}
+            {/* Sección 3: Diagnóstico y Repuestos Requeridos - Tabla Dinámica */}
             <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '14px', bgcolor: 'background.paper' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <BuildCircleIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                  3. Diagnóstico y Repuestos Requeridos
-                </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <BuildCircleIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                    3. Diagnóstico y Repuestos Requeridos
+                  </Typography>
+                </Box>
+                <Chip
+                  size="small"
+                  label={`${formData.repuestos?.length || 0} repuestos`}
+                  color="primary"
+                  variant="outlined"
+                  sx={{ fontWeight: 700 }}
+                />
               </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    multiline
-                    rows={2}
-                    label="Descripción de la Tarea / Fallo Observado"
-                    placeholder="Detalle la rutina o causa raíz según el dominio..."
-                    value={formData.tareaRealizada}
-                    onChange={(e) => setFormData({ ...formData, tareaRealizada: e.target.value })}
-                    required
-                  />
-                </Grid>
 
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Código de Repuesto (Opcional)"
-                    placeholder="Ej: SKF-6204"
-                    value={formData.repuestoCodigo}
-                    onChange={(e) => setFormData({ ...formData, repuestoCodigo: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Descripción de Repuesto / Insumo"
-                    placeholder="Ej: Rulemán blindado, grasa de litio"
-                    value={formData.repuestoDescripcion}
-                    onChange={(e) => setFormData({ ...formData, repuestoDescripcion: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Cantidad"
-                    placeholder="Ej: 2 unidades"
-                    value={formData.repuestoCantidad}
-                    onChange={(e) => setFormData({ ...formData, repuestoCantidad: e.target.value })}
-                  />
-                </Grid>
+              <Box sx={{ mb: 2 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  multiline
+                  rows={2}
+                  label="Descripción de la Tarea / Fallo Observado *"
+                  placeholder="Detalle la rutina técnica o causa raíz del incidente según el dominio..."
+                  value={formData.tareaRealizada}
+                  onChange={(e) => setFormData({ ...formData, tareaRealizada: e.target.value })}
+                  required
+                />
+              </Box>
 
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    multiline
-                    rows={2}
-                    label="Observaciones y Recomendaciones Técnicas"
-                    placeholder="Comentarios adicionales para el equipo operativo..."
-                    value={formData.observaciones}
-                    onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-                  />
-                </Grid>
-              </Grid>
+              {/* Tabla Dinámica de Repuestos */}
+              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 1, textTransform: 'uppercase' }}>
+                Piezas y Repuestos Utilizados
+              </Typography>
+              <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px', overflowX: 'auto', mb: 1.5 }}>
+                <Table size="small">
+                  <TableHead sx={{ bgcolor: 'action.hover' }}>
+                    <TableRow>
+                      <TableCell sx={{ width: 40, fontWeight: 700, textAlign: 'center' }}>#</TableCell>
+                      <TableCell sx={{ width: 150, fontWeight: 700 }}>Código</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Descripción de Repuesto / Insumo *</TableCell>
+                      <TableCell sx={{ width: 140, fontWeight: 700 }}>Cantidad *</TableCell>
+                      <TableCell align="center" sx={{ width: 50, fontWeight: 700 }}>Acción</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {(!formData.repuestos || formData.repuestos.length === 0) ? (
+                      <TableRow>
+                        <TableCell colSpan={5} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                          <Typography variant="body2">No se han asignado repuestos a esta orden de trabajo.</Typography>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      formData.repuestos.map((r, idx) => (
+                        <TableRow key={r.id || idx} hover>
+                          <TableCell align="center" sx={{ color: 'text.secondary', fontWeight: 600, fontSize: '0.8rem' }}>
+                            {idx + 1}
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              size="small"
+                              placeholder="Ej: SKF-6204"
+                              value={r.codigo || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  repuestos: prev.repuestos.map((item, i) => i === idx ? { ...item, codigo: val } : item),
+                                }));
+                              }}
+                              sx={{ '& .MuiInputBase-input': { fontSize: '0.85rem' }, bgcolor: 'background.paper' }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              fullWidth
+                              size="small"
+                              placeholder="Ej: Rulemán blindado 2RS, grasa sintética..."
+                              value={r.descripcion || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  repuestos: prev.repuestos.map((item, i) => i === idx ? { ...item, descripcion: val } : item),
+                                }));
+                              }}
+                              sx={{ '& .MuiInputBase-input': { fontSize: '0.85rem' }, bgcolor: 'background.paper' }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              size="small"
+                              placeholder="Ej: 2 unidades"
+                              value={r.cantidad || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  repuestos: prev.repuestos.map((item, i) => i === idx ? { ...item, cantidad: val } : item),
+                                }));
+                              }}
+                              sx={{ '& .MuiInputBase-input': { fontSize: '0.85rem' }, bgcolor: 'background.paper' }}
+                            />
+                          </TableCell>
+                          <TableCell align="center">
+                            <Tooltip title="Eliminar repuesto">
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    repuestos: prev.repuestos.filter((_, i) => i !== idx),
+                                  }));
+                                }}
+                              >
+                                <DeleteOutlineIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              <Button
+                size="small"
+                variant="outlined"
+                color="primary"
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  const nextId = (formData.repuestos?.length || 0) + 1;
+                  setFormData((prev) => ({
+                    ...prev,
+                    repuestos: [
+                      ...(prev.repuestos || []),
+                      { id: nextId, codigo: '', descripcion: '', cantidad: '1 unidad' },
+                    ],
+                  }));
+                }}
+                sx={{ borderRadius: '8px', fontWeight: 600, mb: 2 }}
+              >
+                Agregar Repuesto
+              </Button>
+
+              <Box>
+                <TextField
+                  fullWidth
+                  size="small"
+                  multiline
+                  rows={2}
+                  label="Observaciones y Recomendaciones Técnicas"
+                  placeholder="Comentarios adicionales para el equipo de producción u operarios..."
+                  value={formData.observaciones}
+                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                />
+              </Box>
             </Paper>
           </DialogContent>
+
 
           <DialogActions
             sx={{
