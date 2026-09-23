@@ -8,7 +8,7 @@ import {
 export const ProductosCompuestosScreen = () => (
   <Box>
     <ActionBar />
-    <SectionLabel>Productos compuestos</SectionLabel>
+    <SectionLabel>Productos</SectionLabel>
     <TableSkeleton rows={6} cols={5} />
   </Box>
 );

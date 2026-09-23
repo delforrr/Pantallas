@@ -20,10 +20,11 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import BlockIcon from '@mui/icons-material/Block';
 import EditIcon from '@mui/icons-material/Edit';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const ESTADO_OP_COLORS = {
-  Planificada: 'info',
-  'En Proceso': 'warning',
+  Planificada: 'default',
+  'En Proceso': 'primary',
   Finalizada: 'success',
   Cancelada: 'default',
 };
@@ -103,8 +104,16 @@ export const OrdenProduccionCard = ({
           </Box>
           <Chip
             size="small"
+            icon={
+              orden.estado === 'Finalizada' ? (
+                <CheckCircleIcon style={{ fontSize: 16 }} />
+              ) : orden.estado === 'Cancelada' ? (
+                <CancelIcon style={{ fontSize: 16 }} />
+              ) : undefined
+            }
             label={orden.estado}
             color={ESTADO_OP_COLORS[orden.estado] || 'default'}
+            variant={orden.estado === 'Finalizada' || orden.estado === 'Cancelada' ? 'outlined' : 'filled'}
             sx={{ fontWeight: 600, fontSize: '0.74rem', flexShrink: 0 }}
           />
         </Box>

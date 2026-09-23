@@ -10,8 +10,6 @@ import {
   Select,
   MenuItem,
   Grid,
-  Card,
-  CardContent,
   TableContainer,
   Table,
   TableHead,
@@ -48,6 +46,7 @@ import BlockIcon from '@mui/icons-material/Block';
 import EditIcon from '@mui/icons-material/Edit';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -70,8 +69,8 @@ const RESPONSABLES_SUGERIDOS = [
 ];
 
 const ESTADO_OP_COLORS = {
-  Planificada: 'info',
-  'En Proceso': 'warning',
+  Planificada: 'default',
+  'En Proceso': 'primary',
   Finalizada: 'success',
   Cancelada: 'default',
 };
@@ -140,8 +139,9 @@ export const OrdenProduccionScreen = () => {
     return formItems.reduce((acc, it) => acc + (Number(it.cantidadKilos) || 0), 0);
   }, [formItems]);
 
-  // Estadísticas para KPIs superiores
+  // Estadísticas para badges de resumen tipo chips
   const stats = useMemo(() => {
+    const total = ordenes.length;
     const totalPlanificadas = ordenes.filter((o) => o.estado === 'Planificada').length;
     const totalEnProceso = ordenes.filter((o) => o.estado === 'En Proceso').length;
     const conFaltante = ordenes.filter((o) => o.estadoInsumos === 'Faltante').length;
@@ -149,7 +149,7 @@ export const OrdenProduccionScreen = () => {
       .filter((o) => o.estado !== 'Cancelada')
       .reduce((sum, o) => sum + (Number(o.cantidadKilos) || 0), 0);
 
-    return { totalPlanificadas, totalEnProceso, conFaltante, totalKilos };
+    return { total, totalPlanificadas, totalEnProceso, conFaltante, totalKilos };
   }, [ordenes]);
 
   // Filtrado y ordenamiento de órdenes
@@ -420,77 +420,7 @@ export const OrdenProduccionScreen = () => {
 
   return (
     <Box>
-      {/* ── KPIs Superiores ─────────────────────────────────── */}
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: {
-            xs: '1fr',
-            sm: 'repeat(2, 1fr)',
-            md: 'repeat(4, 1fr)',
-          },
-          gap: 2,
-          mb: 3,
-        }}
-      >
-        <Card elevation={1} sx={{ borderRadius: '14px', border: '1px solid', borderColor: 'divider', height: 116, boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
-          <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, letterSpacing: '0.04em' }}>
-              PLANIFICADAS (MAÑANA)
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: 'info.main', lineHeight: 1 }}>
-              {stats.totalPlanificadas}
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              Órdenes al cierre de jornada
-            </Typography>
-          </CardContent>
-        </Card>
-
-        <Card elevation={1} sx={{ borderRadius: '14px', border: '1px solid', borderColor: 'divider', height: 116, boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
-          <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, letterSpacing: '0.04em' }}>
-              EN PRODUCCIÓN (CUADRA)
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: 'warning.main', lineHeight: 1 }}>
-              {stats.totalEnProceso}
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              En elaboración activa
-            </Typography>
-          </CardContent>
-        </Card>
-
-        <Card elevation={1} sx={{ borderRadius: '14px', border: '1px solid', borderColor: 'divider', height: 116, boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
-          <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, letterSpacing: '0.04em' }}>
-              ALERTAS DE INSUMOS
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: stats.conFaltante > 0 ? 'error.main' : 'success.main', lineHeight: 1 }}>
-              {stats.conFaltante}
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {stats.conFaltante > 0 ? 'Con pedido a proveedor local' : 'Stock de materias primas OK'}
-            </Typography>
-          </CardContent>
-        </Card>
-
-        <Card elevation={1} sx={{ borderRadius: '14px', border: '1px solid', borderColor: 'divider', height: 116, boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
-          <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, letterSpacing: '0.04em' }}>
-              VOLUMEN PROGRAMADO
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: 'primary.main', lineHeight: 1 }}>
-              {stats.totalKilos} <Typography component="span" variant="h6" sx={{ fontWeight: 600 }}>kg</Typography>
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              Pastas a elaborar
-            </Typography>
-          </CardContent>
-        </Card>
-      </Box>
-
-      {/* ── Barra de Filtros y Herramientas ─────────────────── */}
+      {/* ── Barra de Búsqueda, Filtros con Chips de Resumen y Acciones ─── */}
       <Box
         sx={{
           display: 'flex',
@@ -501,7 +431,7 @@ export const OrdenProduccionScreen = () => {
           justifyContent: 'space-between',
         }}
       >
-        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', flex: 1, minWidth: 280 }}>
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', flex: 1, minWidth: 280, alignItems: 'center' }}>
           <TextField
             size="small"
             placeholder="Buscar por N° OP, producto, nota de pedido..."
@@ -546,6 +476,45 @@ export const OrdenProduccionScreen = () => {
               <MenuItem value="Faltante">Con faltante</MenuItem>
             </Select>
           </FormControl>
+
+          {/* Badges / Chips discretos de resumen con estilo y colores idénticos a Recetas */}
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', ml: { sm: 1 }, flexWrap: 'wrap' }}>
+            <Chip
+              size="small"
+              label={`Total: ${stats.total} (${stats.totalKilos} kg)`}
+              sx={{
+                fontWeight: 600,
+                fontSize: '0.8rem',
+                bgcolor: 'action.selected',
+                color: 'text.primary',
+                border: '1px solid',
+                borderColor: 'divider',
+              }}
+            />
+            <Chip
+              size="small"
+              variant="outlined"
+              color="default"
+              label={`Planificadas: ${stats.totalPlanificadas}`}
+              sx={{ fontWeight: 600, fontSize: '0.8rem' }}
+            />
+            <Chip
+              size="small"
+              variant="outlined"
+              color="primary"
+              label={`En Proceso: ${stats.totalEnProceso}`}
+              sx={{ fontWeight: 600, fontSize: '0.8rem' }}
+            />
+            {stats.conFaltante > 0 && (
+              <Chip
+                size="small"
+                variant="outlined"
+                color="error"
+                label={`Con Faltante: ${stats.conFaltante}`}
+                sx={{ fontWeight: 600, fontSize: '0.8rem' }}
+              />
+            )}
+          </Box>
         </Box>
 
         <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
@@ -696,9 +665,17 @@ export const OrdenProduccionScreen = () => {
                   </TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>
                     <Chip
+                      icon={
+                        row.estado === 'Finalizada' ? (
+                          <CheckCircleIcon style={{ fontSize: 16 }} />
+                        ) : row.estado === 'Cancelada' ? (
+                          <CancelIcon style={{ fontSize: 16 }} />
+                        ) : undefined
+                      }
                       label={row.estado}
                       size="small"
                       color={ESTADO_OP_COLORS[row.estado] || 'default'}
+                      variant={row.estado === 'Finalizada' || row.estado === 'Cancelada' ? 'outlined' : 'filled'}
                       sx={{ fontWeight: 600, fontSize: '0.72rem' }}
                     />
                   </TableCell>
@@ -1199,8 +1176,16 @@ export const OrdenProduccionScreen = () => {
                 </Typography>
               </Box>
               <Chip
+                icon={
+                  selectedOrden.estado === 'Finalizada' ? (
+                    <CheckCircleIcon style={{ fontSize: 18 }} />
+                  ) : selectedOrden.estado === 'Cancelada' ? (
+                    <CancelIcon style={{ fontSize: 18 }} />
+                  ) : undefined
+                }
                 label={selectedOrden.estado}
                 color={ESTADO_OP_COLORS[selectedOrden.estado] || 'default'}
+                variant={selectedOrden.estado === 'Finalizada' || selectedOrden.estado === 'Cancelada' ? 'outlined' : 'filled'}
                 sx={{ fontWeight: 700 }}
               />
             </DialogTitle>

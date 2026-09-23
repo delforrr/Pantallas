@@ -38,7 +38,7 @@ export const PAGE_LABELS = {
   // Producción
   orden_produccion: 'Orden de Producción',
   recetas: 'Recetas',
-  productos_compuestos: 'Productos Compuestos',
+  productos_compuestos: 'Productos',
   materia_prima: 'Materia Prima',
   stock: 'Stock',
 
@@ -81,7 +81,7 @@ export const ADMIN_NAV = [
     children: [
       { id: 'orden_produccion', label: 'Orden de Producción', icon: AssignmentIcon },
       { id: 'recetas', label: 'Recetas', icon: MenuBookIcon },
-      { id: 'productos_compuestos', label: 'Productos Compuestos', icon: CategoryIcon },
+      { id: 'productos_compuestos', label: 'Productos', icon: CategoryIcon },
       { id: 'materia_prima', label: 'Materia Prima', icon: GrassIcon },
       { id: 'stock', label: 'Stock', icon: InventoryIcon },
     ],
