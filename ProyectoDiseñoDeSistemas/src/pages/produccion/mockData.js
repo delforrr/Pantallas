@@ -197,54 +197,206 @@ export const ORDENES_PRODUCCION_INICIALES = [
     numero: 'OP #101',
     fechaEmision: '2026-09-14',
     fechaProgramada: '2026-09-15', // Fabricación al día siguiente
-    productoId: 'REC-001',
-    productoNombre: 'Ravioles de Ricota y Parmesano',
-    cantidadKilos: 50,
     responsable: 'Juan Carlos Pérez (Jefe de Cuadra)',
     turno: 'Mañana (06:00 - 14:00)',
     estado: 'Planificada', // Planificada, En Proceso, Finalizada, Cancelada
     estadoInsumos: 'Completo', // Completo, Faltante
     notaPedidoId: 'NP-2026-001',
-    observaciones: 'Programada al cierre de jornada para producción matutina.',
+    items: [
+      { recetaId: 'REC-001', productoNombre: 'Ravioles de Ricota y Parmesano', cantidadKilos: 50 },
+      { recetaId: 'REC-002', productoNombre: 'Tallarines al Huevo Clásicos', cantidadKilos: 20 },
+    ],
+    cantidadKilos: 70,
+    productoNombre: 'Ravioles de Ricota y Parmesano + 1 más',
+    solicitudCompraGenerada: false,
+    insumosFaltantes: [],
+    observaciones: 'Programada al cierre de jornada para primera hora del turno mañana.',
   },
   {
     id: 'OP-2026-002',
     numero: 'OP #102',
     fechaEmision: '2026-09-14',
     fechaProgramada: '2026-09-15',
-    productoId: 'REC-003',
-    productoNombre: 'Ravioles de Espinaca y Ricota',
-    cantidadKilos: 40,
     responsable: 'María Laura Gómez',
     turno: 'Tarde (14:00 - 22:00)',
     estado: 'Planificada',
     estadoInsumos: 'Faltante', // Genera orden de compra de insumo chico
     notaPedidoId: 'NP-2026-002',
-    observaciones: 'Faltante de Espinaca y Ricota en stock. Se emitió solicitud a compras.',
+    items: [
+      { recetaId: 'REC-003', productoNombre: 'Ravioles de Espinaca y Ricota', cantidadKilos: 40 },
+    ],
+    cantidadKilos: 40,
+    productoNombre: 'Ravioles de Espinaca y Ricota',
+    solicitudCompraGenerada: true,
+    ordenCompraLocalId: 'OC-LOC-042',
+    proveedorSugerido: 'Quinta Don Pedro (Local)',
+    insumosFaltantes: [
+      { nombre: 'Espinaca Fresca Seleccionada', requerido: 10, disponible: 12, faltante: 0, unidad: 'kg' },
+      { nombre: 'Ricota Fresca Entera', requerido: 12, disponible: 28, faltante: 0, unidad: 'kg' },
+    ],
+    observaciones: 'Faltante detectado de insumos frescos. Se generó solicitud a compras para proveedor local.',
   },
   {
     id: 'OP-2026-003',
     numero: 'OP #100',
     fechaEmision: '2026-09-13',
     fechaProgramada: '2026-09-14',
-    productoId: 'REC-002',
-    productoNombre: 'Tallarines al Huevo Clásicos',
-    cantidadKilos: 60,
     responsable: 'Juan Carlos Pérez',
     turno: 'Mañana (06:00 - 14:00)',
     estado: 'Finalizada',
     estadoInsumos: 'Completo',
     notaPedidoId: 'NP-2026-000',
-    observaciones: 'Lote finalizado sin desvíos de merma.',
+    items: [
+      { recetaId: 'REC-002', productoNombre: 'Tallarines al Huevo Clásicos', cantidadKilos: 60 },
+    ],
+    cantidadKilos: 60,
+    productoNombre: 'Tallarines al Huevo Clásicos',
+    solicitudCompraGenerada: false,
+    insumosFaltantes: [],
+    observaciones: 'Lote finalizado en tiempo y forma sin desvíos de merma.',
+  },
+  {
+    id: 'OP-2026-004',
+    numero: 'OP #103',
+    fechaEmision: '2026-09-14',
+    fechaProgramada: '2026-09-15',
+    responsable: 'Esteban Morales',
+    turno: 'Mañana (06:00 - 14:00)',
+    estado: 'En Proceso',
+    estadoInsumos: 'Completo',
+    notaPedidoId: 'NP-2026-003',
+    items: [
+      { recetaId: 'REC-004', productoNombre: 'Capeletis de Carne Braseada', cantidadKilos: 30 },
+    ],
+    cantidadKilos: 30,
+    productoNombre: 'Capeletis de Carne Braseada',
+    solicitudCompraGenerada: false,
+    insumosFaltantes: [],
+    observaciones: 'Elaboración en amasadora N° 2 iniciada según cronograma.',
+  },
+  {
+    id: 'OP-2026-005',
+    numero: 'OP #104',
+    fechaEmision: '2026-09-14',
+    fechaProgramada: '2026-09-15',
+    responsable: 'María Laura Gómez',
+    turno: 'Tarde (14:00 - 22:00)',
+    estado: 'Cancelada',
+    estadoInsumos: 'Completo',
+    notaPedidoId: 'NP-2026-004',
+    items: [
+      { recetaId: 'REC-001', productoNombre: 'Ravioles de Ricota y Parmesano', cantidadKilos: 20 },
+    ],
+    cantidadKilos: 20,
+    productoNombre: 'Ravioles de Ricota y Parmesano',
+    solicitudCompraGenerada: false,
+    insumosFaltantes: [],
+    observaciones: 'Cancelada por cambio de prioridad en pedido especial de banquetes.',
   },
 ];
 
 // Función utilitaria para calcular la materia prima requerida dada una receta y cantidad en kg
 export const calcularInsumosRequeridos = (receta, cantidadKilos) => {
   if (!receta || !receta.ingredientes) return [];
-  const factor = cantidadKilos / receta.rendimientoBase;
+  const factor = cantidadKilos / (receta.rendimientoBase || 10);
   return receta.ingredientes.map((ing) => ({
     ...ing,
     cantidadRequerida: Number((ing.cantidad * factor).toFixed(2)),
   }));
 };
+
+// Verifica la disponibilidad de insumos en stock comparando con las materias primas para una sola receta
+export const verificarDisponibilidadInsumos = (receta, cantidadKilos, inventario = MATERIAS_PRIMAS_INICIALES) => {
+  if (!receta || !receta.ingredientes) return { insumos: [], hayFaltante: false, faltantes: [] };
+  const requeridos = calcularInsumosRequeridos(receta, cantidadKilos);
+
+  const insumos = requeridos.map((req) => {
+    const mp = inventario.find((item) => item.id === req.materiaPrimaId || item.nombre.toLowerCase() === req.nombre.toLowerCase());
+    const stockActual = mp ? mp.stockActual : 0;
+    const falta = Math.max(0, Number((req.cantidadRequerida - stockActual).toFixed(2)));
+    const esFaltante = falta > 0;
+
+    return {
+      ...req,
+      stockActual,
+      faltante: falta,
+      esFaltante,
+      unidad: req.unidad || (mp ? mp.unidad : 'kg'),
+      proveedorSugerido: mp ? mp.proveedorSugerido : 'Proveedor Local Sugerido',
+      tipo: mp ? mp.tipo : 'Insumo',
+    };
+  });
+
+  const faltantes = insumos.filter((i) => i.esFaltante);
+  return {
+    insumos,
+    hayFaltante: faltantes.length > 0,
+    faltantes,
+  };
+};
+
+// Verifica la disponibilidad consolidada de insumos para una orden con múltiples productos a elaborar
+export const verificarDisponibilidadMultiplesProductos = (
+  items = [],
+  recetas = RECETAS_INICIALES,
+  inventario = MATERIAS_PRIMAS_INICIALES
+) => {
+  if (!items || items.length === 0) {
+    return { insumos: [], hayFaltante: false, faltantes: [], totalKilos: 0 };
+  }
+
+  const mapaInsumos = {};
+  let totalKilos = 0;
+
+  items.forEach((item) => {
+    const kilos = Number(item.cantidadKilos) || 0;
+    totalKilos += kilos;
+    const receta = recetas.find((r) => r.id === item.recetaId || r.nombreProducto === item.productoNombre);
+    if (!receta || !receta.ingredientes) return;
+
+    const factor = kilos / (receta.rendimientoBase || 10);
+    receta.ingredientes.forEach((ing) => {
+      const id = ing.materiaPrimaId || ing.nombre;
+      if (!mapaInsumos[id]) {
+        mapaInsumos[id] = {
+          materiaPrimaId: ing.materiaPrimaId,
+          nombre: ing.nombre,
+          unidad: ing.unidad,
+          cantidadRequerida: 0,
+        };
+      }
+      mapaInsumos[id].cantidadRequerida += ing.cantidad * factor;
+    });
+  });
+
+  const insumos = Object.values(mapaInsumos).map((req) => {
+    const cantReq = Number(req.cantidadRequerida.toFixed(2));
+    const mp = inventario.find(
+      (item) => item.id === req.materiaPrimaId || item.nombre.toLowerCase() === req.nombre.toLowerCase()
+    );
+    const stockActual = mp ? mp.stockActual : 0;
+    const falta = Math.max(0, Number((cantReq - stockActual).toFixed(2)));
+    const esFaltante = falta > 0;
+
+    return {
+      ...req,
+      cantidadRequerida: cantReq,
+      stockActual,
+      faltante: falta,
+      esFaltante,
+      unidad: req.unidad || (mp ? mp.unidad : 'kg'),
+      proveedorSugerido: mp ? mp.proveedorSugerido : 'Proveedor Local Sugerido',
+      tipo: mp ? mp.tipo : 'Insumo',
+    };
+  });
+
+  const faltantes = insumos.filter((i) => i.esFaltante);
+  return {
+    insumos,
+    hayFaltante: faltantes.length > 0,
+    faltantes,
+    totalKilos: Number(totalKilos.toFixed(2)),
+  };
+};
+
+
