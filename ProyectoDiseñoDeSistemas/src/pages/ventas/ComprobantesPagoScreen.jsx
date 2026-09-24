@@ -1,16 +1,413 @@
-import { Box } from "@mui/material";
+import { useState, useMemo } from 'react';
 import {
-  TableSkeleton,
-  ActionBar,
-  SectionLabel,
-} from "../../components/shared";
+  Box,
+  Paper,
+  Typography,
+  Button,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import CloseIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
+import PaidIcon from '@mui/icons-material/Paid';
+import PrintIcon from '@mui/icons-material/Print';
+import PaymentsIcon from '@mui/icons-material/Payments';
 
-export const ComprobantesPagoScreen = () => (
-  <Box>
-    <ActionBar />
-    <SectionLabel>Comprobantes de pago</SectionLabel>
-    <TableSkeleton rows={5} cols={5} />
-  </Box>
-);
+import { INITIAL_COMPROBANTES_PAGO, INITIAL_CLIENTES, INITIAL_PEDIDOS } from './mockData';
+
+export const ComprobantesPagoScreen = () => {
+  const [pagos, setPagos] = useState(INITIAL_COMPROBANTES_PAGO);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [medioFilter, setMedioFilter] = useState('TODOS');
+
+  // Modales
+  const [openForm, setOpenForm] = useState(false);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+
+  // Selecciones
+  const [selectedPago, setSelectedPago] = useState(null);
+
+  // Form State
+  const initialFormState = {
+    nroComprobantePago: '',
+    clienteId: 1,
+    pedidoId: 1,
+    medioPago: 'Efectivo',
+    montoAbonado: 15000,
+    concepto: 'Pago Total Venta Mostrador',
+    nroTransaccion: 'EF-CAJA-05',
+    observaciones: 'Pago en efectivo recibido en caja.',
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
+
+  // Filtrado
+  const filteredPagos = useMemo(() => {
+    return pagos.filter((item) => {
+      const matchSearch =
+        item.nroComprobantePago.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.clienteNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.concepto.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchMedio =
+        medioFilter === 'TODOS' || item.medioPago.toUpperCase().includes(medioFilter.toUpperCase());
+
+      return matchSearch && matchMedio;
+    });
+  }, [pagos, searchTerm, medioFilter]);
+
+  // Total Cobrado
+  const totalCobrado = useMemo(() => {
+    return filteredPagos.reduce((acc, p) => acc + (p.montoAbonado || 0), 0);
+  }, [filteredPagos]);
+
+  // Handlers
+  const handleOpenNewForm = () => {
+    const nextNum = pagos.length + 105;
+    const generatedNro = `PAG-2026-00${nextNum}`;
+    setFormData({ ...initialFormState, nroComprobantePago: generatedNro });
+    setOpenForm(true);
+  };
+
+  const handleOpenDetail = (item) => {
+    setSelectedPago(item);
+    setOpenDetail(true);
+  };
+
+  const handleOpenDelete = (item) => {
+    setSelectedPago(item);
+    setOpenDelete(true);
+  };
+
+  const handleSave = () => {
+    // Regla TP: Bloqueo de Cheques y Tarjetas de Crédito
+    if (formData.medioPago === 'Cheque' || formData.medioPago === 'Tarjeta de Crédito') {
+      alert('¡MEDIO DE PAGO NO PERMITIDO! Según las reglas del Trabajo Práctico, NO se aceptan cheques ni tarjetas de crédito.');
+      return;
+    }
+
+    const clienteObj = INITIAL_CLIENTES.find((c) => c.id === formData.clienteId);
+    const pedidoObj = INITIAL_PEDIDOS.find((p) => p.id === formData.pedidoId);
+
+    const payload = {
+      ...formData,
+      clienteNombre: clienteObj ? clienteObj.razonSocial : 'Cliente General',
+      nroPedido: pedidoObj ? pedidoObj.nroPedido : 'VENTA-DIRECTA',
+      fechaEmision: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      montoAbonado: parseFloat(formData.montoAbonado) || 0,
+    };
+
+    const newId = pagos.length > 0 ? Math.max(...pagos.map((p) => p.id)) + 1 : 1;
+    setPagos((prev) => [...prev, { ...payload, id: newId }]);
+    setOpenForm(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    setPagos((prev) => prev.filter((p) => p.id !== selectedPago.id));
+    setOpenDelete(false);
+  };
+
+  return (
+    <Box sx={{ p: { xs: 1.5, md: 3 } }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PaidIcon color="primary" fontSize="large" />
+            Comprobantes de Pago de Clientes
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Registro de cobros recibidos por Efectivo, Débito, MercadoPago y Cuenta DNI (Regla TP: Cero Cheques / Tarjeta Crédito).
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={handleOpenNewForm}
+          sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700, px: 2.5 }}
+        >
+          Registrar Cobro
+        </Button>
+      </Box>
+
+      {/* Muestrario de Total Cobrado */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper sx={{ p: 2, borderRadius: '14px', borderLeft: '5px solid #009246' }} elevation={1}>
+            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700 }}>
+              Total Cobrado Filtrado
+            </Typography>
+            <Typography variant="h4" sx={{ fontWeight: 800, color: '#009246', mt: 0.5 }}>
+              ${totalCobrado.toLocaleString()}
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={8}>
+          <Paper sx={{ p: 2, borderRadius: '14px', bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : '#fbfcfd' }} elevation={1}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <PaymentsIcon fontSize="inherit" color="info" /> Medios de Pago Permitidos por Dominio:
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+              <Chip label="Efectivo (Caja)" color="success" size="small" />
+              <Chip label="Tarjeta Débito (Posnet)" color="primary" size="small" />
+              <Chip label="MercadoPago (QR / Transferencia)" color="info" size="small" />
+              <Chip label="Cuenta DNI (App)" color="secondary" size="small" />
+              <Chip label="🚫 Cheques (No aceptado)" variant="outlined" color="error" size="small" />
+              <Chip label="🚫 Tarjeta Crédito (No aceptado)" variant="outlined" color="error" size="small" />
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Buscador y Filtros */}
+      <Paper elevation={1} sx={{ p: 2, mb: 3, borderRadius: '14px' }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} md={7}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Buscar por Nro Recibo, Cliente o Concepto..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} md={5}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Filtrar por Medio de Pago</InputLabel>
+              <Select value={medioFilter} label="Filtrar por Medio de Pago" onChange={(e) => setMedioFilter(e.target.value)}>
+                <MenuItem value="TODOS">Todos los Medios de Pago</MenuItem>
+                <MenuItem value="EFECTIVO">Efectivo</MenuItem>
+                <MenuItem value="DÉBITO">Tarjeta Débito</MenuItem>
+                <MenuItem value="MERCADOPAGO">MercadoPago</MenuItem>
+                <MenuItem value="CUENTA DNI">Cuenta DNI</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+      </Paper>
+
+      {/* Tabla */}
+      <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflow: 'hidden' }}>
+        <Table>
+          <TableHead sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8f9fa' }}>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700 }}>Nro Recibo Pago</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Cliente</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Fecha / Hora</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Medio de Pago</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Concepto / Ref</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700 }}>Monto Abonado ($)</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredPagos.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                  No se encontraron recibos de pago.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredPagos.map((item) => (
+                <TableRow key={item.id} hover>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>
+                    {item.nroComprobantePago}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{item.clienteNombre}</TableCell>
+                  <TableCell><Typography variant="body2">{item.fechaEmision}</Typography></TableCell>
+                  <TableCell><Chip label={item.medioPago} color="info" size="small" variant="outlined" /></TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{item.concepto}</Typography>
+                    <Typography variant="caption" color="text.secondary">Nro: {item.nroTransaccion}</Typography>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 800, color: '#009246' }}>
+                    ${item.montoAbonado.toLocaleString()}
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title="Ver Recibo Oficial">
+                      <IconButton size="small" color="info" onClick={() => handleOpenDetail(item)}>
+                        <VisibilityOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Anular Recibo">
+                      <IconButton size="small" color="error" onClick={() => handleOpenDelete(item)}>
+                        <DeleteOutlineIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Modal Alta de Pago */}
+      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="sm" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
+        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          Registrar Cobro a Cliente
+          <IconButton onClick={() => setOpenForm(false)}><CloseIcon /></IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField label="Nro Recibo" fullWidth size="small" disabled value={formData.nroComprobantePago} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Medio de Pago</InputLabel>
+                <Select value={formData.medioPago} label="Medio de Pago" onChange={(e) => setFormData({ ...formData, medioPago: e.target.value })}>
+                  <MenuItem value="Efectivo">Efectivo</MenuItem>
+                  <MenuItem value="Tarjeta Débito">Tarjeta Débito</MenuItem>
+                  <MenuItem value="MercadoPago">MercadoPago</MenuItem>
+                  <MenuItem value="Cuenta DNI">Cuenta DNI</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Cliente</InputLabel>
+                <Select value={formData.clienteId} label="Cliente" onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}>
+                  {INITIAL_CLIENTES.map((c) => (
+                    <MenuItem key={c.id} value={c.id}>{c.razonSocial}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Pedido Vinculado</InputLabel>
+                <Select value={formData.pedidoId} label="Pedido Vinculado" onChange={(e) => setFormData({ ...formData, pedidoId: e.target.value })}>
+                  {INITIAL_PEDIDOS.map((p) => (
+                    <MenuItem key={p.id} value={p.id}>{p.nroPedido} (${p.total.toLocaleString()})</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Monto Abonado ($)"
+                type="number"
+                fullWidth
+                size="small"
+                value={formData.montoAbonado}
+                onChange={(e) => setFormData({ ...formData, montoAbonado: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField label="Nro Transacción / Ticket" fullWidth size="small" value={formData.nroTransaccion} onChange={(e) => setFormData({ ...formData, nroTransaccion: e.target.value })} />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField label="Concepto del Pago" fullWidth size="small" value={formData.concepto} onChange={(e) => setFormData({ ...formData, concepto: e.target.value })} />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenForm(false)}>Cancelar</Button>
+          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave}>Guardar Recibo</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal Recibo Detalle */}
+      <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          Recibo de Pago Oficial #{selectedPago?.nroComprobantePago}
+          <IconButton onClick={() => setOpenDetail(false)}><CloseIcon /></IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {selectedPago && (
+            <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #009246', pb: 2, mb: 2 }}>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#009246' }}>PASTAFAB S.A.</Typography>
+                  <Typography variant="caption" display="block">Comprobante de Pago Oficial</Typography>
+                </Box>
+                <Box align="right">
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>{selectedPago.nroComprobantePago}</Typography>
+                  <Typography variant="caption" display="block">{selectedPago.fechaEmision}</Typography>
+                </Box>
+              </Box>
+
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Recibimos de <strong>{selectedPago.clienteNombre}</strong> la cantidad de:
+              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 800, color: '#009246', mb: 2 }}>
+                ${selectedPago.montoAbonado.toLocaleString()}
+              </Typography>
+
+              <Grid container spacing={1}>
+                <Grid item xs={6}>
+                  <Typography variant="caption" color="text.secondary" display="block">Medio de Pago:</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedPago.medioPago}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="caption" color="text.secondary" display="block">Nro Transacción:</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPago.nroTransaccion}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="caption" color="text.secondary" display="block">Concepto:</Typography>
+                  <Typography variant="body2">{selectedPago.concepto}</Typography>
+                </Grid>
+              </Grid>
+            </Paper>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button startIcon={<PrintIcon />} onClick={() => window.print()}>Imprimir Recibo</Button>
+          <Button variant="contained" onClick={() => setOpenDetail(false)}>Cerrar</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal Confirmación Anulación */}
+      <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
+        <DialogTitle sx={{ fontWeight: 700 }}>¿Anular Recibo de Pago?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            ¿Estás seguro de que deseas anular el recibo <strong>{selectedPago?.nroComprobantePago}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDelete(false)}>Cancelar</Button>
+          <Button color="error" variant="contained" onClick={handleDeleteConfirm}>Anular Recibo</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+};
 
 export default ComprobantesPagoScreen;

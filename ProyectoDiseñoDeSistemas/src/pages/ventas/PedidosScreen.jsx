@@ -1,18 +1,671 @@
-import { Box } from "@mui/material";
+import { useState, useMemo } from 'react';
 import {
-  TableSkeleton,
-  StatsRow,
-  ActionBar,
-  SectionLabel,
-} from "../../components/shared";
+  Box,
+  Paper,
+  Typography,
+  Button,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import CloseIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
+import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
+import PriceCheckIcon from '@mui/icons-material/PriceCheck';
+import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 
-export const PedidosScreen = () => (
-  <Box>
-    <StatsRow />
-    <ActionBar />
-    <SectionLabel>Gestión de pedidos</SectionLabel>
-    <TableSkeleton rows={7} cols={6} />
-  </Box>
-);
+import { INITIAL_PEDIDOS, INITIAL_CLIENTES } from './mockData';
+import { DetalleItemsVentasTable, ClienteMorosoAlert } from '../../components/ventas';
+
+export const PedidosScreen = () => {
+  const [pedidos, setPedidos] = useState(INITIAL_PEDIDOS);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [tipoFilter, setTipoFilter] = useState('TODOS');
+  const [estadoFilter, setEstadoFilter] = useState('TODOS');
+
+  // Modales
+  const [openForm, setOpenForm] = useState(false);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [openRegistrarPago, setOpenRegistrarPago] = useState(false);
+
+  // Selecciones
+  const [selectedPedido, setSelectedPedido] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Registrar Pago Form
+  const [montoPago, setMontoPago] = useState(0);
+  const [medioPago, setMedioPago] = useState('Efectivo');
+
+  // Form State Inicial
+  const initialFormState = {
+    nroPedido: '',
+    clienteId: 1,
+    tipoPedido: 'Venta Mostrador / Local',
+    domicilioEntrega: 'Retiro en Local Commercial',
+    telefono: '(02392) 43-9901',
+    fechaEmision: '2026-09-24',
+    fechaEntregaEstimada: '2026-09-25',
+    horaEntregaEstimada: '12:00',
+    vendedor: 'Juan Borlini',
+    estadoPedido: 'Pendiente',
+    señaExigida: 0,
+    señaPagada: 0,
+    estadoPago: 'Pendiente',
+    esCanje: false,
+    esDonacion: false,
+    descuentoAplicado: 0,
+    observaciones: '',
+    items: [
+      { productoId: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 2, precioUnitario: 4500, subtotal: 9000 },
+    ],
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
+
+  // Cliente Seleccionado en Formulario para validar morosidad
+  const selectedClienteForm = useMemo(() => {
+    return INITIAL_CLIENTES.find((c) => c.id === formData.clienteId);
+  }, [formData.clienteId]);
+
+  // Filtrado
+  const filteredPedidos = useMemo(() => {
+    return pedidos.filter((item) => {
+      const matchSearch =
+        item.nroPedido.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.clienteNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.tipoPedido.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchTipo =
+        tipoFilter === 'TODOS' ||
+        (tipoFilter === 'CANJE' && item.esCanje) ||
+        (tipoFilter === 'DONACION' && item.esDonacion) ||
+        (tipoFilter === 'EVENTO' && item.tipoPedido.includes('Evento')) ||
+        (tipoFilter === 'SEMANAL' && item.tipoPedido.includes('Semanal'));
+
+      const matchEstado =
+        estadoFilter === 'TODOS' || item.estadoPedido.toUpperCase() === estadoFilter.toUpperCase();
+
+      return matchSearch && matchTipo && matchEstado;
+    });
+  }, [pedidos, searchTerm, tipoFilter, estadoFilter]);
+
+  // Cálculos de Totales del Formulario
+  const subtotalForm = useMemo(() => {
+    if (formData.esCanje || formData.esDonacion) return 0;
+    return (formData.items || []).reduce((acc, curr) => acc + (curr.subtotal || 0), 0);
+  }, [formData.items, formData.esCanje, formData.esDonacion]);
+
+  const totalForm = useMemo(() => {
+    if (formData.esCanje || formData.esDonacion) return 0;
+    const desc = (subtotalForm * (formData.descuentoAplicado || 0)) / 100;
+    return subtotalForm - desc;
+  }, [subtotalForm, formData.descuentoAplicado, formData.esCanje, formData.esDonacion]);
+
+  // Handlers
+  const handleOpenNewForm = (tipoEspecial = 'REGULAR') => {
+    setIsEditing(false);
+    const nextNum = pedidos.length + 1;
+    const generatedNro = `PED-2026-00${nextNum}`;
+
+    if (tipoEspecial === 'CANJE') {
+      setFormData({
+        ...initialFormState,
+        nroPedido: generatedNro,
+        tipoPedido: 'Canje por Reclamo (Mal Estado)',
+        esCanje: true,
+        descuentoAplicado: 100,
+        observaciones: 'Canje sin costo por reposición de producto en mal estado (Regla TP: Orden $0).',
+        items: [{ productoId: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 1, precioUnitario: 0, subtotal: 0 }],
+      });
+    } else if (tipoEspecial === 'DONACION') {
+      setFormData({
+        ...initialFormState,
+        nroPedido: generatedNro,
+        tipoPedido: 'Donación Institucional ($0)',
+        esDonacion: true,
+        descuentoAplicado: 100,
+        observaciones: 'Donación documentada de alimentos a institución de caridad.',
+        items: [{ productoId: 104, productoNombre: 'Ñoquis de Papa Artesanales (Kg)', cantidad: 5, precioUnitario: 0, subtotal: 0 }],
+      });
+    } else {
+      setFormData({ ...initialFormState, nroPedido: generatedNro });
+    }
+    setOpenForm(true);
+  };
+
+  const handleOpenEditForm = (item) => {
+    setIsEditing(true);
+    setSelectedPedido(item);
+    setFormData({ ...item });
+    setOpenForm(true);
+  };
+
+  const handleOpenDetail = (item) => {
+    setSelectedPedido(item);
+    setOpenDetail(true);
+  };
+
+  const handleOpenRegistrarPagoModal = (item) => {
+    setSelectedPedido(item);
+    setMontoPago(item.total - item.señaPagada);
+    setOpenRegistrarPago(true);
+  };
+
+  const handleOpenDelete = (item) => {
+    setSelectedPedido(item);
+    setOpenDelete(true);
+  };
+
+  const handleSave = () => {
+    const clienteObj = INITIAL_CLIENTES.find((c) => c.id === formData.clienteId);
+    
+    // Regla TP: Bloqueo de moroso para ventas a crédito
+    if (clienteObj && clienteObj.estadoMoroso && formData.estadoPago.includes('Cuenta Corriente')) {
+      alert(`¡ACCIÓN BLOQUEADA! El cliente ${clienteObj.razonSocial} está calificado como MOROSO. Solo se le pueden emitir pedidos cobrados al contado o en efectivo.`);
+      return;
+    }
+
+    const payload = {
+      ...formData,
+      clienteNombre: clienteObj ? clienteObj.razonSocial : 'Cliente General',
+      subtotal: subtotalForm,
+      total: totalForm,
+      señaExigida: formData.tipoPedido.includes('Evento') ? totalForm * 0.5 : 0,
+      estadoPago: (formData.esCanje || formData.esDonacion) ? 'Canje / Donación $0' : formData.estadoPago,
+    };
+
+    if (isEditing) {
+      setPedidos((prev) =>
+        prev.map((p) => (p.id === selectedPedido.id ? { ...payload, id: selectedPedido.id } : p))
+      );
+    } else {
+      const newId = pedidos.length > 0 ? Math.max(...pedidos.map((p) => p.id)) + 1 : 1;
+      setPedidos((prev) => [...prev, { ...payload, id: newId }]);
+    }
+    setOpenForm(false);
+  };
+
+  const handleRegistrarPagoConfirm = () => {
+    setPedidos((prev) =>
+      prev.map((p) => {
+        if (p.id === selectedPedido.id) {
+          const nuevaSeña = p.señaPagada + parseFloat(montoPago || 0);
+          const nuevoEstadoPago = nuevaSeña >= p.total ? 'Saldado 100%' : `Seña $${nuevaSeña} Pagada`;
+          return {
+            ...p,
+            señaPagada: nuevaSeña,
+            estadoPago: nuevoEstadoPago,
+          };
+        }
+        return p;
+      })
+    );
+    setOpenRegistrarPago(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    setPedidos((prev) => prev.filter((p) => p.id !== selectedPedido.id));
+    setOpenDelete(false);
+  };
+
+  const getStatusChip = (estado) => {
+    switch (estado) {
+      case 'Finalizado':
+        return <Chip label="Finalizado" color="success" size="small" sx={{ fontWeight: 700 }} />;
+      case 'En Preparación':
+        return <Chip label="En Preparación" color="info" size="small" sx={{ fontWeight: 700 }} />;
+      case 'Pendiente':
+        return <Chip label="Pendiente" color="warning" size="small" sx={{ fontWeight: 700 }} />;
+      case 'Cancelado':
+        return <Chip label="Cancelado" color="error" size="small" sx={{ fontWeight: 600 }} />;
+      default:
+        return <Chip label={estado} size="small" />;
+    }
+  };
+
+  return (
+    <Box sx={{ p: { xs: 1.5, md: 3 } }}>
+      {/* Header de Pantalla */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ShoppingBagOutlinedIcon color="primary" fontSize="large" />
+            Administración de Pedidos de Clientes
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Control de pedidos semanales, mostrador, banquetes a 48hs y emisión de Canjes ($0) por reclamo de producto en mal estado.
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant="outlined"
+            color="warning"
+            startIcon={<ChangeCircleIcon />}
+            onClick={() => handleOpenNewForm('CANJE')}
+            sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}
+          >
+            Registrar Canje ($0)
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            startIcon={<VolunteerActivismIcon />}
+            onClick={() => handleOpenNewForm('DONACION')}
+            sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}
+          >
+            Donación ($0)
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => handleOpenNewForm('REGULAR')}
+            sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700, px: 2 }}
+          >
+            Nuevo Pedido
+          </Button>
+        </Box>
+      </Box>
+
+      {/* Buscador y Filtros */}
+      <Paper elevation={1} sx={{ p: 2, mb: 3, borderRadius: '14px' }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} md={5}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Buscar por Nro Pedido, Cliente o Domicilio..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+          </Grid>
+          <Grid item xs={6} md={3.5}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Tipo de Pedido</InputLabel>
+              <Select value={tipoFilter} label="Tipo de Pedido" onChange={(e) => setTipoFilter(e.target.value)}>
+                <MenuItem value="TODOS">Todos los Tipos</MenuItem>
+                <MenuItem value="SEMANAL">Semanales / Mayoristas</MenuItem>
+                <MenuItem value="EVENTO">Eventos Especiales (48hs)</MenuItem>
+                <MenuItem value="CANJE">Canje por Mal Estado ($0)</MenuItem>
+                <MenuItem value="DONACION">Donaciones ($0)</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={6} md={3.5}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Estado del Pedido</InputLabel>
+              <Select value={estadoFilter} label="Estado del Pedido" onChange={(e) => setEstadoFilter(e.target.value)}>
+                <MenuItem value="TODOS">Todos los Estados</MenuItem>
+                <MenuItem value="PENDIENTE">Pendientes</MenuItem>
+                <MenuItem value="EN PREPARACIÓN">En Preparación</MenuItem>
+                <MenuItem value="FINALIZADO">Finalizados</MenuItem>
+                <MenuItem value="CANCELADO">Cancelados</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+      </Paper>
+
+      {/* Tabla de Pedidos */}
+      <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflow: 'hidden' }}>
+        <Table>
+          <TableHead sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8f9fa' }}>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700 }}>Nro Pedido</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Cliente</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Tipo / Entrega</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700 }}>Total ($)</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Estado Pago</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Estado Pedido</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredPedidos.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                  No se encontraron pedidos registrados.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredPedidos.map((pedido) => (
+                <TableRow key={pedido.id} hover>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>
+                    {pedido.nroPedido}
+                    {pedido.esCanje && <Chip label="CANJE $0" color="warning" size="small" sx={{ ml: 1, fontWeight: 800 }} />}
+                    {pedido.esDonacion && <Chip label="DONACIÓN" color="secondary" size="small" sx={{ ml: 1, fontWeight: 800 }} />}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{pedido.clienteNombre}</TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{pedido.tipoPedido}</Typography>
+                    <Typography variant="caption" color="text.secondary">Fecha: {pedido.fechaEntregaEstimada} ({pedido.horaEntregaEstimada}hs)</Typography>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 800, color: pedido.total === 0 ? 'text.secondary' : '#009246' }}>
+                    ${pedido.total.toLocaleString()}
+                  </TableCell>
+                  <TableCell>
+                    <Chip label={pedido.estadoPago} variant="outlined" size="small" color={pedido.estadoPago.includes('Saldado') ? 'success' : 'default'} />
+                  </TableCell>
+                  <TableCell>{getStatusChip(pedido.estadoPedido)}</TableCell>
+                  <TableCell align="center">
+                    {pedido.total > 0 && pedido.señaPagada < pedido.total && (
+                      <Tooltip title="Registrar Pago / Seña">
+                        <IconButton size="small" color="success" onClick={() => handleOpenRegistrarPagoModal(pedido)}>
+                          <PriceCheckIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    <Tooltip title="Ver Detalle">
+                      <IconButton size="small" color="info" onClick={() => handleOpenDetail(pedido)}>
+                        <VisibilityOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Editar Pedido">
+                      <IconButton size="small" color="primary" onClick={() => handleOpenEditForm(pedido)}>
+                        <EditOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Eliminar / Cancelar">
+                      <IconButton size="small" color="error" onClick={() => handleOpenDelete(pedido)}>
+                        <DeleteOutlineIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Modal Formulario 2 Columnas (Nuevo / Editar Pedido) */}
+      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
+        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {isEditing ? `Editar Pedido ${formData.nroPedido}` : formData.esCanje ? 'Registrar Canje por Producto en Mal Estado ($0)' : formData.esDonacion ? 'Registrar Donación Institucional ($0)' : 'Nuevo Pedido de Cliente'}
+          <IconButton onClick={() => setOpenForm(false)}><CloseIcon /></IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {selectedClienteForm && selectedClienteForm.estadoMoroso && (
+            <ClienteMorosoAlert cliente={selectedClienteForm} />
+          )}
+
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid item xs={12} sm={4}>
+              <TextField label="Nro de Pedido" fullWidth size="small" disabled value={formData.nroPedido} />
+            </Grid>
+            <Grid item xs={12} sm={8}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Cliente Solicitante</InputLabel>
+                <Select
+                  value={formData.clienteId}
+                  label="Cliente Solicitante"
+                  onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
+                >
+                  {INITIAL_CLIENTES.map((c) => (
+                    <MenuItem key={c.id} value={c.id}>
+                      {c.razonSocial} {c.estadoMoroso ? '⚠️ (MOROSO)' : ''}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Tipo de Pedido</InputLabel>
+                <Select
+                  value={formData.tipoPedido}
+                  label="Tipo de Pedido"
+                  onChange={(e) => setFormData({ ...formData, tipoPedido: e.target.value })}
+                >
+                  <MenuItem value="Venta Mostrador / Local">Venta Mostrador / Local</MenuItem>
+                  <MenuItem value="Mayorista Semanal Fijo">Mayorista Semanal Fijo (Con Descuento)</MenuItem>
+                  <MenuItem value="Evento Especial (Cena 48hs)">Evento Especial (Requiere 48hs y 50% seña)</MenuItem>
+                  <MenuItem value="Canje por Reclamo (Mal Estado)">Canje por Reclamo (Valor $0)</MenuItem>
+                  <MenuItem value="Donación Institucional ($0)">Donación Institucional ($0)</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Domicilio de Entrega / Retiro"
+                fullWidth
+                size="small"
+                value={formData.domicilioEntrega}
+                onChange={(e) => setFormData({ ...formData, domicilioEntrega: e.target.value })}
+              />
+            </Grid>
+
+            <Grid item xs={6} sm={4}>
+              <TextField
+                label="Fecha Entrega Estimada"
+                type="date"
+                fullWidth
+                size="small"
+                slotProps={{ inputLabel: { shrink: true } }}
+                value={formData.fechaEntregaEstimada}
+                onChange={(e) => setFormData({ ...formData, fechaEntregaEstimada: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={6} sm={4}>
+              <TextField
+                label="Hora Entrega Estimada"
+                type="time"
+                fullWidth
+                size="small"
+                slotProps={{ inputLabel: { shrink: true } }}
+                value={formData.horaEntregaEstimada}
+                onChange={(e) => setFormData({ ...formData, horaEntregaEstimada: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Estado del Pedido</InputLabel>
+                <Select
+                  value={formData.estadoPedido}
+                  label="Estado del Pedido"
+                  onChange={(e) => setFormData({ ...formData, estadoPedido: e.target.value })}
+                >
+                  <MenuItem value="Pendiente">Pendiente</MenuItem>
+                  <MenuItem value="En Preparación">En Preparación</MenuItem>
+                  <MenuItem value="Finalizado">Finalizado</MenuItem>
+                  <MenuItem value="Cancelado">Cancelado</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+
+          {/* Tabla de ítems */}
+          <DetalleItemsVentasTable
+            items={formData.items || []}
+            onChangeItems={(newItems) => setFormData({ ...formData, items: newItems })}
+            esCanjeOReclamo={formData.esCanje || formData.esDonacion}
+          />
+
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Observaciones del Pedido / Canje"
+                fullWidth
+                multiline
+                rows={2}
+                size="small"
+                value={formData.observaciones}
+                onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Paper variant="outlined" sx={{ p: 2, borderRadius: '10px', bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0,146,70,0.08)' : '#f4fbf7' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography variant="body2">Subtotal:</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>${subtotalForm.toLocaleString()}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>Total a Cobrar:</Typography>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: formData.esCanje ? 'warning.main' : '#009246' }}>
+                    ${totalForm.toLocaleString()}
+                  </Typography>
+                </Box>
+                {formData.tipoPedido.includes('Evento') && (
+                  <Typography variant="caption" sx={{ color: '#ed6c02', fontWeight: 700, display: 'block' }}>
+                    * Requiere 50% de seña mínima ($ {(totalForm * 0.5).toLocaleString()})
+                  </Typography>
+                )}
+              </Paper>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setOpenForm(false)} color="inherit">Cancelar</Button>
+          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave}>
+            Guardar Pedido
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal Registrar Pago / Seña */}
+      <Dialog open={openRegistrarPago} onClose={() => setOpenRegistrarPago(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Registrar Pago / Seña</DialogTitle>
+        <DialogContent dividers>
+          {selectedPedido && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Typography variant="body2">
+                Pedido: <strong>{selectedPedido.nroPedido}</strong> ({selectedPedido.clienteNombre})
+              </Typography>
+              <Typography variant="body2">
+                Total Pedido: <strong>${selectedPedido.total.toLocaleString()}</strong> (Seña Pagada previa: ${selectedPedido.señaPagada.toLocaleString()})
+              </Typography>
+
+              <TextField
+                label="Monto a Cobrar / Seña ($)"
+                type="number"
+                fullWidth
+                size="small"
+                value={montoPago}
+                onChange={(e) => setMontoPago(e.target.value)}
+              />
+
+              <FormControl fullWidth size="small">
+                <InputLabel>Medio de Pago Permitido</InputLabel>
+                <Select value={medioPago} label="Medio de Pago Permitido" onChange={(e) => setMedioPago(e.target.value)}>
+                  <MenuItem value="Efectivo">Efectivo</MenuItem>
+                  <MenuItem value="Tarjeta Débito">Tarjeta Débito</MenuItem>
+                  <MenuItem value="MercadoPago">MercadoPago (QR / Transferencia)</MenuItem>
+                  <MenuItem value="Cuenta DNI">Cuenta DNI</MenuItem>
+                </Select>
+              </FormControl>
+              <Typography variant="caption" color="text.secondary">
+                * Regla TP: No se aceptan Cheques ni Tarjeta de Crédito.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenRegistrarPago(false)}>Cancelar</Button>
+          <Button variant="contained" color="success" onClick={handleRegistrarPagoConfirm}>Confirmar Pago</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal Detalle Pedido */}
+      <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          Detalle del Pedido #{selectedPedido?.nroPedido}
+          <IconButton onClick={() => setOpenDetail(false)}><CloseIcon /></IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {selectedPedido && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                  {selectedPedido.clienteNombre}
+                </Typography>
+                {getStatusChip(selectedPedido.estadoPedido)}
+              </Box>
+
+              <Grid container spacing={1}>
+                <Grid item xs={6}>
+                  <Typography variant="caption" color="text.secondary" display="block">Tipo de Pedido:</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPedido.tipoPedido}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="caption" color="text.secondary" display="block">Fecha Entrega:</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPedido.fechaEntregaEstimada} ({selectedPedido.horaEntregaEstimada}hs)</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="caption" color="text.secondary" display="block">Domicilio Entrega:</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPedido.domicilioEntrega}</Typography>
+                </Grid>
+              </Grid>
+
+              <DetalleItemsVentasTable items={selectedPedido.items || []} readOnly esCanjeOReclamo={selectedPedido.esCanje} />
+
+              <Paper variant="outlined" sx={{ p: 2, borderRadius: '10px' }}>
+                <Typography variant="body2" display="flex" justifyContent="space-between">
+                  Estado Pago: <strong>{selectedPedido.estadoPago}</strong>
+                </Typography>
+                <Typography variant="body2" display="flex" justifyContent="space-between">
+                  Seña / Cobrado: <strong>${selectedPedido.señaPagada.toLocaleString()}</strong>
+                </Typography>
+                <Typography variant="h6" display="flex" justifyContent="space-between" sx={{ fontWeight: 800, color: '#009246', mt: 1 }}>
+                  Total Final: <span>${selectedPedido.total.toLocaleString()}</span>
+                </Typography>
+              </Paper>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" onClick={() => setOpenDetail(false)}>Cerrar</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal Confirmación Eliminación */}
+      <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
+        <DialogTitle sx={{ fontWeight: 700 }}>¿Eliminar Pedido?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            ¿Estás seguro de que deseas eliminar el pedido <strong>{selectedPedido?.nroPedido}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDelete(false)}>Cancelar</Button>
+          <Button color="error" variant="contained" onClick={handleDeleteConfirm}>Eliminar</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+};
 
 export default PedidosScreen;
