@@ -1,9 +1,12 @@
 import PropTypes from 'prop-types';
 import { Alert, AlertTitle, Button, Typography } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { calcularEstadoMoroso } from '../../pages/ventas/mockData';
 
-export const ClienteMorosoAlert = ({ cliente, onVerDetalle }) => {
-  if (!cliente || !cliente.estadoMoroso) return null;
+export const ClienteMorosoAlert = ({ cliente, comprobantesVenta, onVerDetalle }) => {
+  const morosidad = calcularEstadoMoroso(cliente, comprobantesVenta);
+
+  if (!morosidad.esMoroso) return null;
 
   return (
     <Alert
@@ -28,8 +31,8 @@ export const ClienteMorosoAlert = ({ cliente, onVerDetalle }) => {
         ¡Alerta de Cliente Moroso! - Venta a Crédito Bloqueada
       </AlertTitle>
       <Typography variant="body2">
-        El cliente <strong>{cliente.razonSocial}</strong> presenta <strong>{cliente.diasAtraso} días de atraso</strong> en el pago mensual de su cuenta corriente.
-        Por política del Trabajo Práctico, el sistema ha bloqueado automáticamente la posibilidad de emitir nuevos pedidos a crédito a este cliente. Solo se permiten cobros en efectivo o de contado.
+        El cliente <strong>{cliente.razonSocial}</strong> ha sido detectado como <strong>MOROSO</strong> ({morosidad.razon}).
+        Por política del Trabajo Práctico, el sistema bloquea automáticamente la emisión de nuevos pedidos a crédito a este cliente. Solo se permiten cobros en efectivo o de contado.
       </Typography>
     </Alert>
   );
@@ -37,6 +40,7 @@ export const ClienteMorosoAlert = ({ cliente, onVerDetalle }) => {
 
 ClienteMorosoAlert.propTypes = {
   cliente: PropTypes.object,
+  comprobantesVenta: PropTypes.array,
   onVerDetalle: PropTypes.func,
 };
 
