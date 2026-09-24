@@ -53,10 +53,10 @@ export const PresupuestosScreen = () => {
   const [selectedPresupuesto, setSelectedPresupuesto] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Form State
+  // Form State Normalizado
   const initialFormState = {
     nroPresupuesto: '',
-    clienteId: 1,
+    idCliente: 1,
     tipoPedido: 'Evento / Cena de Gala (150 personas)',
     fechaEmision: '2026-09-24',
     validezHasta: '2026-10-01',
@@ -64,7 +64,7 @@ export const PresupuestosScreen = () => {
     observaciones: '',
     estado: 'Pendiente',
     items: [
-      { productoId: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 10, precioUnitario: 4500, subtotal: 45000 },
+      { idDetallePresupuestoCliente: 1, idProductoCompuesto: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 10, precioUnitario: 4500, subtotal: 45000 },
     ],
   };
 
@@ -126,7 +126,7 @@ export const PresupuestosScreen = () => {
   };
 
   const handleSave = () => {
-    const clienteObj = INITIAL_CLIENTES.find((c) => c.id === formData.clienteId);
+    const clienteObj = INITIAL_CLIENTES.find((c) => c.idCliente === formData.idCliente);
     const payload = {
       ...formData,
       clienteNombre: clienteObj ? clienteObj.razonSocial : 'Cliente General',
@@ -138,24 +138,24 @@ export const PresupuestosScreen = () => {
 
     if (isEditing) {
       setPresupuestos((prev) =>
-        prev.map((p) => (p.id === selectedPresupuesto.id ? { ...payload, id: selectedPresupuesto.id } : p))
+        prev.map((p) => (p.idPresupuestoCliente === selectedPresupuesto.idPresupuestoCliente ? { ...payload, idPresupuestoCliente: selectedPresupuesto.idPresupuestoCliente } : p))
       );
     } else {
-      const newId = presupuestos.length > 0 ? Math.max(...presupuestos.map((p) => p.id)) + 1 : 1;
-      setPresupuestos((prev) => [...prev, { ...payload, id: newId }]);
+      const newId = presupuestos.length > 0 ? Math.max(...presupuestos.map((p) => p.idPresupuestoCliente)) + 1 : 1;
+      setPresupuestos((prev) => [...prev, { ...payload, idPresupuestoCliente: newId }]);
     }
     setOpenForm(false);
   };
 
   const handleConvertirAPedido = (presupuesto) => {
     setPresupuestos((prev) =>
-      prev.map((p) => (p.id === presupuesto.id ? { ...p, estado: 'Aceptado' } : p))
+      prev.map((p) => (p.idPresupuestoCliente === presupuesto.idPresupuestoCliente ? { ...p, estado: 'Aceptado' } : p))
     );
     alert(`¡Presupuesto ${presupuesto.nroPresupuesto} ACEPTADO! Se ha generado la Orden de Pedido correspondiente con un adelanto del 50% ($${(presupuesto.total * 0.5).toLocaleString()}).`);
   };
 
   const handleDeleteConfirm = () => {
-    setPresupuestos((prev) => prev.filter((p) => p.id !== selectedPresupuesto.id));
+    setPresupuestos((prev) => prev.filter((p) => p.idPresupuestoCliente !== selectedPresupuesto.idPresupuestoCliente));
     setOpenDelete(false);
   };
 
@@ -220,11 +220,7 @@ export const PresupuestosScreen = () => {
           <Grid item xs={12} md={5}>
             <FormControl fullWidth size="small">
               <InputLabel>Filtrar por Estado</InputLabel>
-              <Select
-                value={estadoFilter}
-                label="Filtrar por Estado"
-                onChange={(e) => setEstadoFilter(e.target.value)}
-              >
+              <Select value={estadoFilter} label="Filtrar por Estado" onChange={(e) => setEstadoFilter(e.target.value)}>
                 <MenuItem value="TODOS">Todos los Estados</MenuItem>
                 <MenuItem value="PENDIENTE">Pendientes</MenuItem>
                 <MenuItem value="ACEPTADO">Aceptados</MenuItem>
@@ -243,7 +239,8 @@ export const PresupuestosScreen = () => {
               <TableCell sx={{ fontWeight: 700 }}>Nro Presupuesto</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Cliente</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Tipo de Pedido / Evento</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Emisión / Validez</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Emisión</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Validez</TableCell>
               <TableCell align="right" sx={{ fontWeight: 700 }}>Total ($)</TableCell>
               <TableCell align="right" sx={{ fontWeight: 700 }}>Adelanto 50% ($)</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
@@ -253,22 +250,20 @@ export const PresupuestosScreen = () => {
           <TableBody>
             {filteredPresupuestos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                <TableCell colSpan={9} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                   No se encontraron presupuestos cargados.
                 </TableCell>
               </TableRow>
             ) : (
               filteredPresupuestos.map((item) => (
-                <TableRow key={item.id} hover>
+                <TableRow key={item.idPresupuestoCliente} hover>
                   <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>
                     {item.nroPresupuesto}
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{item.clienteNombre}</TableCell>
                   <TableCell>{item.tipoPedido}</TableCell>
-                  <TableCell>
-                    <Typography variant="body2">{item.fechaEmision}</Typography>
-                    <Typography variant="caption" color="text.secondary">Vence: {item.validezHasta}</Typography>
-                  </TableCell>
+                  <TableCell><Typography variant="body2">{item.fechaEmision}</Typography></TableCell>
+                  <TableCell><Typography variant="body2" color="error">{item.validezHasta}</Typography></TableCell>
                   <TableCell align="right" sx={{ fontWeight: 800, color: '#009246' }}>
                     ${item.total.toLocaleString()}
                   </TableCell>
@@ -307,7 +302,7 @@ export const PresupuestosScreen = () => {
         </Table>
       </TableContainer>
 
-      {/* Modal Formulario (Alta / Edición) */}
+      {/* Modal Formulario */}
       <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
         <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {isEditing ? `Editar Presupuesto ${formData.nroPresupuesto}` : 'Nuevo Presupuesto para Cliente'}
@@ -316,25 +311,19 @@ export const PresupuestosScreen = () => {
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ mb: 2 }}>
             <Grid item xs={12} sm={4}>
-              <TextField
-                label="Nro de Presupuesto"
-                fullWidth
-                size="small"
-                disabled
-                value={formData.nroPresupuesto}
-              />
+              <TextField label="Nro de Presupuesto" fullWidth size="small" disabled value={formData.nroPresupuesto} />
             </Grid>
             <Grid item xs={12} sm={8}>
               <FormControl fullWidth size="small">
                 <InputLabel>Cliente Solicitante</InputLabel>
                 <Select
-                  value={formData.clienteId}
+                  value={formData.idCliente}
                   label="Cliente Solicitante"
-                  onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, idCliente: e.target.value })}
                 >
                   {INITIAL_CLIENTES.map((c) => (
-                    <MenuItem key={c.id} value={c.id}>
-                      {c.razonSocial} ({c.tipoCliente})
+                    <MenuItem key={c.idCliente} value={c.idCliente}>
+                      {c.razonSocial}
                     </MenuItem>
                   ))}
                 </Select>
@@ -375,7 +364,6 @@ export const PresupuestosScreen = () => {
             </Grid>
           </Grid>
 
-          {/* Tabla de Productos */}
           <DetalleItemsVentasTable
             items={formData.items || []}
             onChangeItems={(newItems) => setFormData({ ...formData, items: newItems })}
@@ -394,12 +382,11 @@ export const PresupuestosScreen = () => {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Paper variant="outlined" sx={{ p: 2, borderRadius: '10px', bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0,146,70,0.08)' : '#f4fbf7' }}>
+              <Paper variant="outlined" sx={{ p: 2, borderRadius: '10px' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                   <Typography variant="body2">Subtotal:</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>${subtotalForm.toLocaleString()}</Typography>
                 </Box>
-
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body2">Descuento (%):</Typography>
                   <TextField
@@ -410,20 +397,10 @@ export const PresupuestosScreen = () => {
                     onChange={(e) => setFormData({ ...formData, descuentoPorcentaje: parseFloat(e.target.value) || 0 })}
                   />
                 </Box>
-
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>Total Cotizado:</Typography>
                   <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#009246' }}>
                     ${totalForm.toLocaleString()}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', bgcolor: 'rgba(237,108,2,0.1)', p: 1, borderRadius: '6px' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#ed6c02' }}>
-                    Seña del 50% Requerida (TP):
-                  </Typography>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: '#ed6c02' }}>
-                    ${adelanto50Form.toLocaleString()}
                   </Typography>
                 </Box>
               </Paper>
@@ -438,7 +415,7 @@ export const PresupuestosScreen = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal Detalle Cotización / Impresión */}
+      {/* Modal Detalle Cotización */}
       <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="md" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           Cotización Oficial #{selectedPresupuesto?.nroPresupuesto}
@@ -449,48 +426,21 @@ export const PresupuestosScreen = () => {
             <Box sx={{ p: 1 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#009246' }}>FÁBRICA DE PASTAS ERPSISTEMAS</Typography>
-                  <Typography variant="caption" display="block">Av. Villegas 450, Trenque Lauquen</Typography>
-                  <Typography variant="caption" display="block">CUIT: 30-71928441-0</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#009246' }}>PASTAFAB S.A.</Typography>
+                  <Typography variant="caption" display="block">Presupuesto #{selectedPresupuesto.nroPresupuesto}</Typography>
                 </Box>
                 <Box align="right">
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>{selectedPresupuesto.nroPresupuesto}</Typography>
                   <Typography variant="body2">Emisión: {selectedPresupuesto.fechaEmision}</Typography>
-                  <Typography variant="body2" color="error">Vence: {selectedPresupuesto.validezHasta}</Typography>
                 </Box>
               </Box>
 
-              <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: '10px' }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>Cliente Cotizado:</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPresupuesto.clienteNombre}</Typography>
-                <Typography variant="caption" color="text.secondary">Evento / Tipo: {selectedPresupuesto.tipoPedido}</Typography>
-              </Paper>
-
               <DetalleItemsVentasTable items={selectedPresupuesto.items || []} readOnly />
-
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                <Paper variant="outlined" sx={{ p: 2, borderRadius: '10px', minWidth: '280px' }}>
-                  <Typography variant="body2" display="flex" justifyContent="space-between">
-                    Subtotal: <span>${selectedPresupuesto.subtotal.toLocaleString()}</span>
-                  </Typography>
-                  {selectedPresupuesto.descuentoPorcentaje > 0 && (
-                    <Typography variant="body2" color="success.main" display="flex" justifyContent="space-between">
-                      Descuento ({selectedPresupuesto.descuentoPorcentaje}%): <span>-${selectedPresupuesto.montoDescuento.toLocaleString()}</span>
-                    </Typography>
-                  )}
-                  <Typography variant="h6" display="flex" justifyContent="space-between" sx={{ fontWeight: 800, mt: 1, color: '#009246' }}>
-                    Total Cotizado: <span>${selectedPresupuesto.total.toLocaleString()}</span>
-                  </Typography>
-                  <Typography variant="subtitle2" display="flex" justifyContent="space-between" sx={{ color: '#ed6c02', fontWeight: 700, mt: 1 }}>
-                    Seña 50% Obligatoria: <span>${(selectedPresupuesto.total * 0.5).toLocaleString()}</span>
-                  </Typography>
-                </Paper>
-              </Box>
             </Box>
           )}
         </DialogContent>
         <DialogActions>
-          <Button startIcon={<PrintIcon />} onClick={() => window.print()} color="inherit">Imprimir / Exportar PDF</Button>
+          <Button startIcon={<PrintIcon />} onClick={() => window.print()} color="inherit">Imprimir Cotización</Button>
           <Button variant="contained" onClick={() => setOpenDetail(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>

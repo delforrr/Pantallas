@@ -68,7 +68,7 @@ export const CierreCajaScreen = () => {
     if (!confirm) return;
 
     const nuevoRegistroHistorial = {
-      id: Date.now(),
+      idCierreCaja: Date.now(),
       fecha: cajaState.fecha,
       responsable: cajaState.responsable,
       fondoInicial: cajaState.fondoInicial,
@@ -111,7 +111,7 @@ export const CierreCajaScreen = () => {
             Control y Cierre Diario de Caja
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Consolidación diaria de cobros por medios de pago, arqueo físico de efectivo y arqueo de caja.
+            Consolidación diaria de cobros por medios de pago y arqueo físico de efectivo.
           </Typography>
         </Box>
         <Chip
@@ -295,7 +295,7 @@ export const CierreCajaScreen = () => {
             </TableHead>
             <TableBody>
               {cajaState.historialCierres.map((row) => (
-                <TableRow key={row.id} hover>
+                <TableRow key={row.idCierreCaja} hover>
                   <TableCell sx={{ fontWeight: 700 }}>{row.fecha}</TableCell>
                   <TableCell>{row.responsable}</TableCell>
                   <TableCell align="right">${row.totalEfectivo.toLocaleString()}</TableCell>
@@ -330,7 +330,7 @@ export const CierreCajaScreen = () => {
       {/* Modal Detalle Cierre */}
       <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          Resumen Cierre de Caja ({selectedCierre?.fecha})
+          Resumen Cierre ({selectedCierre?.fecha})
           <IconButton onClick={() => setOpenDetail(false)}><CloseIcon /></IconButton>
         </DialogTitle>
         <DialogContent dividers>

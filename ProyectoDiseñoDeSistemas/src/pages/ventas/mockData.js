@@ -1,140 +1,151 @@
 /**
  * mockData.js - Módulo de Ventas y Pagos (PastaFab ERP)
- * Autocontenido y totalmente alineado con la documentación del Trabajo Práctico Anual y el Dominio del Sistema.
+ * Normalizado según la documentación del Diagrama de Clases UML del Trabajo Práctico Anual.
  *
- * Entidades y reglas del dominio reflejadas:
- * - Cliente: (IdCliente, Cuit, RazónSocial, Responsable, Teléfono, Email, Calle, Altura, Localidad, Provincia, TipoIVA, TipoCliente, AceptaCredito, LimiteCredito, CreditoUsado, EstadoMoroso, DiasAtraso, Estado)
- * - PresupuestoCliente: (IdPresupuesto, NroPresupuesto, Cliente, TipoPedido, FechaEmision, ValidezHasta, Descuento, Adelanto50Requerido, Subtotal, Total, Estado, DetalleItems)
- * - ComprobanteDePedidoCliente (Pedidos): (IdPedido, NroPedido, Cliente, TipoPedido [Local, Semanal, Evento, Mayorista, Canje, Donacion], DomicilioEntrega, Telefono, FechaEmision, FechaEntregaEstimada, HoraEntregaEstimada, EstadoPedido, SeñaPagada, EstadoPago, EsCanje, EsDonacion, Descuento, Total, DetalleItems)
- * - ComprobanteDeVentaCliente (Facturas / Recibos Venta): (IdComprobanteVenta, NroComprobante, PedidoAsociado, Cliente, TipoComprobante [Factura A, B, C, Recibo Venta], FechaEmision, TipoIVA, ImporteNeto, ImporteIVA, Total, Estado)
- * - ComprobanteDePagoCliente (Pagos): (IdComprobantePago, NroComprobantePago, PedidoAsociado, FacturaAsociada, Cliente, FechaEmision, MedioDePago [Efectivo, Tarjeta Débito, MercadoPago, Cuenta DNI], MontoAbonado, Concepto, NroTransaccion, Observaciones)
- * - CierreCaja (Administrar Caja): (IdCierre, Fecha, EstadoCaja, Responsable, FondoInicial, TotalEfectivo, TotalDebito, TotalMercadoPago, TotalCuentaDNI, TotalVentasDia, ArqueoEfectivo, DiferenciaCaja, Observaciones, HistorialCierres)
+ * Convenciones de Claves Primarias (PK) y Foráneas (FK) normalizadas:
+ * - Cliente: idCliente (PK), cuit, razonSocial, responsable, telefono, email, idLocalidad, calle, altura, localidad, provincia, idTipoIva, tipoIva, tipoCliente, aceptaCredito, limiteCredito, creditoUsado
+ *   * NOTA PROFESOR: 'estadoMoroso' NO es un atributo de la clase Cliente, sino un CAMPO CALCULADO en base a facturas/cuentas impagas (>30 días atraso o crédito excedido).
+ * - MedioDePagoCliente: idMedioDePagoCliente (PK), descripcion
+ * - PresupuestoCliente: idPresupuestoCliente (PK), nroPresupuesto, idCliente (FK), clienteNombre, tipoPedido, fechaEmision, validezHasta, descuentoPorcentaje, subtotal, total, estado, items
+ * - ComprobanteDePedidoCliente: idComprobantePedidoCliente (PK), nroPedido, idCliente (FK), clienteNombre, tipoPedido, idDomicilioEntrega, domicilioEntrega, telefonoPedido, fechaEmision, fechaEntregaEstimada, horaEntregaEstimada, idEmpleado, vendedor, estadoPedido, señaExigida, señaPagada, estadoPago, esCanje, esDonacion, descuentoAplicado, total, items
+ * - ComprobanteDeVentaCliente: idComprobanteVentaCliente (PK), nroComprobante, idComprobantePedidoCliente (FK), nroPedido, idCliente (FK), clienteNombre, cuitCliente, tipoComprobante, fechaEmision, horaEmision, tipoIva, importeNeto, importeIva, total, estado, condicionPago, diasAtraso
+ * - ComprobanteDePagoCliente: idComprobantePagoCliente (PK), nroComprobantePago, idComprobantePedidoCliente (FK), nroPedido, idComprobanteVentaCliente (FK), nroFactura, idCliente (FK), clienteNombre, idMedioDePagoCliente (FK), medioPago, fechaEmision, montoAbonado, concepto, nroTransaccion, observaciones
+ * - CierreCaja: idCierreCaja (PK), fecha, estadoCaja, responsable, fondoInicial, totalIngresosEfectivo, totalIngresosDebito, totalIngresosMercadoPago, totalIngresosCuentaDNI, totalVentasDia, arqueoEfectivoFisico, diferenciaCaja, observaciones, historialCierres
  */
 
+// Medios de Pago Normalizados
+export const MEDIOS_DE_PAGO = [
+  { idMedioDePagoCliente: 1, descripcion: 'Efectivo' },
+  { idMedioDePagoCliente: 2, descripcion: 'Tarjeta Débito' },
+  { idMedioDePagoCliente: 3, descripcion: 'MercadoPago' },
+  { idMedioDePagoCliente: 4, descripcion: 'Cuenta DNI' },
+];
+
+// Clientes Normalizados (Sin atributo 'estadoMoroso' estático)
 export const INITIAL_CLIENTES = [
   {
-    id: 1,
+    idCliente: 1,
     cuit: '30-68912455-2',
     razonSocial: 'Trattoria & Ristorante Italia Bella',
     responsable: 'Giovanni Rossi',
     telefono: '(02392) 43-9901',
     email: 'contacto@italiabella.com.ar',
+    idLocalidad: 1,
     calle: 'Av. Villegas',
     altura: '450',
     localidad: 'Trenque Lauquen',
     provincia: 'Buenos Aires',
+    idTipoIva: 1,
     tipoIva: 'Responsable Inscripto',
     tipoCliente: 'Mayorista (Restaurante / Semanal)',
     aceptaCredito: true,
     limiteCredito: 350000,
     creditoUsado: 120000,
-    estadoMoroso: false,
-    diasAtraso: 0,
     diaEntregaHabitual: 'Jueves',
     estado: 'Activo',
   },
   {
-    id: 2,
+    idCliente: 2,
     cuit: '30-71029384-8',
     razonSocial: 'Supermercados La Anónima Sucursal 12',
     responsable: 'Martín Benítez (Gerente Compras)',
     telefono: '(02392) 42-1100',
     email: 'compras.tl@laanonima.com.ar',
+    idLocalidad: 1,
     calle: 'García Salinas',
     altura: '1150',
     localidad: 'Trenque Lauquen',
     provincia: 'Buenos Aires',
+    idTipoIva: 1,
     tipoIva: 'Responsable Inscripto',
     tipoCliente: 'Mayorista (Supermercado / Fijo Semanal)',
     aceptaCredito: true,
     limiteCredito: 800000,
     creditoUsado: 340000,
-    estadoMoroso: false,
-    diasAtraso: 0,
     diaEntregaHabitual: 'Lunes',
     estado: 'Activo',
   },
   {
-    id: 3,
+    idCliente: 3,
     cuit: '30-54910293-1',
     razonSocial: 'Hotel & Eventos Campo & Plaza',
     responsable: 'Luciana Gómez',
     telefono: '(02392) 51-2299',
     email: 'eventos@campoplazahotel.com',
+    idLocalidad: 1,
     calle: 'Ruta 5 Km 446',
     altura: 'S/N',
     localidad: 'Trenque Lauquen',
     provincia: 'Buenos Aires',
+    idTipoIva: 1,
     tipoIva: 'Responsable Inscripto',
     tipoCliente: 'Mayorista (Hotel & Eventos)',
     aceptaCredito: true,
     limiteCredito: 500000,
-    creditoUsado: 520000,
-    estadoMoroso: true,
-    diasAtraso: 42, // Moroso (>30 días) -> Bloqueado crédito
+    creditoUsado: 520000, // Credito Usado > LimiteCredito -> Moroso Calculado
     diaEntregaHabitual: 'Viernes',
-    estado: 'Bloqueado por Morosidad',
+    estado: 'Activo',
   },
   {
-    id: 4,
+    idCliente: 4,
     cuit: '20-33491822-4',
     razonSocial: 'Rotisería y Salón El Sabor Casero',
     responsable: 'Carlos Eduardo Paez',
     telefono: '(02392) 42-8812',
     email: 'elsaborcaserotl@gmail.com',
+    idLocalidad: 1,
     calle: 'San Martín',
     altura: '890',
     localidad: 'Trenque Lauquen',
     provincia: 'Buenos Aires',
+    idTipoIva: 2,
     tipoIva: 'Monotributo',
     tipoCliente: 'Minorista / Frecuente',
     aceptaCredito: false,
     limiteCredito: 0,
     creditoUsado: 0,
-    estadoMoroso: false,
-    diasAtraso: 0,
     diaEntregaHabitual: 'Mostrador / Retiro',
     estado: 'Activo',
   },
   {
-    id: 5,
+    idCliente: 5,
     cuit: '30-66441199-0',
     razonSocial: 'Hogar de Niños & Ancianos San José',
     responsable: 'Hermana María Teresa',
     telefono: '(02392) 41-0022',
     email: 'contacto@hogarsanjose.org.ar',
+    idLocalidad: 1,
     calle: 'Monferrand',
     altura: '320',
     localidad: 'Trenque Lauquen',
     provincia: 'Buenos Aires',
+    idTipoIva: 4,
     tipoIva: 'Exento',
     tipoCliente: 'Institución Caritativa (Donaciones)',
     aceptaCredito: false,
     limiteCredito: 0,
     creditoUsado: 0,
-    estadoMoroso: false,
-    diasAtraso: 0,
     diaEntregaHabitual: 'Sábados (Donación)',
     estado: 'Activo',
   },
   {
-    id: 6,
+    idCliente: 6,
     cuit: '27-38291045-6',
     razonSocial: 'Mariana Silveyra (Cliente Mostrador)',
     responsable: 'Mariana Silveyra',
     telefono: '(02392) 15-649012',
     email: 'marianasilveyra@hotmail.com',
+    idLocalidad: 1,
     calle: 'Urquiza',
     altura: '215',
     localidad: 'Trenque Lauquen',
     provincia: 'Buenos Aires',
+    idTipoIva: 3,
     tipoIva: 'Consumidor Final',
     tipoCliente: 'Minorista (Mostrador)',
     aceptaCredito: false,
     limiteCredito: 0,
     creditoUsado: 0,
-    estadoMoroso: false,
-    diasAtraso: 0,
     diaEntregaHabitual: 'Venta Directa',
     estado: 'Activo',
   },
@@ -142,9 +153,9 @@ export const INITIAL_CLIENTES = [
 
 export const INITIAL_PRESUPUESTOS = [
   {
-    id: 1,
+    idPresupuestoCliente: 1,
     nroPresupuesto: 'PRE-2026-001',
-    clienteId: 3,
+    idCliente: 3,
     clienteNombre: 'Hotel & Eventos Campo & Plaza',
     tipoPedido: 'Evento / Cena de Gala (150 personas)',
     fechaEmision: '2026-09-20',
@@ -157,15 +168,15 @@ export const INITIAL_PRESUPUESTOS = [
     estado: 'Aceptado',
     observaciones: 'Servicio de catering pastas rellenas para fiesta empresarial el 30/09. Requiere 50% seña anticipada 48hs antes.',
     items: [
-      { productoId: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 20, precioUnitario: 4500, subtotal: 90000 },
-      { productoId: 102, productoNombre: 'Ravioles de Espinaca y Ricotta (Caja 1kg)', cantidad: 15, precioUnitario: 4000, subtotal: 60000 },
-      { productoId: 201, productoNombre: 'Salsa Tuco Casero Especial (Pote 500cc)', cantidad: 15, precioUnitario: 2000, subtotal: 30000 },
+      { idDetallePresupuestoCliente: 10, idProductoCompuesto: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 20, precioUnitario: 4500, subtotal: 90000 },
+      { idDetallePresupuestoCliente: 11, idProductoCompuesto: 102, productoNombre: 'Ravioles de Espinaca y Ricotta (Caja 1kg)', cantidad: 15, precioUnitario: 4000, subtotal: 60000 },
+      { idDetallePresupuestoCliente: 12, idProductoCompuesto: 201, productoNombre: 'Salsa Tuco Casero Especial (Pote 500cc)', cantidad: 15, precioUnitario: 2000, subtotal: 30000 },
     ],
   },
   {
-    id: 2,
+    idPresupuestoCliente: 2,
     nroPresupuesto: 'PRE-2026-002',
-    clienteId: 1,
+    idCliente: 1,
     clienteNombre: 'Trattoria & Ristorante Italia Bella',
     tipoPedido: 'Acuerdo Semanal Primavera',
     fechaEmision: '2026-09-22',
@@ -178,15 +189,15 @@ export const INITIAL_PRESUPUESTOS = [
     estado: 'Pendiente',
     observaciones: 'Cotización por volumen mensual con entrega fija jueves.',
     items: [
-      { productoId: 103, productoNombre: 'Fideos Tallarines al Huevo (Kg)', cantidad: 30, precioUnitario: 3200, subtotal: 96000 },
-      { productoId: 104, productoNombre: 'Ñoquis de Papa Artesanales (Kg)', cantidad: 25, precioUnitario: 3600, subtotal: 90000 },
-      { productoId: 202, productoNombre: 'Salsa Bolognesa Tradicional (Pote 500cc)', cantidad: 14, precioUnitario: 2400, subtotal: 33600 },
+      { idDetallePresupuestoCliente: 13, idProductoCompuesto: 103, productoNombre: 'Fideos Tallarines al Huevo (Kg)', cantidad: 30, precioUnitario: 3200, subtotal: 96000 },
+      { idDetallePresupuestoCliente: 14, idProductoCompuesto: 104, productoNombre: 'Ñoquis de Papa Artesanales (Kg)', cantidad: 25, precioUnitario: 3600, subtotal: 90000 },
+      { idDetallePresupuestoCliente: 15, idProductoCompuesto: 202, productoNombre: 'Salsa Bolognesa Tradicional (Pote 500cc)', cantidad: 14, precioUnitario: 2400, subtotal: 33600 },
     ],
   },
   {
-    id: 3,
+    idPresupuestoCliente: 3,
     nroPresupuesto: 'PRE-2026-003',
-    clienteId: 4,
+    idCliente: 4,
     clienteNombre: 'Rotisería y Salón El Sabor Casero',
     tipoPedido: 'Pedido Especial Fin de Semana',
     fechaEmision: '2026-09-18',
@@ -199,24 +210,25 @@ export const INITIAL_PRESUPUESTOS = [
     estado: 'Expirado',
     observaciones: 'Cotización vencida por falta de confirmación.',
     items: [
-      { productoId: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 6, precioUnitario: 4500, subtotal: 27000 },
-      { productoId: 203, productoNombre: 'Salsa Cuatro Quesos (Pote 500cc)', cantidad: 6, precioUnitario: 3400, subtotal: 20400 },
+      { idDetallePresupuestoCliente: 16, idProductoCompuesto: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 6, precioUnitario: 4500, subtotal: 27000 },
+      { idDetallePresupuestoCliente: 17, idProductoCompuesto: 203, productoNombre: 'Salsa Cuatro Quesos (Pote 500cc)', cantidad: 6, precioUnitario: 3400, subtotal: 20400 },
     ],
   },
 ];
 
 export const INITIAL_PEDIDOS = [
   {
-    id: 1,
+    idComprobantePedidoCliente: 1,
     nroPedido: 'PED-2026-001',
-    clienteId: 2,
+    idCliente: 2,
     clienteNombre: 'Supermercados La Anónima Sucursal 12',
     tipoPedido: 'Mayorista Semanal Fijo',
     domicilioEntrega: 'García Salinas 1150, Trenque Lauquen',
-    telefono: '(02392) 42-1100',
+    telefonoPedido: '(02392) 42-1100',
     fechaEmision: '2026-09-24',
     fechaEntregaEstimada: '2026-09-25',
     horaEntregaEstimada: '08:30',
+    idEmpleado: 101,
     vendedor: 'Juan Borlini',
     estadoPedido: 'En Preparación',
     señaExigida: 0,
@@ -229,25 +241,26 @@ export const INITIAL_PEDIDOS = [
     total: 220000,
     observaciones: 'Entrega en rampa de descarga de supermercado con remito y factura.',
     items: [
-      { productoId: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 30, precioUnitario: 4500, subtotal: 135000 },
-      { productoId: 103, productoNombre: 'Fideos Tallarines al Huevo (Kg)', cantidad: 25, precioUnitario: 3200, subtotal: 80000 },
-      { productoId: 201, productoNombre: 'Salsa Tuco Casero Especial (Pote 500cc)', cantidad: 17, precioUnitario: 2000, subtotal: 35000 },
+      { idDetallePedidoCliente: 1, idProductoCompuesto: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 30, precioUnitario: 4500, subtotal: 135000 },
+      { idDetallePedidoCliente: 2, idProductoCompuesto: 103, productoNombre: 'Fideos Tallarines al Huevo (Kg)', cantidad: 25, precioUnitario: 3200, subtotal: 80000 },
+      { idDetallePedidoCliente: 3, idProductoCompuesto: 201, productoNombre: 'Salsa Tuco Casero Especial (Pote 500cc)', cantidad: 17, precioUnitario: 2000, subtotal: 35000 },
     ],
   },
   {
-    id: 2,
+    idComprobantePedidoCliente: 2,
     nroPedido: 'PED-2026-002',
-    clienteId: 3,
+    idCliente: 3,
     clienteNombre: 'Hotel & Eventos Campo & Plaza',
     tipoPedido: 'Evento Especial (Cena 48hs)',
     domicilioEntrega: 'Ruta 5 Km 446, Trenque Lauquen',
-    telefono: '(02392) 51-2299',
+    telefonoPedido: '(02392) 51-2299',
     fechaEmision: '2026-09-22',
     fechaEntregaEstimada: '2026-09-26',
     horaEntregaEstimada: '19:00',
+    idEmpleado: 102,
     vendedor: 'Martin Rindlisbacher',
     estadoPedido: 'Pendiente',
-    señaExigida: 81000, // 50% de seña obligatoria
+    señaExigida: 81000,
     señaPagada: 81000,
     estadoPago: 'Seña 50% Pagada',
     esCanje: false,
@@ -255,24 +268,25 @@ export const INITIAL_PEDIDOS = [
     descuentoAplicado: 10,
     subtotal: 180000,
     total: 162000,
-    observaciones: 'Seña del 50% abada por MercadoPago. Saldo restante contra entrega con remito.',
+    observaciones: 'Seña del 50% abonada por MercadoPago. Saldo restante contra entrega con remito.',
     items: [
-      { productoId: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 20, precioUnitario: 4500, subtotal: 90000 },
-      { productoId: 102, productoNombre: 'Ravioles de Espinaca y Ricotta (Caja 1kg)', cantidad: 15, precioUnitario: 4000, subtotal: 60000 },
-      { productoId: 201, productoNombre: 'Salsa Tuco Casero Especial (Pote 500cc)', cantidad: 15, precioUnitario: 2000, subtotal: 30000 },
+      { idDetallePedidoCliente: 4, idProductoCompuesto: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 20, precioUnitario: 4500, subtotal: 90000 },
+      { idDetallePedidoCliente: 5, idProductoCompuesto: 102, productoNombre: 'Ravioles de Espinaca y Ricotta (Caja 1kg)', cantidad: 15, precioUnitario: 4000, subtotal: 60000 },
+      { idDetallePedidoCliente: 6, idProductoCompuesto: 201, productoNombre: 'Salsa Tuco Casero Especial (Pote 500cc)', cantidad: 15, precioUnitario: 2000, subtotal: 30000 },
     ],
   },
   {
-    id: 3,
+    idComprobantePedidoCliente: 3,
     nroPedido: 'PED-2026-003',
-    clienteId: 6,
+    idCliente: 6,
     clienteNombre: 'Mariana Silveyra (Cliente Mostrador)',
     tipoPedido: 'Venta Mostrador / Local',
-    domicilioEntrega: 'Retiro en Local Commercial',
-    telefono: '(02392) 15-649012',
+    domicilioEntrega: 'Retiro en Local Comercial',
+    telefonoPedido: '(02392) 15-649012',
     fechaEmision: '2026-09-24',
     fechaEntregaEstimada: '2026-09-24',
     horaEntregaEstimada: '12:15',
+    idEmpleado: 103,
     vendedor: 'Delfor Vicondo',
     estadoPedido: 'Finalizado',
     señaExigida: 0,
@@ -285,22 +299,23 @@ export const INITIAL_PEDIDOS = [
     total: 15100,
     observaciones: 'Pago inmediato en caja con Cuenta DNI.',
     items: [
-      { productoId: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 2, precioUnitario: 4500, subtotal: 9000 },
-      { productoId: 104, productoNombre: 'Ñoquis de Papa Artesanales (Kg)', cantidad: 1, precioUnitario: 3600, subtotal: 3600 },
-      { productoId: 201, productoNombre: 'Salsa Tuco Casero Especial (Pote 500cc)', cantidad: 1, precioUnitario: 2500, subtotal: 2500 },
+      { idDetallePedidoCliente: 7, idProductoCompuesto: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 2, precioUnitario: 4500, subtotal: 9000 },
+      { idDetallePedidoCliente: 8, idProductoCompuesto: 104, productoNombre: 'Ñoquis de Papa Artesanales (Kg)', cantidad: 1, precioUnitario: 3600, subtotal: 3600 },
+      { idDetallePedidoCliente: 9, idProductoCompuesto: 201, productoNombre: 'Salsa Tuco Casero Especial (Pote 500cc)', cantidad: 1, precioUnitario: 2500, subtotal: 2500 },
     ],
   },
   {
-    id: 4,
+    idComprobantePedidoCliente: 4,
     nroPedido: 'PED-2026-004',
-    clienteId: 1,
+    idCliente: 1,
     clienteNombre: 'Trattoria & Ristorante Italia Bella',
     tipoPedido: 'Canje por Reclamo (Mal Estado)',
     domicilioEntrega: 'Av. Villegas 450, Trenque Lauquen',
-    telefono: '(02392) 43-9901',
+    telefonoPedido: '(02392) 43-9901',
     fechaEmision: '2026-09-23',
     fechaEntregaEstimada: '2026-09-24',
     horaEntregaEstimada: '11:00',
+    idEmpleado: 101,
     vendedor: 'Juan Borlini',
     estadoPedido: 'Finalizado',
     señaExigida: 0,
@@ -310,23 +325,24 @@ export const INITIAL_PEDIDOS = [
     esDonacion: false,
     descuentoAplicado: 100,
     subtotal: 18000,
-    total: 0, // Regla TP: Orden de venta de valor 0 por producto en mal estado
+    total: 0,
     observaciones: 'Canje sin costo por reposición de 4 cajas de sorrentinos con falla de sellado.',
     items: [
-      { productoId: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 4, precioUnitario: 0, subtotal: 0 },
+      { idDetallePedidoCliente: 10, idProductoCompuesto: 101, productoNombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', cantidad: 4, precioUnitario: 0, subtotal: 0 },
     ],
   },
   {
-    id: 5,
+    idComprobantePedidoCliente: 5,
     nroPedido: 'PED-2026-005',
-    clienteId: 5,
+    idCliente: 5,
     clienteNombre: 'Hogar de Niños & Ancianos San José',
     tipoPedido: 'Donación Institucional ($0)',
     domicilioEntrega: 'Monferrand 320, Trenque Lauquen',
-    telefono: '(02392) 41-0022',
+    telefonoPedido: '(02392) 41-0022',
     fechaEmision: '2026-09-21',
     fechaEntregaEstimada: '2026-09-21',
     horaEntregaEstimada: '18:00',
+    idEmpleado: 103,
     vendedor: 'Delfor Vicondo',
     estadoPedido: 'Finalizado',
     señaExigida: 0,
@@ -336,128 +352,138 @@ export const INITIAL_PEDIDOS = [
     esDonacion: true,
     descuentoAplicado: 100,
     subtotal: 28000,
-    total: 0, // Regla TP: Donación documentada como orden sin costo
+    total: 0,
     observaciones: 'Donación documentada de excedente de producción cercano a fecha de vencimiento.',
     items: [
-      { productoId: 104, productoNombre: 'Ñoquis de Papa Artesanales (Kg)', cantidad: 8, precioUnitario: 0, subtotal: 0 },
+      { idDetallePedidoCliente: 11, idProductoCompuesto: 104, productoNombre: 'Ñoquis de Papa Artesanales (Kg)', cantidad: 8, precioUnitario: 0, subtotal: 0 },
     ],
   },
 ];
 
 export const INITIAL_COMPROBANTES_VENTA = [
   {
-    id: 1,
+    idComprobanteVentaCliente: 1,
     nroComprobante: 'FAC-A-0001-00000188',
-    pedidoId: 1,
+    idComprobantePedidoCliente: 1,
     nroPedido: 'PED-2026-001',
-    clienteId: 2,
+    idCliente: 2,
     clienteNombre: 'Supermercados La Anónima Sucursal 12',
     cuitCliente: '30-71029384-8',
     tipoComprobante: 'Factura A',
     fechaEmision: '2026-09-24',
+    horaEmision: '09:30',
     tipoIva: 'Responsable Inscripto',
     importeNeto: 181818.18,
-    importeIva: 38181.82, // 21%
+    importeIva: 38181.82,
     total: 220000.00,
     estado: 'Pendiente de Cobro',
     condicionPago: 'Cuenta Corriente (30 días)',
+    diasAtraso: 0,
   },
   {
-    id: 2,
+    idComprobanteVentaCliente: 2,
     nroComprobante: 'REC-B-0001-00000412',
-    pedidoId: 3,
+    idComprobantePedidoCliente: 3,
     nroPedido: 'PED-2026-003',
-    clienteId: 6,
+    idCliente: 6,
     clienteNombre: 'Mariana Silveyra (Cliente Mostrador)',
     cuitCliente: '27-38291045-6',
     tipoComprobante: 'Factura B',
     fechaEmision: '2026-09-24',
+    horaEmision: '12:15',
     tipoIva: 'Consumidor Final',
     importeNeto: 12479.34,
     importeIva: 2620.66,
     total: 15100.00,
     estado: 'Pagada',
     condicionPago: 'Contado / Cuenta DNI',
+    diasAtraso: 0,
   },
   {
-    id: 3,
+    idComprobanteVentaCliente: 3,
     nroComprobante: 'FAC-A-0001-00000185',
-    pedidoId: 2,
+    idComprobantePedidoCliente: 2,
     nroPedido: 'PED-2026-002',
-    clienteId: 3,
+    idCliente: 3,
     clienteNombre: 'Hotel & Eventos Campo & Plaza',
     cuitCliente: '30-54910293-1',
     tipoComprobante: 'Factura A',
-    fechaEmision: '2026-09-22',
+    fechaEmision: '2026-08-10', // Emitida hace más de 30 días -> genera morosidad calculada
+    horaEmision: '16:00',
     tipoIva: 'Responsable Inscripto',
     importeNeto: 133884.30,
     importeIva: 28115.70,
     total: 162000.00,
-    estado: 'Parcialmente Pagada (Seña 50%)',
-    condicionPago: '50% Seña + 50% Entrega',
+    estado: 'Pendiente de Cobro',
+    condicionPago: 'Cuenta Corriente (30 días)',
+    diasAtraso: 45, // >30 días -> Moroso Calculado
   },
 ];
 
 export const INITIAL_COMPROBANTES_PAGO = [
   {
-    id: 1,
+    idComprobantePagoCliente: 1,
     nroComprobantePago: 'PAG-2026-00101',
-    pedidoId: 2,
+    idComprobantePedidoCliente: 2,
     nroPedido: 'PED-2026-002',
-    comprobanteVentaId: 3,
+    idComprobanteVentaCliente: 3,
     nroFactura: 'FAC-A-0001-00000185',
-    clienteId: 3,
+    idCliente: 3,
     clienteNombre: 'Hotel & Eventos Campo & Plaza',
-    fechaEmision: '2026-09-22 16:30',
+    idMedioDePagoCliente: 3,
     medioPago: 'MercadoPago',
+    fechaEmision: '2026-09-22 16:30',
     montoAbonado: 81000.00,
     concepto: 'Seña 50% Reserva Evento',
     nroTransaccion: 'MP-8920194481',
     observaciones: 'Pago de seña recibido vía transferencia QR MercadoPago.',
   },
   {
-    id: 2,
+    idComprobantePagoCliente: 2,
     nroComprobantePago: 'PAG-2026-00102',
-    pedidoId: 3,
+    idComprobantePedidoCliente: 3,
     nroPedido: 'PED-2026-003',
-    comprobanteVentaId: 2,
+    idComprobanteVentaCliente: 2,
     nroFactura: 'REC-B-0001-00000412',
-    clienteId: 6,
+    idCliente: 6,
     clienteNombre: 'Mariana Silveyra',
-    fechaEmision: '2026-09-24 12:15',
+    idMedioDePagoCliente: 4,
     medioPago: 'Cuenta DNI',
+    fechaEmision: '2026-09-24 12:15',
     montoAbonado: 15100.00,
     concepto: 'Pago Total Venta Mostrador',
     nroTransaccion: 'CDNI-7781920',
     observaciones: 'Pago efectuado en mostrador con descuento Cuenta DNI.',
   },
   {
-    id: 3,
+    idComprobantePagoCliente: 3,
     nroComprobantePago: 'PAG-2026-00103',
-    pedidoId: null,
+    idComprobantePedidoCliente: null,
     nroPedido: 'VENTA-DIRECTA-LOCAL',
-    comprobanteVentaId: null,
+    idComprobanteVentaCliente: null,
     nroFactura: 'TICKET-00192',
-    clienteId: 4,
+    idCliente: 4,
     clienteNombre: 'El Sabor Casero',
-    fechaEmision: '2026-09-24 11:40',
+    idMedioDePagoCliente: 1,
     medioPago: 'Efectivo',
+    fechaEmision: '2026-09-24 11:40',
     montoAbonado: 24500.00,
     concepto: 'Pago Contado Efectivo',
     nroTransaccion: 'EF-CAJA-01',
     observaciones: 'Ingreso directo a caja de efectivo.',
   },
   {
-    id: 4,
+    idComprobantePagoCliente: 4,
     nroComprobantePago: 'PAG-2026-00104',
-    pedidoId: null,
+    idComprobantePedidoCliente: null,
     nroPedido: 'VENTA-DIRECTA-LOCAL',
-    comprobanteVentaId: null,
+    idComprobanteVentaCliente: null,
     nroFactura: 'TICKET-00195',
-    clienteId: 6,
+    idCliente: 6,
     clienteNombre: 'Cliente Anónimo Mostrador',
-    fechaEmision: '2026-09-24 13:10',
+    idMedioDePagoCliente: 2,
     medioPago: 'Tarjeta Débito',
+    fechaEmision: '2026-09-24 13:10',
     montoAbonado: 18200.00,
     concepto: 'Pago POSNET Débito Visa',
     nroTransaccion: 'POS-9812401',
@@ -466,8 +492,9 @@ export const INITIAL_COMPROBANTES_PAGO = [
 ];
 
 export const INITIAL_CIERRE_CAJA = {
+  idCierreCaja: 1,
   fecha: '2026-09-24',
-  estadoCaja: 'Abierta', // 'Abierta' o 'Cerrada'
+  estadoCaja: 'Abierta',
   responsable: 'Juan Borlini',
   fondoInicial: 35000.00,
   totalIngresosEfectivo: 24500.00,
@@ -475,12 +502,12 @@ export const INITIAL_CIERRE_CAJA = {
   totalIngresosMercadoPago: 81000.00,
   totalIngresosCuentaDNI: 15100.00,
   totalVentasDia: 138800.00,
-  arqueoEfectivoFisico: 59500.00, // FondoInicial + Efectivo = 35000 + 24500 = 59500
+  arqueoEfectivoFisico: 59500.00,
   diferenciaCaja: 0.00,
   observaciones: 'Jornada comercial normal. Sin inconsistencias en el arqueo de efectivo.',
   historialCierres: [
     {
-      id: 101,
+      idCierreCaja: 101,
       fecha: '2026-09-23',
       responsable: 'Delfor Vicondo',
       fondoInicial: 30000.00,
@@ -494,7 +521,7 @@ export const INITIAL_CIERRE_CAJA = {
       estado: 'Cerrada y Cuadrada',
     },
     {
-      id: 102,
+      idCierreCaja: 102,
       fecha: '2026-09-22',
       responsable: 'Martin Rindlisbacher',
       fondoInicial: 30000.00,
@@ -511,13 +538,48 @@ export const INITIAL_CIERRE_CAJA = {
 };
 
 export const CATALOGO_PRODUCTOS_VENTAS = [
-  { id: 101, nombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', categoria: 'Pasta Rellena', precioUnitario: 4500, stock: 45 },
-  { id: 102, nombre: 'Ravioles de Espinaca y Ricotta (Caja 1kg)', categoria: 'Pasta Rellena', precioUnitario: 4000, stock: 60 },
-  { id: 103, nombre: 'Fideos Tallarines al Huevo (Kg)', categoria: 'Pasta Simple', precioUnitario: 3200, stock: 80 },
-  { id: 104, nombre: 'Ñoquis de Papa Artesanales (Kg)', categoria: 'Pasta Simple', precioUnitario: 3600, stock: 50 },
-  { id: 105, nombre: 'Panzotti de Cordero al Malbec (Caja 1kg)', categoria: 'Pasta Gourmet', precioUnitario: 5800, stock: 25 },
-  { id: 201, nombre: 'Salsa Tuco Casero Especial (Pote 500cc)', categoria: 'Salsas', precioUnitario: 2500, stock: 40 },
-  { id: 202, nombre: 'Salsa Bolognesa Tradicional (Pote 500cc)', categoria: 'Salsas', precioUnitario: 2800, stock: 35 },
-  { id: 203, nombre: 'Salsa Cuatro Quesos Cremosa (Pote 500cc)', categoria: 'Salsas', precioUnitario: 3400, stock: 30 },
-  { id: 204, nombre: 'Salsa Pesto a la Genovesa (Pote 250cc)', categoria: 'Salsas', precioUnitario: 3100, stock: 20 },
+  { idProductoCompuesto: 101, nombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', categoria: 'Pasta Rellena', precioUnitario: 4500, stock: 45 },
+  { idProductoCompuesto: 102, nombre: 'Ravioles de Espinaca y Ricotta (Caja 1kg)', categoria: 'Pasta Rellena', precioUnitario: 4000, stock: 60 },
+  { idProductoCompuesto: 103, nombre: 'Fideos Tallarines al Huevo (Kg)', categoria: 'Pasta Simple', precioUnitario: 3200, stock: 80 },
+  { idProductoCompuesto: 104, nombre: 'Ñoquis de Papa Artesanales (Kg)', categoria: 'Pasta Simple', precioUnitario: 3600, stock: 50 },
+  { idProductoCompuesto: 105, nombre: 'Panzotti de Cordero al Malbec (Caja 1kg)', categoria: 'Pasta Gourmet', precioUnitario: 5800, stock: 25 },
+  { idProductoCompuesto: 201, nombre: 'Salsa Tuco Casero Especial (Pote 500cc)', categoria: 'Salsas', precioUnitario: 2500, stock: 40 },
+  { idProductoCompuesto: 202, nombre: 'Salsa Bolognesa Tradicional (Pote 500cc)', categoria: 'Salsas', precioUnitario: 2800, stock: 35 },
+  { idProductoCompuesto: 203, nombre: 'Salsa Cuatro Quesos Cremosa (Pote 500cc)', categoria: 'Salsas', precioUnitario: 3400, stock: 30 },
+  { idProductoCompuesto: 204, nombre: 'Salsa Pesto a la Genovesa (Pote 250cc)', categoria: 'Salsas', precioUnitario: 3100, stock: 20 },
 ];
+
+/**
+ * REGLA DEL PROFESOR:
+ * 'estadoMoroso' ES UN CAMPO CALCULADO (NO un atributo guardado en Cliente).
+ * Evalúa si un cliente tiene comprobantes de venta o pedidos impagos con más de 30 días de atraso,
+ * o si ha superado su límite de crédito autorizado.
+ */
+export const calcularEstadoMoroso = (cliente, comprobantesVenta = INITIAL_COMPROBANTES_VENTA) => {
+  if (!cliente || !cliente.aceptaCredito) {
+    return { esMoroso: false, diasAtraso: 0, creditoExcedido: false, razon: 'No opera a crédito' };
+  }
+
+  // Comprobantes de venta impagos de este cliente
+  const facturasImpagas = comprobantesVenta.filter(
+    (f) => f.idCliente === cliente.idCliente && f.estado === 'Pendiente de Cobro'
+  );
+
+  const maxDiasAtraso = facturasImpagas.reduce((max, f) => Math.max(max, f.diasAtraso || 0), 0);
+  const creditoExcedido = cliente.creditoUsado > cliente.limiteCredito;
+  const esMoroso = maxDiasAtraso > 30 || creditoExcedido;
+
+  let razon = 'Al día';
+  if (maxDiasAtraso > 30) {
+    razon = `Atraso en pago de ${maxDiasAtraso} días (>30d)`;
+  } else if (creditoExcedido) {
+    razon = `Límite de crédito superado ($${cliente.creditoUsado.toLocaleString()} > $${cliente.limiteCredito.toLocaleString()})`;
+  }
+
+  return {
+    esMoroso,
+    diasAtraso: maxDiasAtraso,
+    creditoExcedido,
+    razon,
+  };
+};

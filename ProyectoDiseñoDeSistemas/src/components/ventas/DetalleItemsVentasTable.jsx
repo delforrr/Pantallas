@@ -30,7 +30,7 @@ export const DetalleItemsVentasTable = ({
   const handleAddItem = () => {
     const defaultProduct = CATALOGO_PRODUCTOS_VENTAS[0];
     const newItem = {
-      productoId: defaultProduct.id,
+      idProductoCompuesto: defaultProduct.idProductoCompuesto,
       productoNombre: defaultProduct.nombre,
       cantidad: 1,
       precioUnitario: esCanjeOReclamo ? 0 : defaultProduct.precioUnitario,
@@ -50,7 +50,7 @@ export const DetalleItemsVentasTable = ({
     const precio = esCanjeOReclamo ? 0 : selectedProduct.precioUnitario;
     updated[index] = {
       ...updated[index],
-      productoId: selectedProduct.id,
+      idProductoCompuesto: selectedProduct.idProductoCompuesto,
       productoNombre: selectedProduct.nombre,
       precioUnitario: precio,
       subtotal: updated[index].cantidad * precio,
@@ -88,7 +88,7 @@ export const DetalleItemsVentasTable = ({
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1 }}>
           <ShoppingBagOutlinedIcon color="primary" fontSize="small" />
-          Detalle de Productos Solicita/Vendidos ({items.length})
+          Detalle de Productos Solicitados ({items.length})
         </Typography>
         {!readOnly && (
           <Button
@@ -131,11 +131,11 @@ export const DetalleItemsVentasTable = ({
                       <Autocomplete
                         options={CATALOGO_PRODUCTOS_VENTAS}
                         getOptionLabel={(option) => typeof option === 'string' ? option : `${option.nombre} ($${option.precioUnitario})`}
-                        value={CATALOGO_PRODUCTOS_VENTAS.find((p) => p.id === row.productoId) || null}
+                        value={CATALOGO_PRODUCTOS_VENTAS.find((p) => p.idProductoCompuesto === row.idProductoCompuesto) || null}
                         onChange={(_, newValue) => handleProductChange(index, newValue)}
                         size="small"
                         renderInput={(params) => <TextField {...params} placeholder="Seleccionar producto..." variant="outlined" />}
-                        isOptionEqualToValue={(option, val) => option.id === val.id}
+                        isOptionEqualToValue={(option, val) => option.idProductoCompuesto === val.idProductoCompuesto}
                       />
                     )}
                   </TableCell>
