@@ -1,0 +1,30 @@
+{
+  "theme-and-core-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./scripts/guard-core-and-theme.cjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "dependency-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command|write_to_file|replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./scripts/guard-dependencies.cjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
