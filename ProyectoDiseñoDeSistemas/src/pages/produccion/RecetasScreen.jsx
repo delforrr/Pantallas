@@ -199,7 +199,7 @@ export const RecetasScreen = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
       {/* Barra de Búsqueda, Filtros con Chips y Acción Principal */}
       <Box
         sx={{
@@ -224,7 +224,7 @@ export const RecetasScreen = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ minWidth: { xs: '100%', sm: 260 } }}
+            sx={{ flex: { xs: '1 1 100%', sm: 1 }, minWidth: { xs: '100%', sm: 200 }, bgcolor: 'background.paper' }}
           />
 
           <TextField
@@ -232,7 +232,7 @@ export const RecetasScreen = () => {
             size="small"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            sx={{ minWidth: 150 }}
+            sx={{ flex: { xs: '1 1 100%', sm: '0 0 auto' }, minWidth: { xs: '100%', sm: 150 }, bgcolor: 'background.paper' }}
           >
             {CATEGORIAS.map((cat) => (
               <MenuItem key={cat} value={cat}>
@@ -282,6 +282,7 @@ export const RecetasScreen = () => {
             borderRadius: '10px',
             px: 2.5,
             py: 1,
+            width: { xs: '100%', md: 'auto' },
             whiteSpace: 'nowrap',
           }}
         >
@@ -297,10 +298,12 @@ export const RecetasScreen = () => {
           borderRadius: '14px',
           border: '1px solid',
           borderColor: 'divider',
-          overflow: 'hidden',
+          overflowX: 'auto',
+          width: '100%',
+          maxWidth: '100%',
         }}
       >
-        <Table>
+        <Table sx={{ width: '100%', minWidth: 700 }}>
           <TableHead sx={{ bgcolor: 'action.hover' }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>Código</TableCell>

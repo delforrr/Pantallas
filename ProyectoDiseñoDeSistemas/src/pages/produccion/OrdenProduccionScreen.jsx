@@ -56,17 +56,11 @@ import {
   ORDENES_PRODUCCION_INICIALES,
   RECETAS_INICIALES,
   MATERIAS_PRIMAS_INICIALES,
+  EMPLEADOS,
+  MAQUINARIAS,
   verificarDisponibilidadMultiplesProductos,
 } from './mockData';
 import { OrdenProduccionCard } from '../../components/produccion';
-
-const RESPONSABLES_SUGERIDOS = [
-  'Juan Carlos Pérez (Jefe de Cuadra)',
-  'María Laura Gómez (Maestra Pastera)',
-  'Esteban Morales (Operario de Cuadra)',
-  'Roberto Benítez (Ayudante de Producción)',
-  'Lucía Fernández (Control de Calidad)',
-];
 
 const ESTADO_OP_COLORS = {
   Planificada: 'default',
@@ -108,15 +102,23 @@ export const OrdenProduccionScreen = () => {
   const [selectedOrden, setSelectedOrden] = useState(null);
   const [editingOrdenId, setEditingOrdenId] = useState(null);
 
-  // Formulario de orden (cabecera)
-  const [formFechaProgramada, setFormFechaProgramada] = useState(getMananaFecha());
+  // Formulario de orden (cabecera con atributos del diagrama UML)
+  const [formFechaInicio, setFormFechaInicio] = useState(getMananaFecha());
+  const [formFechaFin, setFormFechaFin] = useState(getMananaFecha());
   const [formTurno, setFormTurno] = useState('Mañana (06:00 - 14:00)');
+  const [formIdEmpleado, setFormIdEmpleado] = useState(1);
   const [formResponsable, setFormResponsable] = useState('Juan Carlos Pérez (Jefe de Cuadra)');
+  const [formMaquinaId, setFormMaquinaId] = useState('MAQ-004');
   const [formObservaciones, setFormObservaciones] = useState('');
 
-  // Productos cargados en la orden (soporte de múltiples productos)
+  // Productos cargados en la orden (DetalleOrdenDeProduccion)
   const [formItems, setFormItems] = useState([
     {
+      idProducto: 1,
+      idTipoDeProducto: 1,
+      idVariedad: 1,
+      cantidadPlanificada: 40,
+      cantidadProducida: 0,
       recetaId: 'REC-001',
       productoNombre: 'Ravioles de Ricota y Parmesano',
       categoria: 'Pastas Rellenas',
@@ -160,6 +162,7 @@ export const OrdenProduccionScreen = () => {
           o.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
           o.productoNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
           o.responsable.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (o.maquinaNombre && o.maquinaNombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
           o.notaPedidoId.toLowerCase().includes(searchTerm.toLowerCase());
 
         const matchEstado = filtroEstado === 'TODOS' || o.estado === filtroEstado;
@@ -175,7 +178,7 @@ export const OrdenProduccionScreen = () => {
       });
   }, [ordenes, searchTerm, filtroEstado, filtroInsumos]);
 
-  // Manejo de productos en la orden
+  // Manejo de productos en la orden (DetalleOrdenDeProduccion)
   const handleAddItem = () => {
     if (!selectedRecetaToAdd || !cantidadKilosToAdd || Number(cantidadKilosToAdd) <= 0) return;
 
@@ -185,11 +188,17 @@ export const OrdenProduccionScreen = () => {
         const nuevo = [...prev];
         nuevo[existeIndex].cantidadKilos =
           Number(nuevo[existeIndex].cantidadKilos) + Number(cantidadKilosToAdd);
+        nuevo[existeIndex].cantidadPlanificada = nuevo[existeIndex].cantidadKilos;
         return nuevo;
       }
       return [
         ...prev,
         {
+          idProducto: selectedRecetaToAdd.idProducto || 1,
+          idTipoDeProducto: selectedRecetaToAdd.idTipoDeProducto || 1,
+          idVariedad: selectedRecetaToAdd.idVariedad || 1,
+          cantidadPlanificada: Number(cantidadKilosToAdd),
+          cantidadProducida: 0,
           recetaId: selectedRecetaToAdd.id,
           productoNombre: selectedRecetaToAdd.nombreProducto,
           categoria: selectedRecetaToAdd.categoria,
@@ -216,7 +225,7 @@ export const OrdenProduccionScreen = () => {
     const resultado = verificarDisponibilidadMultiplesProductos(formItems, recetas, materiasPrimas);
     setNotaPedidoData({
       numeroNP: `NP-2026-${String(ordenes.length + 1).padStart(3, '0')}`,
-      fecha: formFechaProgramada,
+      fecha: formFechaInicio,
       turno: formTurno,
       responsable: formResponsable,
       items: formItems,
@@ -257,6 +266,11 @@ export const OrdenProduccionScreen = () => {
     setEditingOrdenId(null);
     setFormItems([
       {
+        idProducto: recetas[0]?.idProducto || 1,
+        idTipoDeProducto: recetas[0]?.idTipoDeProducto || 1,
+        idVariedad: recetas[0]?.idVariedad || 1,
+        cantidadPlanificada: 40,
+        cantidadProducida: 0,
         recetaId: recetas[0]?.id || 'REC-001',
         productoNombre: recetas[0]?.nombreProducto || 'Ravioles de Ricota y Parmesano',
         categoria: recetas[0]?.categoria || 'Pastas Rellenas',
@@ -265,9 +279,12 @@ export const OrdenProduccionScreen = () => {
     ]);
     setSelectedRecetaToAdd(recetas[1] || recetas[0] || null);
     setCantidadKilosToAdd(20);
-    setFormFechaProgramada(getMananaFecha());
+    setFormFechaInicio(getMananaFecha());
+    setFormFechaFin(getMananaFecha());
     setFormTurno('Mañana (06:00 - 14:00)');
+    setFormIdEmpleado(1);
     setFormResponsable('Juan Carlos Pérez (Jefe de Cuadra)');
+    setFormMaquinaId('MAQ-004');
     setFormObservaciones('');
     setOpenNewDialog(true);
   };
@@ -277,9 +294,21 @@ export const OrdenProduccionScreen = () => {
     setEditingOrdenId(orden.id);
     const itemsOrden =
       orden.items && orden.items.length > 0
-        ? orden.items
+        ? orden.items.map((it) => ({
+            ...it,
+            idProducto: it.idProducto || 1,
+            idTipoDeProducto: it.idTipoDeProducto || 1,
+            idVariedad: it.idVariedad || 1,
+            cantidadPlanificada: it.cantidadPlanificada || it.cantidadKilos || 40,
+            cantidadProducida: it.cantidadProducida || 0,
+          }))
         : [
             {
+              idProducto: orden.idProducto || 1,
+              idTipoDeProducto: orden.idTipoDeProducto || 1,
+              idVariedad: orden.idVariedad || 1,
+              cantidadPlanificada: orden.cantidadKilos || 40,
+              cantidadProducida: 0,
               recetaId: orden.productoId || recetas[0]?.id,
               productoNombre: orden.productoNombre,
               categoria: 'Pastas',
@@ -289,9 +318,12 @@ export const OrdenProduccionScreen = () => {
     setFormItems(itemsOrden);
     setSelectedRecetaToAdd(recetas[0] || null);
     setCantidadKilosToAdd(20);
-    setFormFechaProgramada(orden.fechaProgramada);
+    setFormFechaInicio(orden.fechaInicio || orden.fechaProgramada);
+    setFormFechaFin(orden.fechaFin || orden.fechaProgramada);
     setFormTurno(orden.turno);
+    setFormIdEmpleado(orden.idEmpleado || 1);
     setFormResponsable(orden.responsable);
+    setFormMaquinaId(orden.maquinaId || 'MAQ-004');
     setFormObservaciones(orden.observaciones || '');
     setOpenDetailDialog(false);
     setOpenNewDialog(true);
@@ -299,7 +331,19 @@ export const OrdenProduccionScreen = () => {
 
   const handleCambiarEstado = (id, nuevoEstado) => {
     setOrdenes((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, estado: nuevoEstado } : o))
+      prev.map((o) => {
+        if (o.id !== id) return o;
+        const actualizado = { ...o, estado: nuevoEstado };
+        if (nuevoEstado === 'Finalizada') {
+          const itemsFinalizados = (o.items || []).map((it) => ({
+            ...it,
+            cantidadProducida: it.cantidadPlanificada || it.cantidadKilos,
+          }));
+          actualizado.items = itemsFinalizados;
+          actualizado.detallesOrdenProduccion = itemsFinalizados;
+        }
+        return actualizado;
+      })
     );
     setSnackbar({
       open: true,
@@ -345,18 +389,66 @@ export const OrdenProduccionScreen = () => {
         ? formItems[0].productoNombre
         : `${formItems[0].productoNombre} +${formItems.length - 1} más`;
 
+    const empleadoObj = EMPLEADOS.find((e) => e.idEmpleado === formIdEmpleado) || EMPLEADOS[0];
+    const maquinaObj =
+      MAQUINARIAS.find((m) => m.codigo === formMaquinaId || m.idMaquinaria === Number(formMaquinaId)) || MAQUINARIAS[3];
+
+    const fechaHoy = new Date().toISOString().split('T')[0];
+    const ordenIdNum = editingOrdenId ? (ordenes.find((o) => o.id === editingOrdenId)?.idOrdenProduccion || 1) : ordenes.length + 1;
+
+    const detallesCalculados = formItems.map((it) => ({
+      idOrdenProduccion: ordenIdNum,
+      idProducto: it.idProducto || 1,
+      idTipoDeProducto: it.idTipoDeProducto || 1,
+      idVariedad: it.idVariedad || 1,
+      cantidadPlanificada: Number(it.cantidadKilos || it.cantidadPlanificada),
+      cantidadProducida: Number(it.cantidadProducida || 0),
+      recetaId: it.recetaId,
+      productoNombre: it.productoNombre,
+      categoria: it.categoria,
+      cantidadKilos: Number(it.cantidadKilos || it.cantidadPlanificada),
+    }));
+
+    const notaPedidoCalculada = {
+      idNotaPedidoMP: ordenIdNum,
+      fechaEmision: fechaHoy,
+      idOrdenProduccion: ordenIdNum,
+      detalles: calculo.insumos.map((ins, idx) => ({
+        idNotaPedidoMP: ordenIdNum,
+        idMateriaPrima: ins.idMateriaPrima || idx + 1,
+        materiaPrimaNombre: ins.nombre,
+        cantidad: ins.cantidadRequerida,
+        unidad: ins.unidad,
+      })),
+    };
+
     if (editingOrdenId) {
       setOrdenes((prev) =>
         prev.map((o) => {
           if (o.id !== editingOrdenId) return o;
           return {
             ...o,
-            fechaProgramada: formFechaProgramada,
-            items: formItems,
+            fechaEmision: o.fechaEmision || fechaHoy,
+            fechaInicio: formFechaInicio,
+            fechaFin: formFechaFin,
+            fechaProgramada: formFechaInicio,
+            items: detallesCalculados,
+            detallesOrdenProduccion: detallesCalculados,
+            notaPedidoMateriaPrima: notaPedidoCalculada,
             productoNombre: resumenNombre,
             cantidadKilos: totalKilos,
-            responsable: formResponsable,
+            idEmpleado: empleadoObj.idEmpleado,
+            responsable: `${empleadoObj.nombre} (${empleadoObj.cargo})`,
             turno: formTurno,
+            maquinariaProduccion: [
+              {
+                idOrdenProduccion: o.idOrdenProduccion || ordenIdNum,
+                idMaquinaria: maquinaObj.idMaquinaria,
+                descripcion: maquinaObj.descripcion,
+              },
+            ],
+            maquinaId: maquinaObj.codigo,
+            maquinaNombre: maquinaObj.descripcion,
             estadoInsumos: calculo.hayFaltante ? 'Faltante' : 'Completo',
             insumosFaltantes: calculo.faltantes,
             proveedorSugerido: calculo.hayFaltante
@@ -381,17 +473,32 @@ export const OrdenProduccionScreen = () => {
 
     const nuevaOrden = {
       id: nuevoId,
+      idOrdenProduccion: ordenIdNum,
       numero: nuevoNumero,
-      fechaEmision: new Date().toISOString().split('T')[0],
-      fechaProgramada: formFechaProgramada,
-      items: formItems,
+      fechaEmision: fechaHoy,
+      fechaInicio: formFechaInicio,
+      fechaFin: formFechaFin,
+      fechaProgramada: formFechaInicio,
+      items: detallesCalculados,
+      detallesOrdenProduccion: detallesCalculados,
       productoNombre: resumenNombre,
       cantidadKilos: totalKilos,
-      responsable: formResponsable,
+      idEmpleado: empleadoObj.idEmpleado,
+      responsable: `${empleadoObj.nombre} (${empleadoObj.cargo})`,
       turno: formTurno,
+      maquinariaProduccion: [
+        {
+          idOrdenProduccion: ordenIdNum,
+          idMaquinaria: maquinaObj.idMaquinaria,
+          descripcion: maquinaObj.descripcion,
+        },
+      ],
+      maquinaId: maquinaObj.codigo,
+      maquinaNombre: maquinaObj.descripcion,
       estado: 'Planificada',
       estadoInsumos: calculo.hayFaltante ? 'Faltante' : 'Completo',
       notaPedidoId: nuevaNP,
+      notaPedidoMateriaPrima: notaPedidoCalculada,
       solicitudCompraGenerada: calculo.hayFaltante,
       ordenCompraLocalId: calculo.hayFaltante ? `OC-LOC-${Math.floor(100 + Math.random() * 900)}` : null,
       proveedorSugerido: calculo.hayFaltante
@@ -419,7 +526,7 @@ export const OrdenProduccionScreen = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
       {/* ── Barra de Búsqueda, Filtros con Chips de Resumen y Acciones ─── */}
       <Box
         sx={{
@@ -427,11 +534,11 @@ export const OrdenProduccionScreen = () => {
           gap: 2,
           mb: 3,
           flexWrap: 'wrap',
-          alignItems: 'center',
+          alignItems: { xs: 'stretch', md: 'center' },
           justifyContent: 'space-between',
         }}
       >
-        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', flex: 1, minWidth: 280, alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', flex: 1, minWidth: { xs: '100%', md: 280 }, alignItems: 'center' }}>
           <TextField
             size="small"
             placeholder="Buscar por N° OP, producto, nota de pedido..."
@@ -444,10 +551,10 @@ export const OrdenProduccionScreen = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ minWidth: 260, bgcolor: 'background.paper' }}
+            sx={{ flex: { xs: '1 1 100%', sm: 1 }, minWidth: { xs: '100%', sm: 200 }, bgcolor: 'background.paper' }}
           />
 
-          <FormControl size="small" sx={{ minWidth: 150, bgcolor: 'background.paper' }}>
+          <FormControl size="small" sx={{ flex: { xs: '1 1 calc(50% - 6px)', sm: '0 0 auto' }, minWidth: { xs: 'calc(50% - 6px)', sm: 140 }, bgcolor: 'background.paper' }}>
             <InputLabel id="filtro-estado-label">Estado OP</InputLabel>
             <Select
               labelId="filtro-estado-label"
@@ -463,7 +570,7 @@ export const OrdenProduccionScreen = () => {
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 160, bgcolor: 'background.paper' }}>
+          <FormControl size="small" sx={{ flex: { xs: '1 1 calc(50% - 6px)', sm: '0 0 auto' }, minWidth: { xs: 'calc(50% - 6px)', sm: 140 }, bgcolor: 'background.paper' }}>
             <InputLabel id="filtro-insumos-label">Materia Prima</InputLabel>
             <Select
               labelId="filtro-insumos-label"
@@ -517,7 +624,7 @@ export const OrdenProduccionScreen = () => {
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', width: { xs: '100%', md: 'auto' }, justifyContent: { xs: 'space-between', md: 'flex-end' }, mt: { xs: 1, md: 0 } }}>
           <ToggleButtonGroup
             size="small"
             value={viewMode}
@@ -542,7 +649,12 @@ export const OrdenProduccionScreen = () => {
             color="primary"
             startIcon={<AddIcon />}
             onClick={handleOpenNew}
-            sx={{ whiteSpace: 'nowrap', fontWeight: 700 }}
+            sx={{
+              whiteSpace: 'nowrap',
+              fontWeight: 700,
+              width: { xs: 'auto', md: 'auto' },
+              flex: { xs: 1, md: 'none' },
+            }}
           >
             Planificar Producción
           </Button>
@@ -597,14 +709,15 @@ export const OrdenProduccionScreen = () => {
         <TableContainer
           component={Paper}
           elevation={1}
-          sx={{ borderRadius: '14px', border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}
+          sx={{ borderRadius: '14px', border: '1px solid', borderColor: 'divider', overflowX: 'auto', width: '100%', maxWidth: '100%' }}
         >
-          <Table sx={{ minWidth: 750 }}>
+          <Table sx={{ width: '100%', minWidth: 920 }}>
             <TableHead sx={{ bgcolor: 'action.hover' }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>Orden / Pedido</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Productos y Volumen Total</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Fecha Prog. / Turno</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Máquina Asignada</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Responsable</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Insumos</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Estado OP</TableCell>
@@ -639,6 +752,21 @@ export const OrdenProduccionScreen = () => {
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                       {row.turno}
                     </Typography>
+                  </TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                      <PrecisionManufacturingIcon fontSize="small" sx={{ color: 'text.secondary', fontSize: 18 }} />
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {row.maquinaNombre || 'Sin asignar'}
+                        </Typography>
+                        {row.maquinaId && (
+                          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                            {row.maquinaId}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2">{row.responsable}</Typography>
@@ -763,20 +891,33 @@ export const OrdenProduccionScreen = () => {
 
           {/* Cabecera de la Orden en 2 columnas cómodas */}
           <Grid container spacing={2} sx={{ mb: 2.5 }}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 size="small"
-                label="Fecha de Elaboración"
+                label="Fecha de Inicio (FechaInicio)"
                 type="date"
-                value={formFechaProgramada}
-                onChange={(e) => setFormFechaProgramada(e.target.value)}
+                value={formFechaInicio}
+                onChange={(e) => setFormFechaInicio(e.target.value)}
                 InputLabelProps={{ shrink: true }}
                 required
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Fecha de Fin (FechaFin)"
+                type="date"
+                value={formFechaFin}
+                onChange={(e) => setFormFechaFin(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                required
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
                 <InputLabel id="select-turno-label">Turno de Cuadra</InputLabel>
                 <Select
@@ -793,40 +934,47 @@ export const OrdenProduccionScreen = () => {
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <Autocomplete
-                freeSolo
-                size="small"
-                options={RESPONSABLES_SUGERIDOS}
-                value={formResponsable}
-                onChange={(_, newValue) => setFormResponsable(newValue || '')}
-                onInputChange={(_, newInputValue) => setFormResponsable(newInputValue)}
-                slotProps={{
-                  popper: {
-                    sx: {
-                      minWidth: 320,
-                      zIndex: 1400,
-                      '& .MuiAutocomplete-paper': {
-                        minWidth: 320,
-                      },
-                      '& .MuiAutocomplete-option': {
-                        fontSize: '0.85rem',
-                        py: 0.8,
-                      },
-                    },
-                  },
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Responsable de Cuadra"
-                    placeholder="Escribí o seleccioná responsable..."
-                    required
-                  />
-                )}
-              />
+              <FormControl fullWidth size="small">
+                <InputLabel id="select-empleado-label">Empleado Asignado (IdEmpleado)</InputLabel>
+                <Select
+                  labelId="select-empleado-label"
+                  value={formIdEmpleado}
+                  label="Empleado Asignado (IdEmpleado)"
+                  onChange={(e) => {
+                    const idEmp = Number(e.target.value);
+                    setFormIdEmpleado(idEmp);
+                    const emp = EMPLEADOS.find((em) => em.idEmpleado === idEmp);
+                    if (emp) setFormResponsable(`${emp.nombre} (${emp.cargo})`);
+                  }}
+                >
+                  {EMPLEADOS.map((emp) => (
+                    <MenuItem key={emp.idEmpleado} value={emp.idEmpleado}>
+                      Legajo #{emp.idEmpleado}: {emp.nombre} — {emp.cargo}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="select-maquina-label">Máquina Asignada (MaquinariaProduccion)</InputLabel>
+                <Select
+                  labelId="select-maquina-label"
+                  value={formMaquinaId}
+                  label="Máquina Asignada (MaquinariaProduccion)"
+                  onChange={(e) => setFormMaquinaId(e.target.value)}
+                >
+                  {MAQUINARIAS.map((maq) => (
+                    <MenuItem key={maq.idMaquinaria} value={maq.codigo}>
+                      #{maq.idMaquinaria} ({maq.codigo}) - {maq.descripcion}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12}>
               <TextField
                 fullWidth
                 size="small"
@@ -1208,56 +1356,86 @@ export const OrdenProduccionScreen = () => {
                 <Grid item xs={12} sm={6}>
                   <Paper variant="outlined" sx={{ p: 2, borderRadius: '10px' }}>
                     <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      CRONOGRAMA DE CUADRA
+                      CRONOGRAMA DE CUADRA (OrdenDeProduccion)
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                       <CalendarMonthIcon fontSize="small" color="action" />
                       <Typography variant="body2">
-                        Fecha: <strong>{selectedOrden.fechaProgramada}</strong> (Emisión: {selectedOrden.fechaEmision})
+                        Inicio: <strong>{selectedOrden.fechaInicio || selectedOrden.fechaProgramada}</strong> | Fin: <strong>{selectedOrden.fechaFin || selectedOrden.fechaProgramada}</strong> (Emisión: {selectedOrden.fechaEmision})
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                       <AccessTimeIcon fontSize="small" color="action" />
                       <Typography variant="body2">{selectedOrden.turno}</Typography>
                     </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                      <PrecisionManufacturingIcon fontSize="small" color="action" />
+                      <Typography variant="body2">
+                        Máquina (MaquinariaProduccion): <strong>{selectedOrden.maquinaNombre || selectedOrden.maquinariaProduccion?.[0]?.descripcion || 'Sin asignar'}</strong>
+                      </Typography>
+                    </Box>
                     <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block' }}>
-                      Responsable: {selectedOrden.responsable}
+                      Empleado Asignado (IdEmpleado #{selectedOrden.idEmpleado || 1}): {selectedOrden.responsable}
                     </Typography>
                   </Paper>
                 </Grid>
               </Grid>
 
-              {/* Lista de Productos Cargados en la Orden */}
+              {/* Lista de Productos Cargados en la Orden (DetalleOrdenDeProduccion) */}
               <Box sx={{ mb: 2 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-                  Productos Cargados en esta Orden de Producción
+                  Detalle de la Orden de Producción (DetalleOrdenDeProduccion)
                 </Typography>
                 <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px' }}>
                   <Table size="small">
                     <TableHead sx={{ bgcolor: 'action.hover' }}>
                       <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>Producto</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>Categoría</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 600 }}>Cantidad</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>Producto Fabricable</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>Categoría / Tipo</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600 }}>Cant. Planificada</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600 }}>Cant. Producida</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {selectedOrden.items && selectedOrden.items.length > 0 ? (
-                        selectedOrden.items.map((it, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell sx={{ fontWeight: 600 }}>{it.productoNombre}</TableCell>
-                            <TableCell sx={{ color: 'text.secondary' }}>{it.categoria || 'Pastas'}</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                              {it.cantidadKilos} kg
-                            </TableCell>
-                          </TableRow>
-                        ))
+                        selectedOrden.items.map((it, idx) => {
+                          const cantPlan = it.cantidadPlanificada || it.cantidadKilos;
+                          const cantProd = it.cantidadProducida || (selectedOrden.estado === 'Finalizada' ? cantPlan : (selectedOrden.estado === 'En Proceso' ? Math.round(cantPlan * 0.5) : 0));
+                          return (
+                            <TableRow key={idx}>
+                              <TableCell sx={{ fontWeight: 600 }}>{it.productoNombre}</TableCell>
+                              <TableCell sx={{ color: 'text.secondary' }}>{it.categoria || 'Pastas'}</TableCell>
+                              <TableCell align="right" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                                {cantPlan} kg
+                              </TableCell>
+                              <TableCell align="right" sx={{ fontWeight: 700, color: cantProd >= cantPlan ? 'success.main' : 'text.secondary' }}>
+                                {cantProd} kg
+                              </TableCell>
+                              <TableCell>
+                                <Chip
+                                  size="small"
+                                  label={cantProd >= cantPlan ? 'Completado' : (selectedOrden.estado === 'En Proceso' ? 'En Elaboración' : 'Pendiente')}
+                                  color={cantProd >= cantPlan ? 'success' : (selectedOrden.estado === 'En Proceso' ? 'primary' : 'default')}
+                                  variant="outlined"
+                                  sx={{ fontWeight: 600, fontSize: '0.72rem' }}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
                       ) : (
                         <TableRow>
                           <TableCell sx={{ fontWeight: 600 }}>{selectedOrden.productoNombre}</TableCell>
                           <TableCell sx={{ color: 'text.secondary' }}>Pastas</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 700, color: 'primary.main' }}>
                             {selectedOrden.cantidadKilos} kg
+                          </TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>
+                            {selectedOrden.estado === 'Finalizada' ? selectedOrden.cantidadKilos : 0} kg
+                          </TableCell>
+                          <TableCell>
+                            <Chip size="small" label={selectedOrden.estado} color={ESTADO_OP_COLORS[selectedOrden.estado]} variant="outlined" />
                           </TableCell>
                         </TableRow>
                       )}
@@ -1361,6 +1539,121 @@ export const OrdenProduccionScreen = () => {
                   Finalizar Orden
                 </Button>
               )}
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
+
+      {/* ── Modal: Nota de Pedido de Materia Prima (NotaPedidoMateriaPrima) ── */}
+      <Dialog
+        open={openNotaPedidoDialog}
+        onClose={() => setOpenNotaPedidoDialog(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '14px' } }}
+      >
+        {notaPedidoData && (
+          <>
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  Nota de Pedido de Materia Prima: {notaPedidoData.codigoNotaPedido}
+                </Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  Entidad de Dominio: <strong>NotaPedidoMateriaPrima</strong> (IdNotaPedidoMP: #{notaPedidoData.idNotaPedidoMP})
+                </Typography>
+              </Box>
+              <Chip
+                label={notaPedidoData.hayFaltante ? 'Con Alerta de Faltante' : 'Insumos Completos'}
+                color={notaPedidoData.hayFaltante ? 'warning' : 'success'}
+                size="small"
+                sx={{ fontWeight: 700 }}
+              />
+            </DialogTitle>
+            <Divider />
+            <DialogContent>
+              <Grid container spacing={2} sx={{ mb: 2.5 }}>
+                <Grid item xs={12} sm={4}>
+                  <Paper variant="outlined" sx={{ p: 1.5, borderRadius: '10px' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                      ID NOTA PEDIDO (IdNotaPedidoMP)
+                    </Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'primary.main', mt: 0.3 }}>
+                      #{notaPedidoData.idNotaPedidoMP} ({notaPedidoData.codigoNotaPedido})
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Paper variant="outlined" sx={{ p: 1.5, borderRadius: '10px' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                      ORDEN DE PRODUCCIÓN (IdOrdenProduccion)
+                    </Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800, mt: 0.3 }}>
+                      #{notaPedidoData.idOrdenProduccion} ({notaPedidoData.numeroOrden})
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Paper variant="outlined" sx={{ p: 1.5, borderRadius: '10px' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                      FECHA DE EMISIÓN (FechaEmision)
+                    </Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800, mt: 0.3 }}>
+                      {notaPedidoData.fechaEmision}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                Detalles del Pedido de Insumos (DetalleNotaPedidoMateriaPrima)
+              </Typography>
+              <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px' }}>
+                <Table size="small">
+                  <TableHead sx={{ bgcolor: 'action.hover' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700, width: 100 }}>Id MP</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Materia Prima (Nombre)</TableCell>
+                      <TableCell sx={{ fontWeight: 700, width: 140 }}>Cantidad Requerida</TableCell>
+                      <TableCell sx={{ fontWeight: 700, width: 140 }}>Stock Actual</TableCell>
+                      <TableCell sx={{ fontWeight: 700, width: 130 }}>Estado</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {notaPedidoData.insumos?.map((ins, idx) => (
+                      <TableRow key={idx} hover>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                          #{ins.idMateriaPrima || idx + 1}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>
+                          {ins.nombre}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>
+                          {ins.cantidadRequerida} {ins.unidad}
+                        </TableCell>
+                        <TableCell sx={{ color: ins.esFaltante ? 'error.main' : 'text.primary', fontWeight: 600 }}>
+                          {ins.stockActual} {ins.unidad}
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            size="small"
+                            label={ins.esFaltante ? `Falta ${ins.faltante} ${ins.unidad}` : 'Disponible'}
+                            color={ins.esFaltante ? 'warning' : 'success'}
+                            variant={ins.esFaltante ? 'filled' : 'outlined'}
+                            sx={{ fontWeight: 600, fontSize: '0.72rem' }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </DialogContent>
+            <Divider />
+            <DialogActions sx={{ p: 2 }}>
+              <Button onClick={() => setOpenNotaPedidoDialog(false)} color="inherit" sx={{ fontWeight: 600 }}>
+                Cerrar
+              </Button>
             </DialogActions>
           </>
         )}
