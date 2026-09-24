@@ -1,2 +1,2 @@
 // Componentes específicos del módulo de compras
-export {};
+export * from './DetalleItemsTable';

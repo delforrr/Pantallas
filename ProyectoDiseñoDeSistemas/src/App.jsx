@@ -84,16 +84,32 @@ const PageContent = () => {
 
 // ── Root: switches between login and layout ─────────────────
 const AppRoot = () => {
-  const { user, themeMode } = useApp();
+  const { user, themeMode, sidebarOpen, toggleSidebar } = useApp();
   const theme = React.useMemo(() => getTheme(themeMode), [themeMode]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       {user ? (
-        <AppLayout>
-          <PageContent />
-        </AppLayout>
+        <>
+          {sidebarOpen && (
+            <Box
+              id="sidebar-backdrop"
+              onClick={toggleSidebar}
+              sx={{
+                position: 'fixed',
+                inset: 0,
+                bgcolor: 'rgba(0, 0, 0, 0.55)',
+                backdropFilter: 'blur(2px)',
+                zIndex: 1250,
+                cursor: 'pointer',
+              }}
+            />
+          )}
+          <AppLayout>
+            <PageContent />
+          </AppLayout>
+        </>
       ) : (
         <LoginPage />
       )}
