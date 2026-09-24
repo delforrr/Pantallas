@@ -49,13 +49,14 @@ export const ComprobantesVentaScreen = () => {
   // Selecciones
   const [selectedComprobante, setSelectedComprobante] = useState(null);
 
-  // Form State
+  // Form State Normalizado
   const initialFormState = {
     nroComprobante: '',
-    pedidoId: 1,
-    clienteId: 2,
+    idComprobantePedidoCliente: 1,
+    idCliente: 2,
     tipoComprobante: 'Factura A',
     fechaEmision: '2026-09-24',
+    horaEmision: '10:00',
     tipoIva: 'Responsable Inscripto',
     total: 220000,
     condicionPago: 'Cuenta Corriente (30 días)',
@@ -98,8 +99,8 @@ export const ComprobantesVentaScreen = () => {
   };
 
   const handleSave = () => {
-    const clienteObj = INITIAL_CLIENTES.find((c) => c.id === formData.clienteId);
-    const pedidoObj = INITIAL_PEDIDOS.find((p) => p.id === formData.pedidoId);
+    const clienteObj = INITIAL_CLIENTES.find((c) => c.idCliente === formData.idCliente);
+    const pedidoObj = INITIAL_PEDIDOS.find((p) => p.idComprobantePedidoCliente === formData.idComprobantePedidoCliente);
 
     const totalVal = parseFloat(formData.total) || 0;
     const neto = totalVal / 1.21;
@@ -115,13 +116,13 @@ export const ComprobantesVentaScreen = () => {
       total: totalVal,
     };
 
-    const newId = comprobantes.length > 0 ? Math.max(...comprobantes.map((c) => c.id)) + 1 : 1;
-    setComprobantes((prev) => [...prev, { ...payload, id: newId }]);
+    const newId = comprobantes.length > 0 ? Math.max(...comprobantes.map((c) => c.idComprobanteVentaCliente)) + 1 : 1;
+    setComprobantes((prev) => [...prev, { ...payload, idComprobanteVentaCliente: newId }]);
     setOpenForm(false);
   };
 
   const handleDeleteConfirm = () => {
-    setComprobantes((prev) => prev.filter((c) => c.id !== selectedComprobante.id));
+    setComprobantes((prev) => prev.filter((c) => c.idComprobanteVentaCliente !== selectedComprobante.idComprobanteVentaCliente));
     setOpenDelete(false);
   };
 
@@ -191,7 +192,7 @@ export const ComprobantesVentaScreen = () => {
             <TableRow>
               <TableCell sx={{ fontWeight: 700 }}>Nro Comprobante</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Tipo</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Cliente / CUIT</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Cliente</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Pedido Asociado</TableCell>
               <TableCell align="right" sx={{ fontWeight: 700 }}>Neto ($)</TableCell>
               <TableCell align="right" sx={{ fontWeight: 700 }}>IVA 21% ($)</TableCell>
@@ -209,7 +210,7 @@ export const ComprobantesVentaScreen = () => {
               </TableRow>
             ) : (
               filteredComprobantes.map((item) => (
-                <TableRow key={item.id} hover>
+                <TableRow key={item.idComprobanteVentaCliente} hover>
                   <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>
                     {item.nroComprobante}
                   </TableCell>
@@ -271,9 +272,9 @@ export const ComprobantesVentaScreen = () => {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>Pedido Asociado</InputLabel>
-                <Select value={formData.pedidoId} label="Pedido Asociado" onChange={(e) => setFormData({ ...formData, pedidoId: e.target.value })}>
+                <Select value={formData.idComprobantePedidoCliente} label="Pedido Asociado" onChange={(e) => setFormData({ ...formData, idComprobantePedidoCliente: e.target.value })}>
                   {INITIAL_PEDIDOS.map((p) => (
-                    <MenuItem key={p.id} value={p.id}>{p.nroPedido} - {p.clienteNombre}</MenuItem>
+                    <MenuItem key={p.idComprobantePedidoCliente} value={p.idComprobantePedidoCliente}>{p.nroPedido} - {p.clienteNombre}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -282,9 +283,9 @@ export const ComprobantesVentaScreen = () => {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>Cliente Receptor</InputLabel>
-                <Select value={formData.clienteId} label="Cliente Receptor" onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}>
+                <Select value={formData.idCliente} label="Cliente Receptor" onChange={(e) => setFormData({ ...formData, idCliente: e.target.value })}>
                   {INITIAL_CLIENTES.map((c) => (
-                    <MenuItem key={c.id} value={c.id}>{c.razonSocial}</MenuItem>
+                    <MenuItem key={c.idCliente} value={c.idCliente}>{c.razonSocial}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -323,14 +324,12 @@ export const ComprobantesVentaScreen = () => {
             <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #009246', pb: 2, mb: 2 }}>
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#009246' }}>PASTAFAB S.A. - FÁBRICA DE PASTAS</Typography>
-                  <Typography variant="caption" display="block">Av. Villegas 450, Trenque Lauquen (Bs. As.)</Typography>
-                  <Typography variant="caption" display="block">CUIT: 30-71928441-0 • IVA Responsable Inscripto</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#009246' }}>PASTAFAB S.A.</Typography>
+                  <Typography variant="caption" display="block">Comprobante de Venta Oficial</Typography>
                 </Box>
                 <Box align="right">
                   <Chip label={selectedComprobante.tipoComprobante} color="primary" sx={{ fontWeight: 800, fontSize: '1rem', mb: 0.5 }} />
                   <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{selectedComprobante.nroComprobante}</Typography>
-                  <Typography variant="caption" display="block">Fecha Emisión: {selectedComprobante.fechaEmision}</Typography>
                 </Box>
               </Box>
 
@@ -343,25 +342,8 @@ export const ComprobantesVentaScreen = () => {
                 <Grid item xs={6} align="right">
                   <Typography variant="caption" color="text.secondary">Pedido Asociado:</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedComprobante.nroPedido}</Typography>
-                  <Typography variant="caption" display="block">Condición: {selectedComprobante.condicionPago}</Typography>
                 </Grid>
               </Grid>
-
-              <Box sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#fafafa', p: 2, borderRadius: '8px', mb: 2 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Desglose de Liquidación Fiscal (IVA 21%):</Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="body2">Subtotal Importe Neto Gravado:</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>${selectedComprobante.importeNeto.toLocaleString()}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="body2">IVA Alícuota General (21%):</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>${selectedComprobante.importeIva.toLocaleString()}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800 }}>Total Comprobante:</Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#009246' }}>${selectedComprobante.total.toLocaleString()}</Typography>
-                </Box>
-              </Box>
             </Paper>
           )}
         </DialogContent>

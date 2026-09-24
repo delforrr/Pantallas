@@ -35,7 +35,7 @@ import PaidIcon from '@mui/icons-material/Paid';
 import PrintIcon from '@mui/icons-material/Print';
 import PaymentsIcon from '@mui/icons-material/Payments';
 
-import { INITIAL_COMPROBANTES_PAGO, INITIAL_CLIENTES, INITIAL_PEDIDOS } from './mockData';
+import { INITIAL_COMPROBANTES_PAGO, INITIAL_CLIENTES, INITIAL_PEDIDOS, MEDIOS_DE_PAGO } from './mockData';
 
 export const ComprobantesPagoScreen = () => {
   const [pagos, setPagos] = useState(INITIAL_COMPROBANTES_PAGO);
@@ -50,12 +50,12 @@ export const ComprobantesPagoScreen = () => {
   // Selecciones
   const [selectedPago, setSelectedPago] = useState(null);
 
-  // Form State
+  // Form State Normalizado
   const initialFormState = {
     nroComprobantePago: '',
-    clienteId: 1,
-    pedidoId: 1,
-    medioPago: 'Efectivo',
+    idCliente: 1,
+    idComprobantePedidoCliente: 1,
+    idMedioDePagoCliente: 1,
     montoAbonado: 15000,
     concepto: 'Pago Total Venta Mostrador',
     nroTransaccion: 'EF-CAJA-05',
@@ -103,30 +103,26 @@ export const ComprobantesPagoScreen = () => {
   };
 
   const handleSave = () => {
-    // Regla TP: Bloqueo de Cheques y Tarjetas de Crédito
-    if (formData.medioPago === 'Cheque' || formData.medioPago === 'Tarjeta de Crédito') {
-      alert('¡MEDIO DE PAGO NO PERMITIDO! Según las reglas del Trabajo Práctico, NO se aceptan cheques ni tarjetas de crédito.');
-      return;
-    }
-
-    const clienteObj = INITIAL_CLIENTES.find((c) => c.id === formData.clienteId);
-    const pedidoObj = INITIAL_PEDIDOS.find((p) => p.id === formData.pedidoId);
+    const clienteObj = INITIAL_CLIENTES.find((c) => c.idCliente === formData.idCliente);
+    const pedidoObj = INITIAL_PEDIDOS.find((p) => p.idComprobantePedidoCliente === formData.idComprobantePedidoCliente);
+    const medioObj = MEDIOS_DE_PAGO.find((m) => m.idMedioDePagoCliente === formData.idMedioDePagoCliente);
 
     const payload = {
       ...formData,
       clienteNombre: clienteObj ? clienteObj.razonSocial : 'Cliente General',
       nroPedido: pedidoObj ? pedidoObj.nroPedido : 'VENTA-DIRECTA',
-      fechaEmision: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      medioPago: medioObj ? medioObj.descripcion : 'Efectivo',
+      fechaEmision: '2026-09-24 16:30',
       montoAbonado: parseFloat(formData.montoAbonado) || 0,
     };
 
-    const newId = pagos.length > 0 ? Math.max(...pagos.map((p) => p.id)) + 1 : 1;
-    setPagos((prev) => [...prev, { ...payload, id: newId }]);
+    const newId = pagos.length > 0 ? Math.max(...pagos.map((p) => p.idComprobantePagoCliente)) + 1 : 1;
+    setPagos((prev) => [...prev, { ...payload, idComprobantePagoCliente: newId }]);
     setOpenForm(false);
   };
 
   const handleDeleteConfirm = () => {
-    setPagos((prev) => prev.filter((p) => p.id !== selectedPago.id));
+    setPagos((prev) => prev.filter((p) => p.idComprobantePagoCliente !== selectedPago.idComprobantePagoCliente));
     setOpenDelete(false);
   };
 
@@ -137,10 +133,10 @@ export const ComprobantesPagoScreen = () => {
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1 }}>
             <PaidIcon color="primary" fontSize="large" />
-            Comprobantes de Pago de Clientes
+            Comprobantes de Pago (Recibos de Cobro)
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Registro de cobros recibidos por Efectivo, Débito, MercadoPago y Cuenta DNI (Regla TP: Cero Cheques / Tarjeta Crédito).
+            Registro y recepción de cobros a clientes por medios autorizados.
           </Typography>
         </Box>
         <Button
@@ -167,17 +163,14 @@ export const ComprobantesPagoScreen = () => {
           </Paper>
         </Grid>
         <Grid item xs={12} sm={6} md={8}>
-          <Paper sx={{ p: 2, borderRadius: '14px', bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : '#fbfcfd' }} elevation={1}>
+          <Paper sx={{ p: 2, borderRadius: '14px' }} elevation={1}>
             <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <PaymentsIcon fontSize="inherit" color="info" /> Medios de Pago Permitidos por Dominio:
+              <PaymentsIcon fontSize="inherit" color="info" /> Medios de Pago Habilitados:
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
-              <Chip label="Efectivo (Caja)" color="success" size="small" />
-              <Chip label="Tarjeta Débito (Posnet)" color="primary" size="small" />
-              <Chip label="MercadoPago (QR / Transferencia)" color="info" size="small" />
-              <Chip label="Cuenta DNI (App)" color="secondary" size="small" />
-              <Chip label="🚫 Cheques (No aceptado)" variant="outlined" color="error" size="small" />
-              <Chip label="🚫 Tarjeta Crédito (No aceptado)" variant="outlined" color="error" size="small" />
+              {MEDIOS_DE_PAGO.map((m) => (
+                <Chip key={m.idMedioDePagoCliente} label={m.descripcion} color="primary" size="small" variant="outlined" />
+              ))}
             </Box>
           </Paper>
         </Grid>
@@ -208,11 +201,10 @@ export const ComprobantesPagoScreen = () => {
             <FormControl fullWidth size="small">
               <InputLabel>Filtrar por Medio de Pago</InputLabel>
               <Select value={medioFilter} label="Filtrar por Medio de Pago" onChange={(e) => setMedioFilter(e.target.value)}>
-                <MenuItem value="TODOS">Todos los Medios de Pago</MenuItem>
-                <MenuItem value="EFECTIVO">Efectivo</MenuItem>
-                <MenuItem value="DÉBITO">Tarjeta Débito</MenuItem>
-                <MenuItem value="MERCADOPAGO">MercadoPago</MenuItem>
-                <MenuItem value="CUENTA DNI">Cuenta DNI</MenuItem>
+                <MenuItem value="TODOS">Todos los Medios</MenuItem>
+                {MEDIOS_DE_PAGO.map((m) => (
+                  <MenuItem key={m.idMedioDePagoCliente} value={m.descripcion.toUpperCase()}>{m.descripcion}</MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
@@ -242,7 +234,7 @@ export const ComprobantesPagoScreen = () => {
               </TableRow>
             ) : (
               filteredPagos.map((item) => (
-                <TableRow key={item.id} hover>
+                <TableRow key={item.idComprobantePagoCliente} hover>
                   <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>
                     {item.nroComprobantePago}
                   </TableCell>
@@ -289,11 +281,10 @@ export const ComprobantesPagoScreen = () => {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>Medio de Pago</InputLabel>
-                <Select value={formData.medioPago} label="Medio de Pago" onChange={(e) => setFormData({ ...formData, medioPago: e.target.value })}>
-                  <MenuItem value="Efectivo">Efectivo</MenuItem>
-                  <MenuItem value="Tarjeta Débito">Tarjeta Débito</MenuItem>
-                  <MenuItem value="MercadoPago">MercadoPago</MenuItem>
-                  <MenuItem value="Cuenta DNI">Cuenta DNI</MenuItem>
+                <Select value={formData.idMedioDePagoCliente} label="Medio de Pago" onChange={(e) => setFormData({ ...formData, idMedioDePagoCliente: e.target.value })}>
+                  {MEDIOS_DE_PAGO.map((m) => (
+                    <MenuItem key={m.idMedioDePagoCliente} value={m.idMedioDePagoCliente}>{m.descripcion}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
@@ -301,9 +292,9 @@ export const ComprobantesPagoScreen = () => {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>Cliente</InputLabel>
-                <Select value={formData.clienteId} label="Cliente" onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}>
+                <Select value={formData.idCliente} label="Cliente" onChange={(e) => setFormData({ ...formData, idCliente: e.target.value })}>
                   {INITIAL_CLIENTES.map((c) => (
-                    <MenuItem key={c.id} value={c.id}>{c.razonSocial}</MenuItem>
+                    <MenuItem key={c.idCliente} value={c.idCliente}>{c.razonSocial}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -311,9 +302,9 @@ export const ComprobantesPagoScreen = () => {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>Pedido Vinculado</InputLabel>
-                <Select value={formData.pedidoId} label="Pedido Vinculado" onChange={(e) => setFormData({ ...formData, pedidoId: e.target.value })}>
+                <Select value={formData.idComprobantePedidoCliente} label="Pedido Vinculado" onChange={(e) => setFormData({ ...formData, idComprobantePedidoCliente: e.target.value })}>
                   {INITIAL_PEDIDOS.map((p) => (
-                    <MenuItem key={p.id} value={p.id}>{p.nroPedido} (${p.total.toLocaleString()})</MenuItem>
+                    <MenuItem key={p.idComprobantePedidoCliente} value={p.idComprobantePedidoCliente}>{p.nroPedido}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -346,44 +337,18 @@ export const ComprobantesPagoScreen = () => {
       {/* Modal Recibo Detalle */}
       <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          Recibo de Pago Oficial #{selectedPago?.nroComprobantePago}
+          Recibo de Pago #{selectedPago?.nroComprobantePago}
           <IconButton onClick={() => setOpenDetail(false)}><CloseIcon /></IconButton>
         </DialogTitle>
         <DialogContent dividers>
           {selectedPago && (
             <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #009246', pb: 2, mb: 2 }}>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#009246' }}>PASTAFAB S.A.</Typography>
-                  <Typography variant="caption" display="block">Comprobante de Pago Oficial</Typography>
-                </Box>
-                <Box align="right">
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>{selectedPago.nroComprobantePago}</Typography>
-                  <Typography variant="caption" display="block">{selectedPago.fechaEmision}</Typography>
-                </Box>
-              </Box>
-
               <Typography variant="body2" sx={{ mb: 1 }}>
-                Recibimos de <strong>{selectedPago.clienteNombre}</strong> la cantidad de:
+                Recibimos de <strong>{selectedPago.clienteNombre}</strong>:
               </Typography>
               <Typography variant="h4" sx={{ fontWeight: 800, color: '#009246', mb: 2 }}>
                 ${selectedPago.montoAbonado.toLocaleString()}
               </Typography>
-
-              <Grid container spacing={1}>
-                <Grid item xs={6}>
-                  <Typography variant="caption" color="text.secondary" display="block">Medio de Pago:</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedPago.medioPago}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="caption" color="text.secondary" display="block">Nro Transacción:</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPago.nroTransaccion}</Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography variant="caption" color="text.secondary" display="block">Concepto:</Typography>
-                  <Typography variant="body2">{selectedPago.concepto}</Typography>
-                </Grid>
-              </Grid>
             </Paper>
           )}
         </DialogContent>
@@ -393,7 +358,7 @@ export const ComprobantesPagoScreen = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal Confirmación Anulación */}
+      {/* Modal Confirmación Eliminación */}
       <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
         <DialogTitle sx={{ fontWeight: 700 }}>¿Anular Recibo de Pago?</DialogTitle>
         <DialogContent>
