@@ -21,6 +21,7 @@ import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import BlockIcon from '@mui/icons-material/Block';
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
+import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
 
 const ESTADO_OP_COLORS = {
   Planificada: 'default',
@@ -50,9 +51,9 @@ export const OrdenProduccionCard = ({
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
-        height: 385,
-        minHeight: 385,
-        maxHeight: 385,
+        height: 410,
+        minHeight: 410,
+        maxHeight: 410,
         boxSizing: 'border-box',
         overflow: 'hidden',
         transition: 'box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out',
@@ -223,11 +224,13 @@ export const OrdenProduccionCard = ({
         </Box>
 
         {/* Slot 4: Información de Planificación */}
-        <Stack spacing={0.5} sx={{ height: 66, minHeight: 66, maxHeight: 66, justifyContent: 'center' }}>
+        <Stack spacing={0.5} sx={{ height: 88, minHeight: 88, maxHeight: 88, justifyContent: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
             <CalendarMonthIcon fontSize="inherit" sx={{ fontSize: 16, flexShrink: 0 }} />
             <Typography variant="caption" noWrap>
-              Programada: <strong>{orden.fechaProgramada}</strong>
+              {orden.fechaInicio && orden.fechaFin && orden.fechaInicio !== orden.fechaFin
+                ? `Inicio: ${orden.fechaInicio} • Fin: ${orden.fechaFin}`
+                : `Fecha: ${orden.fechaInicio || orden.fechaProgramada}`}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
@@ -237,6 +240,12 @@ export const OrdenProduccionCard = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
             <PersonIcon fontSize="inherit" sx={{ fontSize: 16, flexShrink: 0 }} />
             <Typography variant="caption" noWrap>{orden.responsable}</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
+            <PrecisionManufacturingIcon fontSize="inherit" sx={{ fontSize: 16, flexShrink: 0 }} />
+            <Typography variant="caption" noWrap>
+              Máquina: <strong>{orden.maquinaNombre || 'Sin asignar'}</strong>
+            </Typography>
           </Box>
         </Stack>
 
