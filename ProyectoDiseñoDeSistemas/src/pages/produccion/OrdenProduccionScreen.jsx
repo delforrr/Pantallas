@@ -31,6 +31,8 @@ import {
   Snackbar,
   Divider,
   Autocomplete,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
@@ -54,6 +56,7 @@ import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 
 import {
   ORDENES_PRODUCCION_INICIALES,
+  NOTAS_PEDIDO_MP_INICIALES,
   RECETAS_INICIALES,
   MATERIAS_PRIMAS_INICIALES,
   EMPLEADOS,
@@ -86,8 +89,12 @@ const getMananaFecha = () => {
 export const OrdenProduccionScreen = () => {
   // Estado de datos en memoria
   const [ordenes, setOrdenes] = useState(ORDENES_PRODUCCION_INICIALES);
+  const [notasPedido] = useState(NOTAS_PEDIDO_MP_INICIALES);
   const [materiasPrimas] = useState(MATERIAS_PRIMAS_INICIALES);
   const [recetas] = useState(RECETAS_INICIALES);
+
+  // Selector de entidad normalizada (0: Órdenes de Producción, 1: Notas de Pedido de Insumos)
+  const [tabIndex, setTabIndex] = useState(0);
 
   // Filtros y vista
   const [searchTerm, setSearchTerm] = useState('');
@@ -108,7 +115,7 @@ export const OrdenProduccionScreen = () => {
   const [formTurno, setFormTurno] = useState('Mañana (06:00 - 14:00)');
   const [formIdEmpleado, setFormIdEmpleado] = useState(1);
   const [formResponsable, setFormResponsable] = useState('Juan Carlos Pérez (Jefe de Cuadra)');
-  const [formMaquinaId, setFormMaquinaId] = useState('MAQ-004');
+  const [formMaquinasIds, setFormMaquinasIds] = useState([1, 3, 4]);
   const [formObservaciones, setFormObservaciones] = useState('');
 
   // Productos cargados en la orden (DetalleOrdenDeProduccion)
@@ -284,7 +291,7 @@ export const OrdenProduccionScreen = () => {
     setFormTurno('Mañana (06:00 - 14:00)');
     setFormIdEmpleado(1);
     setFormResponsable('Juan Carlos Pérez (Jefe de Cuadra)');
-    setFormMaquinaId('MAQ-004');
+    setFormMaquinasIds([1, 3, 4]);
     setFormObservaciones('');
     setOpenNewDialog(true);
   };
@@ -323,7 +330,13 @@ export const OrdenProduccionScreen = () => {
     setFormTurno(orden.turno);
     setFormIdEmpleado(orden.idEmpleado || 1);
     setFormResponsable(orden.responsable);
-    setFormMaquinaId(orden.maquinaId || 'MAQ-004');
+    const idsMaquinas =
+      orden.maquinariaProduccion && orden.maquinariaProduccion.length > 0
+        ? orden.maquinariaProduccion.map((m) => m.idMaquinaria)
+        : orden.maquinasIds && orden.maquinasIds.length > 0
+        ? orden.maquinasIds
+        : [1, 3, 4];
+    setFormMaquinasIds(idsMaquinas);
     setFormObservaciones(orden.observaciones || '');
     setOpenDetailDialog(false);
     setOpenNewDialog(true);
@@ -353,7 +366,8 @@ export const OrdenProduccionScreen = () => {
   };
 
   const handleGenerarSolicitudCompra = (orden) => {
-    const nuevoIdOC = `OC-LOC-${Math.floor(100 + Math.random() * 900)}`;
+    const numericPart = parseInt(String(orden.id).replace(/\D/g, ''), 10) || 101;
+    const nuevoIdOC = `OC-LOC-${100 + ((numericPart * 37) % 900)}`;
     setOrdenes((prev) =>
       prev.map((o) =>
         o.id === orden.id
@@ -390,11 +404,20 @@ export const OrdenProduccionScreen = () => {
         : `${formItems[0].productoNombre} +${formItems.length - 1} más`;
 
     const empleadoObj = EMPLEADOS.find((e) => e.idEmpleado === formIdEmpleado) || EMPLEADOS[0];
-    const maquinaObj =
-      MAQUINARIAS.find((m) => m.codigo === formMaquinaId || m.idMaquinaria === Number(formMaquinaId)) || MAQUINARIAS[3];
-
+    const maquinasSeleccionadas = MAQUINARIAS.filter((m) => formMaquinasIds.includes(m.idMaquinaria));
+    const maquinasParaOrden = maquinasSeleccionadas.length > 0 ? maquinasSeleccionadas : [MAQUINARIAS[0], MAQUINARIAS[2], MAQUINARIAS[3]];
     const fechaHoy = new Date().toISOString().split('T')[0];
     const ordenIdNum = editingOrdenId ? (ordenes.find((o) => o.id === editingOrdenId)?.idOrdenProduccion || 1) : ordenes.length + 1;
+
+    const maquinariaProduccionCalculada = maquinasParaOrden.map((m) => ({
+      idOrdenProduccion: ordenIdNum,
+      idMaquinaria: m.idMaquinaria,
+      codigo: m.codigo,
+      descripcion: m.descripcion,
+      tipo: m.tipo,
+    }));
+    const maquinasCodigos = maquinasParaOrden.map((m) => m.codigo).join(', ');
+    const maquinasResumen = `${maquinasCodigos} (${maquinasParaOrden.map((m) => m.descripcion.split(' ')[0]).join(', ')})`;
 
     const detallesCalculados = formItems.map((it) => ({
       idOrdenProduccion: ordenIdNum,
@@ -440,15 +463,10 @@ export const OrdenProduccionScreen = () => {
             idEmpleado: empleadoObj.idEmpleado,
             responsable: `${empleadoObj.nombre} (${empleadoObj.cargo})`,
             turno: formTurno,
-            maquinariaProduccion: [
-              {
-                idOrdenProduccion: o.idOrdenProduccion || ordenIdNum,
-                idMaquinaria: maquinaObj.idMaquinaria,
-                descripcion: maquinaObj.descripcion,
-              },
-            ],
-            maquinaId: maquinaObj.codigo,
-            maquinaNombre: maquinaObj.descripcion,
+            maquinariaProduccion: maquinariaProduccionCalculada,
+            maquinasIds: maquinasParaOrden.map((m) => m.idMaquinaria),
+            maquinaId: maquinasCodigos,
+            maquinaNombre: maquinasResumen,
             estadoInsumos: calculo.hayFaltante ? 'Faltante' : 'Completo',
             insumosFaltantes: calculo.faltantes,
             proveedorSugerido: calculo.hayFaltante
@@ -486,21 +504,16 @@ export const OrdenProduccionScreen = () => {
       idEmpleado: empleadoObj.idEmpleado,
       responsable: `${empleadoObj.nombre} (${empleadoObj.cargo})`,
       turno: formTurno,
-      maquinariaProduccion: [
-        {
-          idOrdenProduccion: ordenIdNum,
-          idMaquinaria: maquinaObj.idMaquinaria,
-          descripcion: maquinaObj.descripcion,
-        },
-      ],
-      maquinaId: maquinaObj.codigo,
-      maquinaNombre: maquinaObj.descripcion,
+      maquinariaProduccion: maquinariaProduccionCalculada,
+      maquinasIds: maquinasParaOrden.map((m) => m.idMaquinaria),
+      maquinaId: maquinasCodigos,
+      maquinaNombre: maquinasResumen,
       estado: 'Planificada',
       estadoInsumos: calculo.hayFaltante ? 'Faltante' : 'Completo',
       notaPedidoId: nuevaNP,
       notaPedidoMateriaPrima: notaPedidoCalculada,
       solicitudCompraGenerada: calculo.hayFaltante,
-      ordenCompraLocalId: calculo.hayFaltante ? `OC-LOC-${Math.floor(100 + Math.random() * 900)}` : null,
+      ordenCompraLocalId: calculo.hayFaltante ? `OC-LOC-${100 + ((ordenIdNum * 43) % 900)}` : null,
       proveedorSugerido: calculo.hayFaltante
         ? calculo.faltantes[0]?.proveedorSugerido || 'Proveedor Local'
         : null,
@@ -527,8 +540,33 @@ export const OrdenProduccionScreen = () => {
 
   return (
     <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
-      {/* ── Barra de Búsqueda, Filtros con Chips de Resumen y Acciones ─── */}
-      <Box
+      {/* ── Selector de Entidades Normalizadas: Órdenes de Producción vs Notas de Pedido de Insumos ── */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs
+          value={tabIndex}
+          onChange={(_, val) => setTabIndex(val)}
+          textColor="primary"
+          indicatorColor="primary"
+        >
+          <Tab
+            icon={<PrecisionManufacturingIcon fontSize="small" />}
+            iconPosition="start"
+            label={`Órdenes de Producción (${ordenes.length})`}
+            sx={{ fontWeight: 700, textTransform: 'none' }}
+          />
+          <Tab
+            icon={<AssignmentIcon fontSize="small" />}
+            iconPosition="start"
+            label={`Notas de Pedido de Materia Prima (${notasPedido.length})`}
+            sx={{ fontWeight: 700, textTransform: 'none' }}
+          />
+        </Tabs>
+      </Box>
+
+      {tabIndex === 0 && (
+        <>
+          {/* ── Barra de Búsqueda, Filtros con Chips de Resumen y Acciones ─── */}
+          <Box
         sx={{
           display: 'flex',
           gap: 2,
@@ -714,10 +752,11 @@ export const OrdenProduccionScreen = () => {
           <Table sx={{ width: '100%', minWidth: 920 }}>
             <TableHead sx={{ bgcolor: 'action.hover' }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700 }}>Orden / Pedido</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>N° Orden (OP)</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Nota de Pedido Insumos</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Productos y Volumen Total</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Fecha Prog. / Turno</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Máquina Asignada</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Máquinas Asignadas</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Responsable</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Insumos</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Estado OP</TableCell>
@@ -728,12 +767,30 @@ export const OrdenProduccionScreen = () => {
               {ordenesFiltradas.map((row) => (
                 <TableRow key={row.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
                       {row.numero}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      {row.notaPedidoId}
+                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                      {row.id}
                     </Typography>
+                  </TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                    <Tooltip title="Ver Nota de Pedido de Insumos asociada">
+                      <Chip
+                        icon={<AssignmentIcon style={{ fontSize: 14 }} />}
+                        label={row.notaPedidoId}
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => handleVerNotaPedidoDeOrden(row)}
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: '0.75rem',
+                          cursor: 'pointer',
+                          '&:hover': { bgcolor: 'action.hover' },
+                        }}
+                      />
+                    </Tooltip>
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
@@ -753,18 +810,28 @@ export const OrdenProduccionScreen = () => {
                       {row.turno}
                     </Typography>
                   </TableCell>
-                  <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                      <PrecisionManufacturingIcon fontSize="small" sx={{ color: 'text.secondary', fontSize: 18 }} />
-                      <Box>
+                  <TableCell sx={{ minWidth: 170 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                        <PrecisionManufacturingIcon fontSize="small" sx={{ color: 'text.secondary', fontSize: 18 }} />
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {row.maquinaNombre || 'Sin asignar'}
+                          {row.maquinariaProduccion?.length || 1} {row.maquinariaProduccion?.length === 1 ? 'máquina' : 'máquinas'}
                         </Typography>
-                        {row.maquinaId && (
-                          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-                            {row.maquinaId}
-                          </Typography>
-                        )}
+                      </Box>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxWidth: 220 }}>
+                        {(row.maquinariaProduccion && row.maquinariaProduccion.length > 0
+                          ? row.maquinariaProduccion
+                          : [{ codigo: row.maquinaId || 'MAQ', descripcion: row.maquinaNombre || 'Máquina' }]
+                        ).map((m, idx) => (
+                          <Tooltip key={idx} title={`${m.descripcion || m.codigo}${m.tipo ? ` (${m.tipo})` : ''}`}>
+                            <Chip
+                              size="small"
+                              label={m.codigo || m.descripcion}
+                              sx={{ fontSize: '0.68rem', height: 20, fontWeight: 600 }}
+                              variant="outlined"
+                            />
+                          </Tooltip>
+                        ))}
                       </Box>
                     </Box>
                   </TableCell>
@@ -867,6 +934,143 @@ export const OrdenProduccionScreen = () => {
           </Table>
         </TableContainer>
       )}
+        </>
+      )}
+
+      {/* ── Vista de Notas de Pedido de Materia Prima (tabIndex === 1) ── */}
+      {tabIndex === 1 && (
+        <Box>
+          <Box sx={{ mb: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                Notas de Pedido de Materia Prima e Insumos
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Entidad normalizada de requerimientos de insumos emitida por Cuadra hacia Almacén y Compras.
+              </Typography>
+            </Box>
+            <Chip
+              icon={<AssignmentIcon fontSize="small" />}
+              label={`${notasPedido.length} notas emitidas`}
+              color="primary"
+              variant="outlined"
+              sx={{ fontWeight: 600 }}
+            />
+          </Box>
+
+          <TableContainer
+            component={Paper}
+            elevation={1}
+            sx={{ borderRadius: '14px', border: '1px solid', borderColor: 'divider', overflowX: 'auto', width: '100%' }}
+          >
+            <Table sx={{ width: '100%', minWidth: 850 }}>
+              <TableHead sx={{ bgcolor: 'action.hover' }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 700 }}>N° Nota Pedido</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Orden de Producción</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Fecha Emisión</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Turno de Cuadra</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Responsable</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Insumos Solicitados</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Disponibilidad Stock</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, width: 180 }}>Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {notasPedido.map((np) => {
+                  const ordenAsociada = ordenes.find(
+                    (o) => o.idOrdenProduccion === np.idOrdenProduccion || o.notaPedidoId === np.numeroNP
+                  );
+
+                  return (
+                    <TableRow key={np.idNotaPedidoMP} hover>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                        <Chip
+                          icon={<AssignmentIcon style={{ fontSize: 14 }} />}
+                          label={np.numeroNP}
+                          size="small"
+                          color="primary"
+                          sx={{ fontWeight: 700 }}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                          {np.ordenNumero}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Ref: OP-00{np.idOrdenProduccion}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{np.fechaEmision}</TableCell>
+                      <TableCell>{np.turno}</TableCell>
+                      <TableCell>{np.responsable}</TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {np.detalles.length} insumo{np.detalles.length !== 1 ? 's' : ''}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {np.detalles.map((d) => d.materiaPrimaNombre).join(', ')}
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                        <Chip
+                          icon={
+                            np.estadoInsumos === 'Completo' ? (
+                              <CheckCircleIcon style={{ fontSize: 15 }} />
+                            ) : (
+                              <WarningAmberIcon style={{ fontSize: 15 }} />
+                            )
+                          }
+                          label={np.estadoInsumos === 'Completo' ? 'Insumos Completos' : 'Con Faltante'}
+                          size="small"
+                          color={np.estadoInsumos === 'Completo' ? 'success' : 'warning'}
+                          variant={np.estadoInsumos === 'Completo' ? 'outlined' : 'filled'}
+                          sx={{ fontWeight: 600, fontSize: '0.72rem' }}
+                        />
+                      </TableCell>
+                      <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<VisibilityOutlinedIcon />}
+                          onClick={() => {
+                            if (ordenAsociada) {
+                              handleVerNotaPedidoDeOrden(ordenAsociada);
+                            } else {
+                              setNotaPedidoData({
+                                numeroNP: np.numeroNP,
+                                fecha: np.fechaEmision,
+                                turno: np.turno,
+                                responsable: np.responsable,
+                                ordenNumero: np.ordenNumero,
+                                insumos: np.detalles.map((d) => ({
+                                  nombre: d.materiaPrimaNombre,
+                                  cantidadRequerida: d.cantidad,
+                                  unidad: d.unidad,
+                                  esFaltante: np.estadoInsumos === 'Faltante',
+                                  faltante: np.estadoInsumos === 'Faltante' ? 5 : 0,
+                                  stockActual: np.estadoInsumos === 'Faltante' ? 2 : d.cantidad + 10,
+                                })),
+                                hayFaltante: np.estadoInsumos === 'Faltante',
+                                faltantes: [],
+                                totalKilos: 50,
+                              });
+                              setOpenNotaPedidoDialog(true);
+                            }
+                          }}
+                          sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px' }}
+                        >
+                          Ver Insumos
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      )}
 
       {/* ── Modal: Planificar / Editar Orden de Producción ──── */}
       <Dialog
@@ -957,21 +1161,41 @@ export const OrdenProduccionScreen = () => {
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="select-maquina-label">Máquina Asignada (MaquinariaProduccion)</InputLabel>
-                <Select
-                  labelId="select-maquina-label"
-                  value={formMaquinaId}
-                  label="Máquina Asignada (MaquinariaProduccion)"
-                  onChange={(e) => setFormMaquinaId(e.target.value)}
-                >
-                  {MAQUINARIAS.map((maq) => (
-                    <MenuItem key={maq.idMaquinaria} value={maq.codigo}>
-                      #{maq.idMaquinaria} ({maq.codigo}) - {maq.descripcion}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                multiple
+                size="small"
+                options={MAQUINARIAS}
+                getOptionLabel={(option) => `${option.codigo} - ${option.descripcion} (${option.tipo})`}
+                value={MAQUINARIAS.filter((m) => formMaquinasIds.includes(m.idMaquinaria))}
+                onChange={(_, newValues) => {
+                  setFormMaquinasIds(newValues.map((v) => v.idMaquinaria));
+                }}
+                isOptionEqualToValue={(option, val) => option.idMaquinaria === val.idMaquinaria}
+                renderTags={(tagValue, getTagProps) =>
+                  tagValue.map((option, index) => {
+                    const tagProps = getTagProps({ index });
+                    return (
+                      <Chip
+                        {...tagProps}
+                        key={option.idMaquinaria}
+                        label={option.codigo}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                        sx={{ fontWeight: 600, fontSize: '0.75rem' }}
+                      />
+                    );
+                  })
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Máquinas Asignadas a la Orden (MaquinariaProduccion)"
+                    placeholder="Elegir máquinas de la línea..."
+                    helperText="Asociación a nivel orden de producción (UML MaquinariaProduccion N:M)"
+                  />
+                )}
+              />
             </Grid>
 
             <Grid item xs={12}>
@@ -1368,13 +1592,32 @@ export const OrdenProduccionScreen = () => {
                       <AccessTimeIcon fontSize="small" color="action" />
                       <Typography variant="body2">{selectedOrden.turno}</Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                      <PrecisionManufacturingIcon fontSize="small" color="action" />
-                      <Typography variant="body2">
-                        Máquina (MaquinariaProduccion): <strong>{selectedOrden.maquinaNombre || selectedOrden.maquinariaProduccion?.[0]?.descripcion || 'Sin asignar'}</strong>
+                    <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider' }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 0.8, mb: 0.8 }}>
+                        <PrecisionManufacturingIcon fontSize="small" color="primary" />
+                        MÁQUINAS ASIGNADAS A LA ORDEN (MaquinariaProduccion N:M):
                       </Typography>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
+                        {selectedOrden.maquinariaProduccion && selectedOrden.maquinariaProduccion.length > 0 ? (
+                          selectedOrden.maquinariaProduccion.map((m, idx) => (
+                            <Chip
+                              key={idx}
+                              icon={<PrecisionManufacturingIcon style={{ fontSize: 14 }} />}
+                              label={`${m.codigo ? m.codigo + ' - ' : ''}${m.descripcion}${m.tipo ? ` [${m.tipo}]` : ''}`}
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                              sx={{ fontWeight: 600 }}
+                            />
+                          ))
+                        ) : (
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            {selectedOrden.maquinaNombre || 'Sin máquinas asignadas'}
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
                       Empleado Asignado (IdEmpleado #{selectedOrden.idEmpleado || 1}): {selectedOrden.responsable}
                     </Typography>
                   </Paper>
