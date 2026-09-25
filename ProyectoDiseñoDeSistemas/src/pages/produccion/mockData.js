@@ -360,9 +360,7 @@ export const MATERIAS_PRIMAS_INICIALES = [
     unidad: 'kg',
     stockActual: 350,
     stockMinimo: 100,
-    precioUnitario: 850,
     tipo: 'Harinas y Cereales',
-    proveedorSugerido: 'Molino Cañuelas',
     estado: 'Activo',
   },
   {
@@ -377,9 +375,7 @@ export const MATERIAS_PRIMAS_INICIALES = [
     unidad: 'kg',
     stockActual: 80,
     stockMinimo: 50,
-    precioUnitario: 1200,
     tipo: 'Harinas y Cereales',
-    proveedorSugerido: 'Molino Campodónico',
     estado: 'Activo',
   },
   {
@@ -394,9 +390,7 @@ export const MATERIAS_PRIMAS_INICIALES = [
     unidad: 'docenas',
     stockActual: 45,
     stockMinimo: 30,
-    precioUnitario: 2400,
     tipo: 'Frescos y Granja',
-    proveedorSugerido: 'Granja San Antonio',
     estado: 'Activo',
   },
   {
@@ -411,9 +405,7 @@ export const MATERIAS_PRIMAS_INICIALES = [
     unidad: 'kg',
     stockActual: 28,
     stockMinimo: 40, // Bajo stock
-    precioUnitario: 3200,
     tipo: 'Lácteos',
-    proveedorSugerido: 'Lácteos La Serranita',
     estado: 'Activo',
   },
   {
@@ -428,9 +420,7 @@ export const MATERIAS_PRIMAS_INICIALES = [
     unidad: 'kg',
     stockActual: 15,
     stockMinimo: 10,
-    precioUnitario: 9800,
     tipo: 'Lácteos',
-    proveedorSugerido: 'Lácteos La Serranita',
     estado: 'Activo',
   },
   {
@@ -445,9 +435,7 @@ export const MATERIAS_PRIMAS_INICIALES = [
     unidad: 'kg',
     stockActual: 12,
     stockMinimo: 20, // Bajo stock
-    precioUnitario: 1800,
     tipo: 'Verduras',
-    proveedorSugerido: 'Quinta Don Pedro (Local)',
     estado: 'Activo',
   },
   {
@@ -462,9 +450,7 @@ export const MATERIAS_PRIMAS_INICIALES = [
     unidad: 'kg',
     stockActual: 30,
     stockMinimo: 15,
-    precioUnitario: 6500,
     tipo: 'Carnes',
-    proveedorSugerido: 'Frigorífico Regional',
     estado: 'Activo',
   },
   {
@@ -479,9 +465,7 @@ export const MATERIAS_PRIMAS_INICIALES = [
     unidad: 'kg',
     stockActual: 60,
     stockMinimo: 15,
-    precioUnitario: 450,
     tipo: 'Condimentos',
-    proveedorSugerido: 'Distribuidora Alimentos Sur',
     estado: 'Activo',
   },
   {
@@ -496,9 +480,7 @@ export const MATERIAS_PRIMAS_INICIALES = [
     unidad: 'kg',
     stockActual: 2.5,
     stockMinimo: 1.0,
-    precioUnitario: 18000,
     tipo: 'Condimentos',
-    proveedorSugerido: 'Especias El Trébol (Local)',
     estado: 'Activo',
   },
   {
@@ -513,9 +495,7 @@ export const MATERIAS_PRIMAS_INICIALES = [
     unidad: 'unidades',
     stockActual: 250,
     stockMinimo: 150,
-    precioUnitario: 350,
     tipo: 'Packaging',
-    proveedorSugerido: 'Envases del Plata (Local)',
     estado: 'Activo',
   },
 ];
