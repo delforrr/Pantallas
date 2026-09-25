@@ -44,6 +44,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 
 import { PRODUCTOS_INICIALES, RECETAS_INICIALES, PRODUCTOS_BASE, VARIEDADES, TIPOS_PRODUCTO, UNIDADES } from './mockData';
 import { useApp } from '../../context/AppContext';
@@ -705,7 +706,7 @@ export const ProductosCompuestosScreen = () => {
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
                     Materias Primas Requeridas ({recetaActiva.ingredientes?.length || 0}):
                   </Typography>
-                  <List dense disablePadding sx={{ bgcolor: 'background.paper', borderRadius: '8px', border: '1px solid', borderColor: 'divider' }}>
+                  <List dense disablePadding sx={{ bgcolor: 'background.paper', borderRadius: '8px', border: '1px solid', borderColor: 'divider', mb: 2.5 }}>
                     {recetaActiva.ingredientes?.map((ing, idx) => (
                       <ListItem
                         key={idx}
@@ -728,6 +729,45 @@ export const ProductosCompuestosScreen = () => {
                       </ListItem>
                     ))}
                   </List>
+
+                  {/* Pasos de Elaboración */}
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <FormatListNumberedIcon color="primary" fontSize="small" />
+                    Pasos de Elaboración ({Array.isArray(recetaActiva.pasos) ? recetaActiva.pasos.length : (recetaActiva.pasos ? 1 : 0)}):
+                  </Typography>
+                  {(!recetaActiva.pasos || (Array.isArray(recetaActiva.pasos) && recetaActiva.pasos.length === 0)) ? (
+                    <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderRadius: '8px' }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                        No se han registrado pasos para esta receta.
+                      </Typography>
+                    </Paper>
+                  ) : (
+                    <List dense disablePadding sx={{ bgcolor: 'background.paper', borderRadius: '8px', border: '1px solid', borderColor: 'divider' }}>
+                      {(Array.isArray(recetaActiva.pasos) ? recetaActiva.pasos : [recetaActiva.pasos]).map((paso, idx, arr) => (
+                        <ListItem
+                          key={idx}
+                          sx={{
+                            py: 1,
+                            px: 1.5,
+                            borderBottom: idx < arr.length - 1 ? '1px dashed' : 'none',
+                            borderColor: 'divider',
+                            alignItems: 'flex-start',
+                          }}
+                        >
+                          <Chip
+                            size="small"
+                            color="primary"
+                            label={`Paso ${idx + 1}`}
+                            sx={{ mr: 1.5, mt: 0.2, fontWeight: 700, fontSize: '0.7rem', height: 22 }}
+                          />
+                          <ListItemText
+                            primary={paso}
+                            primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  )}
                 </Box>
               ) : (
                 <Paper variant="outlined" sx={{ p: 3, textAlign: 'center', borderRadius: '10px' }}>
