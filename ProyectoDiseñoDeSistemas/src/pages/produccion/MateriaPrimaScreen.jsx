@@ -37,8 +37,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CategoryIcon from '@mui/icons-material/Category';
 
 import { MATERIAS_PRIMAS_INICIALES } from './mockData';
@@ -85,8 +83,6 @@ export const MateriaPrimaScreen = () => {
     unidad: 'kg',
     stockActual: 0,
     stockMinimo: 10,
-    proveedorSugerido: '',
-    precioUnitario: 0,
     estado: 'Activo',
     descripcion: '',
   });
@@ -179,8 +175,7 @@ export const MateriaPrimaScreen = () => {
         mp.nombre.toLowerCase().includes(term) ||
         mp.codigo.toLowerCase().includes(term) ||
         (mp.marca && mp.marca.toLowerCase().includes(term)) ||
-        mp.tipo.toLowerCase().includes(term) ||
-        (mp.proveedorSugerido && mp.proveedorSugerido.toLowerCase().includes(term));
+        mp.tipo.toLowerCase().includes(term);
       return matchTipo && matchEstado && matchSearch;
     });
   }, [materiasPrimas, searchTerm, selectedTipo, selectedEstado]);
@@ -203,8 +198,6 @@ export const MateriaPrimaScreen = () => {
       unidad: 'kg',
       stockActual: 50,
       stockMinimo: 20,
-      proveedorSugerido: '',
-      precioUnitario: 1000,
       estado: 'Activo',
       descripcion: '',
     });
@@ -222,8 +215,6 @@ export const MateriaPrimaScreen = () => {
       unidad: mp.unidad,
       stockActual: mp.stockActual,
       stockMinimo: mp.stockMinimo,
-      proveedorSugerido: mp.proveedorSugerido || '',
-      precioUnitario: mp.precioUnitario || 0,
       estado: mp.estado || 'Activo',
       descripcion: mp.descripcion || '',
     });
@@ -246,7 +237,6 @@ export const MateriaPrimaScreen = () => {
                 ...formState,
                 stockActual: Number(formState.stockActual) || 0,
                 stockMinimo: Number(formState.stockMinimo) || 0,
-                precioUnitario: Number(formState.precioUnitario) || 0,
               }
             : m
         )
@@ -258,7 +248,6 @@ export const MateriaPrimaScreen = () => {
         ...formState,
         stockActual: Number(formState.stockActual) || 0,
         stockMinimo: Number(formState.stockMinimo) || 0,
-        precioUnitario: Number(formState.precioUnitario) || 0,
       };
       setMateriasPrimas((prev) => [nuevo, ...prev]);
       setSnackbar({ open: true, message: `Materia prima "${formState.nombre}" dada de alta correctamente.`, severity: 'success' });
@@ -289,7 +278,7 @@ export const MateriaPrimaScreen = () => {
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', flex: 1, minWidth: { xs: '100%', md: 280 }, alignItems: 'center' }}>
           <TextField
             size="small"
-            placeholder="Buscar por código, nombre, proveedor..."
+            placeholder="Buscar por código, nombre, marca o categoría..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
@@ -413,7 +402,7 @@ export const MateriaPrimaScreen = () => {
             maxWidth: '100%',
           }}
         >
-          <Table sx={{ width: '100%', minWidth: 840 }} size="medium">
+          <Table sx={{ width: '100%', minWidth: 700 }} size="medium">
             <TableHead sx={{ bgcolor: 'action.hover' }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700, width: 95, whiteSpace: 'nowrap' }}>Código</TableCell>
@@ -421,8 +410,6 @@ export const MateriaPrimaScreen = () => {
                 <TableCell sx={{ fontWeight: 700, width: 140, whiteSpace: 'nowrap' }}>Categoría</TableCell>
                 <TableCell sx={{ fontWeight: 700, width: 120, whiteSpace: 'nowrap' }}>Stock Actual</TableCell>
                 <TableCell sx={{ fontWeight: 700, width: 110, whiteSpace: 'nowrap' }}>Stock Mínimo</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 120, whiteSpace: 'nowrap' }}>Costo Unitario</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 160, whiteSpace: 'nowrap' }}>Proveedor Sugerido</TableCell>
                 <TableCell sx={{ fontWeight: 700, width: 105, whiteSpace: 'nowrap' }}>Estado</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700, width: 145, minWidth: 145, whiteSpace: 'nowrap' }}>
                   Acciones
@@ -478,17 +465,6 @@ export const MateriaPrimaScreen = () => {
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                         {mp.stockMinimo} {mp.unidad}
                       </Typography>
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                        ${mp.precioUnitario?.toLocaleString('es-AR')}
-                        <Typography component="span" variant="caption" sx={{ color: 'text.secondary', ml: 0.5 }}>
-                          / {mp.unidad}
-                        </Typography>
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
-                      <Typography variant="body2">{mp.proveedorSugerido || 'Sin asignar'}</Typography>
                     </TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
                       {mp.estado === 'Activo' ? (
@@ -789,31 +765,6 @@ export const MateriaPrimaScreen = () => {
 
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Costo Unitario Estimado ($)"
-                type="number"
-                fullWidth
-                size="small"
-                value={formState.precioUnitario}
-                onChange={(e) => setFormState({ ...formState, precioUnitario: e.target.value })}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                }}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Proveedor Sugerido / Habitual"
-                fullWidth
-                size="small"
-                value={formState.proveedorSugerido}
-                onChange={(e) => setFormState({ ...formState, proveedorSugerido: e.target.value })}
-                placeholder="Ej. Molino Cañuelas"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
                 select
                 label="Estado"
                 fullWidth
@@ -975,30 +926,6 @@ export const MateriaPrimaScreen = () => {
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 700, mt: 0.2 }}>
                       {viewingMP.stockMinimo} {viewingMP.unidad}
-                    </Typography>
-                  </Paper>
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px' }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <AttachMoneyIcon fontSize="inherit" /> Costo Unitario
-                    </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main', mt: 0.2 }}>
-                      ${viewingMP.precioUnitario?.toLocaleString('es-AR')}
-                      <Typography component="span" variant="caption" sx={{ color: 'text.secondary', ml: 0.5 }}>
-                        / {viewingMP.unidad}
-                      </Typography>
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px' }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <LocalShippingOutlinedIcon fontSize="inherit" /> Proveedor Sugerido
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>
-                      {viewingMP.proveedorSugerido || 'No especificado'}
                     </Typography>
                   </Paper>
                 </Grid>
