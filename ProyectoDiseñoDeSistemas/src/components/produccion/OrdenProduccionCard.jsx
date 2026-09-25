@@ -79,9 +79,17 @@ export const OrdenProduccionCard = ({
         {/* Slot 1: Header (OP, Pedido, Título a 2 líneas fijas, Estado) */}
         <Box sx={{ height: 62, minHeight: 62, maxHeight: 62, mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Box sx={{ flex: 1, mr: 1, minWidth: 0 }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: '0.04em', display: 'block', lineHeight: 1.2 }}>
-              {orden.numero} • {orden.notaPedidoId}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, mb: 0.5, flexWrap: 'nowrap' }}>
+              <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: '0.02em' }}>
+                {orden.numero}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.7rem' }}>
+                •
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, bgcolor: 'action.hover', px: 0.8, py: 0.2, borderRadius: '6px' }}>
+                NP: {orden.notaPedidoId}
+              </Typography>
+            </Box>
             <Typography
               variant="h6"
               sx={{
@@ -243,8 +251,8 @@ export const OrdenProduccionCard = ({
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
             <PrecisionManufacturingIcon fontSize="inherit" sx={{ fontSize: 16, flexShrink: 0 }} />
-            <Typography variant="caption" noWrap>
-              Máquina: <strong>{orden.maquinaNombre || 'Sin asignar'}</strong>
+            <Typography variant="caption" noWrap title={orden.maquinariaProduccion?.map((m) => `${m.codigo}: ${m.descripcion}`).join(' • ') || orden.maquinaNombre}>
+              Máquinas ({orden.maquinariaProduccion?.length || 1}): <strong>{orden.maquinariaProduccion && orden.maquinariaProduccion.length > 0 ? orden.maquinariaProduccion.map((m) => m.codigo || m.descripcion).join(', ') : orden.maquinaNombre || 'Sin asignar'}</strong>
             </Typography>
           </Box>
         </Stack>
