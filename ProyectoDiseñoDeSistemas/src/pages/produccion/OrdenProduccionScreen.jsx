@@ -53,6 +53,7 @@ import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
+import PersonIcon from '@mui/icons-material/Person';
 
 import {
   ORDENES_PRODUCCION_INICIALES,
@@ -168,7 +169,7 @@ export const OrdenProduccionScreen = () => {
         const matchSearch =
           o.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
           o.productoNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          o.responsable.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (o.empleadoNombre || o.responsable || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
           (o.maquinaNombre && o.maquinaNombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
           o.notaPedidoId.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -230,13 +231,26 @@ export const OrdenProduccionScreen = () => {
   const handleGenerarNotaPedidoEnFormulario = () => {
     if (formItems.length === 0) return;
     const resultado = verificarDisponibilidadMultiplesProductos(formItems, recetas, materiasPrimas);
+    const newId = editingOrdenId || (ordenes.length + 1);
+    const codigoNP = `NP-2026-${String(newId).padStart(3, '0')}`;
+    const codigoOP = editingOrdenId
+      ? (ordenes.find((o) => o.idOrdenProduccion === editingOrdenId)?.numero || `OP #${100 + editingOrdenId - 1}`)
+      : `OP #${100 + ordenes.length}`;
+
     setNotaPedidoData({
-      numeroNP: `NP-2026-${String(ordenes.length + 1).padStart(3, '0')}`,
-      fecha: formFechaInicio,
+      idNotaPedidoMP: newId,
+      codigoNotaPedido: codigoNP,
+      numeroNP: codigoNP,
+      idOrdenProduccion: newId,
+      numeroOrden: codigoOP,
+      ordenNumero: codigoOP,
+      fechaEmision: formFechaInicio || new Date().toISOString().split('T')[0],
+      fecha: formFechaInicio || new Date().toISOString().split('T')[0],
       turno: formTurno,
       responsable: formResponsable,
       items: formItems,
       ...resultado,
+      insumos: resultado.insumos || [],
     });
     setOpenNotaPedidoDialog(true);
   };
@@ -246,6 +260,8 @@ export const OrdenProduccionScreen = () => {
     const itemsOrden =
       orden.items && orden.items.length > 0
         ? orden.items
+        : orden.detallesOrdenProduccion && orden.detallesOrdenProduccion.length > 0
+        ? orden.detallesOrdenProduccion
         : [
             {
               recetaId: orden.productoId || recetas[0]?.id,
@@ -256,14 +272,53 @@ export const OrdenProduccionScreen = () => {
           ];
 
     const resultado = verificarDisponibilidadMultiplesProductos(itemsOrden, recetas, materiasPrimas);
+    let insumosFinal = resultado.insumos && resultado.insumos.length > 0 ? resultado.insumos : [];
+
+    // Fallback si resultado no calculó insumos pero la orden tiene notaPedidoMateriaPrima.detalles
+    if (insumosFinal.length === 0 && orden.notaPedidoMateriaPrima?.detalles?.length > 0) {
+      insumosFinal = orden.notaPedidoMateriaPrima.detalles.map((d, idx) => {
+        const mp = materiasPrimas.find(
+          (m) => m.idMateriaPrima === d.idMateriaPrima || m.nombre?.toLowerCase() === (d.materiaPrimaNombre || d.nombre)?.toLowerCase()
+        );
+        const cant = d.cantidadRequerida ?? d.cantidad ?? 0;
+        const stock = mp ? mp.stockActual : (orden.estadoInsumos === 'Faltante' ? 2 : cant + 10);
+        const falta = Math.max(0, Number((cant - stock).toFixed(2)));
+        return {
+          idMateriaPrima: d.idMateriaPrima || mp?.idMateriaPrima || idx + 1,
+          nombre: d.materiaPrimaNombre || d.nombre || mp?.nombre || `Insumo #${idx + 1}`,
+          tipo: mp?.tipo || 'Insumo',
+          cantidadRequerida: cant,
+          stockActual: stock,
+          unidad: d.unidad || mp?.unidad || 'kg',
+          esFaltante: falta > 0 || orden.estadoInsumos === 'Faltante',
+          faltante: falta,
+          proveedorSugerido: mp?.proveedorSugerido || 'Proveedor Local Sugerido',
+        };
+      });
+    }
+
+    const idNP = orden.notaPedidoMateriaPrima?.idNotaPedidoMP || orden.idOrdenProduccion || 1;
+    const codNP = orden.notaPedidoId || orden.numeroNP || `NP-2026-${String(idNP).padStart(3, '0')}`;
+    const idOP = orden.idOrdenProduccion || 1;
+    const numOP = orden.numero || orden.ordenNumero || `OP #${100 + idOP - 1}`;
+    const fechaEm = orden.notaPedidoMateriaPrima?.fechaEmision || orden.fechaEmision || orden.fechaProgramada || '2026-09-14';
+
     setNotaPedidoData({
-      numeroNP: orden.notaPedidoId,
-      fecha: orden.fechaProgramada,
+      idNotaPedidoMP: idNP,
+      codigoNotaPedido: codNP,
+      numeroNP: codNP,
+      idOrdenProduccion: idOP,
+      numeroOrden: numOP,
+      ordenNumero: numOP,
+      fechaEmision: fechaEm,
+      fecha: orden.fechaProgramada || fechaEm,
       turno: orden.turno,
       responsable: orden.responsable,
-      ordenNumero: orden.numero,
       items: itemsOrden,
       ...resultado,
+      insumos: insumosFinal,
+      hayFaltante: insumosFinal.some((i) => i.esFaltante) || orden.estadoInsumos === 'Faltante',
+      totalKilos: resultado.totalKilos || orden.cantidadKilos || 40,
     });
     setOpenNotaPedidoDialog(true);
   };
@@ -461,6 +516,7 @@ export const OrdenProduccionScreen = () => {
             productoNombre: resumenNombre,
             cantidadKilos: totalKilos,
             idEmpleado: empleadoObj.idEmpleado,
+            empleadoNombre: `${empleadoObj.nombre} (${empleadoObj.cargo})`,
             responsable: `${empleadoObj.nombre} (${empleadoObj.cargo})`,
             turno: formTurno,
             maquinariaProduccion: maquinariaProduccionCalculada,
@@ -502,6 +558,7 @@ export const OrdenProduccionScreen = () => {
       productoNombre: resumenNombre,
       cantidadKilos: totalKilos,
       idEmpleado: empleadoObj.idEmpleado,
+      empleadoNombre: `${empleadoObj.nombre} (${empleadoObj.cargo})`,
       responsable: `${empleadoObj.nombre} (${empleadoObj.cargo})`,
       turno: formTurno,
       maquinariaProduccion: maquinariaProduccionCalculada,
@@ -757,7 +814,7 @@ export const OrdenProduccionScreen = () => {
                 <TableCell sx={{ fontWeight: 700 }}>Productos y Volumen Total</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Fecha Prog. / Turno</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Máquinas Asignadas</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Responsable</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Empleado</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Insumos</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Estado OP</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700, width: 170, whiteSpace: 'nowrap' }}>Acciones</TableCell>
@@ -836,7 +893,10 @@ export const OrdenProduccionScreen = () => {
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{row.responsable}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{row.empleadoNombre || row.responsable}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                      Legajo #{row.idEmpleado || 1}
+                    </Typography>
                   </TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>
                     {row.estadoInsumos === 'Completo' ? (
@@ -970,7 +1030,7 @@ export const OrdenProduccionScreen = () => {
                   <TableCell sx={{ fontWeight: 700 }}>Orden de Producción</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Fecha Emisión</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Turno de Cuadra</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Responsable</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Empleado</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Insumos Solicitados</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Disponibilidad Stock</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700, width: 180 }}>Acciones</TableCell>
@@ -1003,7 +1063,10 @@ export const OrdenProduccionScreen = () => {
                       </TableCell>
                       <TableCell>{np.fechaEmision}</TableCell>
                       <TableCell>{np.turno}</TableCell>
-                      <TableCell>{np.responsable}</TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{np.empleadoNombre || np.responsable}</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>Legajo #{np.idEmpleado || 1}</Typography>
+                      </TableCell>
                       <TableCell>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                           {np.detalles.length} insumo{np.detalles.length !== 1 ? 's' : ''}
@@ -1037,22 +1100,41 @@ export const OrdenProduccionScreen = () => {
                             if (ordenAsociada) {
                               handleVerNotaPedidoDeOrden(ordenAsociada);
                             } else {
+                              const insumos = (np.detalles || []).map((d, idx) => {
+                                const mp = materiasPrimas.find(
+                                  (m) => m.idMateriaPrima === d.idMateriaPrima || m.nombre?.toLowerCase() === (d.materiaPrimaNombre || d.nombre)?.toLowerCase()
+                                );
+                                const cant = d.cantidadRequerida ?? d.cantidad ?? 0;
+                                const stock = mp ? mp.stockActual : (np.estadoInsumos === 'Faltante' ? 2 : cant + 10);
+                                const falta = Math.max(0, Number((cant - stock).toFixed(2)));
+                                return {
+                                  idMateriaPrima: d.idMateriaPrima || mp?.idMateriaPrima || (idx + 1),
+                                  nombre: d.materiaPrimaNombre || d.nombre || mp?.nombre || `Insumo #${idx + 1}`,
+                                  tipo: mp?.tipo || 'Insumo',
+                                  cantidadRequerida: cant,
+                                  stockActual: stock,
+                                  unidad: d.unidad || mp?.unidad || 'kg',
+                                  esFaltante: falta > 0 || np.estadoInsumos === 'Faltante',
+                                  faltante: falta,
+                                  proveedorSugerido: mp?.proveedorSugerido || 'Proveedor Local Sugerido',
+                                };
+                              });
+
                               setNotaPedidoData({
+                                idNotaPedidoMP: np.idNotaPedidoMP,
+                                codigoNotaPedido: np.numeroNP,
                                 numeroNP: np.numeroNP,
+                                idOrdenProduccion: np.idOrdenProduccion,
+                                numeroOrden: np.ordenNumero,
+                                ordenNumero: np.ordenNumero,
+                                fechaEmision: np.fechaEmision,
                                 fecha: np.fechaEmision,
                                 turno: np.turno,
                                 responsable: np.responsable,
-                                ordenNumero: np.ordenNumero,
-                                insumos: np.detalles.map((d) => ({
-                                  nombre: d.materiaPrimaNombre,
-                                  cantidadRequerida: d.cantidad,
-                                  unidad: d.unidad,
-                                  esFaltante: np.estadoInsumos === 'Faltante',
-                                  faltante: np.estadoInsumos === 'Faltante' ? 5 : 0,
-                                  stockActual: np.estadoInsumos === 'Faltante' ? 2 : d.cantidad + 10,
-                                })),
-                                hayFaltante: np.estadoInsumos === 'Faltante',
-                                faltantes: [],
+                                insumos,
+                                hayFaltante: np.estadoInsumos === 'Faltante' || insumos.some((i) => i.esFaltante),
+                                faltantes: insumos.filter((i) => i.esFaltante),
+                                items: [{ productoNombre: 'Producción Programada', cantidadKilos: 50 }],
                                 totalKilos: 50,
                               });
                               setOpenNotaPedidoDialog(true);
@@ -1381,7 +1463,7 @@ export const OrdenProduccionScreen = () => {
         </DialogActions>
       </Dialog>
 
-      {/* ── Modal: Nota de Pedido de Materia Prima ─────────── */}
+      {/* ── Modal: Nota de Pedido de Materia Prima (NotaPedidoMateriaPrima) ── */}
       <Dialog
         open={openNotaPedidoDialog}
         onClose={() => setOpenNotaPedidoDialog(false)}
@@ -1391,48 +1473,86 @@ export const OrdenProduccionScreen = () => {
       >
         {notaPedidoData && (
           <>
-            <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <AssignmentIcon color="primary" />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    Nota de Pedido de Materia Prima ({notaPedidoData.numeroNP})
+                    Nota de Pedido de Materia Prima: {notaPedidoData.codigoNotaPedido || notaPedidoData.numeroNP}
                   </Typography>
                   <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    Fecha programada: {notaPedidoData.fecha} • {notaPedidoData.turno}
+                    Entidad de Dominio: <strong>NotaPedidoMateriaPrima</strong> (IdNotaPedidoMP: #{notaPedidoData.idNotaPedidoMP}) • {notaPedidoData.turno}
                   </Typography>
                 </Box>
               </Box>
               <Chip
-                label={notaPedidoData.hayFaltante ? 'Con Faltante de Insumos' : 'Insumos Completos'}
+                label={notaPedidoData.hayFaltante ? 'Con Alerta de Faltante' : 'Insumos Completos'}
                 color={notaPedidoData.hayFaltante ? 'warning' : 'success'}
                 sx={{ fontWeight: 700 }}
               />
             </DialogTitle>
 
             <DialogContent dividers>
+              {/* Tarjetas de Identificación de Dominio */}
+              <Grid container spacing={2} sx={{ mb: 2.5 }}>
+                <Grid item xs={12} sm={4}>
+                  <Paper variant="outlined" sx={{ p: 1.5, borderRadius: '10px' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                      ID NOTA PEDIDO (IdNotaPedidoMP)
+                    </Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'primary.main', mt: 0.3 }}>
+                      #{notaPedidoData.idNotaPedidoMP} ({notaPedidoData.codigoNotaPedido || notaPedidoData.numeroNP})
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Paper variant="outlined" sx={{ p: 1.5, borderRadius: '10px' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                      ORDEN DE PRODUCCIÓN (IdOrdenProduccion)
+                    </Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800, mt: 0.3 }}>
+                      #{notaPedidoData.idOrdenProduccion} ({notaPedidoData.numeroOrden || notaPedidoData.ordenNumero})
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Paper variant="outlined" sx={{ p: 1.5, borderRadius: '10px' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                      FECHA DE EMISIÓN (FechaEmision)
+                    </Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800, mt: 0.3 }}>
+                      {notaPedidoData.fechaEmision || notaPedidoData.fecha}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+
               {/* Resumen de productos que originan esta nota de pedido */}
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700 }}>
-                  PRODUCTOS A ELABORAR INCLUIDOS EN ESTA NOTA:
-                </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.8 }}>
-                  {notaPedidoData.items?.map((it, idx) => (
-                    <Chip
-                      key={idx}
-                      label={`${it.productoNombre}: ${it.cantidadKilos} kg`}
-                      color="primary"
-                      variant="outlined"
-                      sx={{ fontWeight: 600 }}
-                    />
-                  ))}
-                  <Chip
-                    label={`Total: ${notaPedidoData.totalKilos} kg`}
-                    color="primary"
-                    sx={{ fontWeight: 700 }}
-                  />
+              {notaPedidoData.items && notaPedidoData.items.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700 }}>
+                    PRODUCTOS A ELABORAR INCLUIDOS EN ESTA NOTA:
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.8 }}>
+                    {notaPedidoData.items.map((it, idx) => (
+                      <Chip
+                        key={idx}
+                        label={`${it.productoNombre}: ${it.cantidadKilos || it.cantidadPlanificada} kg`}
+                        color="primary"
+                        variant="outlined"
+                        sx={{ fontWeight: 600 }}
+                      />
+                    ))}
+                    {notaPedidoData.totalKilos && (
+                      <Chip
+                        label={`Total: ${notaPedidoData.totalKilos} kg`}
+                        color="primary"
+                        sx={{ fontWeight: 700 }}
+                      />
+                    )}
+                  </Box>
                 </Box>
-              </Box>
+              )}
 
               {/* Alerta de faltante */}
               {notaPedidoData.hayFaltante ? (
@@ -1451,61 +1571,73 @@ export const OrdenProduccionScreen = () => {
 
               {/* Tabla consolidada de Materias Primas */}
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-                Detalle Consolidado de Insumos Requeridos
+                Detalles del Pedido de Insumos (DetalleNotaPedidoMateriaPrima)
               </Typography>
               <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px', maxHeight: 280, overflowY: 'auto' }}>
                 <Table size="small">
                   <TableHead sx={{ bgcolor: 'action.hover' }}>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 600 }}>Materia Prima / Insumo</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Tipo</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 600 }}>Cantidad Requerida</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 600 }}>Stock Actual</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 600 }}>Estado</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Proveedor Local</TableCell>
+                      <TableCell sx={{ fontWeight: 700, width: 80 }}>Id MP</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Materia Prima (Nombre)</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Tipo</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>Cantidad Requerida</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>Stock Actual</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700 }}>Estado</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Proveedor Local</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {notaPedidoData.insumos?.map((ins, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell sx={{ fontWeight: 500 }}>{ins.nombre}</TableCell>
-                        <TableCell sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>{ins.tipo}</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 700 }}>
-                          {ins.cantidadRequerida} {ins.unidad}
-                        </TableCell>
-                        <TableCell align="right" sx={{ color: 'text.secondary' }}>
-                          {ins.stockActual} {ins.unidad}
-                        </TableCell>
-                        <TableCell align="center">
-                          {ins.esFaltante ? (
-                            <Chip
-                              size="small"
-                              color="error"
-                              label={`Faltan ${ins.faltante} ${ins.unidad}`}
-                              sx={{ fontSize: '0.7rem', height: 22, fontWeight: 700 }}
-                            />
-                          ) : (
-                            <Chip
-                              size="small"
-                              color="success"
-                              variant="outlined"
-                              label="Disponible"
-                              sx={{ fontSize: '0.7rem', height: 22, fontWeight: 600 }}
-                            />
-                          )}
-                        </TableCell>
-                        <TableCell sx={{ fontSize: '0.78rem', color: 'text.secondary' }}>
-                          {ins.proveedorSugerido}
+                    {(!notaPedidoData.insumos || notaPedidoData.insumos.length === 0) ? (
+                      <TableRow>
+                        <TableCell colSpan={7} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                          No hay insumos requeridos registrados para esta nota de pedido.
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      notaPedidoData.insumos.map((ins, idx) => (
+                        <TableRow key={idx} hover>
+                          <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                            #{ins.idMateriaPrima || idx + 1}
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>{ins.nombre || ins.materiaPrimaNombre}</TableCell>
+                          <TableCell sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>{ins.tipo || 'Insumo'}</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                            {ins.cantidadRequerida ?? ins.cantidad} {ins.unidad || 'kg'}
+                          </TableCell>
+                          <TableCell align="right" sx={{ color: ins.esFaltante ? 'error.main' : 'text.secondary', fontWeight: 600 }}>
+                            {ins.stockActual ?? 0} {ins.unidad || 'kg'}
+                          </TableCell>
+                          <TableCell align="center">
+                            {ins.esFaltante ? (
+                              <Chip
+                                size="small"
+                                color="error"
+                                label={`Falta ${ins.faltante} ${ins.unidad || 'kg'}`}
+                                sx={{ fontSize: '0.7rem', height: 22, fontWeight: 700 }}
+                              />
+                            ) : (
+                              <Chip
+                                size="small"
+                                color="success"
+                                variant="outlined"
+                                label="Disponible"
+                                sx={{ fontSize: '0.7rem', height: 22, fontWeight: 600 }}
+                              />
+                            )}
+                          </TableCell>
+                          <TableCell sx={{ fontSize: '0.78rem', color: 'text.secondary' }}>
+                            {ins.proveedorSugerido || 'Proveedor Local'}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
             </DialogContent>
 
             <DialogActions sx={{ px: 3, py: 2 }}>
-              <Button onClick={() => setOpenNotaPedidoDialog(false)} color="inherit">
+              <Button onClick={() => setOpenNotaPedidoDialog(false)} color="inherit" sx={{ fontWeight: 600 }}>
                 Cerrar
               </Button>
               <Button
@@ -1513,13 +1645,14 @@ export const OrdenProduccionScreen = () => {
                   setOpenNotaPedidoDialog(false);
                   setSnackbar({
                     open: true,
-                    message: `Nota de pedido ${notaPedidoData.numeroNP} verificada y vinculada a la orden.`,
+                    message: `Nota de pedido ${notaPedidoData.codigoNotaPedido || notaPedidoData.numeroNP} verificada y vinculada a la orden.`,
                     severity: 'success',
                   });
                 }}
                 variant="contained"
                 color="primary"
                 startIcon={<CheckCircleIcon />}
+                sx={{ fontWeight: 600 }}
               >
                 Aceptar y Confirmar Insumos
               </Button>
@@ -1617,9 +1750,12 @@ export const OrdenProduccionScreen = () => {
                         )}
                       </Box>
                     </Box>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
-                      Empleado Asignado (IdEmpleado #{selectedOrden.idEmpleado || 1}): {selectedOrden.responsable}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, mt: 1 }}>
+                      <PersonIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                      <Typography variant="body2">
+                        Empleado Asignado (IdEmpleado #{selectedOrden.idEmpleado || 1}): <strong>{selectedOrden.empleadoNombre || selectedOrden.responsable}</strong>
+                      </Typography>
+                    </Box>
                   </Paper>
                 </Grid>
               </Grid>
@@ -1787,120 +1923,6 @@ export const OrdenProduccionScreen = () => {
         )}
       </Dialog>
 
-      {/* ── Modal: Nota de Pedido de Materia Prima (NotaPedidoMateriaPrima) ── */}
-      <Dialog
-        open={openNotaPedidoDialog}
-        onClose={() => setOpenNotaPedidoDialog(false)}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{ sx: { borderRadius: '14px' } }}
-      >
-        {notaPedidoData && (
-          <>
-            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  Nota de Pedido de Materia Prima: {notaPedidoData.codigoNotaPedido}
-                </Typography>
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                  Entidad de Dominio: <strong>NotaPedidoMateriaPrima</strong> (IdNotaPedidoMP: #{notaPedidoData.idNotaPedidoMP})
-                </Typography>
-              </Box>
-              <Chip
-                label={notaPedidoData.hayFaltante ? 'Con Alerta de Faltante' : 'Insumos Completos'}
-                color={notaPedidoData.hayFaltante ? 'warning' : 'success'}
-                size="small"
-                sx={{ fontWeight: 700 }}
-              />
-            </DialogTitle>
-            <Divider />
-            <DialogContent>
-              <Grid container spacing={2} sx={{ mb: 2.5 }}>
-                <Grid item xs={12} sm={4}>
-                  <Paper variant="outlined" sx={{ p: 1.5, borderRadius: '10px' }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      ID NOTA PEDIDO (IdNotaPedidoMP)
-                    </Typography>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'primary.main', mt: 0.3 }}>
-                      #{notaPedidoData.idNotaPedidoMP} ({notaPedidoData.codigoNotaPedido})
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Paper variant="outlined" sx={{ p: 1.5, borderRadius: '10px' }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      ORDEN DE PRODUCCIÓN (IdOrdenProduccion)
-                    </Typography>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 800, mt: 0.3 }}>
-                      #{notaPedidoData.idOrdenProduccion} ({notaPedidoData.numeroOrden})
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Paper variant="outlined" sx={{ p: 1.5, borderRadius: '10px' }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      FECHA DE EMISIÓN (FechaEmision)
-                    </Typography>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 800, mt: 0.3 }}>
-                      {notaPedidoData.fechaEmision}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              </Grid>
-
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-                Detalles del Pedido de Insumos (DetalleNotaPedidoMateriaPrima)
-              </Typography>
-              <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px' }}>
-                <Table size="small">
-                  <TableHead sx={{ bgcolor: 'action.hover' }}>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 700, width: 100 }}>Id MP</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Materia Prima (Nombre)</TableCell>
-                      <TableCell sx={{ fontWeight: 700, width: 140 }}>Cantidad Requerida</TableCell>
-                      <TableCell sx={{ fontWeight: 700, width: 140 }}>Stock Actual</TableCell>
-                      <TableCell sx={{ fontWeight: 700, width: 130 }}>Estado</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {notaPedidoData.insumos?.map((ins, idx) => (
-                      <TableRow key={idx} hover>
-                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                          #{ins.idMateriaPrima || idx + 1}
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>
-                          {ins.nombre}
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>
-                          {ins.cantidadRequerida} {ins.unidad}
-                        </TableCell>
-                        <TableCell sx={{ color: ins.esFaltante ? 'error.main' : 'text.primary', fontWeight: 600 }}>
-                          {ins.stockActual} {ins.unidad}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            size="small"
-                            label={ins.esFaltante ? `Falta ${ins.faltante} ${ins.unidad}` : 'Disponible'}
-                            color={ins.esFaltante ? 'warning' : 'success'}
-                            variant={ins.esFaltante ? 'filled' : 'outlined'}
-                            sx={{ fontWeight: 600, fontSize: '0.72rem' }}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </DialogContent>
-            <Divider />
-            <DialogActions sx={{ p: 2 }}>
-              <Button onClick={() => setOpenNotaPedidoDialog(false)} color="inherit" sx={{ fontWeight: 600 }}>
-                Cerrar
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
 
       {/* ── Snackbar Notificaciones ────────────────────────── */}
       <Snackbar

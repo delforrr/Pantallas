@@ -247,7 +247,9 @@ export const OrdenProduccionCard = ({
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
             <PersonIcon fontSize="inherit" sx={{ fontSize: 16, flexShrink: 0 }} />
-            <Typography variant="caption" noWrap>{orden.responsable}</Typography>
+            <Typography variant="caption" noWrap title={`Empleado: ${orden.empleadoNombre || orden.responsable} (Legajo #${orden.idEmpleado || 1})`}>
+              Empleado: <strong>{orden.empleadoNombre || orden.responsable}</strong>
+            </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
             <PrecisionManufacturingIcon fontSize="inherit" sx={{ fontSize: 16, flexShrink: 0 }} />

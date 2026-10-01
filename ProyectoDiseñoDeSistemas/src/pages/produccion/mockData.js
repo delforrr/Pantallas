@@ -107,7 +107,7 @@ export const PRODUCTOS_INICIALES = [
     categoria: 'Pastas Rellenas',
     recetaId: 'REC-001',
     recetaNombre: 'Ravioles de Ricota y Parmesano (10 kg)',
-    presentacion: 'Caja x 1 kg',
+    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: 'Ravioles artesanales con masa al huevo rellenos de ricota fresca de campo y parmesano estacionado.',
@@ -130,7 +130,7 @@ export const PRODUCTOS_INICIALES = [
     categoria: 'Pastas Simples',
     recetaId: 'REC-002',
     recetaNombre: 'Tallarines al Huevo Clásicos (10 kg)',
-    presentacion: 'Caja x 1 kg',
+    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: 'Cintas tradicionales al huevo con sémola de trigo candeal de primera calidad.',
@@ -153,7 +153,7 @@ export const PRODUCTOS_INICIALES = [
     categoria: 'Pastas Rellenas',
     recetaId: 'REC-003',
     recetaNombre: 'Ravioles de Espinaca y Ricota (10 kg)',
-    presentacion: 'Caja x 1 kg',
+    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: 'Ravioles con espinaca fresca de huerta seleccionada y ricota cremosa.',
@@ -176,7 +176,7 @@ export const PRODUCTOS_INICIALES = [
     categoria: 'Pastas Rellenas',
     recetaId: 'REC-004',
     recetaNombre: 'Capeletis de Carne Braseada (10 kg)',
-    presentacion: 'Caja x 1 kg',
+    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: 'Masa fina al huevo rellena de carne vacuna braseada lentamente con verduras.',
@@ -199,7 +199,7 @@ export const PRODUCTOS_INICIALES = [
     categoria: 'Pastas Simples',
     recetaId: 'REC-005',
     recetaNombre: 'Ñoquis de Papa Tradicionales (10 kg)',
-    presentacion: 'Caja x 1 kg',
+    unidad: 'kg',
     vidaUtil: '24 hs fresco / 60 días freezer',
     estado: 'Activo',
     descripcion: 'Ñoquis suaves y livianos elaborados con papa natural y harina de trigo 0000.',
@@ -222,7 +222,7 @@ export const PRODUCTOS_INICIALES = [
     categoria: 'Pastas Rellenas',
     recetaId: 'REC-006',
     recetaNombre: 'Sorrentinos de Jamón y Mozzarella (10 kg)',
-    presentacion: 'Caja x 1 kg',
+    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: 'Sorrentinos redondos con abundancia de jamón cocido seleccionado y mozzarella suave.',
@@ -245,7 +245,7 @@ export const PRODUCTOS_INICIALES = [
     categoria: 'Pastas Simples',
     recetaId: null,
     recetaNombre: 'Sin receta asignada',
-    presentacion: 'Caja x 1 kg',
+    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Inactivo',
     descripcion: 'Pasta cinta verde al huevo coloreada con espinaca natural molida.',
@@ -268,7 +268,7 @@ export const PRODUCTOS_INICIALES = [
     categoria: 'Pastas Rellenas',
     recetaId: null,
     recetaNombre: 'Sin receta asignada',
-    presentacion: 'Bandeja x 6 un',
+    unidad: 'unidades',
     vidaUtil: '48 hs refrigerado',
     estado: 'Inactivo',
     descripcion: 'Canelones armados listos para hornear con salsa a elección.',
@@ -291,7 +291,7 @@ export const PRODUCTOS_INICIALES = [
     categoria: 'Otros',
     recetaId: null,
     recetaNombre: 'No requiere (Producto listo / reventa)',
-    presentacion: 'Pote x 500g',
+    unidad: 'unidades',
     vidaUtil: '15 días refrigerado',
     estado: 'Activo',
     descripcion: 'Salsa de tomates frescos seleccionados con albahaca y aceite de oliva virgen extra.',
@@ -314,7 +314,7 @@ export const PRODUCTOS_INICIALES = [
     categoria: 'Otros',
     recetaId: null,
     recetaNombre: 'No requiere (Producto listo / reventa)',
-    presentacion: 'Pote x 200g',
+    unidad: 'unidades',
     vidaUtil: '60 días refrigerado',
     estado: 'Activo',
     descripcion: 'Queso reggianito de pasta dura estacionado, envasado al vacío en hebras.',
@@ -337,7 +337,7 @@ export const PRODUCTOS_INICIALES = [
     categoria: 'Otros',
     recetaId: null,
     recetaNombre: 'No requiere (Producto listo / reventa)',
-    presentacion: 'Copa x 250g',
+    unidad: 'unidades',
     vidaUtil: '5 días refrigerado',
     estado: 'Activo',
     descripcion: 'Postre italiano con vainillas al café expreso, crema de mascarpone y cacao amargo.',
@@ -734,6 +734,7 @@ export const ORDENES_PRODUCCION_INICIALES = [
     fechaFin: '2026-09-15',
     fechaProgramada: '2026-09-15',
     idEmpleado: 1,
+    empleadoNombre: 'Juan Carlos Pérez (Jefe de Cuadra)',
     responsable: 'Juan Carlos Pérez (Jefe de Cuadra)',
     turno: 'Mañana (06:00 - 14:00)',
     maquinariaProduccion: [
@@ -802,6 +803,7 @@ export const ORDENES_PRODUCCION_INICIALES = [
     fechaFin: '2026-09-15',
     fechaProgramada: '2026-09-15',
     idEmpleado: 2,
+    empleadoNombre: 'María Laura Gómez',
     responsable: 'María Laura Gómez',
     turno: 'Tarde (14:00 - 22:00)',
     maquinariaProduccion: [
@@ -860,6 +862,7 @@ export const ORDENES_PRODUCCION_INICIALES = [
     fechaFin: '2026-09-14',
     fechaProgramada: '2026-09-14',
     idEmpleado: 1,
+    empleadoNombre: 'Juan Carlos Pérez',
     responsable: 'Juan Carlos Pérez',
     turno: 'Mañana (06:00 - 14:00)',
     maquinariaProduccion: [
@@ -913,6 +916,7 @@ export const ORDENES_PRODUCCION_INICIALES = [
     fechaFin: '2026-09-15',
     fechaProgramada: '2026-09-15',
     idEmpleado: 3,
+    empleadoNombre: 'Esteban Morales',
     responsable: 'Esteban Morales',
     turno: 'Mañana (06:00 - 14:00)',
     maquinariaProduccion: [
@@ -964,6 +968,7 @@ export const ORDENES_PRODUCCION_INICIALES = [
     fechaFin: '2026-09-15',
     fechaProgramada: '2026-09-15',
     idEmpleado: 2,
+    empleadoNombre: 'María Laura Gómez',
     responsable: 'María Laura Gómez',
     turno: 'Tarde (14:00 - 22:00)',
     maquinariaProduccion: [
@@ -980,7 +985,14 @@ export const ORDENES_PRODUCCION_INICIALES = [
       idNotaPedidoMP: 5,
       fechaEmision: '2026-09-14',
       idOrdenProduccion: 5,
-      detalles: [],
+      detalles: [
+        { idNotaPedidoMP: 5, idMateriaPrima: 1, materiaPrimaNombre: 'Harina de Trigo 0000', nombre: 'Harina de Trigo 0000', cantidad: 9.0, cantidadRequerida: 9.0, unidad: 'kg' },
+        { idNotaPedidoMP: 5, idMateriaPrima: 3, materiaPrimaNombre: 'Huevos de Campo', nombre: 'Huevos de Campo', cantidad: 5.0, cantidadRequerida: 5.0, unidad: 'docenas' },
+        { idNotaPedidoMP: 5, idMateriaPrima: 4, materiaPrimaNombre: 'Ricota Fresca Entera', nombre: 'Ricota Fresca Entera', cantidad: 8.0, cantidadRequerida: 8.0, unidad: 'kg' },
+        { idNotaPedidoMP: 5, idMateriaPrima: 5, materiaPrimaNombre: 'Queso Parmesano Rallado', nombre: 'Queso Parmesano Rallado', cantidad: 2.0, cantidadRequerida: 2.0, unidad: 'kg' },
+        { idNotaPedidoMP: 5, idMateriaPrima: 8, materiaPrimaNombre: 'Sal Refinada Fina', nombre: 'Sal Refinada Fina', cantidad: 0.2, cantidadRequerida: 0.2, unidad: 'kg' },
+        { idNotaPedidoMP: 5, idMateriaPrima: 10, materiaPrimaNombre: 'Cajas Térmicas 1 kg (Packaging)', nombre: 'Cajas Térmicas 1 kg (Packaging)', cantidad: 20, cantidadRequerida: 20, unidad: 'unidades' },
+      ],
     },
     detallesOrdenProduccion: [
       {
@@ -1018,6 +1030,8 @@ export const NOTAS_PEDIDO_MP_INICIALES = [
     ordenNumero: 'OP #101',
     fechaEmision: '2026-09-14',
     turno: 'Mañana (06:00 - 14:00)',
+    idEmpleado: 1,
+    empleadoNombre: 'Juan Carlos Pérez (Jefe de Cuadra)',
     responsable: 'Juan Carlos Pérez (Jefe de Cuadra)',
     estadoInsumos: 'Completo',
     detalles: [
@@ -1034,6 +1048,8 @@ export const NOTAS_PEDIDO_MP_INICIALES = [
     ordenNumero: 'OP #102',
     fechaEmision: '2026-09-14',
     turno: 'Tarde (14:00 - 22:00)',
+    idEmpleado: 2,
+    empleadoNombre: 'María Laura Gómez',
     responsable: 'María Laura Gómez',
     estadoInsumos: 'Faltante',
     detalles: [
@@ -1048,6 +1064,8 @@ export const NOTAS_PEDIDO_MP_INICIALES = [
     ordenNumero: 'OP #100',
     fechaEmision: '2026-09-13',
     turno: 'Mañana (06:00 - 14:00)',
+    idEmpleado: 1,
+    empleadoNombre: 'Juan Carlos Pérez',
     responsable: 'Juan Carlos Pérez',
     estadoInsumos: 'Completo',
     detalles: [
@@ -1062,6 +1080,8 @@ export const NOTAS_PEDIDO_MP_INICIALES = [
     ordenNumero: 'OP #103',
     fechaEmision: '2026-09-14',
     turno: 'Mañana (06:00 - 14:00)',
+    idEmpleado: 3,
+    empleadoNombre: 'Esteban Morales',
     responsable: 'Esteban Morales',
     estadoInsumos: 'Completo',
     detalles: [
@@ -1075,36 +1095,49 @@ export const NOTAS_PEDIDO_MP_INICIALES = [
     ordenNumero: 'OP #104',
     fechaEmision: '2026-09-14',
     turno: 'Tarde (14:00 - 22:00)',
+    idEmpleado: 2,
+    empleadoNombre: 'María Laura Gómez',
     responsable: 'María Laura Gómez',
     estadoInsumos: 'Completo',
-    detalles: [],
+    detalles: [
+      { idNotaPedidoMP: 5, idMateriaPrima: 1, materiaPrimaNombre: 'Harina de Trigo 0000', nombre: 'Harina de Trigo 0000', cantidad: 9.0, cantidadRequerida: 9.0, unidad: 'kg' },
+      { idNotaPedidoMP: 5, idMateriaPrima: 3, materiaPrimaNombre: 'Huevos de Campo', nombre: 'Huevos de Campo', cantidad: 5.0, cantidadRequerida: 5.0, unidad: 'docenas' },
+      { idNotaPedidoMP: 5, idMateriaPrima: 4, materiaPrimaNombre: 'Ricota Fresca Entera', nombre: 'Ricota Fresca Entera', cantidad: 8.0, cantidadRequerida: 8.0, unidad: 'kg' },
+      { idNotaPedidoMP: 5, idMateriaPrima: 5, materiaPrimaNombre: 'Queso Parmesano Rallado', nombre: 'Queso Parmesano Rallado', cantidad: 2.0, cantidadRequerida: 2.0, unidad: 'kg' },
+      { idNotaPedidoMP: 5, idMateriaPrima: 8, materiaPrimaNombre: 'Sal Refinada Fina', nombre: 'Sal Refinada Fina', cantidad: 0.2, cantidadRequerida: 0.2, unidad: 'kg' },
+      { idNotaPedidoMP: 5, idMateriaPrima: 10, materiaPrimaNombre: 'Cajas Térmicas 1 kg (Packaging)', nombre: 'Cajas Térmicas 1 kg (Packaging)', cantidad: 20, cantidadRequerida: 20, unidad: 'unidades' },
+    ],
   },
 ];
 
 // Función utilitaria para calcular la materia prima requerida dada una receta y cantidad en kg
 export const calcularInsumosRequeridos = (receta, cantidadKilos) => {
-  if (!receta || (!receta.ingredientes && !receta.detalles)) return [];
-  const lista = receta.ingredientes || receta.detalles;
+  if (!receta || (!receta.detalles && !receta.ingredientes)) return [];
+  const lista = receta.detalles || receta.ingredientes;
   const factor = cantidadKilos / (receta.rendimientoBase || receta.cantidad || 10);
   return lista.map((ing) => ({
     ...ing,
-    cantidadRequerida: Number((ing.cantidad * factor).toFixed(2)),
+    cantidadRequerida: Number(((ing.cantidad || ing.cantidadRequerida) * factor).toFixed(2)),
   }));
 };
 
 // Verifica la disponibilidad de insumos en stock comparando con las materias primas para una sola receta
 export const verificarDisponibilidadInsumos = (receta, cantidadKilos, inventario = MATERIAS_PRIMAS_INICIALES) => {
-  if (!receta || (!receta.ingredientes && !receta.detalles)) return { insumos: [], hayFaltante: false, faltantes: [] };
+  if (!receta || (!receta.detalles && !receta.ingredientes)) return { insumos: [], hayFaltante: false, faltantes: [] };
   const requeridos = calcularInsumosRequeridos(receta, cantidadKilos);
 
   const insumos = requeridos.map((req) => {
-    const mp = inventario.find((item) => item.id === req.materiaPrimaId || item.idMateriaPrima === req.idMateriaPrima || item.nombre.toLowerCase() === req.nombre.toLowerCase());
+    const mp = inventario.find(
+      (item) => item.id === req.materiaPrimaId || item.idMateriaPrima === req.idMateriaPrima || item.nombre?.toLowerCase() === (req.nombre || req.materiaPrimaNombre)?.toLowerCase()
+    );
     const stockActual = mp ? mp.stockActual : 0;
     const falta = Math.max(0, Number((req.cantidadRequerida - stockActual).toFixed(2)));
     const esFaltante = falta > 0;
 
     return {
       ...req,
+      idMateriaPrima: req.idMateriaPrima || (mp ? mp.idMateriaPrima : null),
+      nombre: req.nombre || req.materiaPrimaNombre || (mp ? mp.nombre : 'Insumo'),
       stockActual,
       faltante: falta,
       esFaltante,
@@ -1138,31 +1171,33 @@ export const verificarDisponibilidadMultiplesProductos = (
   items.forEach((item) => {
     const kilos = Number(item.cantidadKilos || item.cantidadPlanificada) || 0;
     totalKilos += kilos;
-    const receta = recetas.find((r) => r.id === item.recetaId || r.idReceta === item.idReceta || r.nombreProducto === item.productoNombre);
+    const receta = recetas.find(
+      (r) => r.id === item.recetaId || r.idReceta === item.idReceta || r.nombreProducto === item.productoNombre
+    );
     if (!receta) return;
-    const lista = receta.ingredientes || receta.detalles;
+    const lista = receta.detalles || receta.ingredientes;
     if (!lista) return;
 
     const factor = kilos / (receta.rendimientoBase || receta.cantidad || 10);
     lista.forEach((ing) => {
-      const id = ing.materiaPrimaId || ing.idMateriaPrima || ing.nombre;
+      const id = ing.idMateriaPrima || ing.materiaPrimaId || ing.nombre;
       if (!mapaInsumos[id]) {
         mapaInsumos[id] = {
-          materiaPrimaId: ing.materiaPrimaId || `MP-${String(ing.idMateriaPrima).padStart(3, '0')}`,
+          materiaPrimaId: ing.materiaPrimaId || (ing.idMateriaPrima ? `MP-${String(ing.idMateriaPrima).padStart(3, '0')}` : undefined),
           idMateriaPrima: ing.idMateriaPrima,
-          nombre: ing.nombre,
+          nombre: ing.nombre || ing.materiaPrimaNombre,
           unidad: ing.unidad,
           cantidadRequerida: 0,
         };
       }
-      mapaInsumos[id].cantidadRequerida += ing.cantidad * factor;
+      mapaInsumos[id].cantidadRequerida += (ing.cantidad || ing.cantidadRequerida || 0) * factor;
     });
   });
 
   const insumos = Object.values(mapaInsumos).map((req) => {
     const cantReq = Number(req.cantidadRequerida.toFixed(2));
     const mp = inventario.find(
-      (item) => item.id === req.materiaPrimaId || item.idMateriaPrima === req.idMateriaPrima || item.nombre.toLowerCase() === req.nombre.toLowerCase()
+      (item) => item.id === req.materiaPrimaId || item.idMateriaPrima === req.idMateriaPrima || item.nombre?.toLowerCase() === req.nombre?.toLowerCase()
     );
     const stockActual = mp ? mp.stockActual : 0;
     const falta = Math.max(0, Number((cantReq - stockActual).toFixed(2)));
@@ -1170,6 +1205,8 @@ export const verificarDisponibilidadMultiplesProductos = (
 
     return {
       ...req,
+      idMateriaPrima: req.idMateriaPrima || (mp ? mp.idMateriaPrima : null),
+      nombre: req.nombre || (mp ? mp.nombre : 'Insumo'),
       cantidadRequerida: cantReq,
       stockActual,
       faltante: falta,

@@ -87,12 +87,12 @@ export const ProductosCompuestosScreen = () => {
     idStock: 101,
     categoria: 'Pastas Rellenas',
     recetaId: 'REC-001',
-    presentacion: 'Caja x 1 kg',
     precioUnitario: 5000,
     precioVenta: 5000,
     stockActual: 0,
     stockMinimo: 15,
     unidadMedida: 'kg',
+    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: '',
@@ -113,6 +113,16 @@ export const ProductosCompuestosScreen = () => {
     return { total, activos, sinStock, bajoStock };
   }, [productos]);
 
+  // Helpers para normalizar campos de dominio
+  const getTipoProductoNombre = (p) =>
+    TIPOS_PRODUCTO.find((t) => t.idTipoDeProducto === p.idTipoDeProducto)?.tipoProducto || p.categoria || '-';
+
+  const getProductoBaseNombre = (p) =>
+    PRODUCTOS_BASE.find((pb) => pb.idProducto === p.idProducto)?.producto || p.nombre || '-';
+
+  const getVariedadNombre = (p) =>
+    VARIEDADES.find((v) => v.idVariedad === p.idVariedad)?.variedad || '-';
+
   // Filtrado reactivo en memoria
   const filteredProductos = useMemo(() => {
     return productos.filter((p) => {
@@ -122,8 +132,12 @@ export const ProductosCompuestosScreen = () => {
       const matchSearch =
         p.nombre.toLowerCase().includes(term) ||
         p.codigo.toLowerCase().includes(term) ||
+        getTipoProductoNombre(p).toLowerCase().includes(term) ||
+        getProductoBaseNombre(p).toLowerCase().includes(term) ||
+        getVariedadNombre(p).toLowerCase().includes(term) ||
         (p.recetaNombre && p.recetaNombre.toLowerCase().includes(term)) ||
-        (p.presentacion && p.presentacion.toLowerCase().includes(term));
+        (p.unidadMedida && p.unidadMedida.toLowerCase().includes(term)) ||
+        (p.unidad && p.unidad.toLowerCase().includes(term));
       return matchCat && matchEst && matchSearch;
     });
   }, [productos, searchTerm, selectedCategoria, selectedEstado]);
@@ -224,12 +238,12 @@ export const ProductosCompuestosScreen = () => {
       idUnidad: 1,
       idStock: 100 + nextNum,
       categoria: 'Pastas Rellenas',
-      presentacion: 'Caja x 1 kg',
       precioUnitario: 5500,
       precioVenta: 5500,
       stockActual: 0,
       stockMinimo: 15,
       unidadMedida: 'kg',
+      unidad: 'kg',
       vidaUtil: '48 hs fresco / 90 días freezer',
       estado: 'Activo',
       descripcion: '',
@@ -249,12 +263,12 @@ export const ProductosCompuestosScreen = () => {
       idUnidad: prod.idUnidad || 1,
       idStock: prod.idStock || 101,
       categoria: prod.categoria,
-      presentacion: prod.presentacion || 'Caja x 1 kg',
       precioUnitario: prod.precioUnitario || prod.precioVenta || 0,
       precioVenta: prod.precioVenta || prod.precioUnitario || 0,
       stockActual: prod.stockActual ?? 0,
       stockMinimo: prod.stockMinimo ?? 15,
-      unidadMedida: prod.unidadMedida || 'kg',
+      unidadMedida: prod.unidadMedida || prod.unidad || 'kg',
+      unidad: prod.unidad || prod.unidadMedida || 'kg',
       vidaUtil: prod.vidaUtil || '48 hs fresco',
       estado: prod.estado || 'Activo',
       descripcion: prod.descripcion || '',
@@ -472,14 +486,15 @@ export const ProductosCompuestosScreen = () => {
             maxWidth: '100%',
           }}
         >
-          <Table sx={{ width: '100%', minWidth: 840 }} size="medium">
+          <Table sx={{ width: '100%', minWidth: 1020 }} size="medium">
             <TableHead sx={{ bgcolor: 'action.hover' }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700, width: 95, whiteSpace: 'nowrap' }}>Código</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Producto</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 130, whiteSpace: 'nowrap' }}>Categoría</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 140, whiteSpace: 'nowrap' }}>Receta</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 110, whiteSpace: 'nowrap' }}>Presentación</TableCell>
+                <TableCell sx={{ fontWeight: 700, width: 135, whiteSpace: 'nowrap' }}>Tipo de Producto</TableCell>
+                <TableCell sx={{ fontWeight: 700, width: 130, whiteSpace: 'nowrap' }}>Producto</TableCell>
+                <TableCell sx={{ fontWeight: 700, minWidth: 140 }}>Variedad</TableCell>
+                <TableCell sx={{ fontWeight: 700, width: 130, whiteSpace: 'nowrap' }}>Receta</TableCell>
+                <TableCell sx={{ fontWeight: 700, width: 90, whiteSpace: 'nowrap' }}>Unidad</TableCell>
                 <TableCell sx={{ fontWeight: 700, width: 125, whiteSpace: 'nowrap' }}>Stock Actual</TableCell>
                 <TableCell sx={{ fontWeight: 700, width: 110, whiteSpace: 'nowrap' }}>Precio Sugerido</TableCell>
                 <TableCell sx={{ fontWeight: 700, width: 105, whiteSpace: 'nowrap' }}>Estado</TableCell>
@@ -496,24 +511,29 @@ export const ProductosCompuestosScreen = () => {
                       {prod.codigo}
                     </Typography>
                   </TableCell>
-                  <TableCell sx={{ py: 1.5 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {prod.nombre}
-                    </Typography>
-                    {prod.descripcion && (
-                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', maxWidth: 280 }} noWrap>
-                        {prod.descripcion}
-                      </Typography>
-                    )}
-                  </TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
                     <Chip
-                      label={prod.categoria}
+                      label={getTipoProductoNombre(prod)}
                       size="small"
                       color="default"
                       variant="outlined"
                       sx={{ fontWeight: 600, fontSize: '0.72rem' }}
                     />
+                  </TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {getProductoBaseNombre(prod)}
+                    </Typography>
+                    {prod.descripcion && (
+                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', maxWidth: 200 }} noWrap>
+                        {prod.descripcion}
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell sx={{ py: 1.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                      {getVariedadNombre(prod)}
+                    </Typography>
                   </TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
                     {prod.categoria === 'Otros' ? (
@@ -551,7 +571,7 @@ export const ProductosCompuestosScreen = () => {
                     )}
                   </TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
-                    <Typography variant="body2">{prod.presentacion}</Typography>
+                    <Typography variant="body2">{prod.unidadMedida || prod.unidad || 'kg'}</Typography>
                   </TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
@@ -840,6 +860,31 @@ export const ProductosCompuestosScreen = () => {
             <Grid item xs={12} sm={4}>
               <TextField
                 select
+                label="Tipo de Producto (TipoDeProducto)"
+                fullWidth
+                size="small"
+                value={formState.idTipoDeProducto}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  const tipoObj = TIPOS_PRODUCTO.find((t) => t.idTipoDeProducto === val);
+                  setFormState({
+                    ...formState,
+                    idTipoDeProducto: val,
+                    categoria: tipoObj ? tipoObj.tipoProducto : formState.categoria,
+                  });
+                }}
+              >
+                {TIPOS_PRODUCTO.map((tp) => (
+                  <MenuItem key={tp.idTipoDeProducto} value={tp.idTipoDeProducto}>
+                    {tp.tipoProducto}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <TextField
+                select
                 label="Producto Base (Producto)"
                 fullWidth
                 size="small"
@@ -858,31 +903,6 @@ export const ProductosCompuestosScreen = () => {
                 {PRODUCTOS_BASE.map((pb) => (
                   <MenuItem key={pb.idProducto} value={pb.idProducto}>
                     {pb.producto}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
-            <Grid item xs={12} sm={4}>
-              <TextField
-                select
-                label="Tipo de Producto (TipoDeProducto)"
-                fullWidth
-                size="small"
-                value={formState.idTipoDeProducto}
-                onChange={(e) => {
-                  const val = Number(e.target.value);
-                  const tipoObj = TIPOS_PRODUCTO.find((t) => t.idTipoDeProducto === val);
-                  setFormState({
-                    ...formState,
-                    idTipoDeProducto: val,
-                    categoria: tipoObj ? tipoObj.tipoProducto : formState.categoria,
-                  });
-                }}
-              >
-                {TIPOS_PRODUCTO.map((tp) => (
-                  <MenuItem key={tp.idTipoDeProducto} value={tp.idTipoDeProducto}>
-                    {tp.tipoProducto}
                   </MenuItem>
                 ))}
               </TextField>
@@ -916,19 +936,8 @@ export const ProductosCompuestosScreen = () => {
 
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Presentación"
-                fullWidth
-                size="small"
-                value={formState.presentacion}
-                onChange={(e) => setFormState({ ...formState, presentacion: e.target.value })}
-                placeholder="Ej. Caja x 1 kg"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
                 select
-                label="Unidad de Medida (Unidad)"
+                label="Unidad"
                 fullWidth
                 size="small"
                 value={formState.idUnidad}
@@ -939,6 +948,7 @@ export const ProductosCompuestosScreen = () => {
                     ...formState,
                     idUnidad: val,
                     unidadMedida: uObj ? uObj.unidad : formState.unidadMedida,
+                    unidad: uObj ? uObj.unidad : formState.unidad,
                   });
                 }}
               >
@@ -947,6 +957,20 @@ export const ProductosCompuestosScreen = () => {
                     {u.unidad}
                   </MenuItem>
                 ))}
+              </TextField>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                select
+                label="Estado"
+                fullWidth
+                size="small"
+                value={formState.estado}
+                onChange={(e) => setFormState({ ...formState, estado: e.target.value })}
+              >
+                <MenuItem value="Activo">Activo</MenuItem>
+                <MenuItem value="Inactivo">Inactivo</MenuItem>
               </TextField>
             </Grid>
 
@@ -994,20 +1018,6 @@ export const ProductosCompuestosScreen = () => {
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <TextField
-                select
-                label="Estado"
-                fullWidth
-                size="small"
-                value={formState.estado}
-                onChange={(e) => setFormState({ ...formState, estado: e.target.value })}
-              >
-                <MenuItem value="Activo">Activo</MenuItem>
-                <MenuItem value="Inactivo">Inactivo</MenuItem>
-              </TextField>
-            </Grid>
-
-            <Grid item xs={12}>
               <TextField
                 label="Vida Útil / Conservación"
                 fullWidth
@@ -1209,23 +1219,43 @@ export const ProductosCompuestosScreen = () => {
             <Divider />
             <DialogContent sx={{ pt: 2.5 }}>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={4}>
                   <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px' }}>
                     <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      Categoría
+                      Tipo de Producto
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>
-                      {viewingProducto.categoria}
+                      {getTipoProductoNombre(viewingProducto)}
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                      Producto
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>
+                      {getProductoBaseNombre(viewingProducto)}
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                      Variedad
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>
+                      {getVariedadNombre(viewingProducto)}
                     </Typography>
                   </Paper>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px' }}>
                     <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      Presentación
+                      Unidad
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>
-                      {viewingProducto.presentacion}
+                      {viewingProducto.unidadMedida || viewingProducto.unidad || 'kg'}
                     </Typography>
                   </Paper>
                 </Grid>
