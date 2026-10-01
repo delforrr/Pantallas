@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useApp } from '../../context/AppContext';
 import {
   Box,
   Grid,
@@ -35,7 +35,7 @@ import { ProductoCard, PresupuestoEventoModal } from '../../components/cliente';
  */
 export const CatalogoScreen = () => {
   const store = useClientStore();
-  const navigate = useNavigate();
+  const { navigate } = useApp();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
@@ -236,7 +236,7 @@ export const CatalogoScreen = () => {
                   color="primary"
                   size="large"
                   startIcon={<ShoppingCartIcon />}
-                  onClick={() => navigate('/cliente/carrito')}
+                  onClick={() => navigate('carrito')}
                   sx={{
                     px: 2.5,
                     py: 1.25,
@@ -301,19 +301,21 @@ export const CatalogoScreen = () => {
             placeholder="Buscar por variedad de pasta, salsa o ingredientes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              ),
-              endAdornment: searchTerm ? (
-                <InputAdornment position="end">
-                  <IconButton size="small" onClick={() => setSearchTerm('')}>
-                    <ClearIcon fontSize="small" />
-                  </IconButton>
-                </InputAdornment>
-              ) : null,
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                  </InputAdornment>
+                ),
+                endAdornment: searchTerm ? (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setSearchTerm('')}>
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ) : null,
+              },
             }}
             sx={{
               flexGrow: 1,
@@ -483,7 +485,7 @@ export const CatalogoScreen = () => {
             <Button
               color="inherit"
               size="small"
-              onClick={() => navigate('/cliente/carrito')}
+              onClick={() => navigate('carrito')}
               sx={{ fontWeight: 800, textDecoration: 'underline' }}
             >
               Ir al Carrito
