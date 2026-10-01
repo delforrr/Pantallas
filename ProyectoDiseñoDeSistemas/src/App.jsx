@@ -23,7 +23,6 @@ import OrdenProduccionScreen from './pages/produccion/OrdenProduccionScreen';
 import RecetasScreen from './pages/produccion/RecetasScreen';
 import ProductosCompuestosScreen from './pages/produccion/ProductosCompuestosScreen';
 import MateriaPrimaScreen from './pages/produccion/MateriaPrimaScreen';
-import StockScreen from './pages/produccion/StockScreen';
 
 import ProveedoresScreen from './pages/compras/ProveedoresScreen';
 import OrdenCompraScreen from './pages/compras/OrdenCompraScreen';
@@ -49,7 +48,6 @@ const SCREEN_MAP = {
   recetas: RecetasScreen,
   productos_compuestos: ProductosCompuestosScreen,
   materia_prima: MateriaPrimaScreen,
-  stock: StockScreen,
   proveedores: ProveedoresScreen,
   orden_compra: OrdenCompraScreen,
   presupuesto_proveedor: PresupuestoProveedorScreen,
@@ -66,7 +64,7 @@ const PageContent = () => {
 
   return (
     <Fade in key={currentPage} timeout={300}>
-      <Box sx={{ flex: 1, p: { xs: 2, sm: 3 }, overflowY: 'auto' }}>
+      <Box sx={{ flex: 1, p: { xs: 1.5, sm: 2.5, md: 3 }, overflowY: 'auto', minWidth: 0, width: '100%', maxWidth: '100%' }}>
         {/* Page header */}
         <Box sx={{ mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', letterSpacing: '-0.01em' }}>

@@ -8,10 +8,10 @@ import {
 
 export const MateriaPrimaScreen = () => (
   <Box>
-    <StatsRow count={3} />
+    <StatsRow />
     <ActionBar />
-    <SectionLabel>Inventario de materia prima</SectionLabel>
-    <TableSkeleton rows={7} cols={5} />
+    <SectionLabel>Materias primas e insumos</SectionLabel>
+    <TableSkeleton rows={6} cols={5} />
   </Box>
 );
 

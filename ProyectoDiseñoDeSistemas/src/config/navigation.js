@@ -12,7 +12,6 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import CategoryIcon from '@mui/icons-material/Category';
 import GrassIcon from '@mui/icons-material/Grass';
-import InventoryIcon from '@mui/icons-material/Inventory';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -38,9 +37,8 @@ export const PAGE_LABELS = {
   // Producción
   orden_produccion: 'Orden de Producción',
   recetas: 'Recetas',
-  productos_compuestos: 'Productos Compuestos',
+  productos_compuestos: 'Productos',
   materia_prima: 'Materia Prima',
-  stock: 'Stock',
 
   // Compras
   proveedores: 'Proveedores',
@@ -81,9 +79,8 @@ export const ADMIN_NAV = [
     children: [
       { id: 'orden_produccion', label: 'Orden de Producción', icon: AssignmentIcon },
       { id: 'recetas', label: 'Recetas', icon: MenuBookIcon },
-      { id: 'productos_compuestos', label: 'Productos Compuestos', icon: CategoryIcon },
+      { id: 'productos_compuestos', label: 'Productos', icon: CategoryIcon },
       { id: 'materia_prima', label: 'Materia Prima', icon: GrassIcon },
-      { id: 'stock', label: 'Stock', icon: InventoryIcon },
     ],
   },
   {
