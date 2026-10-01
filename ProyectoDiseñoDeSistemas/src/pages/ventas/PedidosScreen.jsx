@@ -326,14 +326,19 @@ export const PedidosScreen = () => {
         </Grid>
       </Paper>
 
-      {/* Tabla de Pedidos limpia */}
-      <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflow: 'hidden' }}>
-        <Table>
+      {/* Tabla de Pedidos limpia con columnas 100% normalizadas y scroll horizontal */}
+      <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflowX: 'auto', width: '100%' }}>
+        <Table sx={{ minWidth: 1400 }}>
           <TableHead sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8f9fa' }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 700 }}>Nro Pedido</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Cliente</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Tipo / Entrega</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Tipo de Pedido</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Calle Entrega</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Altura</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Localidad</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Fecha Entrega</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Hora Entrega</TableCell>
               <TableCell align="right" sx={{ fontWeight: 700 }}>Total ($)</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Estado Pago</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Estado Pedido</TableCell>
@@ -343,7 +348,7 @@ export const PedidosScreen = () => {
           <TableBody>
             {filteredPedidos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                <TableCell colSpan={12} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                   No se encontraron pedidos registrados.
                 </TableCell>
               </TableRow>
@@ -356,10 +361,12 @@ export const PedidosScreen = () => {
                     {pedido.esDonacion && <Chip label="DONACIÓN" color="secondary" size="small" sx={{ ml: 1, fontWeight: 800 }} />}
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{pedido.clienteNombre}</TableCell>
-                  <TableCell>
-                    <Typography variant="body2">{pedido.tipoPedido}</Typography>
-                    <Typography variant="caption" color="text.secondary">Fecha: {pedido.fechaEntregaEstimada} ({pedido.horaEntregaEstimada}hs)</Typography>
-                  </TableCell>
+                  <TableCell><Chip label={pedido.tipoPedido} size="small" variant="outlined" /></TableCell>
+                  <TableCell>{pedido.calleEntrega || 'Av. Villegas'}</TableCell>
+                  <TableCell>{pedido.alturaEntrega || '450'}</TableCell>
+                  <TableCell>{pedido.localidadEntrega || 'Trenque Lauquen'}</TableCell>
+                  <TableCell>{pedido.fechaEntregaEstimada}</TableCell>
+                  <TableCell>{pedido.horaEntregaEstimada}hs</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 800, color: pedido.total === 0 ? 'text.secondary' : '#009246' }}>
                     ${pedido.total.toLocaleString()}
                   </TableCell>
@@ -398,13 +405,13 @@ export const PedidosScreen = () => {
         </Table>
       </TableContainer>
 
-      {/* Modal Formulario */}
+      {/* Modal Formulario Normalizado */}
       <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
         <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {isEditing ? `Editar Pedido ${formData.nroPedido}` : formData.esCanje ? 'Registrar Canje por Producto en Mal Estado ($0)' : formData.esDonacion ? 'Registrar Donación Institucional ($0)' : 'Nuevo Pedido de Cliente'}
           <IconButton onClick={() => setOpenForm(false)}><CloseIcon /></IconButton>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ maxHeight: '75vh', overflowY: 'auto' }}>
           {morosidadCalculada.esMoroso && (
             <ClienteMorosoAlert cliente={selectedClienteForm} comprobantesVenta={INITIAL_COMPROBANTES_VENTA} />
           )}
@@ -442,8 +449,28 @@ export const PedidosScreen = () => {
                 </Select>
               </FormControl>
             </Grid>
+
             <Grid item xs={12} sm={6}>
-              <TextField label="Domicilio de Entrega" fullWidth size="small" value={formData.domicilioEntrega} onChange={(e) => setFormData({ ...formData, domicilioEntrega: e.target.value })} />
+              <TextField label="Teléfono de Contacto" fullWidth size="small" value={formData.telefonoPedido} onChange={(e) => setFormData({ ...formData, telefonoPedido: e.target.value })} />
+            </Grid>
+
+            {/* Domicilio Entrega Normalizado */}
+            <Grid item xs={12} sm={5}>
+              <TextField label="Calle de Entrega" fullWidth size="small" value={formData.calleEntrega || ''} onChange={(e) => setFormData({ ...formData, calleEntrega: e.target.value })} />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField label="Altura / Nro" fullWidth size="small" value={formData.alturaEntrega || ''} onChange={(e) => setFormData({ ...formData, alturaEntrega: e.target.value })} />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField label="Localidad" fullWidth size="small" value={formData.localidadEntrega || ''} onChange={(e) => setFormData({ ...formData, localidadEntrega: e.target.value })} />
+            </Grid>
+
+            {/* Fechas de Entrega Normalizadas */}
+            <Grid item xs={12} sm={6}>
+              <TextField label="Fecha Entrega Estimada" type="date" fullWidth size="small" InputLabelProps={{ shrink: true }} value={formData.fechaEntregaEstimada || ''} onChange={(e) => setFormData({ ...formData, fechaEntregaEstimada: e.target.value })} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField label="Hora Entrega Estimada" type="time" fullWidth size="small" InputLabelProps={{ shrink: true }} value={formData.horaEntregaEstimada || ''} onChange={(e) => setFormData({ ...formData, horaEntregaEstimada: e.target.value })} />
             </Grid>
           </Grid>
 

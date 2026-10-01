@@ -185,18 +185,23 @@ export const ComprobantesVentaScreen = () => {
         </Grid>
       </Paper>
 
-      {/* Tabla */}
-      <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflow: 'hidden' }}>
-        <Table>
+      {/* Tabla de Comprobantes Normalizada con Scroll Horizontal */}
+      <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflowX: 'auto', width: '100%' }}>
+        <Table sx={{ minWidth: 1500 }}>
           <TableHead sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8f9fa' }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 700 }}>Nro Comprobante</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Tipo</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Tipo Comprobante</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Cliente</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>CUIT</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Tipo IVA</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Pedido Asociado</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700 }}>Neto ($)</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Fecha Emisión</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Hora Emisión</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700 }}>Importe Neto ($)</TableCell>
               <TableCell align="right" sx={{ fontWeight: 700 }}>IVA 21% ($)</TableCell>
               <TableCell align="right" sx={{ fontWeight: 700 }}>Total ($)</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Condición Pago</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
               <TableCell align="center" sx={{ fontWeight: 700 }}>Acciones</TableCell>
             </TableRow>
@@ -204,7 +209,7 @@ export const ComprobantesVentaScreen = () => {
           <TableBody>
             {filteredComprobantes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                <TableCell colSpan={14} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                   No se encontraron comprobantes emitidos.
                 </TableCell>
               </TableRow>
@@ -215,16 +220,18 @@ export const ComprobantesVentaScreen = () => {
                     {item.nroComprobante}
                   </TableCell>
                   <TableCell><Chip label={item.tipoComprobante} size="small" variant="outlined" /></TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.clienteNombre}</Typography>
-                    <Typography variant="caption" color="text.secondary">CUIT: {item.cuitCliente}</Typography>
-                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{item.clienteNombre}</TableCell>
+                  <TableCell>{item.cuitCliente}</TableCell>
+                  <TableCell><Chip label={item.tipoIva} size="small" color="default" /></TableCell>
                   <TableCell><Typography variant="body2">{item.nroPedido}</Typography></TableCell>
+                  <TableCell>{item.fechaEmision}</TableCell>
+                  <TableCell>{item.horaEmision}hs</TableCell>
                   <TableCell align="right">${item.importeNeto.toLocaleString()}</TableCell>
                   <TableCell align="right">${item.importeIva.toLocaleString()}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 800, color: '#009246' }}>
                     ${item.total.toLocaleString()}
                   </TableCell>
+                  <TableCell><Typography variant="body2">{item.condicionPago}</Typography></TableCell>
                   <TableCell>
                     <Chip label={item.estado} color={item.estado.includes('Pagada') ? 'success' : 'warning'} size="small" />
                   </TableCell>

@@ -231,16 +231,18 @@ export const PresupuestosScreen = () => {
         </Grid>
       </Paper>
 
-      {/* Tabla de Presupuestos */}
-      <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflow: 'hidden' }}>
-        <Table>
+      {/* Tabla de Presupuestos Normalizada con Scroll Horizontal */}
+      <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflowX: 'auto', width: '100%' }}>
+        <Table sx={{ minWidth: 1200 }}>
           <TableHead sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8f9fa' }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 700 }}>Nro Presupuesto</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Cliente</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Tipo de Pedido / Evento</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Emisión</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Validez</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Tipo de Pedido</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Fecha Emisión</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Validez Hasta</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700 }}>Subtotal ($)</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700 }}>Descuento (%)</TableCell>
               <TableCell align="right" sx={{ fontWeight: 700 }}>Total ($)</TableCell>
               <TableCell align="right" sx={{ fontWeight: 700 }}>Adelanto 50% ($)</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
@@ -250,7 +252,7 @@ export const PresupuestosScreen = () => {
           <TableBody>
             {filteredPresupuestos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                <TableCell colSpan={11} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                   No se encontraron presupuestos cargados.
                 </TableCell>
               </TableRow>
@@ -261,9 +263,11 @@ export const PresupuestosScreen = () => {
                     {item.nroPresupuesto}
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{item.clienteNombre}</TableCell>
-                  <TableCell>{item.tipoPedido}</TableCell>
-                  <TableCell><Typography variant="body2">{item.fechaEmision}</Typography></TableCell>
-                  <TableCell><Typography variant="body2" color="error">{item.validezHasta}</Typography></TableCell>
+                  <TableCell><Chip label={item.tipoPedido} size="small" variant="outlined" /></TableCell>
+                  <TableCell>{item.fechaEmision}</TableCell>
+                  <TableCell><Typography variant="body2" color="error" sx={{ fontWeight: 600 }}>{item.validezHasta}</Typography></TableCell>
+                  <TableCell align="right">${(item.subtotal || item.total).toLocaleString()}</TableCell>
+                  <TableCell align="right">{item.descuentoPorcentaje || 0}%</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 800, color: '#009246' }}>
                     ${item.total.toLocaleString()}
                   </TableCell>

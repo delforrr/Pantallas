@@ -103,8 +103,8 @@ export const DetalleItemsVentasTable = ({
         )}
       </Box>
 
-      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px', overflow: 'hidden', borderColor: 'divider' }}>
-        <Table size="small">
+      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px', overflowX: 'auto', width: '100%', borderColor: 'divider' }}>
+        <Table size="small" sx={{ minWidth: 600 }}>
           <TableHead sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8f9fa' }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 700 }}>Producto / Presentación</TableCell>

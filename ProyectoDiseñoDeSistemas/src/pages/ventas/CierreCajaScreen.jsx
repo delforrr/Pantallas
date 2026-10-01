@@ -278,8 +278,8 @@ export const CierreCajaScreen = () => {
           <HistoryIcon color="primary" /> Historial de Cierres Anteriores
         </Typography>
 
-        <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflow: 'hidden' }}>
-          <Table>
+        <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflowX: 'auto', width: '100%' }}>
+          <Table sx={{ minWidth: 1200 }}>
             <TableHead sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8f9fa' }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>Fecha Cierre</TableCell>

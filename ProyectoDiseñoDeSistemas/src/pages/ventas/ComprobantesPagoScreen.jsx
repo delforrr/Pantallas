@@ -211,16 +211,20 @@ export const ComprobantesPagoScreen = () => {
         </Grid>
       </Paper>
 
-      {/* Tabla */}
-      <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflow: 'hidden' }}>
-        <Table>
+      {/* Tabla de Cobros Normalizada con Scroll Horizontal */}
+      <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflowX: 'auto', width: '100%' }}>
+        <Table sx={{ minWidth: 1400 }}>
           <TableHead sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8f9fa' }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 700 }}>Nro Recibo Pago</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Cliente</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Fecha / Hora</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Pedido Asociado</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Factura Imputada</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Medio de Pago</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Concepto / Ref</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Fecha Emisión</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Hora Emisión</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Concepto Cobro</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Nro Transacción / Posnet</TableCell>
               <TableCell align="right" sx={{ fontWeight: 700 }}>Monto Abonado ($)</TableCell>
               <TableCell align="center" sx={{ fontWeight: 700 }}>Acciones</TableCell>
             </TableRow>
@@ -228,7 +232,7 @@ export const ComprobantesPagoScreen = () => {
           <TableBody>
             {filteredPagos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                <TableCell colSpan={11} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                   No se encontraron recibos de pago.
                 </TableCell>
               </TableRow>
@@ -239,12 +243,13 @@ export const ComprobantesPagoScreen = () => {
                     {item.nroComprobantePago}
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{item.clienteNombre}</TableCell>
-                  <TableCell><Typography variant="body2">{item.fechaEmision}</Typography></TableCell>
+                  <TableCell><Chip label={item.nroPedido || 'Venta Directa'} size="small" variant="outlined" /></TableCell>
+                  <TableCell><Chip label={item.nroFactura || 'Sin Factura'} size="small" color="default" /></TableCell>
                   <TableCell><Chip label={item.medioPago} color="info" size="small" variant="outlined" /></TableCell>
-                  <TableCell>
-                    <Typography variant="body2">{item.concepto}</Typography>
-                    <Typography variant="caption" color="text.secondary">Nro: {item.nroTransaccion}</Typography>
-                  </TableCell>
+                  <TableCell>{item.fechaEmision}</TableCell>
+                  <TableCell>{item.horaEmision || '12:00'}hs</TableCell>
+                  <TableCell>{item.concepto}</TableCell>
+                  <TableCell>{item.nroTransaccion}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 800, color: '#009246' }}>
                     ${item.montoAbonado.toLocaleString()}
                   </TableCell>

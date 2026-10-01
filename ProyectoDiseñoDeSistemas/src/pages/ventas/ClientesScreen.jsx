@@ -314,28 +314,32 @@ export const ClientesScreen = () => {
         </Grid>
       </Paper>
 
-      {/* Tabla Normalizada (Columnas independientes) */}
+      {/* Tabla Normalizada (Columnas 100% independientes con scroll horizontal) */}
       {viewMode === 'table' ? (
-        <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflow: 'hidden' }}>
-          <Table>
+        <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflowX: 'auto', width: '100%' }}>
+          <Table sx={{ minWidth: 1400 }}>
             <TableHead sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8f9fa' }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>ID</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Razón Social</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>CUIT</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Tipo IVA</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Responsable</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Teléfono</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Domicilio</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Calle</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Altura</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Localidad</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Tipo Cliente</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Crédito Mensual</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700 }}>Límite Crédito ($)</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700 }}>Crédito Usado ($)</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Estado Morosidad</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 700 }}>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredClientes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                  <TableCell colSpan={14} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                     No se encontraron clientes que coincidan con la búsqueda.
                   </TableCell>
                 </TableRow>
@@ -349,39 +353,27 @@ export const ClientesScreen = () => {
                       {cliente.razonSocial}
                     </TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>{cliente.cuit}</TableCell>
+                    <TableCell><Chip label={cliente.tipoIva} size="small" variant="outlined" /></TableCell>
                     <TableCell><Typography variant="body2">{cliente.responsable}</Typography></TableCell>
                     <TableCell><Typography variant="body2">{cliente.telefono}</Typography></TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {cliente.calle} {cliente.altura}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {cliente.localidad}
-                      </Typography>
+                    <TableCell>{cliente.calle}</TableCell>
+                    <TableCell>{cliente.altura}</TableCell>
+                    <TableCell>{cliente.localidad}</TableCell>
+                    <TableCell><Chip label={cliente.tipoCliente} size="small" color="primary" variant="outlined" /></TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, color: cliente.aceptaCredito ? '#ed6c02' : 'text.secondary' }}>
+                      {cliente.aceptaCredito ? `$${cliente.limiteCredito.toLocaleString()}` : 'Contado'}
                     </TableCell>
-                    <TableCell><Chip label={cliente.tipoCliente} size="small" variant="outlined" /></TableCell>
-                    <TableCell>
-                      {cliente.aceptaCredito ? (
-                        <Box>
-                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#ed6c02' }}>
-                            ${cliente.limiteCredito.toLocaleString()}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Usado: ${cliente.creditoUsado.toLocaleString()}
-                          </Typography>
-                        </Box>
-                      ) : (
-                        <Typography variant="caption" color="text.secondary">Contado</Typography>
-                      )}
+                    <TableCell align="right" sx={{ fontWeight: 700, color: cliente.creditoUsado > cliente.limiteCredito ? 'error.main' : 'text.primary' }}>
+                      {cliente.aceptaCredito ? `$${cliente.creditoUsado.toLocaleString()}` : '$0'}
                     </TableCell>
                     <TableCell>{getStatusChip(cliente)}</TableCell>
                     <TableCell align="center">
-                      <Tooltip title="Ver Ficha">
+                      <Tooltip title="Ver Ficha Completa">
                         <IconButton size="small" color="info" onClick={() => handleOpenDetail(cliente)}>
                           <VisibilityOutlinedIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Editar">
+                      <Tooltip title="Editar Cliente">
                         <IconButton size="small" color="primary" onClick={() => handleOpenEditForm(cliente)}>
                           <EditOutlinedIcon fontSize="small" />
                         </IconButton>
@@ -456,7 +448,7 @@ export const ClientesScreen = () => {
           {isEditing ? `Editar Cliente ID #${selectedCliente?.idCliente}` : 'Registrar Nuevo Cliente'}
           <IconButton onClick={() => setOpenForm(false)}><CloseIcon /></IconButton>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ maxHeight: '75vh', overflowY: 'auto' }}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
