@@ -59,42 +59,49 @@ export const MediosPagoScreen = () => {
 
       {/* Layout de 2 columnas */}
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'flex-start' }}>
-        {/* Columna Izquierda: Medios Guardados + Widget Cuenta Corriente */}
-        <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 58%' }, width: '100%', minWidth: 0 }}>
-          {/* Métodos de Pago Guardados */}
-          <Box sx={{ mb: 3.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <PaymentsOutlinedIcon color="primary" />
-              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                Métodos de Pago Registrados ({mediosPago.length})
-              </Typography>
-            </Box>
-
-            {mediosPago.map((metodo) => (
-              <MetodoPagoItem
-                key={metodo.idMedioDePago}
-                metodo={metodo}
-                onSetDefault={handleSetDefault}
-                onDelete={handleDelete}
-              />
-            ))}
+        {/* Columna Izquierda: Medios Guardados */}
+        <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 50%' }, width: '100%', minWidth: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <PaymentsOutlinedIcon color="primary" />
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Métodos de Pago Registrados ({mediosPago.length})
+            </Typography>
           </Box>
 
-          {/* Widget de Cuenta Corriente Comercial */}
+          {mediosPago.map((metodo) => (
+            <MetodoPagoItem
+              key={metodo.idMedioDePago}
+              metodo={metodo}
+              onSetDefault={handleSetDefault}
+              onDelete={handleDelete}
+            />
+          ))}
+        </Box>
+
+        {/* Columna Derecha: Vincular Nuevo Medio de Pago + Cuenta Corriente */}
+        <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 50%' }, width: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <NuevoMetodoPagoForm
+            onSuccess={() => {
+              setSnackbarMsg('Nuevo medio de pago añadido a la lista.');
+              setSnackbarOpen(true);
+            }}
+          />
+
+          {/* Widget de Cuenta Corriente Comercial (debajo de vincular medio de pago) */}
           <Paper
             elevation={1}
             sx={{
               borderRadius: '14px',
               border: '1px solid',
               borderColor: 'divider',
-              p: 3,
+              p: 2.5,
               bgcolor: 'background.paper',
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-              <AccountBalanceIcon color="secondary" sx={{ fontSize: 26 }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+              <AccountBalanceIcon color="secondary" sx={{ fontSize: 24 }} />
               <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '0.95rem' }}>
                   Cuenta Corriente Comercial Habilitada
                 </Typography>
                 <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
@@ -103,44 +110,44 @@ export const MediosPagoScreen = () => {
               </Box>
             </Box>
 
-            <Divider sx={{ mb: 2.5 }} />
+            <Divider sx={{ mb: 2 }} />
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2, mb: 2.5 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1.5, mb: 2 }}>
               <Box>
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block', fontSize: '0.72rem' }}>
                   Límite Otorgado
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
                   {formatCurrency(limiteCredito)}
                 </Typography>
               </Box>
 
               <Box>
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block', fontSize: '0.72rem' }}>
                   Crédito Utilizado
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: 'warning.main' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'warning.main' }}>
                   {formatCurrency(creditoUsado)}
                 </Typography>
               </Box>
 
               <Box>
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block', fontSize: '0.72rem' }}>
                   Saldo Disponible
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: 'success.main' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'success.main' }}>
                   {formatCurrency(saldoDisponible)}
                 </Typography>
               </Box>
             </Box>
 
             {/* Barra de progreso de uso de crédito */}
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 1.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.72rem' }}>
                   Utilización de Línea de Crédito
                 </Typography>
-                <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.72rem' }}>
                   {porcentajeUso}% consumido
                 </Typography>
               </Box>
@@ -148,24 +155,14 @@ export const MediosPagoScreen = () => {
                 variant="determinate"
                 value={porcentajeUso}
                 color={porcentajeUso > 80 ? 'error' : porcentajeUso > 50 ? 'warning' : 'primary'}
-                sx={{ height: 8, borderRadius: '4px' }}
+                sx={{ height: 6, borderRadius: '4px' }}
               />
             </Box>
 
-            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-              Ciclo de facturación comercial: mensual con liquidación a 30 días. Los pedidos realizados con Cuenta Corriente impactan automáticamente en el saldo disponible.
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.72rem', lineHeight: 1.35 }}>
+              Ciclo de facturación comercial: mensual con liquidación a 30 días. Los pedidos con Cuenta Corriente impactan automáticamente en el saldo disponible.
             </Typography>
           </Paper>
-        </Box>
-
-        {/* Columna Derecha: Vincular Nuevo Medio de Pago */}
-        <Box sx={{ flex: { xs: '1 1 100%', md: '0 0 42%' }, width: '100%', minWidth: { md: 320 } }}>
-          <NuevoMetodoPagoForm
-            onSuccess={() => {
-              setSnackbarMsg('Nuevo medio de pago añadido a la lista.');
-              setSnackbarOpen(true);
-            }}
-          />
         </Box>
       </Box>
 
