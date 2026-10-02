@@ -12,7 +12,6 @@ import {
   MenuItem,
   Alert,
   AlertTitle,
-  Grid,
   Snackbar,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutlined';
@@ -213,8 +212,8 @@ export const NuevoMetodoPagoForm = ({ onSuccess }) => {
 
         {/* Campos Condicionales para Débito */}
         {tipoMetodo === 'debito' && (
-          <Grid container spacing={2} sx={{ mb: 2.5 }}>
-            <Grid item xs={12}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2, mb: 2.5 }}>
+            <Box sx={{ gridColumn: '1 / -1' }}>
               <TextField
                 fullWidth
                 size="small"
@@ -225,10 +224,10 @@ export const NuevoMetodoPagoForm = ({ onSuccess }) => {
                   setNumeroTarjeta(e.target.value);
                   setErrorText('');
                 }}
-                inputProps={{ maxLength: 19 }}
+                slotProps={{ htmlInput: { maxLength: 19 } }}
               />
-            </Grid>
-            <Grid item xs={12}>
+            </Box>
+            <Box sx={{ gridColumn: '1 / -1' }}>
               <TextField
                 fullWidth
                 size="small"
@@ -240,8 +239,8 @@ export const NuevoMetodoPagoForm = ({ onSuccess }) => {
                   setErrorText('');
                 }}
               />
-            </Grid>
-            <Grid item xs={6}>
+            </Box>
+            <Box>
               <TextField
                 fullWidth
                 size="small"
@@ -252,10 +251,10 @@ export const NuevoMetodoPagoForm = ({ onSuccess }) => {
                   setVencimiento(e.target.value);
                   setErrorText('');
                 }}
-                inputProps={{ maxLength: 5 }}
+                slotProps={{ htmlInput: { maxLength: 5 } }}
               />
-            </Grid>
-            <Grid item xs={6}>
+            </Box>
+            <Box>
               <TextField
                 fullWidth
                 size="small"
@@ -264,76 +263,68 @@ export const NuevoMetodoPagoForm = ({ onSuccess }) => {
                 value={bancoEmisor}
                 onChange={(e) => setBancoEmisor(e.target.value)}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         )}
 
         {/* Campos Condicionales para Mercado Pago */}
         {tipoMetodo === 'mercadopago' && (
-          <Grid container spacing={2} sx={{ mb: 2.5 }}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                size="small"
-                label="CVU o Alias de Mercado Pago *"
-                placeholder="pastafab.cliente.mp"
-                value={aliasCvu}
-                onChange={(e) => {
-                  setAliasCvu(e.target.value);
-                  setErrorText('');
-                }}
-                helperText="Puede ingresar tanto un Alias como un CVU de 22 dígitos."
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                size="small"
-                label="Nombre del Titular de la Cuenta MP *"
-                placeholder="María García"
-                value={titularMp}
-                onChange={(e) => {
-                  setTitularMp(e.target.value);
-                  setErrorText('');
-                }}
-              />
-            </Grid>
-          </Grid>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2.5 }}>
+            <TextField
+              fullWidth
+              size="small"
+              label="CVU o Alias de Mercado Pago *"
+              placeholder="pastafab.cliente.mp"
+              value={aliasCvu}
+              onChange={(e) => {
+                setAliasCvu(e.target.value);
+                setErrorText('');
+              }}
+              helperText="Puede ingresar tanto un Alias como un CVU de 22 dígitos."
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Nombre del Titular de la Cuenta MP *"
+              placeholder="María García"
+              value={titularMp}
+              onChange={(e) => {
+                setTitularMp(e.target.value);
+                setErrorText('');
+              }}
+            />
+          </Box>
         )}
 
         {/* Campos Condicionales para Cuenta DNI */}
         {tipoMetodo === 'cuentadni' && (
-          <Grid container spacing={2} sx={{ mb: 2.5 }}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                size="small"
-                label="DNI del Titular *"
-                placeholder="28912455"
-                value={dniTitular}
-                onChange={(e) => {
-                  setDniTitular(e.target.value);
-                  setErrorText('');
-                }}
-                inputProps={{ maxLength: 8 }}
-                helperText="DNI del titular registrado en Cuenta DNI."
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                size="small"
-                label="Celular Vinculado *"
-                placeholder="2392-439901"
-                value={celularDni}
-                onChange={(e) => {
-                  setCelularDni(e.target.value);
-                  setErrorText('');
-                }}
-                helperText="Número para envío de cobro o QR."
-              />
-            </Grid>
-          </Grid>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mb: 2.5 }}>
+            <TextField
+              fullWidth
+              size="small"
+              label="DNI del Titular *"
+              placeholder="28912455"
+              value={dniTitular}
+              onChange={(e) => {
+                setDniTitular(e.target.value);
+                setErrorText('');
+              }}
+              slotProps={{ htmlInput: { maxLength: 8 } }}
+              helperText="DNI del titular registrado en Cuenta DNI."
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Celular Vinculado *"
+              placeholder="2392-439901"
+              value={celularDni}
+              onChange={(e) => {
+                setCelularDni(e.target.value);
+                setErrorText('');
+              }}
+              helperText="Número para envío de cobro o QR."
+            />
+          </Box>
         )}
 
         <Button

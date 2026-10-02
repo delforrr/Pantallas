@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Box,
   Typography,
-  Grid,
   Paper,
   Divider,
   LinearProgress,
@@ -90,10 +89,10 @@ export const MediosPagoScreen = () => {
         </Typography>
       </Alert>
 
-      {/* Grid de 2 columnas */}
-      <Grid container spacing={3}>
+      {/* Layout de 2 columnas */}
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'flex-start' }}>
         {/* Columna Izquierda: Medios Guardados + Widget Cuenta Corriente */}
-        <Grid item xs={12} md={7}>
+        <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 58%' }, width: '100%', minWidth: 0 }}>
           {/* Métodos de Pago Guardados */}
           <Box sx={{ mb: 3.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -138,34 +137,34 @@ export const MediosPagoScreen = () => {
 
             <Divider sx={{ mb: 2.5 }} />
 
-            <Grid container spacing={2} sx={{ mb: 2.5 }}>
-              <Grid item xs={4}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2, mb: 2.5 }}>
+              <Box>
                 <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block' }}>
                   Límite Otorgado
                 </Typography>
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>
                   {formatCurrency(limiteCredito)}
                 </Typography>
-              </Grid>
+              </Box>
 
-              <Grid item xs={4}>
+              <Box>
                 <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block' }}>
                   Crédito Utilizado
                 </Typography>
                 <Typography variant="h6" sx={{ fontWeight: 800, color: 'warning.main' }}>
                   {formatCurrency(creditoUsado)}
                 </Typography>
-              </Grid>
+              </Box>
 
-              <Grid item xs={4}>
+              <Box>
                 <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block' }}>
                   Saldo Disponible
                 </Typography>
                 <Typography variant="h6" sx={{ fontWeight: 800, color: 'success.main' }}>
                   {formatCurrency(saldoDisponible)}
                 </Typography>
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
 
             {/* Barra de progreso de uso de crédito */}
             <Box sx={{ mb: 2 }}>
@@ -189,18 +188,18 @@ export const MediosPagoScreen = () => {
               Ciclo de facturación comercial: mensual con liquidación a 30 días. Los pedidos realizados con Cuenta Corriente impactan automáticamente en el saldo disponible.
             </Typography>
           </Paper>
-        </Grid>
+        </Box>
 
         {/* Columna Derecha: Vincular Nuevo Medio de Pago */}
-        <Grid item xs={12} md={5}>
+        <Box sx={{ flex: { xs: '1 1 100%', md: '0 0 42%' }, width: '100%', minWidth: { md: 320 } }}>
           <NuevoMetodoPagoForm
             onSuccess={() => {
               setSnackbarMsg('Nuevo medio de pago añadido a la lista.');
               setSnackbarOpen(true);
             }}
           />
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       {/* Snackbar feedback */}
       <Snackbar

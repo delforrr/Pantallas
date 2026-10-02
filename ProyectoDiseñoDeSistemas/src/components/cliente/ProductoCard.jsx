@@ -72,6 +72,9 @@ export const ProductoCard = ({ producto, onAddToCartFeedback }) => {
     <Card
       elevation={1}
       sx={{
+        width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
         height: 490,
         display: 'flex',
         flexDirection: 'column',

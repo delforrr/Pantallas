@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import {
   Box,
   Typography,
-  Grid,
   Paper,
   Chip,
   TextField,
@@ -157,159 +156,151 @@ export const PedidosClienteScreen = () => {
       </Box>
 
       {/* Barra de Métricas (KPIs) */}
-      <Grid container spacing={2} sx={{ mb: 3.5 }}>
-        <Grid item xs={6} sm={3}>
-          <Paper
-            elevation={1}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' }, gap: 2, mb: 3.5 }}>
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <Box
             sx={{
-              p: 2,
-              borderRadius: '14px',
-              border: '1px solid',
-              borderColor: 'divider',
+              width: 44,
+              height: 44,
+              borderRadius: '10px',
+              bgcolor: 'action.hover',
               display: 'flex',
               alignItems: 'center',
-              gap: 2,
+              justifyContent: 'center',
+              color: 'text.primary',
             }}
           >
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: '10px',
-                bgcolor: 'action.hover',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'text.primary',
-              }}
-            >
-              <ShoppingBagOutlinedIcon />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                Total Pedidos
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 800 }}>
-                {kpis.total}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
+            <ShoppingBagOutlinedIcon />
+          </Box>
+          <Box>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+              Total Pedidos
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 800 }}>
+              {kpis.total}
+            </Typography>
+          </Box>
+        </Paper>
 
-        <Grid item xs={6} sm={3}>
-          <Paper
-            elevation={1}
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <Box
             sx={{
-              p: 2,
-              borderRadius: '14px',
-              border: '1px solid',
-              borderColor: 'divider',
+              width: 44,
+              height: 44,
+              borderRadius: '10px',
+              bgcolor: 'info.light',
               display: 'flex',
               alignItems: 'center',
-              gap: 2,
+              justifyContent: 'center',
+              color: 'info.main',
             }}
           >
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: '10px',
-                bgcolor: 'info.light',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'info.main',
-              }}
-            >
-              <PrecisionManufacturingOutlinedIcon />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                En Producción
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 800, color: 'info.main' }}>
-                {kpis.enProduccion}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
+            <PrecisionManufacturingOutlinedIcon />
+          </Box>
+          <Box>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+              En Producción
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 800, color: 'info.main' }}>
+              {kpis.enProduccion}
+            </Typography>
+          </Box>
+        </Paper>
 
-        <Grid item xs={6} sm={3}>
-          <Paper
-            elevation={1}
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <Box
             sx={{
-              p: 2,
-              borderRadius: '14px',
-              border: '1px solid',
-              borderColor: 'divider',
+              width: 44,
+              height: 44,
+              borderRadius: '10px',
+              bgcolor: 'success.light',
               display: 'flex',
               alignItems: 'center',
-              gap: 2,
+              justifyContent: 'center',
+              color: 'success.main',
             }}
           >
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: '10px',
-                bgcolor: 'success.light',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'success.main',
-              }}
-            >
-              <CheckCircleOutlineOutlinedIcon />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                Entregados
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 800, color: 'success.main' }}>
-                {kpis.entregados}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
+            <CheckCircleOutlineOutlinedIcon />
+          </Box>
+          <Box>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+              Entregados
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 800, color: 'success.main' }}>
+              {kpis.entregados}
+            </Typography>
+          </Box>
+        </Paper>
 
-        <Grid item xs={6} sm={3}>
-          <Paper
-            elevation={1}
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <Box
             sx={{
-              p: 2,
-              borderRadius: '14px',
-              border: '1px solid',
-              borderColor: 'divider',
+              width: 44,
+              height: 44,
+              borderRadius: '10px',
+              bgcolor: 'secondary.light',
               display: 'flex',
               alignItems: 'center',
-              gap: 2,
+              justifyContent: 'center',
+              color: 'secondary.main',
             }}
           >
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: '10px',
-                bgcolor: 'secondary.light',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'secondary.main',
-              }}
-            >
-              <ChangeCircleOutlinedIcon />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                Reclamos / Canjes
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 800, color: 'secondary.main' }}>
-                {kpis.reclamosCanjes}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+            <ChangeCircleOutlinedIcon />
+          </Box>
+          <Box>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+              Reclamos / Canjes
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 800, color: 'secondary.main' }}>
+              {kpis.reclamosCanjes}
+            </Typography>
+          </Box>
+        </Paper>
+      </Box>
 
       {/* Barra de Búsqueda y Filtros de Estado */}
       <Box
@@ -423,7 +414,10 @@ export const PedidosClienteScreen = () => {
         onClose={() => setDialogCancelOpen(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '16px' } }}
+        slotProps={{
+          backdrop: { sx: { backdropFilter: 'blur(4px)' } },
+          paper: { sx: { borderRadius: '16px' } },
+        }}
       >
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pb: 1 }}>
           <WarningAmberOutlinedIcon color="warning" />
@@ -432,7 +426,7 @@ export const PedidosClienteScreen = () => {
           </Typography>
         </DialogTitle>
 
-        <DialogContent sx={{ pt: 1 }}>
+        <DialogContent sx={{ pt: '20px !important' }}>
           {pedidoACancelar?.tipoPedido?.includes('Evento') ? (
             <Alert severity="warning" sx={{ mb: 2.5, borderRadius: '12px' }}>
               <AlertTitle sx={{ fontWeight: 700 }}>
