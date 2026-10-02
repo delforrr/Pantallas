@@ -85,10 +85,13 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
       maxWidth="sm"
       fullWidth
       aria-labelledby="reclamo-canje-dialog-title"
-      PaperProps={{
-        sx: {
-          borderRadius: '16px',
-          boxShadow: 24,
+      slotProps={{
+        backdrop: { sx: { backdropFilter: 'blur(4px)' } },
+        paper: {
+          sx: {
+            borderRadius: '16px',
+            boxShadow: 24,
+          },
         },
       }}
     >
@@ -126,7 +129,7 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
       </DialogTitle>
 
       <Box component="form" onSubmit={handleSubmit} noValidate>
-        <DialogContent sx={{ p: { xs: 2.5, sm: 3 } }}>
+        <DialogContent dividers sx={{ px: { xs: 2.5, sm: 3 }, pt: '24px !important', pb: 2.5 }}>
           {/* Banner normativo del dominio: Puntos 104 y 132 */}
           <Alert
             severity="info"
@@ -190,7 +193,9 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
               setCantidad(Math.min(Math.max(1, val), maxCantidad));
               setErrorValidation('');
             }}
-            inputProps={{ min: 1, max: maxCantidad }}
+            slotProps={{
+              htmlInput: { min: 1, max: maxCantidad },
+            }}
             helperText={`Cantidad máxima elegible según el pedido entregado: ${maxCantidad} unidad(es)`}
             sx={{ mb: 2.5 }}
           />

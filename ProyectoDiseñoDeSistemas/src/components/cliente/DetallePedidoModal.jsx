@@ -11,7 +11,6 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Grid,
   Paper,
   Chip,
   Table,
@@ -58,10 +57,13 @@ export const DetallePedidoModal = ({ open, onClose, pedido }) => {
       maxWidth="md"
       fullWidth
       aria-labelledby="detalle-pedido-dialog-title"
-      PaperProps={{
-        sx: {
-          borderRadius: '16px',
-          boxShadow: 24,
+      slotProps={{
+        backdrop: { sx: { backdropFilter: 'blur(4px)' } },
+        paper: {
+          sx: {
+            borderRadius: '16px',
+            boxShadow: 24,
+          },
         },
       }}
     >
@@ -102,7 +104,7 @@ export const DetallePedidoModal = ({ open, onClose, pedido }) => {
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
+      <DialogContent dividers sx={{ px: { xs: 2, sm: 3 }, pt: '24px !important', pb: 3 }}>
         {/* Alerta si está cancelado */}
         {isCancelado ? (
           <Alert severity="error" sx={{ mb: 3, borderRadius: '12px' }}>
@@ -154,8 +156,8 @@ export const DetallePedidoModal = ({ open, onClose, pedido }) => {
         )}
 
         {/* Metadatos Generales y de Entrega */}
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mb: 3 }}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -197,9 +199,9 @@ export const DetallePedidoModal = ({ open, onClose, pedido }) => {
                 </Box>
               )}
             </Paper>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} sm={6}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -264,8 +266,8 @@ export const DetallePedidoModal = ({ open, onClose, pedido }) => {
                 />
               </Box>
             </Paper>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
         {/* Tabla con el desglose de productos */}
         <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
@@ -333,8 +335,8 @@ export const DetallePedidoModal = ({ open, onClose, pedido }) => {
         </TableContainer>
 
         {/* Resumen Financiero y Comprobantes Emitidos */}
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -368,9 +370,9 @@ export const DetallePedidoModal = ({ open, onClose, pedido }) => {
                 Los comprobantes fiscales y remitos se entregan junto con la mercadería o se envían digitalmente.
               </Typography>
             </Paper>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} sm={6}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -438,8 +440,8 @@ export const DetallePedidoModal = ({ open, onClose, pedido }) => {
                 </Typography>
               </Box>
             </Paper>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </DialogContent>
 
       <DialogActions

@@ -6,7 +6,6 @@ import {
   DialogActions,
   Box,
   Typography,
-  Grid,
   Button,
   IconButton,
   TextField,
@@ -27,6 +26,8 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
+import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import { CATALOGO_CLIENTE, clientStore, INITIAL_CLIENT_PROFILE } from '../../pages/cliente/mockData';
 
 const formatToInputDate = (date) => {
@@ -40,8 +41,9 @@ const formatToInputDate = (date) => {
 };
 
 /**
- * PresupuestoEventoModal - Cotizador compacto y eficiente para pedidos de eventos especiales.
- * Cumple estrictamente con la regla de 48hs mínimas de anticipación y seña del 50%.
+ * PresupuestoEventoModal - Cotizador para eventos especiales.
+ * Cumple con la regla de 48hs mínimas de anticipación, 10% OFF y seña del 50%.
+ * Todos los apartados ocupan el ancho completo (100% width) con diseño uniforme.
  */
 export const PresupuestoEventoModal = ({ open, onClose, onConfirmed }) => {
   const [minDateObj] = useState(() => new Date(Date.now() + 48 * 60 * 60 * 1000));
@@ -167,19 +169,22 @@ export const PresupuestoEventoModal = ({ open, onClose, onConfirmed }) => {
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: '16px',
-          bgcolor: 'background.paper',
-          overflow: 'hidden',
+      slotProps={{
+        backdrop: { sx: { backdropFilter: 'blur(4px)' } },
+        paper: {
+          sx: {
+            borderRadius: '16px',
+            bgcolor: 'background.paper',
+            overflow: 'hidden',
+          },
         },
       }}
     >
-      {/* Cabecera Compacta */}
+      {/* Cabecera del Modal */}
       <DialogTitle
         sx={{
-          py: 1.5,
-          px: 2.5,
+          py: 1.8,
+          px: 3,
           borderBottom: '1px solid',
           borderColor: 'divider',
           display: 'flex',
@@ -189,7 +194,7 @@ export const PresupuestoEventoModal = ({ open, onClose, onConfirmed }) => {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <CelebrationIcon color="primary" sx={{ fontSize: 24 }} />
+          <CelebrationIcon color="primary" sx={{ fontSize: 26 }} />
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
               Cotizador de Pedidos para Eventos y Fiestas
@@ -204,304 +209,379 @@ export const PresupuestoEventoModal = ({ open, onClose, onConfirmed }) => {
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ p: 2.5 }}>
+      <DialogContent
+        dividers
+        sx={{
+          px: { xs: 2, sm: 3 },
+          pt: '24px !important',
+          pb: 3,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2.5,
+        }}
+      >
         {/* Banner de fecha / 48hs */}
         {!fechaValidaInfo.esValida && (
-          <Alert severity="warning" sx={{ mb: 2, py: 0.5, borderRadius: '10px', fontSize: '0.8rem' }}>
+          <Alert severity="warning" sx={{ py: 0.8, borderRadius: '10px', fontSize: '0.82rem' }}>
             {fechaValidaInfo.mensaje}
           </Alert>
         )}
 
-        <Grid container spacing={2}>
-          {/* COLUMNA IZQUIERDA: Configuración y Selección de Menú */}
-          <Grid item xs={12} md={7}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                borderRadius: '12px',
-                border: '1px solid',
-                borderColor: 'divider',
-                mb: 2,
-                bgcolor: 'background.paper',
+        {/* ─────────────────────────────────────────────────────────────
+            1. DETALLES DEL EVENTO (ANCHO COMPLETO 100%)
+           ───────────────────────────────────────────────────────────── */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2.5,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.paper',
+            width: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <EventAvailableIcon color="primary" sx={{ fontSize: 20 }} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: '0.02em' }}>
+              1. DETALLES DEL EVENTO & COMENSALES
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+              gap: 2,
+              mb: 2,
+            }}
+          >
+            <TextField
+              label="Nombre / Motivo del Evento"
+              size="small"
+              fullWidth
+              value={nombreEvento}
+              onChange={(e) => setNombreEvento(e.target.value)}
+            />
+            <TextField
+              label="Fecha y Hora de Entrega (Mín. 48 hs)"
+              type="datetime-local"
+              size="small"
+              fullWidth
+              value={fechaEvento}
+              slotProps={{
+                htmlInput: { min: minInputDate },
+                inputLabel: { shrink: true },
               }}
-            >
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 1.5 }}>
-                1. DETALLES DEL EVENTO
+              onChange={(e) => setFechaEvento(e.target.value)}
+              error={!fechaValidaInfo.esValida}
+            />
+            <TextField
+              label="Teléfono de Contacto"
+              size="small"
+              fullWidth
+              value={telefonoContacto}
+              onChange={(e) => setTelefonoContacto(e.target.value)}
+            />
+            <TextField
+              label="Lugar / Dirección de Entrega"
+              size="small"
+              fullWidth
+              value={direccionEntrega}
+              onChange={(e) => setDireccionEntrega(e.target.value)}
+            />
+          </Box>
+
+          {/* Selector de Comensales y Recomendación */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 1,
+              pt: 1.5,
+              borderTop: '1px dashed',
+              borderColor: 'divider',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                Cantidad de comensales:
               </Typography>
-              <Grid container spacing={1.5}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Nombre / Motivo"
+              <Box sx={{ display: 'flex', gap: 0.8 }}>
+                {[15, 25, 50, 80].map((num) => (
+                  <Chip
+                    key={num}
+                    label={`${num} pers.`}
                     size="small"
-                    fullWidth
-                    value={nombreEvento}
-                    onChange={(e) => setNombreEvento(e.target.value)}
+                    clickable
+                    onClick={() => setComensales(num)}
+                    color={comensales === num ? 'primary' : 'default'}
+                    variant={comensales === num ? 'filled' : 'outlined'}
+                    sx={{ fontSize: '0.75rem', height: 26, fontWeight: 700 }}
                   />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Fecha y Hora de Entrega"
-                    type="datetime-local"
-                    size="small"
-                    fullWidth
-                    value={fechaEvento}
-                    min={minInputDate}
-                    onChange={(e) => setFechaEvento(e.target.value)}
-                    error={!fechaValidaInfo.esValida}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Teléfono de Contacto"
-                    size="small"
-                    fullWidth
-                    value={telefonoContacto}
-                    onChange={(e) => setTelefonoContacto(e.target.value)}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Lugar / Dirección de Entrega"
-                    size="small"
-                    fullWidth
-                    value={direccionEntrega}
-                    onChange={(e) => setDireccionEntrega(e.target.value)}
-                  />
-                </Grid>
-              </Grid>
-
-              {/* Selector Rápido de Comensales */}
-              <Box sx={{ mt: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                  Comensales estimados:
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 0.8 }}>
-                  {[15, 25, 50, 80].map((num) => (
-                    <Chip
-                      key={num}
-                      label={`${num} pers.`}
-                      size="small"
-                      clickable
-                      onClick={() => setComensales(num)}
-                      color={comensales === num ? 'primary' : 'default'}
-                      variant={comensales === num ? 'filled' : 'outlined'}
-                      sx={{ fontSize: '0.72rem', height: 24, fontWeight: 700 }}
-                    />
-                  ))}
-                </Box>
+                ))}
               </Box>
+            </Box>
 
-              <Typography variant="caption" sx={{ color: 'primary.main', display: 'block', mt: 0.8, fontSize: '0.72rem' }}>
-                Sugerencia ({comensales} personas): ~{recomendacionComensales.kilosPastas} kg de pasta y {recomendacionComensales.potesSalsa} potes de salsa.
+            <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600, fontSize: '0.75rem' }}>
+              Sugerencia ({comensales} personas): ~{recomendacionComensales.kilosPastas} kg pasta y {recomendacionComensales.potesSalsa} potes salsa.
+            </Typography>
+          </Box>
+        </Paper>
+
+        {/* ─────────────────────────────────────────────────────────────
+            2. SELECCIÓN DE MENÚ (ANCHO COMPLETO 100%)
+           ───────────────────────────────────────────────────────────── */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2.5,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.paper',
+            width: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <RestaurantMenuIcon color="primary" sx={{ fontSize: 20 }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: '0.02em' }}>
+                2. SELECCIÓN DE MENÚ PARA EL EVENTO
               </Typography>
-            </Paper>
+            </Box>
 
-            {/* Selector de Menú */}
-            <Paper
-              elevation={0}
-              sx={{
-                p: 1.5,
-                borderRadius: '12px',
-                border: '1px solid',
-                borderColor: 'divider',
-                bgcolor: 'background.paper',
-              }}
-            >
-              <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 1 }}>
-                <Tabs value={activeTab} onChange={(_, val) => setActiveTab(val)} variant="fullWidth" sx={{ minHeight: 34 }}>
-                  <Tab label="Pastas" sx={{ fontSize: '0.78rem', fontWeight: 700, minHeight: 34, py: 0.5 }} />
-                  <Tab label="Salsas" sx={{ fontSize: '0.78rem', fontWeight: 700, minHeight: 34, py: 0.5 }} />
-                  <Tab label="Packs" sx={{ fontSize: '0.78rem', fontWeight: 700, minHeight: 34, py: 0.5 }} />
-                </Tabs>
-              </Box>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+              {resumenCalculado.itemsDetallados.length} variedades seleccionadas
+            </Typography>
+          </Box>
 
-              {/* Lista scrolleable compacta */}
-              <Box sx={{ maxHeight: 220, overflowY: 'auto', pr: 0.5 }}>
-                {productosPorCategoria.map((prod) => {
-                  const qty = selectedItems[prod.idProducto] || 0;
-                  return (
-                    <Box
-                      key={prod.idProducto}
-                      sx={{
-                        p: 1,
-                        mb: 0.8,
-                        borderRadius: '8px',
-                        border: '1px solid',
-                        borderColor: qty > 0 ? 'primary.main' : 'divider',
-                        bgcolor: qty > 0 ? 'action.selected' : 'background.paper',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0, mr: 1 }}>
-                        <Avatar src={prod.imagen} variant="rounded" sx={{ width: 34, height: 34, flexShrink: 0 }} />
-                        <Box sx={{ minWidth: 0 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {prod.nombre}
-                          </Typography>
-                          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
-                            ${prod.precio.toLocaleString('es-AR')} • {prod.unidad}
-                          </Typography>
-                        </Box>
-                      </Box>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+            <Tabs value={activeTab} onChange={(_, val) => setActiveTab(val)} variant="fullWidth">
+              <Tab label="Pastas Artesanales" sx={{ fontSize: '0.82rem', fontWeight: 700, py: 1 }} />
+              <Tab label="Salsas Caseras" sx={{ fontSize: '0.82rem', fontWeight: 700, py: 1 }} />
+              <Tab label="Packs Promocionales" sx={{ fontSize: '0.82rem', fontWeight: 700, py: 1 }} />
+            </Tabs>
+          </Box>
 
-                      {/* Selector de cantidad */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleUpdateItemQty(prod.idProducto, -1)}
-                          disabled={qty === 0}
-                          sx={{ p: 0.3 }}
-                        >
-                          <RemoveIcon sx={{ fontSize: 14 }} />
-                        </IconButton>
-                        <Typography sx={{ minWidth: 20, textAlign: 'center', fontWeight: 700, fontSize: '0.82rem' }}>
-                          {qty}
-                        </Typography>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleUpdateItemQty(prod.idProducto, 1)}
-                          sx={{ p: 0.3 }}
-                        >
-                          <AddIcon sx={{ fontSize: 14 }} />
-                        </IconButton>
-                      </Box>
+          {/* Grilla de productos en 2 columnas para aprovechar el ancho completo */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+              gap: 1.5,
+              maxHeight: 220,
+              overflowY: 'auto',
+              pr: 0.5,
+            }}
+          >
+            {productosPorCategoria.map((prod) => {
+              const qty = selectedItems[prod.idProducto] || 0;
+              return (
+                <Box
+                  key={prod.idProducto}
+                  sx={{
+                    p: 1.2,
+                    borderRadius: '10px',
+                    border: '1px solid',
+                    borderColor: qty > 0 ? 'primary.main' : 'divider',
+                    bgcolor: qty > 0 ? 'action.selected' : 'background.paper',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'border-color 0.2s',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, flex: 1, minWidth: 0, mr: 1 }}>
+                    <Avatar src={prod.imagen} variant="rounded" sx={{ width: 40, height: 40, flexShrink: 0 }} />
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.82rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {prod.nombre}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.72rem' }}>
+                        ${prod.precio.toLocaleString('es-AR')} • {prod.unidad}
+                      </Typography>
                     </Box>
-                  );
-                })}
-              </Box>
-            </Paper>
-          </Grid>
+                  </Box>
 
-          {/* COLUMNA DERECHA: Resumen Financiero y Confirmación */}
-          <Grid item xs={12} md={5}>
-            <Paper
-              elevation={0}
+                  {/* Selector de cantidad */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleUpdateItemQty(prod.idProducto, -1)}
+                      disabled={qty === 0}
+                      sx={{ p: 0.4 }}
+                    >
+                      <RemoveIcon sx={{ fontSize: 15 }} />
+                    </IconButton>
+                    <Typography sx={{ minWidth: 22, textAlign: 'center', fontWeight: 800, fontSize: '0.85rem' }}>
+                      {qty}
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleUpdateItemQty(prod.idProducto, 1)}
+                      sx={{ p: 0.4 }}
+                    >
+                      <AddIcon sx={{ fontSize: 15 }} />
+                    </IconButton>
+                  </Box>
+                </Box>
+              );
+            })}
+          </Box>
+        </Paper>
+
+        {/* ─────────────────────────────────────────────────────────────
+            3. RESUMEN Y CONDICIONES (OCUPA EL 100% DEL ANCHO Y MISMO ESTILO)
+           ───────────────────────────────────────────────────────────── */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2.5,
+            borderRadius: '14px',
+            border: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.paper',
+            width: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: '0.02em', mb: 2 }}>
+            3. RESUMEN FINANCIERO & CONDICIONES DE CONTRATACIÓN
+          </Typography>
+
+          {/* Banner Financiero en 3 Columnas Uniformes a lo Ancho */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+              gap: 2,
+              mb: 2.5,
+            }}
+          >
+            {/* Columna 1: Subtotal y Descuento */}
+            <Box
               sx={{
                 p: 2,
-                borderRadius: '12px',
+                borderRadius: '10px',
                 border: '1px solid',
                 borderColor: 'divider',
                 bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : '#F9FAFB'),
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%',
               }}
             >
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 1.5 }}>
-                2. RESUMEN Y CONDICIONES
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                Subtotal ({resumenCalculado.itemsDetallados.length} variedades):
               </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                ${resumenCalculado.subtotal.toLocaleString('es-AR')}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 700, mt: 0.5, display: 'block' }}>
+                Bonificación Evento (10%): -${resumenCalculado.descuento.toLocaleString('es-AR')}
+              </Typography>
+            </Box>
 
-              {/* Desglose de totales */}
-              <Box sx={{ mb: 1.5 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Subtotal ({resumenCalculado.itemsDetallados.length} variedades):
-                  </Typography>
-                  <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                    ${resumenCalculado.subtotal.toLocaleString('es-AR')}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600 }}>
-                    Descuento Volumen (10%):
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 700 }}>
-                    -${resumenCalculado.descuento.toLocaleString('es-AR')}
-                  </Typography>
-                </Box>
-                <Divider sx={{ my: 0.8 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                    Total Presupuesto:
-                  </Typography>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'text.primary' }}>
-                    ${resumenCalculado.total.toLocaleString('es-AR')}
-                  </Typography>
-                </Box>
-              </Box>
+            {/* Columna 2: Total Presupuestado */}
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: '10px',
+                border: '1px solid',
+                borderColor: 'divider',
+                bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : '#F9FAFB'),
+              }}
+            >
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                Total del Pedido:
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary' }}>
+                ${resumenCalculado.total.toLocaleString('es-AR')}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5 }}>
+                Precio final con IVA incluido
+              </Typography>
+            </Box>
 
-              {/* Tarjeta de Seña 50% Obligatoria */}
-              <Box
-                sx={{
-                  p: 1.5,
-                  borderRadius: '10px',
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark' ? 'rgba(46, 204, 113, 0.12)' : 'rgba(0, 146, 70, 0.08)',
-                  border: '1px solid',
-                  borderColor: 'primary.main',
-                  mb: 1.5,
-                }}
-              >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main' }}>
-                    SEÑA EXIGIDA (50%):
-                  </Typography>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 900, color: 'primary.main' }}>
-                    ${resumenCalculado.señaExigida.toLocaleString('es-AR')}
-                  </Typography>
-                </Box>
-                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.68rem' }}>
-                  Saldo de ${resumenCalculado.saldoPendiente.toLocaleString('es-AR')} a liquidar contra entrega con remito y factura.
-                </Typography>
-              </Box>
+            {/* Columna 3: Seña 50% Obligatoria */}
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: '10px',
+                border: '1.5px solid',
+                borderColor: 'primary.main',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'rgba(46, 204, 113, 0.12)' : 'rgba(0, 146, 70, 0.08)',
+              }}
+            >
+              <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', display: 'block', mb: 0.5 }}>
+                SEÑA OBLIGATORIA (50%):
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: 900, color: 'primary.main' }}>
+                ${resumenCalculado.señaExigida.toLocaleString('es-AR')}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5, fontSize: '0.72rem' }}>
+                Saldo de ${resumenCalculado.saldoPendiente.toLocaleString('es-AR')} contra entrega
+              </Typography>
+            </Box>
+          </Box>
 
-              {/* Modalidad de entrega */}
-              <Box sx={{ mb: 1.5 }}>
-                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 0.5 }}>
-                  Modalidad de Entrega:
-                </Typography>
-                <RadioGroup row value={modalidad} onChange={(e) => setModalidad(e.target.value)}>
-                  <FormControlLabel
-                    value="reparto"
-                    control={<Radio size="small" />}
-                    label={<Typography sx={{ fontSize: '0.75rem', fontWeight: 600 }}>Reparto Propio</Typography>}
-                  />
-                  <FormControlLabel
-                    value="retiro"
-                    control={<Radio size="small" />}
-                    label={<Typography sx={{ fontSize: '0.75rem', fontWeight: 600 }}>Retiro en Planta</Typography>}
-                  />
-                </RadioGroup>
-              </Box>
+          {/* Modalidad de Entrega a lo Ancho */}
+          <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+            <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary' }}>
+              Modalidad de Entrega:
+            </Typography>
+            <RadioGroup row value={modalidad} onChange={(e) => setModalidad(e.target.value)}>
+              <FormControlLabel
+                value="reparto"
+                control={<Radio size="small" />}
+                label={<Typography sx={{ fontSize: '0.82rem', fontWeight: 600 }}>Reparto Propio Refrigerado</Typography>}
+              />
+              <FormControlLabel
+                value="retiro"
+                control={<Radio size="small" />}
+                label={<Typography sx={{ fontSize: '0.82rem', fontWeight: 600 }}>Retiro en Fábrica</Typography>}
+              />
+            </RadioGroup>
+          </Box>
 
-              {/* Advertencia obligatoria de cancelación */}
-              <Alert
-                severity="warning"
-                icon={<WarningAmberIcon sx={{ fontSize: 16 }} />}
-                sx={{
-                  py: 0.5,
-                  px: 1,
-                  borderRadius: '8px',
-                  fontSize: '0.68rem',
-                  lineHeight: 1.25,
-                  mt: 'auto',
-                }}
-              >
-                <strong>Política de Cancelación:</strong> En caso de cancelación, el cliente pierde la seña del 50% y la mercadería producida se almacena.
-              </Alert>
-            </Paper>
-          </Grid>
-        </Grid>
+          <Divider sx={{ my: 1.5 }} />
+
+          {/* Política de Cancelación a Ancho Completo */}
+          <Alert
+            severity="warning"
+            icon={<WarningAmberIcon sx={{ fontSize: 18 }} />}
+            sx={{
+              py: 1,
+              px: 2,
+              borderRadius: '10px',
+              fontSize: '0.78rem',
+              lineHeight: 1.4,
+              width: '100%',
+              boxSizing: 'border-box',
+            }}
+          >
+            <strong>Política de Cancelación:</strong> En caso de cancelación del pedido, el cliente pierde la seña del 50% y la mercadería elaborada se almacena en fábrica según los protocolos de elaboración especial.
+          </Alert>
+        </Paper>
       </DialogContent>
 
-      <DialogActions sx={{ py: 1.2, px: 2.5, borderTop: '1px solid', borderColor: 'divider' }}>
-        <Button onClick={onClose} size="small" sx={{ fontWeight: 600 }}>
+      <DialogActions sx={{ py: 1.8, px: 3, borderTop: '1px solid', borderColor: 'divider', gap: 1.5 }}>
+        <Button onClick={onClose} size="medium" sx={{ fontWeight: 600 }}>
           Cancelar
         </Button>
         <Button
           variant="contained"
           color="primary"
-          size="small"
+          size="medium"
           startIcon={<ShoppingCartCheckoutIcon />}
           onClick={handleConfirmarEvento}
           disabled={!fechaValidaInfo.esValida || resumenCalculado.itemsDetallados.length === 0}
-          sx={{ fontWeight: 700, borderRadius: '8px', px: 2 }}
+          sx={{ fontWeight: 800, borderRadius: '10px', px: 3 }}
         >
-          Confirmar y Enviar al Carrito (${resumenCalculado.total.toLocaleString('es-AR')})
+          Confirmar Presupuesto y Enviar al Carrito (${resumenCalculado.total.toLocaleString('es-AR')})
         </Button>
       </DialogActions>
     </Dialog>
