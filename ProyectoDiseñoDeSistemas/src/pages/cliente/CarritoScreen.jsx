@@ -15,6 +15,7 @@ import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useApp } from '../../context/AppContext';
 import { useClientStore, clientStore } from './mockData';
 import { CarritoItem, ResumenPedido } from '../../components/cliente';
@@ -107,6 +108,44 @@ export const CarritoScreen = () => {
 
   return (
     <Box>
+      {/* Barra superior de navegación / UX para volver */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          mb: 2.5,
+          p: 1.5,
+          bgcolor: 'background.paper',
+          borderRadius: '12px',
+          border: '1px solid',
+          borderColor: 'divider',
+          flexWrap: 'wrap',
+          gap: 1.5,
+        }}
+      >
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('catalogo')}
+          variant="outlined"
+          size="small"
+          sx={{
+            fontWeight: 700,
+            borderRadius: '8px',
+            color: 'text.primary',
+            borderColor: 'divider',
+            textTransform: 'none',
+            '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' },
+          }}
+        >
+          Volver al Catálogo de Pastas
+        </Button>
+
+        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+          Paso 1 de 2: Revisión de Ítems y Configuración del Pedido
+        </Typography>
+      </Box>
+
       <Grid container spacing={3}>
         {/* Columna Izquierda: Lista de Ítems y Botón Vaciar */}
         <Grid item xs={12} md={7.5} lg={8}>

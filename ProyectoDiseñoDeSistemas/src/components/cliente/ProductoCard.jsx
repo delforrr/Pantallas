@@ -1,114 +1,129 @@
 import { useState } from 'react';
 import {
   Card,
+  CardMedia,
   CardContent,
   Box,
   Typography,
   Chip,
   IconButton,
   Button,
-  Tooltip,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PeopleIcon from '@mui/icons-material/People';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import StarIcon from '@mui/icons-material/Star';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
 import { clientStore } from '../../pages/cliente/mockData';
 
-const CATEGORY_COLOR_MAP = {
-  'Pastas Frescas': { bg: 'rgba(0, 146, 70, 0.1)', color: '#009246', border: 'rgba(0, 146, 70, 0.3)' },
-  'Pastas Rellenas': { bg: 'rgba(41, 128, 185, 0.1)', color: '#2980B9', border: 'rgba(41, 128, 185, 0.3)' },
-  'Pastas Gourmet': { bg: 'rgba(142, 68, 173, 0.1)', color: '#8E44AD', border: 'rgba(142, 68, 173, 0.3)' },
-  'Salsas Caseras': { bg: 'rgba(206, 43, 55, 0.1)', color: '#CE2B37', border: 'rgba(206, 43, 55, 0.3)' },
-  'Packs y Combos': { bg: 'rgba(243, 156, 18, 0.12)', color: '#D35400', border: 'rgba(243, 156, 18, 0.35)' },
-};
-
 /**
- * ProductoCard - Tarjeta gastronómica interactiva para el catálogo de clientes.
- * Presenta detalles de rinde, cocción, maridaje, selector numérico y botón de agregado.
+ * ProductoCard - Tarjeta gastronómica uniforme (mismo tamaño) sin emojis y con imagen stock real.
+ * Diseñada para catálogos y carruseles con altura fija de 490px.
  */
-export const ProductoCard = ({ producto, onAddToCart }) => {
+export const ProductoCard = ({ producto, onAddToCartFeedback }) => {
   const [cantidad, setCantidad] = useState(1);
   const [agregadoAnim, setAgregadoAnim] = useState(false);
 
-  const catStyle = CATEGORY_COLOR_MAP[producto.categoria] || {
-    bg: 'action.hover',
-    color: 'text.primary',
-    border: 'divider',
-  };
-
   const handleIncrement = () => {
-    setCantidad((prev) => prev + 1);
+    if (cantidad < producto.stock) {
+      setCantidad((prev) => prev + 1);
+    }
   };
 
   const handleDecrement = () => {
-    setCantidad((prev) => Math.max(1, prev - 1));
+    if (cantidad > 1) {
+      setCantidad((prev) => prev - 1);
+    }
   };
 
   const handleAddToCart = () => {
     clientStore.addToCart(producto, cantidad);
     setAgregadoAnim(true);
-    if (onAddToCart) {
-      onAddToCart(producto, cantidad);
+    if (onAddToCartFeedback) {
+      onAddToCartFeedback(producto, cantidad);
     }
     setTimeout(() => {
       setAgregadoAnim(false);
       setCantidad(1);
-    }, 1500);
+    }, 1800);
   };
 
-  const precioTotal = (producto.precio || 0) * cantidad;
+  const getCategoryColor = (categoria) => {
+    switch (categoria) {
+      case 'Pastas Rellenas':
+        return { bg: 'rgba(46, 204, 113, 0.15)', text: '#27AE60', border: 'rgba(46, 204, 113, 0.4)' };
+      case 'Pastas Gourmet':
+        return { bg: 'rgba(155, 89, 182, 0.15)', text: '#8E44AD', border: 'rgba(155, 89, 182, 0.4)' };
+      case 'Pastas Frescas':
+        return { bg: 'rgba(52, 152, 219, 0.15)', text: '#2980B9', border: 'rgba(52, 152, 219, 0.4)' };
+      case 'Salsas Caseras':
+        return { bg: 'rgba(231, 76, 60, 0.15)', text: '#C0392B', border: 'rgba(231, 76, 60, 0.4)' };
+      default:
+        return { bg: 'rgba(243, 156, 18, 0.15)', text: '#D68910', border: 'rgba(243, 156, 18, 0.4)' };
+    }
+  };
+
+  const catStyle = getCategoryColor(producto.categoria);
 
   return (
     <Card
       elevation={1}
       sx={{
+        height: 490,
+        display: 'flex',
+        flexDirection: 'column',
         borderRadius: '16px',
         border: '1px solid',
         borderColor: 'divider',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
         bgcolor: 'background.paper',
-        transition: 'transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease',
+        overflow: 'hidden',
+        transition: 'all 0.25s ease-in-out',
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: (theme) =>
             theme.palette.mode === 'dark'
               ? '0 12px 28px rgba(0,0,0,0.6)'
-              : '0 12px 28px rgba(0,146,70,0.12)',
-          borderColor: 'primary.light',
+              : '0 12px 28px rgba(0,0,0,0.1)',
+          borderColor: 'primary.main',
         },
       }}
     >
-      {/* Cabecera / Banner visual del producto con icono temático */}
-      <Box
-        sx={{
-          height: 130,
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: (theme) =>
-            theme.palette.mode === 'dark'
-              ? 'linear-gradient(135deg, rgba(46,204,113,0.15) 0%, rgba(231,76,60,0.1) 100%)'
-              : 'linear-gradient(135deg, rgba(0,146,70,0.07) 0%, rgba(206,43,55,0.05) 100%)',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        {/* Badges superiores: Categoría y Destacado */}
+      {/* 1. Header con Imagen Stock de Alta Calidad y Badges */}
+      <Box sx={{ position: 'relative', height: 165, overflow: 'hidden' }}>
+        <CardMedia
+          component="img"
+          image={producto.imagen}
+          alt={producto.nombre}
+          sx={{
+            height: '100%',
+            width: '100%',
+            objectFit: 'cover',
+            transition: 'transform 0.4s ease',
+            '&:hover': {
+              transform: 'scale(1.05)',
+            },
+          }}
+        />
+
+        {/* Gradiente sutil para legibilidad de badges */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.65) 100%)',
+          }}
+        />
+
+        {/* Badges superiores */}
         <Box
           sx={{
             position: 'absolute',
             top: 10,
-            left: 12,
-            right: 12,
+            left: 10,
+            right: 10,
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -119,332 +134,246 @@ export const ProductoCard = ({ producto, onAddToCart }) => {
             size="small"
             sx={{
               fontWeight: 700,
-              fontSize: '0.72rem',
-              bgcolor: catStyle.bg,
-              color: catStyle.color,
+              fontSize: '0.7rem',
+              bgcolor: 'background.paper',
+              color: catStyle.text,
               border: `1px solid ${catStyle.border}`,
               backdropFilter: 'blur(4px)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
             }}
           />
 
           {producto.destacado && (
-            <Tooltip title="Producto estrella de elaboración propia">
-              <Chip
-                icon={<StarIcon sx={{ fontSize: '15px !important', color: '#F39C12' }} />}
-                label="Destacado"
-                size="small"
-                sx={{
-                  fontWeight: 700,
-                  fontSize: '0.72rem',
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark' ? 'rgba(243,156,18,0.2)' : '#FEF9E7',
-                  color: '#B7950B',
-                  border: '1px solid rgba(243,156,18,0.4)',
-                }}
-              />
-            </Tooltip>
+            <Chip
+              icon={<StarIcon sx={{ fontSize: 14, color: '#F39C12 !important' }} />}
+              label="Destacado"
+              size="small"
+              sx={{
+                fontWeight: 700,
+                fontSize: '0.7rem',
+                bgcolor: 'background.paper',
+                color: '#B7950B',
+                border: '1px solid rgba(243,156,18,0.5)',
+                backdropFilter: 'blur(4px)',
+              }}
+            />
           )}
         </Box>
 
-        {/* Icono temático grande */}
-        <Typography
-          role="img"
-          aria-label={producto.nombre}
-          sx={{
-            fontSize: '3.6rem',
-            lineHeight: 1,
-            filter: 'drop-shadow(0 6px 10px rgba(0,0,0,0.15))',
-            transform: 'scale(1)',
-            transition: 'transform 0.3s ease',
-            '&:hover': {
-              transform: 'scale(1.15) rotate(4deg)',
-            },
-          }}
-        >
-          {producto.icono || '🍝'}
-        </Typography>
-
-        {/* Badge inferior de disponibilidad */}
+        {/* Badge inferior de stock */}
         <Box
           sx={{
             position: 'absolute',
             bottom: 8,
-            right: 12,
+            right: 10,
+            bgcolor: 'rgba(0,0,0,0.65)',
+            backdropFilter: 'blur(4px)',
+            borderRadius: '6px',
+            px: 1,
+            py: 0.25,
           }}
         >
           <Typography
             variant="caption"
             sx={{
-              fontSize: '0.7rem',
+              fontSize: '0.68rem',
               fontWeight: 600,
-              color: 'text.secondary',
-              bgcolor: 'background.paper',
-              px: 1,
-              py: 0.25,
-              borderRadius: '6px',
-              border: '1px solid',
-              borderColor: 'divider',
+              color: producto.stock > 10 ? '#58D68D' : '#F5B041',
             }}
           >
-            Stock: {producto.stock} {producto.unidad}
+            {producto.stock > 10 ? `Stock: ${producto.stock} disp.` : `Últimos ${producto.stock} disp.`}
           </Typography>
         </Box>
       </Box>
 
-      {/* Cuerpo de la tarjeta con especificaciones gastronómicas */}
+      {/* 2. Cuerpo del Producto (dimensiones fijas para uniformidad) */}
       <CardContent
         sx={{
-          p: 2.25,
           flexGrow: 1,
           display: 'flex',
           flexDirection: 'column',
-          '&:last-child': { pb: 2.25 },
+          p: 2,
+          '&:last-child': { pb: 2 },
         }}
       >
-        {/* Título del producto */}
+        {/* Título de 2 líneas fijas */}
         <Typography
           variant="subtitle1"
-          component="h3"
           sx={{
             fontWeight: 700,
             lineHeight: 1.25,
-            mb: 0.75,
-            minHeight: '2.5rem',
+            height: 44,
+            overflow: 'hidden',
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
+            color: 'text.primary',
+            mb: 0.5,
           }}
+          title={producto.nombre}
         >
           {producto.nombre}
         </Typography>
 
-        {/* Variedad / Ingredientes */}
+        {/* Variedad / Ingredientes de 2 líneas fijas */}
         <Typography
-          variant="body2"
-          color="text.secondary"
+          variant="caption"
           sx={{
-            fontSize: '0.825rem',
-            mb: 1.5,
-            flexGrow: 1,
-            minHeight: '2.5rem',
+            color: 'text.secondary',
+            height: 32,
+            overflow: 'hidden',
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
+            lineHeight: 1.3,
+            mb: 1.5,
           }}
+          title={producto.variedad}
         >
           {producto.variedad}
         </Typography>
 
-        {/* Chips de especificaciones: Cocción y Porciones */}
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1.5 }}>
-          {producto.tiempoCoccion && (
-            <Chip
-              icon={<AccessTimeIcon sx={{ fontSize: '15px !important' }} />}
-              label={producto.tiempoCoccion}
-              size="small"
-              variant="outlined"
-              sx={{
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                color: 'text.secondary',
-                borderColor: 'divider',
-                bgcolor: 'action.hover',
-              }}
-            />
-          )}
-          {producto.rinde && (
-            <Chip
-              icon={<PeopleIcon sx={{ fontSize: '15px !important' }} />}
-              label={producto.rinde}
-              size="small"
-              variant="outlined"
-              sx={{
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                color: 'text.secondary',
-                borderColor: 'divider',
-                bgcolor: 'action.hover',
-              }}
-            />
-          )}
+        {/* Chips de Especificaciones (Porciones y Cocción) */}
+        <Box sx={{ display: 'flex', gap: 1, mb: 1.5, height: 26, alignItems: 'center' }}>
+          <Chip
+            icon={<PeopleIcon sx={{ fontSize: '13px !important' }} />}
+            label={producto.rinde}
+            size="small"
+            variant="outlined"
+            sx={{
+              fontSize: '0.68rem',
+              height: 24,
+              borderColor: 'divider',
+              color: 'text.secondary',
+            }}
+          />
+          <Chip
+            icon={<AccessTimeIcon sx={{ fontSize: '13px !important' }} />}
+            label={producto.tiempoCoccion}
+            size="small"
+            variant="outlined"
+            sx={{
+              fontSize: '0.68rem',
+              height: 24,
+              borderColor: 'divider',
+              color: 'text.secondary',
+            }}
+          />
         </Box>
 
-        {/* Sugerencia de maridaje con salsas en tipografía caption destacada */}
-        {producto.maridajeSugerido && (
-          <Box
-            sx={{
-              p: 1.2,
-              mb: 2,
-              borderRadius: '10px',
-              bgcolor: (theme) =>
-                theme.palette.mode === 'dark'
-                  ? 'rgba(46, 204, 113, 0.06)'
-                  : 'rgba(0, 146, 70, 0.05)',
-              border: '1px dashed',
-              borderColor: (theme) =>
-                theme.palette.mode === 'dark'
-                  ? 'rgba(46, 204, 113, 0.3)'
-                  : 'rgba(0, 146, 70, 0.25)',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 1,
-            }}
-          >
-            <RestaurantMenuIcon
-              fontSize="small"
-              sx={{
-                color: 'primary.main',
-                fontSize: '18px',
-                mt: 0.15,
-                flexShrink: 0,
-              }}
-            />
-            <Box>
-              <Typography
-                variant="caption"
-                sx={{
-                  fontWeight: 700,
-                  color: 'primary.main',
-                  display: 'block',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  fontSize: '0.68rem',
-                }}
-              >
-                Maridaje Sugerido
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: 'text.secondary',
-                  fontWeight: 500,
-                  lineHeight: 1.25,
-                  display: 'block',
-                }}
-              >
-                {producto.maridajeSugerido}
-              </Typography>
-            </Box>
-          </Box>
-        )}
-
-        {/* Separador, Precio y Selector Numérico */}
+        {/* Maridaje Sugerido en caja fija */}
         <Box
           sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.8,
+            p: 0.8,
+            bgcolor: (theme) =>
+              theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+            borderRadius: '8px',
+            border: '1px dashed',
+            borderColor: 'divider',
+            height: 36,
+            mb: 2,
+            overflow: 'hidden',
+          }}
+        >
+          <RestaurantMenuIcon fontSize="small" sx={{ color: 'secondary.main', fontSize: 15, flexShrink: 0 }} />
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+              fontSize: '0.68rem',
+              fontStyle: 'italic',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+            title={`Maridaje: ${producto.maridajeSugerido}`}
+          >
+            {producto.maridajeSugerido}
+          </Typography>
+        </Box>
+
+        {/* 3. Fila de Precio, Selector y Botón de Agregado (anclada al fondo) */}
+        <Box
+          sx={{
+            mt: 'auto',
             pt: 1.5,
             borderTop: '1px solid',
             borderColor: 'divider',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 1,
+            flexDirection: 'column',
+            gap: 1.2,
           }}
         >
-          {/* Precio formateado en ARS */}
-          <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.7rem' }}>
-              Precio ({producto.unidad})
-            </Typography>
-            <Typography
-              variant="h6"
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <Box>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.68rem' }}>
+                Precio ({producto.unidad})
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main', lineHeight: 1 }}>
+                ${producto.precio.toLocaleString('es-AR')}
+              </Typography>
+            </Box>
+
+            {/* Selector de cantidad */}
+            <Box
               sx={{
-                fontWeight: 800,
-                color: 'text.primary',
-                lineHeight: 1.1,
+                display: 'flex',
+                alignItems: 'center',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: '8px',
+                bgcolor: 'background.paper',
               }}
             >
-              ${producto.precio?.toLocaleString('es-AR')}
-            </Typography>
-          </Box>
-
-          {/* Selector numérico interactivo de cantidad (- y +) */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              bgcolor: 'action.hover',
-              borderRadius: '8px',
-              border: '1px solid',
-              borderColor: 'divider',
-              p: 0.25,
-            }}
-          >
-            <Tooltip title="Disminuir">
-              <span>
-                <IconButton
-                  size="small"
-                  onClick={handleDecrement}
-                  disabled={cantidad <= 1}
-                  sx={{
-                    width: 28,
-                    height: 28,
-                    color: 'text.primary',
-                    '&.Mui-disabled': { color: 'text.disabled' },
-                  }}
-                >
-                  <RemoveIcon sx={{ fontSize: 16 }} />
-                </IconButton>
-              </span>
-            </Tooltip>
-
-            <Typography
-              sx={{
-                px: 1.2,
-                minWidth: 24,
-                textAlign: 'center',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                color: 'text.primary',
-                userSelect: 'none',
-              }}
-            >
-              {cantidad}
-            </Typography>
-
-            <Tooltip title="Aumentar">
+              <IconButton
+                size="small"
+                onClick={handleDecrement}
+                disabled={cantidad <= 1 || agregadoAnim}
+                sx={{ p: 0.4, color: 'text.secondary' }}
+              >
+                <RemoveIcon sx={{ fontSize: 15 }} />
+              </IconButton>
+              <Typography sx={{ px: 1, fontSize: '0.82rem', fontWeight: 700, minWidth: 20, textAlign: 'center' }}>
+                {cantidad}
+              </Typography>
               <IconButton
                 size="small"
                 onClick={handleIncrement}
-                disabled={cantidad >= producto.stock}
-                sx={{
-                  width: 28,
-                  height: 28,
-                  color: 'text.primary',
-                }}
+                disabled={cantidad >= producto.stock || agregadoAnim}
+                sx={{ p: 0.4, color: 'text.secondary' }}
               >
-                <AddIcon sx={{ fontSize: 16 }} />
+                <AddIcon sx={{ fontSize: 15 }} />
               </IconButton>
-            </Tooltip>
+            </Box>
           </Box>
-        </Box>
 
-        {/* Botón 'Agregar' con icono AddShoppingCartIcon y animación de feedback */}
-        <Button
-          variant="contained"
-          color={agregadoAnim ? 'success' : 'primary'}
-          fullWidth
-          startIcon={agregadoAnim ? <CheckCircleIcon /> : <AddShoppingCartIcon />}
-          onClick={handleAddToCart}
-          sx={{
-            mt: 1.5,
-            py: 1,
-            borderRadius: '10px',
-            fontWeight: 700,
-            fontSize: '0.85rem',
-            letterSpacing: '0.02em',
-            boxShadow: (theme) =>
-              agregadoAnim
-                ? `0 4px 12px ${theme.palette.success.main}40`
-                : `0 4px 14px ${theme.palette.primary.main}30`,
-            transition: 'all 0.2s ease',
-          }}
-        >
-          {agregadoAnim
-            ? '¡Agregado al Carrito!'
-            : `Agregar • $${precioTotal.toLocaleString('es-AR')}`}
-        </Button>
+          {/* Botón Agregar al Carrito */}
+          <Button
+            variant="contained"
+            color={agregadoAnim ? 'success' : 'primary'}
+            fullWidth
+            size="small"
+            startIcon={agregadoAnim ? <CheckCircleIcon /> : <AddShoppingCartIcon />}
+            onClick={handleAddToCart}
+            disabled={producto.stock === 0}
+            sx={{
+              py: 0.85,
+              borderRadius: '10px',
+              fontWeight: 700,
+              fontSize: '0.8rem',
+              transition: 'all 0.2s',
+            }}
+          >
+            {producto.stock === 0
+              ? 'Sin Stock'
+              : agregadoAnim
+              ? `¡Agregado (${cantidad})!`
+              : `Agregar • $${(producto.precio * cantidad).toLocaleString('es-AR')}`}
+          </Button>
+        </Box>
       </CardContent>
     </Card>
   );

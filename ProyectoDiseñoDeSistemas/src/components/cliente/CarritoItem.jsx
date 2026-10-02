@@ -51,19 +51,18 @@ export const CarritoItem = ({ item }) => {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, minWidth: { xs: '100%', sm: 220 } }}>
         <Avatar
           variant="rounded"
+          src={item.imagen}
+          alt={item.nombre}
           sx={{
             width: 56,
             height: 56,
-            bgcolor: 'action.hover',
-            fontSize: '1.8rem',
             borderRadius: '10px',
             border: '1px solid',
             borderColor: 'divider',
             flexShrink: 0,
+            bgcolor: 'action.hover',
           }}
-        >
-          {item.icono || '🍝'}
-        </Avatar>
+        />
 
         <Box sx={{ minWidth: 0 }}>
           <Typography

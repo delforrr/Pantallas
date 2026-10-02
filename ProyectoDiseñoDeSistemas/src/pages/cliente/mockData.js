@@ -31,7 +31,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '8 - 10 min',
     stock: 45,
     destacado: true,
-    icono: '🥟',
+    imagen: 'https://images.unsplash.com/photo-1587740896339-96a76170508d?auto=format&fit=crop&w=800&q=80',
     maridajeSugerido: 'Salsa Tuco Casero o Cuatro Quesos',
   },
   {
@@ -45,7 +45,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '6 - 8 min',
     stock: 60,
     destacado: true,
-    icono: '🥟',
+    imagen: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=800&q=80',
     maridajeSugerido: 'Salsa Bolognesa o Filetto',
   },
   {
@@ -59,7 +59,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '4 - 5 min',
     stock: 80,
     destacado: false,
-    icono: '🍝',
+    imagen: 'https://images.unsplash.com/photo-1621996346565-e3d5d6281072?auto=format&fit=crop&w=800&q=80',
     maridajeSugerido: 'Pesto Genovés o Bolognesa',
   },
   {
@@ -73,7 +73,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '2 - 3 min (hasta que floten)',
     stock: 50,
     destacado: true,
-    icono: '🥔',
+    imagen: 'https://images.unsplash.com/photo-1546549032-9571cd6b27df?auto=format&fit=crop&w=800&q=80',
     maridajeSugerido: 'Tuco Casero o Estofado',
   },
   {
@@ -87,7 +87,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '8 - 10 min',
     stock: 25,
     destacado: true,
-    icono: '✨',
+    imagen: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
     maridajeSugerido: 'Manteca de salvia y nueces o fondo de cocción',
   },
   {
@@ -101,7 +101,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '7 - 9 min',
     stock: 35,
     destacado: false,
-    icono: '🥟',
+    imagen: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',
     maridajeSugerido: 'Crema de verdeo o caldo casero',
   },
   {
@@ -115,7 +115,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: 'Lista para calentar',
     stock: 40,
     destacado: true,
-    icono: '🍅',
+    imagen: 'https://images.unsplash.com/photo-1607532941433-304659e8198a?auto=format&fit=crop&w=800&q=80',
     maridajeSugerido: 'Ideal para ñoquis, fideos y ravioles',
   },
   {
@@ -129,7 +129,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: 'Lista para calentar',
     stock: 35,
     destacado: false,
-    icono: '🥩',
+    imagen: 'https://images.unsplash.com/photo-1598866594230-a7c12756260f?auto=format&fit=crop&w=800&q=80',
     maridajeSugerido: 'Pastas secas y rellenas',
   },
   {
@@ -143,7 +143,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: 'Lista para calentar a fuego bajo',
     stock: 30,
     destacado: false,
-    icono: '🧀',
+    imagen: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&w=800&q=80',
     maridajeSugerido: 'Sorrentinos y panzottis',
   },
   {
@@ -157,7 +157,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: 'Listo para servir a temperatura ambiente',
     stock: 20,
     destacado: false,
-    icono: '🌿',
+    imagen: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=800&q=80',
     maridajeSugerido: 'Tallarines o fusillis al dente',
   },
   {
@@ -171,7 +171,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '8 - 10 min',
     stock: 15,
     destacado: true,
-    icono: '🎁',
+    imagen: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80',
     maridajeSugerido: 'Almuerzo familiar completo',
   },
   {
@@ -185,7 +185,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: 'Varios',
     stock: 10,
     destacado: false,
-    icono: '🎉',
+    imagen: 'https://images.unsplash.com/photo-1579684947550-22e945225d9a?auto=format&fit=crop&w=800&q=80',
     maridajeSugerido: 'Cenas, celebraciones y reuniones empresariales',
   },
 ];
@@ -433,7 +433,7 @@ let currentStore = {
       unidad: 'Caja 1kg',
       cantidad: 2,
       subtotal: 9000,
-      icono: '🥟',
+      imagen: 'https://images.unsplash.com/photo-1587740896339-96a76170508d?auto=format&fit=crop&w=800&q=80',
     },
     {
       idProducto: 201,
@@ -443,7 +443,7 @@ let currentStore = {
       unidad: 'Pote 500cc',
       cantidad: 1,
       subtotal: 2500,
-      icono: '🍅',
+      imagen: 'https://images.unsplash.com/photo-1607532941433-304659e8198a?auto=format&fit=crop&w=800&q=80',
     },
   ],
   pedidos: INITIAL_PEDIDOS_CLIENTE,
@@ -494,7 +494,7 @@ export const clientStore = {
           unidad: producto.unidad,
           cantidad,
           subtotal: producto.precio * cantidad,
-          icono: producto.icono,
+          imagen: producto.imagen,
         },
       ];
     }
