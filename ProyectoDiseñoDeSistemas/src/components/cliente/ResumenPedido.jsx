@@ -10,12 +10,9 @@ import {
   Select,
   MenuItem,
   TextField,
-  Alert,
-  AlertTitle,
   Chip,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
 import DiscountOutlinedIcon from '@mui/icons-material/DiscountOutlined';
@@ -228,26 +225,6 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
           </MenuItem>
         </Select>
       </FormControl>
-
-      {/* ALERTA VISUAL: Nota aclaratoria normativa de fábrica */}
-      <Alert
-        severity="warning"
-        icon={<WarningAmberIcon />}
-        sx={{
-          mb: 2,
-          borderRadius: '10px',
-          border: '1px solid',
-          borderColor: 'warning.light',
-          '& .MuiAlert-message': { width: '100%' },
-        }}
-      >
-        <AlertTitle sx={{ fontSize: '0.82rem', fontWeight: 700, mb: 0.25 }}>
-          Normativa de Cobranzas de Fábrica
-        </AlertTitle>
-        <Typography variant="caption" sx={{ display: 'block', lineHeight: 1.35 }}>
-          Por disposición administrativa <strong>NO se aceptan cheques ni tarjetas de crédito</strong>. Sólo medios autorizados: Efectivo, Débito, Transferencia/QR o Cuenta Corriente mayorista.
-        </Typography>
-      </Alert>
 
       {/* Campo Opcional de Observaciones */}
       <TextField

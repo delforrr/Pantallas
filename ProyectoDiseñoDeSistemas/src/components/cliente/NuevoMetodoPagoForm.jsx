@@ -11,14 +11,12 @@ import {
   Select,
   MenuItem,
   Alert,
-  AlertTitle,
   Snackbar,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutlined';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
-import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import { clientStore } from '../../pages/cliente/mockData';
 
@@ -145,33 +143,12 @@ export const NuevoMetodoPagoForm = ({ onSuccess }) => {
         bgcolor: 'background.paper',
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
         <AddCircleOutlineIcon color="primary" sx={{ fontSize: 26 }} />
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
           Vincular Nuevo Medio de Pago
         </Typography>
       </Box>
-
-      {/* ALERTA DESTACADA: POLÍTICA ESTRICTA PASTAFAB */}
-      <Alert
-        severity="warning"
-        icon={<BlockOutlinedIcon sx={{ fontSize: 22 }} />}
-        sx={{
-          mb: 3,
-          borderRadius: '12px',
-          border: '1px solid',
-          borderColor: 'warning.light',
-        }}
-      >
-        <AlertTitle sx={{ fontWeight: 700, fontSize: '0.9rem' }}>
-          Política estricta PastaFab
-        </AlertTitle>
-        <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-          Únicamente se aceptan <strong>Efectivo, Débito y Billeteras Virtuales</strong>.
-          <br />
-          <strong>No se aceptan Cheques ni Tarjetas de Crédito</strong> bajo ninguna circunstancia.
-        </Typography>
-      </Alert>
 
       {errorText && (
         <Alert severity="error" sx={{ mb: 2.5, borderRadius: '10px' }}>

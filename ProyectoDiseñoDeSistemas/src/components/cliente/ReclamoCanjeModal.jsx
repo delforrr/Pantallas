@@ -130,7 +130,7 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
 
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <DialogContent dividers sx={{ px: { xs: 2.5, sm: 3 }, pt: '24px !important', pb: 2.5 }}>
-          {/* Banner normativo del dominio: Puntos 104 y 132 */}
+          {/* Garantía de Calidad y Reposición */}
           <Alert
             severity="info"
             icon={<VerifiedUserOutlinedIcon />}
@@ -142,12 +142,12 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
             }}
           >
             <AlertTitle sx={{ fontWeight: 700, fontSize: '0.9rem' }}>
-              Normativa de Calidad PastaFab (Puntos 104 y 132 del dominio)
+              Garantía de Calidad y Reposición PastaFab
             </AlertTitle>
             <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
               Ante cualquier producto en mal estado, rotura en empaque o falla en la cocción,
               PastaFab genera una <strong>orden de canje inmediato a costo $0</strong> con
-              remito de reposición sin cargo.
+              remito oficial de reposición sin cargo.
             </Typography>
           </Alert>
 

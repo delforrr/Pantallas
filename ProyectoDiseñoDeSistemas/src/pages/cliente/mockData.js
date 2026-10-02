@@ -2,12 +2,11 @@ import { useSyncExternalStore } from 'react';
 
 /**
  * mockData.js - Portal Cliente (PastaFab ERP)
- * Implementa el modelo de dominio según el Trabajo Práctico Anual:
+ * Gestión de datos en memoria para el autoservicio de clientes:
  * - Catálogo de productos: Pastas simples, rellenas, gourmet y salsas por separado.
  * - Tipos de pedido: Venta Mostrador, Fijo Semanal (con descuento), Evento Especial 48hs (seña 50%).
  * - Medios de pago autorizados: Efectivo, Débito, Mercado Pago, Cuenta DNI, Cuenta Corriente.
- * - REGLA DE NEGOCIO: No se aceptan tarjetas de crédito ni cheques.
- * - Políticas de cancelación y canje sin costo (valor $0) por producto en mal estado.
+ * - Políticas de cancelación y canje de calidad sin costo ($0).
  */
 
 export const CATEGORIAS_PRODUCTOS = [
@@ -304,14 +303,14 @@ export const INITIAL_PEDIDOS_CLIENTE = [
     estadoPago: 'Seña 50% Abonada',
     medioPago: 'Tarjeta Débito Visa',
     trackingStep: 1,
-    señaExigida: 68265, // 50% obligatorio por regla de negocio
+    señaExigida: 68265, // 50% anticipo reserva evento
     señaAbonada: 68265,
     saldoPendiente: 68265,
     subtotal: 151700,
     descuento: 15170, // 10% descuento volumen
     envio: 0,
     total: 136530,
-    politicaCancelacion: 'Anticipación mínima 48hs. En caso de cancelación, el cliente pierde la seña del 50% y la mercadería producida se almacena.',
+    politicaCancelacion: 'Anticipación mínima 48hs. En caso de cancelación, se retiene la seña del 50% para cubrir costos de producción.',
     nroRemito: 'REM-0001-00008399 (Pendiente entrega)',
     nroFactura: 'FC-A-0001-00004508',
     items: [
@@ -404,7 +403,7 @@ export const INITIAL_PEDIDOS_CLIENTE = [
     descuento: 0,
     envio: 0,
     total: 45000,
-    motivoCancelacion: 'Cancelación tardía informada por el cliente. De acuerdo a la normativa de fábrica, se retuvo la seña del 50% ($22.500) y la mercadería elaborada fue derivada a stock de frío.',
+    motivoCancelacion: 'Cancelación tardía informada por el cliente. De acuerdo a las condiciones de reserva de eventos, se retuvo la seña del 50% ($22.500) para cubrir costos de elaboración.',
     nroRemito: 'REM-ANULADO',
     nroFactura: 'FC-ANULADA',
     items: [
@@ -561,7 +560,7 @@ export const clientStore = {
           ...p,
           estadoPedido: 'Cancelado',
           trackingStep: -1,
-          motivoCancelacion: motivo || (esEvento ? 'Cancelación con retención de seña del 50% según normativa.' : 'Cancelado a solicitud del cliente.'),
+          motivoCancelacion: motivo || (esEvento ? 'Cancelación con retención de seña del 50% según condiciones del servicio.' : 'Cancelado a solicitud del cliente.'),
           estadoPago: esEvento ? 'Seña Retenida (50%)' : 'Cancelado / Reintegrado',
         };
       }
@@ -595,7 +594,7 @@ export const clientStore = {
       subtotal: 0,
       descuento: 0,
       envio: 0,
-      total: 0, // Cero costo según regla del dominio
+      total: 0, // Cero costo bajo garantía oficial
       pedidoOriginalAsociado: nroPedidoOriginal,
       motivoReclamo: descripcionFalla,
       nroRemito: `REM-CANJE-${nextId}`,

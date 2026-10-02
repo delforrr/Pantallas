@@ -113,7 +113,7 @@ export const DetallePedidoModal = ({ open, onClose, pedido }) => {
             </Typography>
             <Typography variant="body2">
               {pedido.motivoCancelacion ||
-                'Este pedido ha sido cancelado. Según la normativa comercial, la seña puede estar sujeta a retención.'}
+                'Este pedido ha sido cancelado. Ante cualquier duda sobre reintegros o reservas, contacte a atención al cliente.'}
             </Typography>
           </Alert>
         ) : (

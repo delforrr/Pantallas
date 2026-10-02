@@ -141,7 +141,7 @@ export const PedidoClienteItem = ({
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
             {pedido.motivoCancelacion ||
               (esEvento
-                ? 'Evento cancelado: Se aplica la retención normativa del 50% de la seña abonada.'
+                ? 'Evento cancelado: Se aplica la retención del 50% de la seña según condiciones de reserva.'
                 : 'Pedido cancelado')}
           </Typography>
         </Alert>
