@@ -1,0 +1,184 @@
+import { useState } from 'react';
+import {
+  Box,
+  Typography,
+  Paper,
+  Divider,
+  LinearProgress,
+  Snackbar,
+} from '@mui/material';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+
+import { useClientStore, clientStore } from './mockData';
+import { MetodoPagoItem, NuevoMetodoPagoForm, NotificacionesDrawer } from '../../components/cliente';
+
+export const MediosPagoScreen = () => {
+  const store = useClientStore();
+  const mediosPago = store.mediosPago || [];
+  const cliente = store.cliente || {};
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState('');
+
+  const handleSetDefault = (id) => {
+    clientStore.setDefaultPaymentMethod(id);
+    setSnackbarMsg('Método de pago predeterminado actualizado.');
+    setSnackbarOpen(true);
+  };
+
+  const handleDelete = (id) => {
+    clientStore.removePaymentMethod(id);
+    setSnackbarMsg('Método de pago eliminado.');
+    setSnackbarOpen(true);
+  };
+
+  const formatCurrency = (val) => {
+    return typeof val === 'number'
+      ? `$ ${val.toLocaleString('es-AR')}`
+      : '$ 0';
+  };
+
+  const limiteCredito = cliente.limiteCredito || 350000;
+  const creditoUsado = cliente.creditoUsado || 120000;
+  const saldoDisponible = cliente.saldoDisponible || (limiteCredito - creditoUsado);
+  const porcentajeUso = Math.min(100, Math.round((creditoUsado / limiteCredito) * 100));
+
+  return (
+    <Box sx={{ width: '100%', pb: 2 }}>
+      {/* Título de la pantalla */}
+      <Box sx={{ mb: 2.5 }}>
+        <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', mb: 0.5 }}>
+          Medios de Pago y Cuenta Corriente
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          Administra tus formas de pago guardadas, saldo comercial habilitado y opciones de facturación.
+        </Typography>
+      </Box>
+
+      {/* Layout de 2 columnas */}
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'flex-start' }}>
+        {/* Columna Izquierda: Medios Guardados */}
+        <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 50%' }, width: '100%', minWidth: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <PaymentsOutlinedIcon color="primary" />
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Métodos de Pago Registrados ({mediosPago.length})
+            </Typography>
+          </Box>
+
+          {mediosPago.map((metodo) => (
+            <MetodoPagoItem
+              key={metodo.idMedioDePago}
+              metodo={metodo}
+              onSetDefault={handleSetDefault}
+              onDelete={handleDelete}
+            />
+          ))}
+        </Box>
+
+        {/* Columna Derecha: Vincular Nuevo Medio de Pago + Cuenta Corriente */}
+        <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 50%' }, width: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <NuevoMetodoPagoForm
+            onSuccess={() => {
+              setSnackbarMsg('Nuevo medio de pago añadido a la lista.');
+              setSnackbarOpen(true);
+            }}
+          />
+
+          {/* Widget de Cuenta Corriente Comercial (debajo de vincular medio de pago) */}
+          <Paper
+            elevation={1}
+            sx={{
+              borderRadius: '14px',
+              border: '1px solid',
+              borderColor: 'divider',
+              p: 2.5,
+              bgcolor: 'background.paper',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+              <AccountBalanceIcon color="secondary" sx={{ fontSize: 24 }} />
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '0.95rem' }}>
+                  Cuenta Corriente Comercial Habilitada
+                </Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                  Titular: {cliente.razonSocial || 'Trattoria & Ristorante Italia Bella'} &bull; CUIT {cliente.cuit || '30-68912455-2'}
+                </Typography>
+              </Box>
+            </Box>
+
+            <Divider sx={{ mb: 2 }} />
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1.5, mb: 2 }}>
+              <Box>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block', fontSize: '0.72rem' }}>
+                  Límite Otorgado
+                </Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                  {formatCurrency(limiteCredito)}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block', fontSize: '0.72rem' }}>
+                  Crédito Utilizado
+                </Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'warning.main' }}>
+                  {formatCurrency(creditoUsado)}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block', fontSize: '0.72rem' }}>
+                  Saldo Disponible
+                </Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'success.main' }}>
+                  {formatCurrency(saldoDisponible)}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Barra de progreso de uso de crédito */}
+            <Box sx={{ mb: 1.5 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.72rem' }}>
+                  Utilización de Línea de Crédito
+                </Typography>
+                <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.72rem' }}>
+                  {porcentajeUso}% consumido
+                </Typography>
+              </Box>
+              <LinearProgress
+                variant="determinate"
+                value={porcentajeUso}
+                color={porcentajeUso > 80 ? 'error' : porcentajeUso > 50 ? 'warning' : 'primary'}
+                sx={{ height: 6, borderRadius: '4px' }}
+              />
+            </Box>
+
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.72rem', lineHeight: 1.35 }}>
+              Ciclo de facturación comercial: mensual con liquidación a 30 días. Los pedidos con Cuenta Corriente impactan automáticamente en el saldo disponible.
+            </Typography>
+          </Paper>
+        </Box>
+      </Box>
+
+      {/* Snackbar feedback */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMsg}
+        action={<CheckCircleIcon sx={{ fontSize: 20, color: 'success.light', mr: 1 }} />}
+      />
+
+      {/* Drawer lateral de notificaciones */}
+      <NotificacionesDrawer />
+    </Box>
+  );
+};
+
+export default MediosPagoScreen;

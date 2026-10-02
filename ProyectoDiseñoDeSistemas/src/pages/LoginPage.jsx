@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box, Button, TextField, Typography, InputAdornment,
   IconButton, Chip, Divider, CircularProgress,
@@ -50,7 +50,7 @@ const LoginPage = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0F0A00 0%, #1C1205 40%, #0F0A00 100%)',
+        bgcolor: 'background.default',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -59,13 +59,13 @@ const LoginPage = () => {
       <Box sx={{
         position: 'absolute', top: '-15%', right: '-10%',
         width: 500, height: 500, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(232,160,32,0.12) 0%, transparent 70%)',
+        background: (theme) => `radial-gradient(circle, ${theme.palette.primary.main}20 0%, transparent 70%)`,
         pointerEvents: 'none',
       }} />
       <Box sx={{
         position: 'absolute', bottom: '-10%', left: '-8%',
         width: 400, height: 400, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(192,57,43,0.1) 0%, transparent 70%)',
+        background: (theme) => `radial-gradient(circle, ${theme.palette.secondary.main}20 0%, transparent 70%)`,
         pointerEvents: 'none',
       }} />
 
@@ -76,11 +76,11 @@ const LoginPage = () => {
           maxWidth: 440,
           mx: 2,
           p: { xs: 3, sm: 5 },
-          background: 'rgba(28, 20, 8, 0.85)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(232, 160, 32, 0.2)',
+          bgcolor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'divider',
           borderRadius: '24px',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(232,160,32,0.05)',
+          boxShadow: 24,
           position: 'relative',
           zIndex: 1,
         }}
@@ -93,16 +93,17 @@ const LoginPage = () => {
             justifyContent: 'center',
             width: 72, height: 72,
             borderRadius: '20px',
-            background: 'linear-gradient(135deg, #E8A020, #B57A10)',
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
             mb: 2,
-            boxShadow: '0 8px 24px rgba(232, 160, 32, 0.4)',
+            boxShadow: 4,
           }}>
             <Typography sx={{ fontSize: 32 }}>🍝</Typography>
           </Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: '#F5ECD7', letterSpacing: '-0.02em' }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: '-0.02em' }}>
             PastaFab
           </Typography>
-          <Typography variant="body2" sx={{ color: '#B8A882', mt: 0.5 }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
             Sistema de Gestión Integral
           </Typography>
         </Box>
@@ -119,7 +120,7 @@ const LoginPage = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <PersonIcon sx={{ color: '#B8A882', fontSize: 20 }} />
+                  <PersonIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
                 </InputAdornment>
               ),
             }}
@@ -135,13 +136,13 @@ const LoginPage = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <LockIcon sx={{ color: '#B8A882', fontSize: 20 }} />
+                  <LockIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
                 </InputAdornment>
               ),
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton onClick={() => setShowPass((p) => !p)} edge="end" size="small">
-                    {showPass ? <VisibilityOff sx={{ color: '#B8A882' }} /> : <Visibility sx={{ color: '#B8A882' }} />}
+                    {showPass ? <VisibilityOff sx={{ color: 'text.secondary' }} /> : <Visibility sx={{ color: 'text.secondary' }} />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -149,7 +150,7 @@ const LoginPage = () => {
           />
 
           {error && (
-            <Typography variant="caption" sx={{ color: '#E74C3C', display: 'block', mb: 1, pl: 1 }}>
+            <Typography variant="caption" sx={{ color: 'error.main', display: 'block', mb: 1, pl: 1 }}>
               {error}
             </Typography>
           )}
@@ -167,7 +168,7 @@ const LoginPage = () => {
         </Box>
 
         <Divider sx={{ mb: 3 }}>
-          <Typography variant="caption" sx={{ color: '#6B5F44', px: 1 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', px: 1 }}>
             Acceso rápido (demo)
           </Typography>
         </Divider>
@@ -181,15 +182,15 @@ const LoginPage = () => {
             onClick={() => handleLogin('cliente')}
             disabled={loading}
             sx={{
-              borderColor: 'rgba(232, 160, 32, 0.35)',
-              color: '#E8A020',
+              borderColor: 'primary.main',
+              color: 'primary.main',
               py: 1.2,
               flexDirection: 'column',
               gap: 0.5,
-              '&:hover': { borderColor: '#E8A020', background: 'rgba(232,160,32,0.08)' },
+              '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' },
             }}
           >
-            <Typography variant="caption" display="block" sx={{ color: '#B8A882', fontWeight: 500 }}>
+            <Typography variant="caption" display="block" sx={{ color: 'text.secondary', fontWeight: 500 }}>
               Ingresar como
             </Typography>
             <Typography variant="body2" sx={{ fontWeight: 700 }}>Cliente</Typography>
@@ -201,15 +202,15 @@ const LoginPage = () => {
             onClick={() => handleLogin('admin')}
             disabled={loading}
             sx={{
-              borderColor: 'rgba(192,57,43,0.45)',
-              color: '#E74C3C',
+              borderColor: 'secondary.main',
+              color: 'secondary.main',
               py: 1.2,
               flexDirection: 'column',
               gap: 0.5,
-              '&:hover': { borderColor: '#E74C3C', background: 'rgba(192,57,43,0.08)' },
+              '&:hover': { borderColor: 'secondary.main', bgcolor: 'action.hover' },
             }}
           >
-            <Typography variant="caption" display="block" sx={{ color: '#B8A882', fontWeight: 500 }}>
+            <Typography variant="caption" display="block" sx={{ color: 'text.secondary', fontWeight: 500 }}>
               Ingresar como
             </Typography>
             <Typography variant="body2" sx={{ fontWeight: 700 }}>Admin</Typography>
@@ -220,7 +221,7 @@ const LoginPage = () => {
           <Chip
             label="Demo: admin@pastafab.com / admin"
             size="small"
-            sx={{ background: 'rgba(232,160,32,0.1)', color: '#B8A882', fontSize: '0.7rem' }}
+            sx={{ bgcolor: 'action.hover', color: 'text.secondary', fontSize: '0.7rem' }}
           />
         </Box>
       </Box>

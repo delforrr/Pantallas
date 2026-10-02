@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box, List, ListItemButton, ListItemIcon, ListItemText,
   Collapse, Divider, Typography, Tooltip,
 } from '@mui/material';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { useApp } from '../context/AppContext';
-import { CLIENT_NAV, ADMIN_NAV } from '../config/navigation';
+import { useApp } from '../../context/AppContext';
+import { CLIENT_NAV, ADMIN_NAV } from '../../config/navigation';
 
 const DRAWER_WIDTH = 260;
 const DRAWER_COLLAPSED = 72;
@@ -31,12 +31,12 @@ const NavItem = ({ item, level = 0, collapsed }) => {
               px: collapsed ? 1.5 : 1.5,
               py: 1,
               justifyContent: collapsed ? 'center' : 'flex-start',
-              '&:hover': { background: 'rgba(232,160,32,0.08)' },
+              '&:hover': { bgcolor: 'action.hover' },
             }}
           >
             <ListItemIcon sx={{
               minWidth: collapsed ? 0 : 36,
-              color: '#E8A020',
+              color: 'primary.main',
               justifyContent: 'center',
             }}>
               <Icon fontSize="small" />
@@ -48,12 +48,12 @@ const NavItem = ({ item, level = 0, collapsed }) => {
                   primaryTypographyProps={{
                     fontSize: '0.82rem',
                     fontWeight: 700,
-                    color: '#E8A020',
+                    color: 'primary.main',
                     letterSpacing: '0.04em',
                     textTransform: 'uppercase',
                   }}
                 />
-                {open ? <ExpandLessIcon sx={{ color: '#E8A020', fontSize: 18 }} /> : <ExpandMoreIcon sx={{ color: '#6B5F44', fontSize: 18 }} />}
+                {open ? <ExpandLessIcon sx={{ color: 'primary.main', fontSize: 18 }} /> : <ExpandMoreIcon sx={{ color: 'text.secondary', fontSize: 18 }} />}
               </>
             )}
           </ListItemButton>
@@ -88,7 +88,7 @@ const NavItem = ({ item, level = 0, collapsed }) => {
       >
         <ListItemIcon sx={{
           minWidth: collapsed ? 0 : 34,
-          color: isSelected ? '#E8A020' : '#B8A882',
+          color: isSelected ? 'primary.main' : 'text.secondary',
           justifyContent: 'center',
         }}>
           <Icon fontSize="small" />
@@ -99,7 +99,7 @@ const NavItem = ({ item, level = 0, collapsed }) => {
             primaryTypographyProps={{
               fontSize: '0.855rem',
               fontWeight: isSelected ? 600 : 400,
-              color: isSelected ? '#F5ECD7' : '#B8A882',
+              color: isSelected ? 'text.primary' : 'text.secondary',
             }}
           />
         )}
@@ -125,8 +125,9 @@ const AppSidebar = () => {
         top: 0,
         display: 'flex',
         flexDirection: 'column',
-        background: 'linear-gradient(180deg, #1A1205 0%, #120D02 100%)',
-        borderRight: '1px solid rgba(232, 160, 32, 0.15)',
+        bgcolor: 'background.paper',
+        borderRight: '1px solid',
+        borderColor: 'divider',
         transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         overflow: 'hidden',
         zIndex: 100,
@@ -144,19 +145,19 @@ const AppSidebar = () => {
       }}>
         <Box sx={{
           width: 36, height: 36, borderRadius: '10px',
-          background: 'linear-gradient(135deg, #E8A020, #B57A10)',
+          bgcolor: 'primary.main',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
-          boxShadow: '0 4px 12px rgba(232, 160, 32, 0.35)',
+          boxShadow: 3,
         }}>
           <Typography sx={{ fontSize: 18 }}>🍝</Typography>
         </Box>
         {!collapsed && (
           <Box>
-            <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: '#F5ECD7', lineHeight: 1.2 }}>
+            <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: 'text.primary', lineHeight: 1.2 }}>
               PastaFab
             </Typography>
-            <Typography variant="caption" sx={{ color: '#6B5F44', fontSize: '0.68rem' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.68rem' }}>
               {roleLabel}
             </Typography>
           </Box>
@@ -176,8 +177,8 @@ const AppSidebar = () => {
 
       {/* Footer */}
       {!collapsed && (
-        <Box sx={{ px: 2, py: 2, borderTop: '1px solid rgba(232,160,32,0.1)' }}>
-          <Typography variant="caption" sx={{ color: '#6B5F44', display: 'block', textAlign: 'center' }}>
+        <Box sx={{ px: 2, py: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', textAlign: 'center' }}>
             PastaFab v1.0 · DSI 2025
           </Typography>
         </Box>

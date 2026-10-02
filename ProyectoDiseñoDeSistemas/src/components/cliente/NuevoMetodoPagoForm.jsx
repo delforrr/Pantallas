@@ -1,0 +1,341 @@
+import { useState } from 'react';
+import PropTypes from 'prop-types';
+import {
+  Paper,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Alert,
+  Snackbar,
+} from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutlined';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
+import { clientStore } from '../../pages/cliente/mockData';
+
+export const NuevoMetodoPagoForm = ({ onSuccess }) => {
+  const [tipoMetodo, setTipoMetodo] = useState('debito');
+
+  // Campos Débito
+  const [numeroTarjeta, setNumeroTarjeta] = useState('');
+  const [titularTarjeta, setTitularTarjeta] = useState('');
+  const [vencimiento, setVencimiento] = useState('');
+  const [bancoEmisor, setBancoEmisor] = useState('');
+
+  // Campos Mercado Pago
+  const [aliasCvu, setAliasCvu] = useState('');
+  const [titularMp, setTitularMp] = useState('');
+
+  // Campos Cuenta DNI
+  const [dniTitular, setDniTitular] = useState('');
+  const [celularDni, setCelularDni] = useState('');
+
+  // Estados de feedback y error
+  const [errorText, setErrorText] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const handleTipoChange = (e) => {
+    setTipoMetodo(e.target.value);
+    setErrorText('');
+  };
+
+  const resetForm = () => {
+    setNumeroTarjeta('');
+    setTitularTarjeta('');
+    setVencimiento('');
+    setBancoEmisor('');
+    setAliasCvu('');
+    setTitularMp('');
+    setDniTitular('');
+    setCelularDni('');
+    setErrorText('');
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (tipoMetodo === 'debito') {
+      const cleanNum = numeroTarjeta.replace(/\s+/g, '');
+      if (cleanNum.length < 16) {
+        setErrorText('El número de tarjeta de débito debe contener 16 dígitos.');
+        return;
+      }
+      if (!titularTarjeta.trim()) {
+        setErrorText('Ingrese el nombre y apellido del titular tal como figura en la tarjeta.');
+        return;
+      }
+      if (!vencimiento.trim() || !vencimiento.includes('/')) {
+        setErrorText('Ingrese una fecha de vencimiento válida (MM/AA).');
+        return;
+      }
+
+      const ultimos4 = cleanNum.slice(-4);
+      const banco = bancoEmisor.trim() || 'Banco Emisor';
+
+      clientStore.addPaymentMethod({
+        tipo: 'debito',
+        nombre: `Tarjeta de Débito (${banco})`,
+        detalle: `Terminada en •••• ${ultimos4} | ${titularTarjeta.trim().toUpperCase()} | Vto: ${vencimiento}`,
+        badge: 'Débito Autorizado',
+      });
+
+      setSuccessMessage('Tarjeta de débito vinculada exitosamente.');
+    } else if (tipoMetodo === 'mercadopago') {
+      if (!aliasCvu.trim()) {
+        setErrorText('Ingrese el CVU o Alias de la cuenta de Mercado Pago.');
+        return;
+      }
+      if (!titularMp.trim()) {
+        setErrorText('Ingrese el titular registrado en la cuenta de Mercado Pago.');
+        return;
+      }
+
+      clientStore.addPaymentMethod({
+        tipo: 'mercadopago',
+        nombre: 'Mercado Pago (Transferencia / QR)',
+        detalle: `Alias/CVU: ${aliasCvu.trim()} | Titular: ${titularMp.trim()}`,
+        badge: 'Billetera Digital',
+      });
+
+      setSuccessMessage('Cuenta de Mercado Pago vinculada exitosamente.');
+    } else if (tipoMetodo === 'cuentadni') {
+      const cleanDni = dniTitular.replace(/\D/g, '');
+      if (cleanDni.length < 7 || cleanDni.length > 8) {
+        setErrorText('Ingrese un número de DNI válido (7 u 8 dígitos).');
+        return;
+      }
+      if (!celularDni.trim()) {
+        setErrorText('Ingrese el teléfono celular asociado a Cuenta DNI.');
+        return;
+      }
+
+      clientStore.addPaymentMethod({
+        tipo: 'cuentadni',
+        nombre: 'Cuenta DNI (Banco Provincia)',
+        detalle: `DNI Titular: ${cleanDni} | Cel: ${celularDni.trim()} | Promociones activas`,
+        badge: 'Billetera Digital',
+      });
+
+      setSuccessMessage('Cuenta DNI vinculada exitosamente.');
+    }
+
+    setSnackbarOpen(true);
+    resetForm();
+    if (onSuccess) onSuccess();
+  };
+
+  return (
+    <Paper
+      elevation={1}
+      sx={{
+        borderRadius: '14px',
+        border: '1px solid',
+        borderColor: 'divider',
+        p: { xs: 2.5, sm: 3 },
+        bgcolor: 'background.paper',
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
+        <AddCircleOutlineIcon color="primary" sx={{ fontSize: 26 }} />
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          Vincular Nuevo Medio de Pago
+        </Typography>
+      </Box>
+
+      {errorText && (
+        <Alert severity="error" sx={{ mb: 2.5, borderRadius: '10px' }}>
+          {errorText}
+        </Alert>
+      )}
+
+      <Box component="form" onSubmit={handleSubmit} noValidate>
+        {/* Selector de Tipo */}
+        <FormControl fullWidth size="small" sx={{ mb: 2.5 }}>
+          <InputLabel id="tipo-medio-pago-label">Tipo de Medio de Pago *</InputLabel>
+          <Select
+            labelId="tipo-medio-pago-label"
+            value={tipoMetodo}
+            label="Tipo de Medio de Pago *"
+            onChange={handleTipoChange}
+          >
+            <MenuItem value="debito">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CreditCardIcon fontSize="small" color="primary" />
+                <span>Tarjeta de Débito (Visa / Mastercard Débito)</span>
+              </Box>
+            </MenuItem>
+            <MenuItem value="mercadopago">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <AccountBalanceWalletIcon fontSize="small" color="info" />
+                <span>Mercado Pago (Alias / CVU)</span>
+              </Box>
+            </MenuItem>
+            <MenuItem value="cuentadni">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <PhoneAndroidIcon fontSize="small" color="success" />
+                <span>Cuenta DNI (Banco Provincia)</span>
+              </Box>
+            </MenuItem>
+          </Select>
+        </FormControl>
+
+        {/* Campos Condicionales para Débito */}
+        {tipoMetodo === 'debito' && (
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2, mb: 2.5 }}>
+            <Box sx={{ gridColumn: '1 / -1' }}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Número de Tarjeta de Débito (16 dígitos) *"
+                placeholder="4500 0000 0000 4412"
+                value={numeroTarjeta}
+                onChange={(e) => {
+                  setNumeroTarjeta(e.target.value);
+                  setErrorText('');
+                }}
+                slotProps={{ htmlInput: { maxLength: 19 } }}
+              />
+            </Box>
+            <Box sx={{ gridColumn: '1 / -1' }}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Nombre y Apellido del Titular *"
+                placeholder="MARIA GARCIA"
+                value={titularTarjeta}
+                onChange={(e) => {
+                  setTitularTarjeta(e.target.value);
+                  setErrorText('');
+                }}
+              />
+            </Box>
+            <Box>
+              <TextField
+                fullWidth
+                size="small"
+                label="Vencimiento (MM/AA) *"
+                placeholder="09/28"
+                value={vencimiento}
+                onChange={(e) => {
+                  setVencimiento(e.target.value);
+                  setErrorText('');
+                }}
+                slotProps={{ htmlInput: { maxLength: 5 } }}
+              />
+            </Box>
+            <Box>
+              <TextField
+                fullWidth
+                size="small"
+                label="Banco Emisor"
+                placeholder="Ej. Banco Provincia"
+                value={bancoEmisor}
+                onChange={(e) => setBancoEmisor(e.target.value)}
+              />
+            </Box>
+          </Box>
+        )}
+
+        {/* Campos Condicionales para Mercado Pago */}
+        {tipoMetodo === 'mercadopago' && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2.5 }}>
+            <TextField
+              fullWidth
+              size="small"
+              label="CVU o Alias de Mercado Pago *"
+              placeholder="pastafab.cliente.mp"
+              value={aliasCvu}
+              onChange={(e) => {
+                setAliasCvu(e.target.value);
+                setErrorText('');
+              }}
+              helperText="Puede ingresar tanto un Alias como un CVU de 22 dígitos."
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Nombre del Titular de la Cuenta MP *"
+              placeholder="María García"
+              value={titularMp}
+              onChange={(e) => {
+                setTitularMp(e.target.value);
+                setErrorText('');
+              }}
+            />
+          </Box>
+        )}
+
+        {/* Campos Condicionales para Cuenta DNI */}
+        {tipoMetodo === 'cuentadni' && (
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mb: 2.5 }}>
+            <TextField
+              fullWidth
+              size="small"
+              label="DNI del Titular *"
+              placeholder="28912455"
+              value={dniTitular}
+              onChange={(e) => {
+                setDniTitular(e.target.value);
+                setErrorText('');
+              }}
+              slotProps={{ htmlInput: { maxLength: 8 } }}
+              helperText="DNI del titular registrado en Cuenta DNI."
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Celular Vinculado *"
+              placeholder="2392-439901"
+              value={celularDni}
+              onChange={(e) => {
+                setCelularDni(e.target.value);
+                setErrorText('');
+              }}
+              helperText="Número para envío de cobro o QR."
+            />
+          </Box>
+        )}
+
+        <Button
+          type="submit"
+          variant="contained"
+          fullWidth
+          size="medium"
+          startIcon={<AddCircleOutlineIcon />}
+          sx={{
+            py: 1.2,
+            borderRadius: '10px',
+            fontWeight: 700,
+            textTransform: 'none',
+          }}
+        >
+          Guardar Medio de Pago
+        </Button>
+      </Box>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        message={successMessage}
+        action={
+          <CheckCircleOutlineIcon color="inherit" sx={{ fontSize: 20, mr: 1 }} />
+        }
+      />
+    </Paper>
+  );
+};
+
+NuevoMetodoPagoForm.propTypes = {
+  onSuccess: PropTypes.func,
+};
+
+export default NuevoMetodoPagoForm;

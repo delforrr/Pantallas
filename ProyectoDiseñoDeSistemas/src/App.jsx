@@ -1,22 +1,36 @@
 import React from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { Box, Typography, Fade } from '@mui/material';
-import theme from './theme';
+import { getTheme } from './theme';
 import { AppProvider, useApp } from './context/AppContext';
 import LoginPage from './pages/LoginPage';
-import AppSidebar from './components/AppSidebar';
-import AppHeader from './components/AppHeader';
+import { AppLayout } from './components/layout';
 
 // ── All screen imports ──────────────────────────────────────
-import {
-  CatalogoScreen, CarritoScreen, PedidosClienteScreen, MediosPagoScreen,
-  ClientesScreen, PedidosScreen, PresupuestosScreen,
-  ComprobantesVentaScreen, ComprobantesPagoScreen, CierreCajaScreen,
-  OrdenProduccionScreen, RecetasScreen, ProductosCompuestosScreen,
-  MateriaPrimaScreen, StockScreen,
-  ProveedoresScreen, OrdenCompraScreen, PresupuestoProveedorScreen, FacturasRemitosScreen,
-  MaquinariaScreen, OrdenesMantScreen,
-} from './pages/screens';
+import CatalogoScreen from './pages/cliente/CatalogoScreen';
+import CarritoScreen from './pages/cliente/CarritoScreen';
+import PedidosClienteScreen from './pages/cliente/PedidosClienteScreen';
+import MediosPagoScreen from './pages/cliente/MediosPagoScreen';
+
+import ClientesScreen from './pages/ventas/ClientesScreen';
+import PedidosScreen from './pages/ventas/PedidosScreen';
+import PresupuestosScreen from './pages/ventas/PresupuestosScreen';
+import ComprobantesVentaScreen from './pages/ventas/ComprobantesVentaScreen';
+import ComprobantesPagoScreen from './pages/ventas/ComprobantesPagoScreen';
+import CierreCajaScreen from './pages/ventas/CierreCajaScreen';
+
+import OrdenProduccionScreen from './pages/produccion/OrdenProduccionScreen';
+import RecetasScreen from './pages/produccion/RecetasScreen';
+import ProductosCompuestosScreen from './pages/produccion/ProductosCompuestosScreen';
+import MateriaPrimaScreen from './pages/produccion/MateriaPrimaScreen';
+
+import ProveedoresScreen from './pages/compras/ProveedoresScreen';
+import OrdenCompraScreen from './pages/compras/OrdenCompraScreen';
+import PresupuestoProveedorScreen from './pages/compras/PresupuestoProveedorScreen';
+import FacturasRemitosScreen from './pages/compras/FacturasRemitosScreen';
+
+import MaquinariaScreen from './pages/mantenimiento/MaquinariaScreen';
+import OrdenesMantScreen from './pages/mantenimiento/OrdenesMantScreen';
 import { PAGE_LABELS } from './config/navigation';
 
 const SCREEN_MAP = {
@@ -34,7 +48,6 @@ const SCREEN_MAP = {
   recetas: RecetasScreen,
   productos_compuestos: ProductosCompuestosScreen,
   materia_prima: MateriaPrimaScreen,
-  stock: StockScreen,
   proveedores: ProveedoresScreen,
   orden_compra: OrdenCompraScreen,
   presupuesto_proveedor: PresupuestoProveedorScreen,
@@ -51,16 +64,16 @@ const PageContent = () => {
 
   return (
     <Fade in key={currentPage} timeout={300}>
-      <Box sx={{ flex: 1, p: { xs: 2, sm: 3 }, overflowY: 'auto' }}>
+      <Box sx={{ flex: 1, p: { xs: 1.5, sm: 2.5, md: 3 }, overflowY: 'auto', minWidth: 0, width: '100%', maxWidth: '100%' }}>
         {/* Page header */}
         <Box sx={{ mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700, color: '#F5ECD7', letterSpacing: '-0.01em' }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', letterSpacing: '-0.01em' }}>
             {label}
           </Typography>
-          <Box sx={{ width: 40, height: 3, background: 'linear-gradient(90deg, #E8A020, transparent)', borderRadius: 2, mt: 0.8 }} />
+          <Box sx={{ width: 40, height: 3, background: (theme) => `linear-gradient(90deg, ${theme.palette.primary.main}, transparent)`, borderRadius: 2, mt: 0.8 }} />
         </Box>
         {Screen ? <Screen /> : (
-          <Box sx={{ color: '#6B5F44', mt: 6, textAlign: 'center' }}>
+          <Box sx={{ color: 'text.disabled', mt: 6, textAlign: 'center' }}>
             <Typography variant="h6">Seleccioná una sección del menú</Typography>
           </Box>
         )}
@@ -69,30 +82,45 @@ const PageContent = () => {
   );
 };
 
-// ── Authenticated layout ────────────────────────────────────
-const AppLayout = () => (
-  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-    <AppSidebar />
-    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-      <AppHeader />
-      <PageContent />
-    </Box>
-  </Box>
-);
-
 // ── Root: switches between login and layout ─────────────────
 const AppRoot = () => {
-  const { user } = useApp();
-  return user ? <AppLayout /> : <LoginPage />;
+  const { user, themeMode, sidebarOpen, toggleSidebar } = useApp();
+  const theme = React.useMemo(() => getTheme(themeMode), [themeMode]);
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {user ? (
+        <>
+          {sidebarOpen && (
+            <Box
+              id="sidebar-backdrop"
+              onClick={toggleSidebar}
+              sx={{
+                position: 'fixed',
+                inset: 0,
+                bgcolor: 'rgba(0, 0, 0, 0.55)',
+                backdropFilter: 'blur(2px)',
+                zIndex: 1250,
+                cursor: 'pointer',
+              }}
+            />
+          )}
+          <AppLayout>
+            <PageContent />
+          </AppLayout>
+        </>
+      ) : (
+        <LoginPage />
+      )}
+    </ThemeProvider>
+  );
 };
 
 export default function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AppProvider>
-        <AppRoot />
-      </AppProvider>
-    </ThemeProvider>
+    <AppProvider>
+      <AppRoot />
+    </AppProvider>
   );
 }
