@@ -29,6 +29,7 @@ import {
   PedidoClienteItem,
   DetallePedidoModal,
   ReclamoCanjeModal,
+  NotificacionesDrawer,
 } from '../../components/cliente';
 
 const FILTROS_ESTADO = [
@@ -319,7 +320,7 @@ export const PedidosClienteScreen = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           size="small"
           sx={{
-            maxWidth: { xs: '100%', md: 400 },
+            width: { xs: '100%', sm: 460, md: 520 },
             bgcolor: 'background.paper',
             borderRadius: '10px',
             '& .MuiOutlinedInput-root': {
@@ -430,12 +431,12 @@ export const PedidosClienteScreen = () => {
           {pedidoACancelar?.tipoPedido?.includes('Evento') ? (
             <Alert severity="warning" sx={{ mb: 2.5, borderRadius: '12px' }}>
               <AlertTitle sx={{ fontWeight: 700 }}>
-                Retención de Seña del 50% (Normativa de Fábrica)
+                Condiciones de Cancelación de Evento (Seña del 50%)
               </AlertTitle>
               <Typography variant="body2">
-                Este pedido corresponde a un <strong>Evento Especial con reserva de producción</strong>.
-                Al cancelar, <strong>se retiene el 50% abonado ($ {pedidoACancelar?.señaAbonada?.toLocaleString('es-AR')})</strong>
-                en concepto de gastos de materia prima y elaboración ya incurridos.
+                Este pedido corresponde a una <strong>reserva de producción para Evento Especial</strong>.
+                Al cancelar, se aplica la <strong>retención del 50% abonado ($ {pedidoACancelar?.señaAbonada?.toLocaleString('es-AR')})</strong>
+                en concepto de costos de elaboración y reserva de fecha.
               </Typography>
             </Alert>
           ) : (
@@ -480,6 +481,9 @@ export const PedidosClienteScreen = () => {
         message={snackbarMsg}
         action={<CheckCircleIcon sx={{ fontSize: 20, color: 'success.light', mr: 1 }} />}
       />
+
+      {/* Drawer lateral de notificaciones */}
+      <NotificacionesDrawer />
     </Box>
   );
 };

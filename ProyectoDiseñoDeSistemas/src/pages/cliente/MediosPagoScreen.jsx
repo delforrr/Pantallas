@@ -5,17 +5,14 @@ import {
   Paper,
   Divider,
   LinearProgress,
-  Alert,
-  AlertTitle,
   Snackbar,
 } from '@mui/material';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
-import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 import { useClientStore, clientStore } from './mockData';
-import { MetodoPagoItem, NuevoMetodoPagoForm } from '../../components/cliente';
+import { MetodoPagoItem, NuevoMetodoPagoForm, NotificacionesDrawer } from '../../components/cliente';
 
 export const MediosPagoScreen = () => {
   const store = useClientStore();
@@ -49,45 +46,16 @@ export const MediosPagoScreen = () => {
   const porcentajeUso = Math.min(100, Math.round((creditoUsado / limiteCredito) * 100));
 
   return (
-    <Box sx={{ width: '100%', pb: 4 }}>
+    <Box sx={{ width: '100%', pb: 2 }}>
       {/* Título de la pantalla */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 2.5 }}>
         <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', mb: 0.5 }}>
           Medios de Pago y Cuenta Corriente
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          Administra tus formas de pago guardadas, saldo comercial habilitado y consulta las normativas de cobro.
+          Administra tus formas de pago guardadas, saldo comercial habilitado y opciones de facturación.
         </Typography>
       </Box>
-
-      {/* Banner Explicativo de Normas de Cobro */}
-      <Alert
-        severity="info"
-        icon={<SecurityOutlinedIcon sx={{ fontSize: 24 }} />}
-        sx={{
-          mb: 3.5,
-          borderRadius: '14px',
-          border: '1px solid',
-          borderColor: 'info.light',
-          bgcolor: 'background.paper',
-        }}
-      >
-        <AlertTitle sx={{ fontWeight: 700, fontSize: '0.95rem' }}>
-          Políticas y Normas de Cobro PastaFab (Reglas de Negocio Oficiales)
-        </AlertTitle>
-        <Typography variant="body2" sx={{ mb: 0.75, fontSize: '0.85rem' }}>
-          &bull; <strong>Medios Homologados:</strong> Únicamente se reciben Efectivo (mostrador o contra entrega), Débito bancario (Visa/Mastercard Débito) y Billeteras Virtuales oficiales (Mercado Pago y Cuenta DNI).
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 0.75, fontSize: '0.85rem' }}>
-          &bull; <strong>Restricción Absoluta:</strong> No se aceptan bajo ninguna circunstancia <em>Tarjetas de Crédito</em> ni <em>Cheques de terceros o diferidos</em>.
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 0.75, fontSize: '0.85rem' }}>
-          &bull; <strong>Eventos Especiales (48hs):</strong> Requieren el pago anticipado de una seña obligatoria del 50%. En caso de cancelación por parte del cliente, la seña es retenida según normativa.
-        </Typography>
-        <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-          &bull; <strong>Cuenta Corriente Comercial:</strong> Vía de crédito autorizada a 30 días para clientes del rubro gastronómico y mayoristas registrados.
-        </Typography>
-      </Alert>
 
       {/* Layout de 2 columnas */}
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'flex-start' }}>
@@ -209,6 +177,9 @@ export const MediosPagoScreen = () => {
         message={snackbarMsg}
         action={<CheckCircleIcon sx={{ fontSize: 20, color: 'success.light', mr: 1 }} />}
       />
+
+      {/* Drawer lateral de notificaciones */}
+      <NotificacionesDrawer />
     </Box>
   );
 };
