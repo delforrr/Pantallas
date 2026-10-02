@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Box,
-  Grid,
   Typography,
   Button,
   Dialog,
@@ -146,9 +145,17 @@ export const CarritoScreen = () => {
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: 3,
+          alignItems: 'flex-start',
+          width: '100%',
+        }}
+      >
         {/* Columna Izquierda: Lista de Ítems y Botón Vaciar */}
-        <Grid item xs={12} md={7.5} lg={8}>
+        <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 65%' }, width: '100%', minWidth: 0 }}>
           <Box
             sx={{
               display: 'flex',
@@ -187,13 +194,21 @@ export const CarritoScreen = () => {
           {cart.map((item) => (
             <CarritoItem key={item.idProducto} item={item} />
           ))}
-        </Grid>
+        </Box>
 
         {/* Columna Derecha: Resumen de Pedido y Checkout */}
-        <Grid item xs={12} md={4.5} lg={4}>
+        <Box
+          sx={{
+            flex: { xs: '1 1 100%', md: '0 0 35%' },
+            width: { xs: '100%', md: 'auto' },
+            minWidth: { md: 320 },
+            position: { md: 'sticky' },
+            top: { md: 20 },
+          }}
+        >
           <ResumenPedido onOrderSuccess={handleOrderSuccess} />
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       {/* Modal Diálogo de Confirmación para Vaciar Carrito */}
       <Dialog
@@ -201,10 +216,13 @@ export const CarritoScreen = () => {
         onClose={() => setOpenVaciarDialog(false)}
         maxWidth="xs"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '14px', p: 1 } }}
+        slotProps={{
+          backdrop: { sx: { backdropFilter: 'blur(4px)' } },
+          paper: { sx: { borderRadius: '16px', p: 1 } },
+        }}
       >
         <DialogTitle sx={{ fontWeight: 700 }}>¿Vaciar todo el carrito?</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: '16px !important' }}>
           <Typography variant="body2" color="text.secondary">
             Esta acción quitará todos los productos y salsas que seleccionaste. Tendrás que volver a agregarlos desde el catálogo.
           </Typography>
@@ -233,8 +251,9 @@ export const CarritoScreen = () => {
         onClose={() => setPedidoExitoso(null)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{
-          sx: { borderRadius: '16px', p: 1 },
+        slotProps={{
+          backdrop: { sx: { backdropFilter: 'blur(4px)' } },
+          paper: { sx: { borderRadius: '16px', p: 1 } },
         }}
       >
         <DialogTitle sx={{ textAlign: 'center', pt: 3, pb: 1 }}>

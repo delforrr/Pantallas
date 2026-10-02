@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import {
   Box,
-  Grid,
   Typography,
   Chip,
   Button,
@@ -12,6 +11,7 @@ import {
   Alert,
   IconButton,
   Fade,
+  CardMedia,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -24,22 +24,30 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import GrassIcon from '@mui/icons-material/Grass';
 import EggAltIcon from '@mui/icons-material/EggAlt';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import PeopleIcon from '@mui/icons-material/People';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import VerifiedIcon from '@mui/icons-material/Verified';
 import { useApp } from '../../context/AppContext';
 import {
   useClientStore,
+  clientStore,
   CATEGORIAS_PRODUCTOS,
   CATALOGO_CLIENTE,
 } from './mockData';
 import { ProductoCard, PresupuestoEventoModal } from '../../components/cliente';
 
 /**
- * CatalogoScreen - Experiencia gastronómica para el cliente PastaFab ERP.
- * Vista Inicial: Hero artesanal + Carousel full-height con especialidades destacadas y botón 'Ver todos los productos'.
- * Vista Catálogo Completo: Filtros por categoría, buscador en memoria y grilla uniforme de productos.
+ * CatalogoScreen - Portal Cliente PastaFab ERP.
+ * Vista 1 (Landing): Hero de 70% welcome + 30% carousel a pantalla completa con botón "Ver todos los productos".
+ * Vista 2 (Catálogo Completo): Grilla CSS uniforme (1fr por columna) con buscador y filtros por categoría.
  */
 export const CatalogoScreen = () => {
   const store = useClientStore();
@@ -51,6 +59,10 @@ export const CatalogoScreen = () => {
   const [soloDestacados, setSoloDestacados] = useState(false);
   const [modalEventoOpen, setModalEventoOpen] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
+
+  // Estado para la tarjeta del carrusel en el 30%
+  const [carouselCantidad, setCarouselCantidad] = useState(1);
+  const [carouselAgregado, setCarouselAgregado] = useState(false);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -78,7 +90,40 @@ export const CatalogoScreen = () => {
     return CATALOGO_CLIENTE.filter((p) => p.destacado);
   }, []);
 
-  // Productos filtrados para la vista de catálogo completa
+  const currentFeaturedProduct = useMemo(() => {
+    if (productosDestacados.length === 0) return null;
+    return productosDestacados[carouselIndex % productosDestacados.length];
+  }, [productosDestacados, carouselIndex]);
+
+  // Manejador del carrusel
+  const handleNextSlide = () => {
+    setCarouselIndex((prev) => (prev + 1) % productosDestacados.length);
+    setCarouselCantidad(1);
+    setCarouselAgregado(false);
+  };
+
+  const handlePrevSlide = () => {
+    setCarouselIndex((prev) => (prev - 1 + productosDestacados.length) % productosDestacados.length);
+    setCarouselCantidad(1);
+    setCarouselAgregado(false);
+  };
+
+  const handleAddCarouselItem = () => {
+    if (!currentFeaturedProduct) return;
+    clientStore.addToCart(currentFeaturedProduct, carouselCantidad);
+    setCarouselAgregado(true);
+    setSnackbar({
+      open: true,
+      message: `¡Agregaste ${carouselCantidad} ${currentFeaturedProduct.unidad} de "${currentFeaturedProduct.nombre}" al carrito!`,
+      severity: 'success',
+    });
+    setTimeout(() => {
+      setCarouselAgregado(false);
+      setCarouselCantidad(1);
+    }, 1800);
+  };
+
+  // Filtrado para la vista de catálogo completo
   const filteredProducts = useMemo(() => {
     return CATALOGO_CLIENTE.filter((producto) => {
       const term = searchTerm.trim().toLowerCase();
@@ -120,227 +165,543 @@ export const CatalogoScreen = () => {
     setSoloDestacados(false);
   };
 
-  // Controles de Carrusel (muestra 3 ítems simultáneos en desktop)
-  const itemsPorVista = 3;
-  const maxIndex = Math.max(0, productosDestacados.length - itemsPorVista);
-
-  const handleNextCarousel = () => {
-    setCarouselIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-  };
-
-  const handlePrevCarousel = () => {
-    setCarouselIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
-  };
-
   return (
-    <Box sx={{ pb: 6, minHeight: 'calc(100vh - 100px)' }}>
+    <Box sx={{ pb: 3, width: '100%' }}>
       {/* ─────────────────────────────────────────────────────────────
-          1. VISTA INICIAL (HERO + CAROUSEL DESTACADOS A PANTALLA COMPLETA)
+          1. LANDING: 70% WELCOME HERO + 30% CAROUSEL (ALTO COMPLETO)
          ───────────────────────────────────────────────────────────── */}
       {!vistaCompleta ? (
-        <Fade in timeout={400}>
+        <Fade in timeout={350}>
           <Box
             sx={{
               display: 'flex',
-              flexDirection: 'column',
-              minHeight: 'calc(100vh - 120px)',
-              justifyContent: 'space-between',
-              gap: 3,
+              flexDirection: { xs: 'column', md: 'row' },
+              gap: 2.5,
+              width: '100%',
+              minHeight: { md: 'calc(100vh - 170px)' },
+              boxSizing: 'border-box',
             }}
           >
-            {/* HERO COMPACTO GASTRONÓMICO */}
+            {/* HERO WELCOME (70% WIDTH) */}
             <Paper
               elevation={0}
               sx={{
-                p: { xs: 2.5, md: 3.5 },
+                width: { xs: '100%', md: '70%' },
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                p: { xs: 2.5, sm: 3.5, md: 4 },
                 borderRadius: '20px',
                 border: '1px solid',
                 borderColor: 'divider',
                 background: (theme) =>
                   theme.palette.mode === 'dark'
-                    ? 'linear-gradient(135deg, rgba(46,204,113,0.15) 0%, rgba(25,25,25,0.95) 50%, rgba(231,76,60,0.12) 100%)'
-                    : 'linear-gradient(135deg, rgba(0,146,70,0.08) 0%, #FFFFFF 55%, rgba(206,43,55,0.06) 100%)',
+                    ? 'linear-gradient(135deg, rgba(46,204,113,0.12) 0%, rgba(26,26,26,0.96) 55%, rgba(231,76,60,0.10) 100%)'
+                    : 'linear-gradient(135deg, rgba(0,146,70,0.07) 0%, #FFFFFF 55%, rgba(206,43,55,0.05) 100%)',
                 boxShadow: (theme) =>
                   theme.palette.mode === 'dark'
-                    ? '0 8px 24px rgba(0,0,0,0.45)'
-                    : '0 8px 24px rgba(0,146,70,0.07)',
+                    ? '0 10px 30px rgba(0,0,0,0.5)'
+                    : '0 10px 30px rgba(0,146,70,0.06)',
+                overflow: 'hidden',
               }}
             >
-              <Grid container spacing={2.5} alignItems="center">
-                <Grid item xs={12} md={8}>
-                  {/* Badges de calidad con iconos SVG (cero emojis) */}
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
-                    <Chip
-                      icon={<GrassIcon sx={{ fontSize: 14 }} />}
-                      label="Sémola Candeal Pura"
-                      size="small"
-                      sx={{ fontWeight: 700, fontSize: '0.72rem', bgcolor: 'background.paper', borderColor: 'divider' }}
-                      variant="outlined"
-                    />
-                    <Chip
-                      icon={<EggAltIcon sx={{ fontSize: 14 }} />}
-                      label="6 Huevos de Campo por Kilo"
-                      size="small"
-                      sx={{ fontWeight: 700, fontSize: '0.72rem', bgcolor: 'background.paper', borderColor: 'divider' }}
-                      variant="outlined"
-                    />
-                    <Chip
-                      icon={<AccessTimeIcon sx={{ fontSize: 14 }} />}
-                      label="Elaboración Diaria Artesanal"
-                      size="small"
-                      sx={{ fontWeight: 700, fontSize: '0.72rem', bgcolor: 'background.paper', borderColor: 'divider' }}
-                      variant="outlined"
-                    />
-                  </Box>
+              {/* Barra superior de badges y acceso al carrito */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, mb: 2 }}>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  <Chip
+                    icon={<GrassIcon sx={{ fontSize: '14px !important' }} />}
+                    label="Sémola Candeal 100% Pura"
+                    size="small"
+                    sx={{ fontWeight: 700, fontSize: '0.72rem', bgcolor: 'background.paper', borderColor: 'divider' }}
+                    variant="outlined"
+                  />
+                  <Chip
+                    icon={<EggAltIcon sx={{ fontSize: '14px !important' }} />}
+                    label="6 Huevos de Campo por Kilo"
+                    size="small"
+                    sx={{ fontWeight: 700, fontSize: '0.72rem', bgcolor: 'background.paper', borderColor: 'divider' }}
+                    variant="outlined"
+                  />
+                  <Chip
+                    icon={<AccessTimeIcon sx={{ fontSize: '14px !important' }} />}
+                    label="Elaboración Matutina Diaria"
+                    size="small"
+                    sx={{ fontWeight: 700, fontSize: '0.72rem', bgcolor: 'background.paper', borderColor: 'divider' }}
+                    variant="outlined"
+                  />
+                </Box>
 
-                  <Typography
-                    variant="h4"
+                {cartSummary.totalItems > 0 && (
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    startIcon={<ShoppingCartIcon />}
+                    onClick={() => navigate('carrito')}
                     sx={{
-                      fontWeight: 800,
-                      letterSpacing: '-0.02em',
-                      color: 'text.primary',
-                      fontSize: { xs: '1.45rem', sm: '1.85rem', md: '2.1rem' },
-                      mb: 0.8,
+                      fontWeight: 700,
+                      borderRadius: '10px',
+                      bgcolor: 'background.paper',
                     }}
                   >
-                    Fábrica de Pastas Caseras & Salsas Especiales
-                  </Typography>
+                    Carrito ({cartSummary.totalItems} u. • ${cartSummary.totalPrice.toLocaleString('es-AR')})
+                  </Button>
+                )}
+              </Box>
 
-                  <Typography
-                    variant="body2"
+              {/* Contenido principal del Hero */}
+              <Box sx={{ my: 'auto', py: { xs: 1, md: 2 } }}>
+                <Typography
+                  variant="overline"
+                  sx={{
+                    color: 'primary.main',
+                    fontWeight: 800,
+                    letterSpacing: '0.12em',
+                    fontSize: '0.82rem',
+                    display: 'block',
+                    mb: 0.5,
+                  }}
+                >
+                  PASTAS FRESCAS ARTESANALES & SALSAS TRADICIONALES
+                </Typography>
+
+                <Typography
+                  variant="h3"
+                  sx={{
+                    fontWeight: 900,
+                    letterSpacing: '-0.025em',
+                    color: 'text.primary',
+                    fontSize: { xs: '1.85rem', sm: '2.4rem', md: '2.8rem' },
+                    lineHeight: 1.15,
+                    mb: 1.5,
+                  }}
+                >
+                  La pasión de la pasta hecha en casa, todos los días.
+                </Typography>
+
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: 'text.secondary',
+                    maxWidth: 680,
+                    lineHeight: 1.6,
+                    fontSize: { xs: '0.92rem', md: '1.02rem' },
+                    mb: 3,
+                  }}
+                >
+                  Elaboramos pastas frescas con recetas familiares italianas. Atendemos pedidos familiares,
+                  suministro regular para restaurantes gastronómicos y cotizaciones especiales para eventos
+                  con 48 hs de anticipación y seña del 50%.
+                </Typography>
+
+                {/* 3 Pilares Gastronómicos */}
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+                    gap: 2,
+                    mb: 3,
+                  }}
+                >
+                  <Paper
+                    elevation={0}
                     sx={{
-                      color: 'text.secondary',
-                      maxWidth: 620,
-                      lineHeight: 1.5,
-                      fontSize: { xs: '0.85rem', sm: '0.92rem' },
+                      p: 2,
+                      borderRadius: '14px',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#FFFFFF'),
                     }}
                   >
-                    Elaboramos pastas frescas artesanales con recetas tradicionales italianas. Ventas por mayor para restaurantes,
-                    pedidos fijos semanales y cotizaciones especiales para eventos con 48 hs de anticipación.
-                  </Typography>
-                </Grid>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      <VerifiedIcon color="primary" sx={{ fontSize: 18 }} />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                        Amasado Diario
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.4, display: 'block' }}>
+                      Frescura garantizada, sin conservantes químicos ni colorantes artificiales.
+                    </Typography>
+                  </Paper>
 
-                <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2, alignItems: { xs: 'flex-start', md: 'flex-end' } }}>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      size="medium"
-                      startIcon={<CelebrationIcon />}
-                      onClick={() => setModalEventoOpen(true)}
-                      sx={{
-                        fontWeight: 700,
-                        borderRadius: '10px',
-                        px: 2.5,
-                        py: 1,
-                        boxShadow: '0 4px 14px rgba(231,76,60,0.3)',
-                      }}
-                    >
-                      Cotizar Evento (48hs)
-                    </Button>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: '14px',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#FFFFFF'),
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      <RestaurantMenuIcon sx={{ color: '#E74C3C', fontSize: 18 }} />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                        Salsas Caseras
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.4, display: 'block' }}>
+                      Vendidas por separado, listas para servir y maridar a la perfección.
+                    </Typography>
+                  </Paper>
 
-                    {cartSummary.totalItems > 0 && (
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        size="medium"
-                        startIcon={<ShoppingCartIcon />}
-                        onClick={() => navigate('carrito')}
-                        sx={{
-                          fontWeight: 700,
-                          borderRadius: '10px',
-                          bgcolor: 'background.paper',
-                        }}
-                      >
-                        Ver Carrito ({cartSummary.totalItems} u. • ${cartSummary.totalPrice.toLocaleString('es-AR')})
-                      </Button>
-                    )}
-                  </Box>
-                </Grid>
-              </Grid>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: '14px',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#FFFFFF'),
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      <LocalOfferIcon sx={{ color: '#F39C12', fontSize: 18 }} />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                        Eventos (48hs)
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.4, display: 'block' }}>
+                      10% de descuento por volumen, entrega programada y 50% de seña.
+                    </Typography>
+                  </Paper>
+                </Box>
+              </Box>
+
+              {/* Botonera de Acción */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  flexWrap: 'wrap',
+                  pt: 2,
+                  borderTop: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  startIcon={<RestaurantMenuIcon />}
+                  endIcon={<ArrowForwardIcon />}
+                  onClick={() => setVistaCompleta(true)}
+                  sx={{
+                    py: 1.5,
+                    px: 3.5,
+                    borderRadius: '12px',
+                    fontWeight: 800,
+                    fontSize: '0.95rem',
+                    letterSpacing: '0.02em',
+                    boxShadow: (theme) => `0 6px 20px ${theme.palette.primary.main}40`,
+                    transition: 'all 0.25s',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: (theme) => `0 8px 24px ${theme.palette.primary.main}60`,
+                    },
+                  }}
+                >
+                  Ver Todos los Productos ({CATALOGO_CLIENTE.length} variedades)
+                </Button>
+
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  size="large"
+                  startIcon={<CelebrationIcon />}
+                  onClick={() => setModalEventoOpen(true)}
+                  sx={{
+                    py: 1.5,
+                    px: 3,
+                    borderRadius: '12px',
+                    fontWeight: 700,
+                    fontSize: '0.92rem',
+                    boxShadow: '0 4px 14px rgba(231,76,60,0.3)',
+                  }}
+                >
+                  Cotizar Evento (48hs)
+                </Button>
+              </Box>
             </Paper>
 
-            {/* SECCIÓN CAROUSEL CON PRODUCTOS DESTACADOS */}
-            <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            {/* CAROUSEL CON PRODUCTOS DESTACADOS (30% WIDTH) */}
+            <Paper
+              elevation={0}
+              sx={{
+                width: { xs: '100%', md: '30%' },
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                borderRadius: '20px',
+                border: '1px solid',
+                borderColor: 'divider',
+                p: 2.5,
+                bgcolor: 'background.paper',
+                boxShadow: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? '0 10px 30px rgba(0,0,0,0.45)'
+                    : '0 10px 30px rgba(0,0,0,0.06)',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Cabecera del Carrusel */}
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <StarIcon sx={{ color: '#F39C12', fontSize: 20 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', fontSize: '1.15rem' }}>
-                    Especialidades Destacadas de la Fábrica
+                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'text.primary' }}>
+                    Especialidad Destacada
                   </Typography>
                 </Box>
 
-                {/* Flechas de navegación del Carrusel */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                    {carouselIndex + 1} - {Math.min(carouselIndex + itemsPorVista, productosDestacados.length)} de {productosDestacados.length}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, mr: 0.5 }}>
+                    {carouselIndex + 1}/{productosDestacados.length}
                   </Typography>
                   <IconButton
                     size="small"
-                    onClick={handlePrevCarousel}
-                    sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}
+                    onClick={handlePrevSlide}
+                    sx={{ border: '1px solid', borderColor: 'divider' }}
                   >
                     <ChevronLeftIcon fontSize="small" />
                   </IconButton>
                   <IconButton
                     size="small"
-                    onClick={handleNextCarousel}
-                    sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}
+                    onClick={handleNextSlide}
+                    sx={{ border: '1px solid', borderColor: 'divider' }}
                   >
                     <ChevronRightIcon fontSize="small" />
                   </IconButton>
                 </Box>
               </Box>
 
-              {/* Grilla uniforme del Carrusel */}
-              <Grid container spacing={2.5}>
-                {productosDestacados.slice(carouselIndex, carouselIndex + itemsPorVista).map((producto) => (
-                  <Grid item xs={12} sm={6} md={4} key={producto.idProducto}>
-                    <ProductoCard
-                      producto={producto}
-                      onAddToCartFeedback={handleProductAdded}
+              {/* Contenido del Producto en el Carrusel */}
+              {currentFeaturedProduct && (
+                <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                  {/* Imagen Stock con Badges */}
+                  <Box sx={{ position: 'relative', height: 180, borderRadius: '14px', overflow: 'hidden', mb: 2 }}>
+                    <CardMedia
+                      component="img"
+                      image={currentFeaturedProduct.imagen}
+                      alt={currentFeaturedProduct.nombre}
+                      sx={{ height: '100%', width: '100%', objectFit: 'cover' }}
                     />
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        left: 8,
+                        right: 8,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <Chip
+                        label={currentFeaturedProduct.categoria}
+                        size="small"
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: '0.68rem',
+                          bgcolor: 'background.paper',
+                          backdropFilter: 'blur(4px)',
+                        }}
+                      />
+                      <Chip
+                        icon={<StarIcon sx={{ fontSize: 13, color: '#F39C12 !important' }} />}
+                        label="Top Ventas"
+                        size="small"
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: '0.68rem',
+                          bgcolor: 'background.paper',
+                          color: '#B7950B',
+                        }}
+                      />
+                    </Box>
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        bottom: 8,
+                        right: 8,
+                        bgcolor: 'rgba(0,0,0,0.7)',
+                        borderRadius: '6px',
+                        px: 0.8,
+                        py: 0.2,
+                      }}
+                    >
+                      <Typography variant="caption" sx={{ color: '#58D68D', fontWeight: 700, fontSize: '0.68rem' }}>
+                        Stock: {currentFeaturedProduct.stock} disp.
+                      </Typography>
+                    </Box>
+                  </Box>
 
-            {/* BOTÓN PROMINENTE PARA VER TODO EL CATÁLOGO */}
-            <Box sx={{ textAlign: 'center', pt: 1, pb: 1 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                startIcon={<RestaurantMenuIcon />}
-                endIcon={<ArrowDownwardIcon />}
-                onClick={() => setVistaCompleta(true)}
-                sx={{
-                  py: 1.5,
-                  px: 4.5,
-                  borderRadius: '14px',
-                  fontWeight: 800,
-                  fontSize: '0.98rem',
-                  letterSpacing: '0.02em',
-                  boxShadow: (theme) => `0 6px 20px ${theme.palette.primary.main}45`,
-                  transition: 'all 0.25s',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: (theme) => `0 8px 26px ${theme.palette.primary.main}60`,
-                  },
-                }}
-              >
-                Ver Todos los Productos ({CATALOGO_CLIENTE.length} variedades)
-              </Button>
-            </Box>
+                  {/* Textos del Producto */}
+                  <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.25, mb: 0.5, color: 'text.primary' }}>
+                    {currentFeaturedProduct.nombre}
+                  </Typography>
+
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                      mb: 1.5,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      height: 32,
+                    }}
+                  >
+                    {currentFeaturedProduct.variedad}
+                  </Typography>
+
+                  {/* Chips de porciones y cocción */}
+                  <Box sx={{ display: 'flex', gap: 1, mb: 1.5 }}>
+                    <Chip
+                      icon={<PeopleIcon sx={{ fontSize: '13px !important' }} />}
+                      label={currentFeaturedProduct.rinde}
+                      size="small"
+                      variant="outlined"
+                      sx={{ fontSize: '0.68rem', height: 24, borderColor: 'divider' }}
+                    />
+                    <Chip
+                      icon={<AccessTimeIcon sx={{ fontSize: '13px !important' }} />}
+                      label={currentFeaturedProduct.tiempoCoccion}
+                      size="small"
+                      variant="outlined"
+                      sx={{ fontSize: '0.68rem', height: 24, borderColor: 'divider' }}
+                    />
+                  </Box>
+
+                  {/* Maridaje Sugerido */}
+                  <Box
+                    sx={{
+                      p: 1,
+                      borderRadius: '8px',
+                      border: '1px dashed',
+                      borderColor: 'divider',
+                      bgcolor: 'action.hover',
+                      mb: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.8,
+                    }}
+                  >
+                    <RestaurantMenuIcon sx={{ fontSize: 16, color: 'secondary.main', flexShrink: 0 }} />
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'text.secondary',
+                        fontSize: '0.7rem',
+                        fontStyle: 'italic',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      Maridaje: {currentFeaturedProduct.maridajeSugerido}
+                    </Typography>
+                  </Box>
+
+                  {/* Selector y Botón Agregar (anclado al fondo del carrusel) */}
+                  <Box sx={{ mt: 'auto', pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 1.2 }}>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.68rem' }}>
+                          Precio ({currentFeaturedProduct.unidad})
+                        </Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main', lineHeight: 1 }}>
+                          ${currentFeaturedProduct.precio.toLocaleString('es-AR')}
+                        </Typography>
+                      </Box>
+
+                      {/* Contador de unidades */}
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          borderRadius: '8px',
+                          bgcolor: 'background.paper',
+                        }}
+                      >
+                        <IconButton
+                          size="small"
+                          onClick={() => setCarouselCantidad((p) => Math.max(1, p - 1))}
+                          disabled={carouselCantidad <= 1 || carouselAgregado}
+                          sx={{ p: 0.3 }}
+                        >
+                          <RemoveIcon sx={{ fontSize: 14 }} />
+                        </IconButton>
+                        <Typography sx={{ px: 1, fontSize: '0.8rem', fontWeight: 700, minWidth: 18, textAlign: 'center' }}>
+                          {carouselCantidad}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={() => setCarouselCantidad((p) => Math.min(currentFeaturedProduct.stock, p + 1))}
+                          disabled={carouselCantidad >= currentFeaturedProduct.stock || carouselAgregado}
+                          sx={{ p: 0.3 }}
+                        >
+                          <AddIcon sx={{ fontSize: 14 }} />
+                        </IconButton>
+                      </Box>
+                    </Box>
+
+                    <Button
+                      variant="contained"
+                      color={carouselAgregado ? 'success' : 'primary'}
+                      fullWidth
+                      size="small"
+                      startIcon={carouselAgregado ? <CheckCircleIcon /> : <AddShoppingCartIcon />}
+                      onClick={handleAddCarouselItem}
+                      disabled={currentFeaturedProduct.stock === 0}
+                      sx={{
+                        py: 0.9,
+                        borderRadius: '10px',
+                        fontWeight: 700,
+                        fontSize: '0.82rem',
+                      }}
+                    >
+                      {carouselAgregado
+                        ? `¡Agregado (${carouselCantidad})!`
+                        : `Agregar • $${(currentFeaturedProduct.precio * carouselCantidad).toLocaleString('es-AR')}`}
+                    </Button>
+                  </Box>
+                </Box>
+              )}
+
+              {/* Indicadores de bolitas / dots del Carrusel */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.8, mt: 1.5 }}>
+                {productosDestacados.map((_, idx) => (
+                  <Box
+                    key={idx}
+                    onClick={() => {
+                      setCarouselIndex(idx);
+                      setCarouselCantidad(1);
+                      setCarouselAgregado(false);
+                    }}
+                    sx={{
+                      width: carouselIndex === idx ? 18 : 6,
+                      height: 6,
+                      borderRadius: 3,
+                      bgcolor: carouselIndex === idx ? 'primary.main' : 'divider',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  />
+                ))}
+              </Box>
+            </Paper>
           </Box>
         </Fade>
       ) : (
         /* ─────────────────────────────────────────────────────────────
-            2. VISTA DE CATÁLOGO COMPLETO (BÚSQUEDA + FILTROS + GRILLA)
+            2. VISTA DE CATÁLOGO COMPLETO (GRILLA CSS UNIFORME 1fr)
            ───────────────────────────────────────────────────────────── */
-        <Fade in timeout={350}>
+        <Fade in timeout={300}>
           <Box>
-            {/* Barra superior de retorno a la vista destacada */}
+            {/* Barra superior de retorno */}
             <Box
               sx={{
                 display: 'flex',
@@ -392,7 +753,7 @@ export const CatalogoScreen = () => {
               </Box>
             </Box>
 
-            {/* BARRA DE BÚSQUEDA Y FILTROS */}
+            {/* Búsqueda y filtros */}
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
                 <TextField
@@ -436,7 +797,7 @@ export const CatalogoScreen = () => {
                 />
               </Box>
 
-              {/* Chips de categorías */}
+              {/* Categorías */}
               <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', py: 0.5, alignItems: 'center' }}>
                 {CATEGORIAS_PRODUCTOS.map((categoria) => {
                   const isSelected = selectedCategory === categoria;
@@ -461,7 +822,7 @@ export const CatalogoScreen = () => {
               </Box>
             </Box>
 
-            {/* GRILLA DE PRODUCTOS (uniforme, todas las tarjetas con idéntico tamaño) */}
+            {/* GRILLA UNIFORME CON CSS GRID: Todas las tarjetas tienen idéntico ancho (1fr) y están equitativamente distribuidas */}
             {filteredProducts.length === 0 ? (
               <Paper
                 elevation={0}
@@ -495,16 +856,26 @@ export const CatalogoScreen = () => {
                 </Button>
               </Paper>
             ) : (
-              <Grid container spacing={2.5}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: {
+                    xs: '1fr',
+                    sm: 'repeat(2, 1fr)',
+                    md: 'repeat(3, 1fr)',
+                  },
+                  gap: 3,
+                  width: '100%',
+                }}
+              >
                 {filteredProducts.map((producto) => (
-                  <Grid item xs={12} sm={6} md={4} key={producto.idProducto}>
-                    <ProductoCard
-                      producto={producto}
-                      onAddToCartFeedback={handleProductAdded}
-                    />
-                  </Grid>
+                  <ProductoCard
+                    key={producto.idProducto}
+                    producto={producto}
+                    onAddToCartFeedback={handleProductAdded}
+                  />
                 ))}
-              </Grid>
+              </Box>
             )}
           </Box>
         </Fade>
