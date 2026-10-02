@@ -42,7 +42,7 @@ import {
   CATEGORIAS_PRODUCTOS,
   CATALOGO_CLIENTE,
 } from './mockData';
-import { ProductoCard, PresupuestoEventoModal } from '../../components/cliente';
+import { ProductoCard, PresupuestoEventoModal, NotificacionesDrawer } from '../../components/cliente';
 
 /**
  * CatalogoScreen - Portal Cliente PastaFab ERP.
@@ -166,7 +166,7 @@ export const CatalogoScreen = () => {
   };
 
   return (
-    <Box sx={{ pb: 3, width: '100%' }}>
+    <Box sx={{ pb: vistaCompleta ? 3 : 0, width: '100%' }}>
       {/* ─────────────────────────────────────────────────────────────
           1. LANDING: 70% WELCOME HERO + 30% CAROUSEL (ALTO COMPLETO)
          ───────────────────────────────────────────────────────────── */}
@@ -178,8 +178,10 @@ export const CatalogoScreen = () => {
               flexDirection: { xs: 'column', md: 'row' },
               gap: 2.5,
               width: '100%',
-              minHeight: { md: 'calc(100vh - 170px)' },
+              height: { xs: 'auto', md: 'calc(100vh - 185px)' },
+              maxHeight: { md: 'calc(100vh - 185px)' },
               boxSizing: 'border-box',
+              overflow: 'hidden',
             }}
           >
             {/* HERO WELCOME (70% WIDTH) */}
@@ -187,10 +189,11 @@ export const CatalogoScreen = () => {
               elevation={0}
               sx={{
                 width: { xs: '100%', md: '70%' },
+                height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                p: { xs: 2.5, sm: 3.5, md: 4 },
+                p: { xs: 2.5, sm: 3, md: 3 },
                 borderRadius: '20px',
                 border: '1px solid',
                 borderColor: 'divider',
@@ -203,6 +206,7 @@ export const CatalogoScreen = () => {
                     ? '0 10px 30px rgba(0,0,0,0.5)'
                     : '0 10px 30px rgba(0,146,70,0.06)',
                 overflow: 'hidden',
+                boxSizing: 'border-box',
               }}
             >
               {/* Barra superior de badges y acceso al carrito */}
@@ -284,9 +288,9 @@ export const CatalogoScreen = () => {
                   sx={{
                     color: 'text.secondary',
                     maxWidth: 680,
-                    lineHeight: 1.6,
-                    fontSize: { xs: '0.92rem', md: '1.02rem' },
-                    mb: 3,
+                    lineHeight: 1.5,
+                    fontSize: { xs: '0.9rem', md: '0.98rem' },
+                    mb: 2,
                   }}
                 >
                   Elaboramos pastas frescas con recetas familiares italianas. Atendemos pedidos familiares,
@@ -299,15 +303,15 @@ export const CatalogoScreen = () => {
                   sx={{
                     display: 'grid',
                     gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
-                    gap: 2,
-                    mb: 3,
+                    gap: 1.5,
+                    mb: 2,
                   }}
                 >
                   <Paper
                     elevation={0}
                     sx={{
-                      p: 2,
-                      borderRadius: '14px',
+                      p: 1.5,
+                      borderRadius: '12px',
                       border: '1px solid',
                       borderColor: 'divider',
                       bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#FFFFFF'),
@@ -319,7 +323,7 @@ export const CatalogoScreen = () => {
                         Amasado Diario
                       </Typography>
                     </Box>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.4, display: 'block' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.3, display: 'block' }}>
                       Frescura garantizada, sin conservantes químicos ni colorantes artificiales.
                     </Typography>
                   </Paper>
@@ -327,8 +331,8 @@ export const CatalogoScreen = () => {
                   <Paper
                     elevation={0}
                     sx={{
-                      p: 2,
-                      borderRadius: '14px',
+                      p: 1.5,
+                      borderRadius: '12px',
                       border: '1px solid',
                       borderColor: 'divider',
                       bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#FFFFFF'),
@@ -340,7 +344,7 @@ export const CatalogoScreen = () => {
                         Salsas Caseras
                       </Typography>
                     </Box>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.4, display: 'block' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.3, display: 'block' }}>
                       Vendidas por separado, listas para servir y maridar a la perfección.
                     </Typography>
                   </Paper>
@@ -348,8 +352,8 @@ export const CatalogoScreen = () => {
                   <Paper
                     elevation={0}
                     sx={{
-                      p: 2,
-                      borderRadius: '14px',
+                      p: 1.5,
+                      borderRadius: '12px',
                       border: '1px solid',
                       borderColor: 'divider',
                       bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#FFFFFF'),
@@ -361,7 +365,7 @@ export const CatalogoScreen = () => {
                         Eventos (48hs)
                       </Typography>
                     </Box>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.4, display: 'block' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.3, display: 'block' }}>
                       10% de descuento por volumen, entrega programada y 50% de seña.
                     </Typography>
                   </Paper>
@@ -430,26 +434,28 @@ export const CatalogoScreen = () => {
               elevation={0}
               sx={{
                 width: { xs: '100%', md: '30%' },
+                height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 borderRadius: '20px',
                 border: '1px solid',
                 borderColor: 'divider',
-                p: 2.5,
+                p: { xs: 2, md: 2.25 },
                 bgcolor: 'background.paper',
                 boxShadow: (theme) =>
                   theme.palette.mode === 'dark'
                     ? '0 10px 30px rgba(0,0,0,0.45)'
                     : '0 10px 30px rgba(0,0,0,0.06)',
                 overflow: 'hidden',
+                boxSizing: 'border-box',
               }}
             >
               {/* Cabecera del Carrusel */}
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <StarIcon sx={{ color: '#F39C12', fontSize: 20 }} />
-                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'text.primary' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'text.primary', fontSize: '0.95rem' }}>
                     Especialidad Destacada
                   </Typography>
                 </Box>
@@ -478,8 +484,17 @@ export const CatalogoScreen = () => {
               {/* Contenido del Producto en el Carrusel */}
               {currentFeaturedProduct && (
                 <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  {/* Imagen Stock con Badges */}
-                  <Box sx={{ position: 'relative', height: 180, borderRadius: '14px', overflow: 'hidden', mb: 2 }}>
+                  {/* Imagen Stock con Badges (Agrandada verticalmente) */}
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      height: { xs: 200, sm: 240, md: 275 },
+                      borderRadius: '14px',
+                      overflow: 'hidden',
+                      mb: 1.2,
+                      flexShrink: 0,
+                    }}
+                  >
                     <CardMedia
                       component="img"
                       image={currentFeaturedProduct.imagen}
@@ -536,7 +551,7 @@ export const CatalogoScreen = () => {
                   </Box>
 
                   {/* Textos del Producto */}
-                  <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.25, mb: 0.5, color: 'text.primary' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2, mb: 0.4, color: 'text.primary', fontSize: '1rem' }}>
                     {currentFeaturedProduct.nombre}
                   </Typography>
 
@@ -544,55 +559,55 @@ export const CatalogoScreen = () => {
                     variant="caption"
                     sx={{
                       color: 'text.secondary',
-                      mb: 1.5,
+                      mb: 1,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
-                      height: 32,
+                      height: 30,
                     }}
                   >
                     {currentFeaturedProduct.variedad}
                   </Typography>
 
                   {/* Chips de porciones y cocción */}
-                  <Box sx={{ display: 'flex', gap: 1, mb: 1.5 }}>
+                  <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
                     <Chip
                       icon={<PeopleIcon sx={{ fontSize: '13px !important' }} />}
                       label={currentFeaturedProduct.rinde}
                       size="small"
                       variant="outlined"
-                      sx={{ fontSize: '0.68rem', height: 24, borderColor: 'divider' }}
+                      sx={{ fontSize: '0.68rem', height: 22, borderColor: 'divider' }}
                     />
                     <Chip
                       icon={<AccessTimeIcon sx={{ fontSize: '13px !important' }} />}
                       label={currentFeaturedProduct.tiempoCoccion}
                       size="small"
                       variant="outlined"
-                      sx={{ fontSize: '0.68rem', height: 24, borderColor: 'divider' }}
+                      sx={{ fontSize: '0.68rem', height: 22, borderColor: 'divider' }}
                     />
                   </Box>
 
                   {/* Maridaje Sugerido */}
                   <Box
                     sx={{
-                      p: 1,
+                      p: 0.8,
                       borderRadius: '8px',
                       border: '1px dashed',
                       borderColor: 'divider',
                       bgcolor: 'action.hover',
-                      mb: 2,
+                      mb: 1.2,
                       display: 'flex',
                       alignItems: 'center',
                       gap: 0.8,
                     }}
                   >
-                    <RestaurantMenuIcon sx={{ fontSize: 16, color: 'secondary.main', flexShrink: 0 }} />
+                    <RestaurantMenuIcon sx={{ fontSize: 15, color: 'secondary.main', flexShrink: 0 }} />
                     <Typography
                       variant="caption"
                       sx={{
                         color: 'text.secondary',
-                        fontSize: '0.7rem',
+                        fontSize: '0.68rem',
                         fontStyle: 'italic',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
@@ -604,7 +619,7 @@ export const CatalogoScreen = () => {
                   </Box>
 
                   {/* Selector y Botón Agregar (anclado al fondo del carrusel) */}
-                  <Box sx={{ mt: 'auto', pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+                  <Box sx={{ mt: 'auto', pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 1.2 }}>
                       <Box>
                         <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.68rem' }}>
@@ -918,6 +933,9 @@ export const CatalogoScreen = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* DRAWER LATERAL DE NOTIFICACIONES */}
+      <NotificacionesDrawer />
     </Box>
   );
 };
