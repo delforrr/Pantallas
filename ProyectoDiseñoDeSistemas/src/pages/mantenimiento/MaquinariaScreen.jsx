@@ -69,6 +69,19 @@ const getWearLevel = (hours) => {
   return { label: "Alto", color: "error", text: "Desgaste Alto (> 3.000 hs)" };
 };
 
+const INITIAL_FORM_STATE = {
+  codigo: "",
+  nombre: "",
+  marca: "General",
+  modelo: "Estándar",
+  linea: "Elaboración de Masas",
+  estado: "Operativa",
+  horasUso: 0,
+  ultimoMantenimiento: "2026-03-10",
+  proximoMantenimiento: "2026-03-24",
+  observaciones: "",
+};
+
 export const MaquinariaScreen = () => {
   const [maquinarias, setMaquinarias] = useState(INITIAL_MAQUINARIAS);
   const [viewMode, setViewMode] = useState("grid"); // 'grid' o 'table'
@@ -86,14 +99,7 @@ export const MaquinariaScreen = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   // Form de Maquinaria
-  const initialFormState = {
-    codigo: "",
-    nombre: "",
-    estado: "Operativa",
-    horasUso: 0,
-    observaciones: "",
-  };
-  const [formData, setFormData] = useState(initialFormState);
+  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
 
   // Form de Orden Rápida
   const [quickOrderForm, setQuickOrderForm] = useState({
@@ -107,10 +113,10 @@ export const MaquinariaScreen = () => {
   const filteredMaquinarias = useMemo(() => {
     return maquinarias.filter((m) => {
       const matchSearch =
-        m.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        m.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        m.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        m.linea.toLowerCase().includes(searchTerm.toLowerCase());
+        (m.nombre || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (m.codigo || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (m.marca || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (m.linea || "").toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchEstado = estadoFilter === "TODOS" || m.estado === estadoFilter;
 
@@ -137,7 +143,7 @@ export const MaquinariaScreen = () => {
   const handleOpenCreate = () => {
     setIsEditing(false);
     const nextCode = `MAQ-00${maquinarias.length + 1}`;
-    setFormData({ ...initialFormState, codigo: nextCode });
+    setFormData({ ...INITIAL_FORM_STATE, codigo: nextCode });
     setOpenForm(true);
   };
 
@@ -472,7 +478,7 @@ export const MaquinariaScreen = () => {
           <ToggleButtonGroup
             value={viewMode}
             exclusive
-            onChange={(val) => val && setViewMode(val)}
+            onChange={(e, val) => val && setViewMode(val)}
             size="small"
             sx={{ bgcolor: "background.paper" }}
           >
@@ -561,19 +567,8 @@ export const MaquinariaScreen = () => {
             <TableHead sx={{ bgcolor: "action.hover" }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>Código</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>
-                  Maquinaria & Marca
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>
-                  Línea de Producción
-                </TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Maquinaria</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Horas de Uso</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>
-                  Último Mantenimiento
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>
-                  Próximo Preventivo
-                </TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700 }}>
                   Acciones
@@ -613,19 +608,9 @@ export const MaquinariaScreen = () => {
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>
                         {row.nombre}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {row.marca} ({row.modelo})
-                      </Typography>
                     </TableCell>
-                    <TableCell sx={{ fontSize: "0.85rem" }}>
-                      {row.linea}
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      {row.horasUso} hs
-                    </TableCell>
-                    <TableCell>{row.ultimoMantenimiento}</TableCell>
                     <TableCell sx={{ fontWeight: 600, color: "primary.main" }}>
-                      {row.proximoMantenimiento}
+                      {row.proximoMantenimiento || "—"}
                     </TableCell>
                     <TableCell>
                       <Chip
@@ -994,7 +979,7 @@ export const MaquinariaScreen = () => {
                 Ficha Técnica · {selectedMaq?.codigo}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Especificaciones industriales y trazabilidad
+                Especificaciones de la máquina
               </Typography>
             </Box>
           </Box>
@@ -1021,91 +1006,7 @@ export const MaquinariaScreen = () => {
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>
                   {selectedMaq.nombre}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {selectedMaq.marca} — Modelo:{" "}
-                  <strong>{selectedMaq.modelo}</strong>
-                </Typography>
               </Box>
-
-              <Paper variant="outlined" sx={{ p: 2, borderRadius: "12px" }}>
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block" }}
-                    >
-                      Línea de Producción
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {selectedMaq.linea}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block" }}
-                    >
-                      Ubicación en Planta
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {selectedMaq.ubicacion}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block" }}
-                    >
-                      Capacidad de Trabajo
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {selectedMaq.capacidad}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block" }}
-                    >
-                      Horas de Operación
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {selectedMaq.horasUso} horas
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block" }}
-                    >
-                      Última Revisión
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {selectedMaq.ultimoMantenimiento}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block" }}
-                    >
-                      Próximo Preventivo
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: 700, color: "primary.main" }}
-                    >
-                      {selectedMaq.proximoMantenimiento}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Paper>
 
               <Paper
                 variant="outlined"
