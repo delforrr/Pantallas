@@ -25,16 +25,13 @@ import {
   Tooltip,
   Grid,
   Autocomplete,
-  List,
-  ListItem,
-  ListItemText,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import NotesIcon from '@mui/icons-material/Notes';
 
 import { RECETAS_INICIALES, MATERIAS_PRIMAS_INICIALES, PRODUCTOS_FABRICABLES } from './mockData';
 
@@ -57,12 +54,9 @@ export const RecetasScreen = () => {
     categoria: 'Pastas Rellenas',
     rendimientoBase: 10,
     tiempoElaboracionMin: 60,
-    pasos: [],
+    pasos: '',
     ingredientes: [],
   });
-
-  // Paso en construcción dentro del modal
-  const [nuevoPasoText, setNuevoPasoText] = useState('');
 
   // Ingrediente en construcción dentro del modal
   const [selectedMPId, setSelectedMPId] = useState('');
@@ -105,16 +99,10 @@ export const RecetasScreen = () => {
       categoria: 'Pastas Rellenas',
       rendimientoBase: 10,
       tiempoElaboracionMin: 60,
-      pasos: [
-        'Pesar y tamizar los ingredientes secos en tolva de carga.',
-        'Incorporar líquidos/huevos y amasar durante 12-15 minutos.',
-        'Laminar la masa en sobadora hasta el espesor uniforme deseado.',
-        'Conformar el producto en la línea de producción correspondiente.',
-        'Control de calidad y envasado en cajas térmicas de 1 kg.',
-      ],
+      pasos:
+        '1. Pesar y tamizar los ingredientes secos en tolva de carga.\n2. Incorporar líquidos/huevos y amasar durante 12-15 minutos.\n3. Laminar la masa en sobadora hasta el espesor uniforme deseado.\n4. Conformar el producto en la línea de producción correspondiente.\n5. Control de calidad y envasado en cajas térmicas de 1 kg.',
       ingredientes: [],
     });
-    setNuevoPasoText('');
     setSelectedMPId('');
     setCantidadMP('');
     setModalOpen(true);
@@ -130,39 +118,13 @@ export const RecetasScreen = () => {
       rendimientoBase: receta.rendimientoBase,
       tiempoElaboracionMin: receta.tiempoElaboracionMin,
       pasos: Array.isArray(receta.pasos)
-        ? [...receta.pasos]
-        : typeof receta.pasos === 'string'
-        ? receta.pasos.split('\n').filter(Boolean)
-        : [
-            'Pesar y tamizar ingredientes.',
-            'Amasar hasta lograr masa homogénea.',
-            'Laminar en sobadora.',
-            'Moldear y envasar.',
-          ],
+        ? receta.pasos.join('\n')
+        : (receta.pasos || ''),
       ingredientes: [...receta.ingredientes],
     });
-    setNuevoPasoText('');
     setSelectedMPId('');
     setCantidadMP('');
     setModalOpen(true);
-  };
-
-  // Agregar paso al formulario
-  const handleAddPaso = () => {
-    if (!nuevoPasoText.trim()) return;
-    setFormState((prev) => ({
-      ...prev,
-      pasos: [...(prev.pasos || []), nuevoPasoText.trim()],
-    }));
-    setNuevoPasoText('');
-  };
-
-  // Quitar paso del formulario
-  const handleRemovePaso = (index) => {
-    setFormState((prev) => ({
-      ...prev,
-      pasos: (prev.pasos || []).filter((_, i) => i !== index),
-    }));
   };
 
   // Agregar ingrediente al formulario
@@ -225,7 +187,7 @@ export const RecetasScreen = () => {
             ? {
                 ...r,
                 ...formState,
-                pasos: formState.pasos || [],
+                pasos: typeof formState.pasos === 'string' ? formState.pasos.trim() : (formState.pasos || ''),
               }
             : r
         )
@@ -236,7 +198,7 @@ export const RecetasScreen = () => {
         id: `REC-00${recetas.length + 1}`,
         idReceta: recetas.length + 1,
         ...formState,
-        pasos: formState.pasos || [],
+        pasos: typeof formState.pasos === 'string' ? formState.pasos.trim() : (formState.pasos || ''),
       };
       setRecetas((prev) => [newReceta, ...prev]);
       setSnackbar({ open: true, message: 'Nueva receta creada exitosamente', severity: 'success' });
@@ -366,7 +328,7 @@ export const RecetasScreen = () => {
               <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>Categoría</TableCell>
               <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>Lote Base</TableCell>
               <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>Insumos</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>Pasos de Elaboración</TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>Instrucciones / Pasos</TableCell>
               <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.85rem' }}>
                 Acciones
               </TableCell>
@@ -428,19 +390,46 @@ export const RecetasScreen = () => {
                     </Button>
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      size="small"
-                      icon={<FormatListNumberedIcon sx={{ fontSize: '0.9rem !important' }} />}
-                      label={`${Array.isArray(receta.pasos) ? receta.pasos.length : (receta.pasos || 0)} pasos`}
-                      onClick={() => setViewingReceta(receta)}
-                      sx={{
-                        fontWeight: 600,
-                        fontSize: '0.75rem',
-                        cursor: 'pointer',
-                        bgcolor: 'action.hover',
-                        '&:hover': { bgcolor: 'action.selected' },
-                      }}
-                    />
+                    <Tooltip
+                      title={
+                        Array.isArray(receta.pasos)
+                          ? receta.pasos.join('\n')
+                          : (receta.pasos || 'Sin instrucciones registradas')
+                      }
+                      arrow
+                      placement="top-start"
+                    >
+                      <Box
+                        onClick={() => setViewingReceta(receta)}
+                        sx={{
+                          cursor: 'pointer',
+                          maxWidth: 240,
+                          p: 0.6,
+                          borderRadius: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.8,
+                          '&:hover': { bgcolor: 'action.hover' },
+                        }}
+                      >
+                        <NotesIcon fontSize="small" sx={{ color: 'text.secondary', flexShrink: 0 }} />
+                        <Typography
+                          variant="caption"
+                          noWrap
+                          sx={{
+                            color: receta.pasos ? 'text.primary' : 'text.disabled',
+                            fontStyle: receta.pasos ? 'normal' : 'italic',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {typeof receta.pasos === 'string'
+                            ? (receta.pasos.split('\n')[0] || 'Sin instrucciones')
+                            : (Array.isArray(receta.pasos) && receta.pasos.length > 0
+                                ? receta.pasos[0]
+                                : 'Sin instrucciones')}
+                        </Typography>
+                      </Box>
+                    </Tooltip>
                   </TableCell>
                   <TableCell align="right">
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
@@ -480,7 +469,7 @@ export const RecetasScreen = () => {
         PaperProps={{ sx: { borderRadius: '16px' } }}
       >
         <DialogTitle sx={{ fontWeight: 700, pb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <FormatListNumberedIcon color="primary" />
+          <NotesIcon color="primary" />
           Ficha Técnica de Receta: {viewingReceta?.nombreProducto}
         </DialogTitle>
         <DialogContent dividers sx={{ p: 2.5 }}>
@@ -528,43 +517,40 @@ export const RecetasScreen = () => {
             </Table>
           </TableContainer>
 
-          {/* Pasos de Elaboración */}
+          {/* Instrucciones y Pasos de Elaboración (Texto Libre) */}
           <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <FormatListNumberedIcon color="primary" fontSize="small" />
-            Pasos de Elaboración ({Array.isArray(viewingReceta?.pasos) ? viewingReceta.pasos.length : (viewingReceta?.pasos ? 1 : 0)}):
+            <NotesIcon color="primary" fontSize="small" />
+            Instrucciones y Pasos de Elaboración:
           </Typography>
           {(!viewingReceta?.pasos || (Array.isArray(viewingReceta.pasos) && viewingReceta.pasos.length === 0)) ? (
             <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderRadius: '10px' }}>
               <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                Esta receta aún no cuenta con pasos de elaboración registrados.
+                Esta receta aún no cuenta con instrucciones ni pasos de elaboración registrados.
               </Typography>
             </Paper>
           ) : (
-            <List disablePadding sx={{ bgcolor: 'background.paper', borderRadius: '10px', border: '1px solid', borderColor: 'divider' }}>
-              {(Array.isArray(viewingReceta.pasos) ? viewingReceta.pasos : [viewingReceta.pasos]).map((paso, idx, arr) => (
-                <ListItem
-                  key={idx}
-                  sx={{
-                    py: 1.2,
-                    px: 2,
-                    borderBottom: idx < arr.length - 1 ? '1px dashed' : 'none',
-                    borderColor: 'divider',
-                    alignItems: 'flex-start',
-                  }}
-                >
-                  <Chip
-                    size="small"
-                    color="primary"
-                    label={`Paso ${idx + 1}`}
-                    sx={{ mr: 1.5, mt: 0.2, fontWeight: 700, fontSize: '0.75rem', height: 24 }}
-                  />
-                  <ListItemText
-                    primary={paso}
-                    primaryTypographyProps={{ variant: 'body2', sx: { fontWeight: 500 } }}
-                  />
-                </ListItem>
-              ))}
-            </List>
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
+                borderRadius: '10px',
+                bgcolor: 'background.paper',
+                borderColor: 'divider',
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{
+                  whiteSpace: 'pre-line',
+                  lineHeight: 1.7,
+                  color: 'text.primary',
+                }}
+              >
+                {Array.isArray(viewingReceta.pasos)
+                  ? viewingReceta.pasos.join('\n')
+                  : viewingReceta.pasos}
+              </Typography>
+            </Paper>
           )}
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
@@ -810,82 +796,33 @@ export const RecetasScreen = () => {
               )}
             </Grid>
 
-            {/* Sección de Pasos de Elaboración */}
+            {/* Sección de Pasos de Elaboración (Texto Libre / Comentario Único) */}
             <Grid item xs={12} sx={{ mt: 1 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <FormatListNumberedIcon color="primary" fontSize="small" />
-                Pasos de Elaboración del Producto ({formState.pasos?.length || 0})
+                <NotesIcon color="primary" fontSize="small" />
+                Instrucciones y Pasos de Elaboración
               </Typography>
               <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
-                Indica la secuencia de preparación o instrucciones técnicas para elaborar el lote base de la receta.
+                Ingrese el texto libre con el procedimiento, parámetros técnicos y secuencia de pasos para elaborar el lote base de la receta.
               </Typography>
-
-              <Box sx={{ display: 'flex', gap: 1.5, mb: 2, alignItems: 'center' }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Nuevo Paso de Elaboración"
-                  placeholder="Ej: Mezclar harina y semolín en amasadora durante 10 minutos..."
-                  value={nuevoPasoText}
-                  onChange={(e) => setNuevoPasoText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddPaso();
-                    }
-                  }}
-                />
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  startIcon={<AddIcon />}
-                  onClick={handleAddPaso}
-                  disabled={!nuevoPasoText.trim()}
-                  sx={{ textTransform: 'none', fontWeight: 600, height: 40, whiteSpace: 'nowrap' }}
-                >
-                  Agregar Paso
-                </Button>
-              </Box>
-
-              {/* Lista de pasos agregados */}
-              {(!formState.pasos || formState.pasos.length === 0) ? (
-                <Alert severity="info" sx={{ borderRadius: '10px' }}>
-                  Aún no se han configurado pasos de elaboración para esta receta. Agrega al menos un paso.
-                </Alert>
-              ) : (
-                <Paper variant="outlined" sx={{ borderRadius: '10px', overflow: 'hidden' }}>
-                  <List disablePadding>
-                    {formState.pasos.map((paso, idx) => (
-                      <ListItem
-                        key={idx}
-                        divider={idx < formState.pasos.length - 1}
-                        secondaryAction={
-                          <IconButton
-                            edge="end"
-                            size="small"
-                            onClick={() => handleRemovePaso(idx)}
-                            sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        }
-                        sx={{ py: 1, px: 2 }}
-                      >
-                        <Chip
-                          size="small"
-                          color="primary"
-                          label={`Paso ${idx + 1}`}
-                          sx={{ mr: 1.5, fontWeight: 700, fontSize: '0.75rem', height: 24 }}
-                        />
-                        <ListItemText
-                          primary={paso}
-                          primaryTypographyProps={{ variant: 'body2', sx: { fontWeight: 500 } }}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Paper>
-              )}
+              <TextField
+                fullWidth
+                multiline
+                minRows={5}
+                maxRows={10}
+                label="Procedimiento y Pasos de Elaboración (Texto Libre)"
+                placeholder="Detalle aquí las instrucciones paso a paso o comentarios generales para elaborar la receta (temperaturas, tiempos de reposo, amasado, laminado, dosificación, etc.)..."
+                value={formState.pasos}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, pasos: e.target.value }))
+                }
+                helperText="Campo de texto libre / comentario único con las instrucciones técnicas de la receta."
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '10px',
+                  },
+                }}
+              />
             </Grid>
           </Grid>
         </DialogContent>

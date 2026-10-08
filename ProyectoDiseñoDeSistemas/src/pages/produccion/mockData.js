@@ -502,6 +502,7 @@ export const MATERIAS_PRIMAS_INICIALES = [
 
 // -------------------------------------------------------------
 // Clase: Receta (IdReceta, Cantidad, Pasos, IdMateriaPrima)
+// (Pasos configurado como texto libre / comentario único)
 // Clase: DetalleReceta (IdReceta, IdMateriaPrima, Cantidad)
 // -------------------------------------------------------------
 export const RECETAS_INICIALES = [
@@ -516,15 +517,13 @@ export const RECETAS_INICIALES = [
     categoria: 'Pastas Rellenas',
     cantidad: 10, // Cantidad en kg de rendimiento según diagrama
     rendimientoBase: 10,
-    pasos: [
-      'Pesar y tamizar la harina de trigo 0000 con la sal fina en tolva de carga.',
-      'Incorporar los huevos de campo y amasar en amasadora rápida durante 12 minutos hasta masa elástica y sin vetas.',
-      'Dejar descansar el empaste tapado en cámara de reposo a 18°C durante 20 minutos.',
-      'Pasar por sobadora/laminadora continua en graduación decreciente hasta calibrar lámina de 1.2 mm.',
-      'Preparar el relleno homogeneizando la ricota fresca entera con el queso parmesano rallado y condimentos.',
-      'Alimentar la raviolera automática continua, verificar dosificación y sellado perimetral de planchas.',
-      'Orear 15 minutos en bandejas perforadas y fraccionar en cajas térmicas de 1 kg etiquetadas con lote y vencimiento.',
-    ],
+    pasos: `1. Pesar y tamizar la harina de trigo 0000 con la sal fina en tolva de carga.
+2. Incorporar los huevos de campo y amasar en amasadora rápida durante 12 minutos hasta masa elástica y sin vetas.
+3. Dejar descansar el empaste tapado en cámara de reposo a 18°C durante 20 minutos.
+4. Pasar por sobadora/laminadora continua en graduación decreciente hasta calibrar lámina de 1.2 mm.
+5. Preparar el relleno homogeneizando la ricota fresca entera con el queso parmesano rallado y condimentos.
+6. Alimentar la raviolera automática continua, verificar dosificación y sellado perimetral de planchas.
+7. Orear 15 minutos en bandejas perforadas y fraccionar en cajas térmicas de 1 kg etiquetadas con lote y vencimiento.`,
     tiempoElaboracionMin: 90,
     detalles: [
       { idReceta: 1, idMateriaPrima: 1, materiaPrimaId: 'MP-001', nombre: 'Harina de Trigo 0000', cantidad: 4.5, unidad: 'kg' },
@@ -554,13 +553,11 @@ export const RECETAS_INICIALES = [
     categoria: 'Pastas Simples',
     cantidad: 10,
     rendimientoBase: 10,
-    pasos: [
-      'Pesar y combinar la harina 0000 con la sémola de trigo candeal y sal fina.',
-      'Agregar huevos de campo e iniciar amasado enérgico por 15 minutos hasta consistencia firme.',
-      'Laminar y sobar con múltiples pliegues en sobadora hasta lograr textura sedosa y tenacidad al dente.',
-      'Pasar las láminas por cortadora/fideera automática con peine de cinta fina de 4 mm.',
-      'Conformar nidos tradicionales de 100g y envasar en cajas térmicas de 1 kg refrigeradas.',
-    ],
+    pasos: `1. Pesar y combinar la harina 0000 con la sémola de trigo candeal y sal fina.
+2. Agregar huevos de campo e iniciar amasado enérgico por 15 minutos hasta consistencia firme.
+3. Laminar y sobar con múltiples pliegues en sobadora hasta lograr textura sedosa y tenacidad al dente.
+4. Pasar las láminas por cortadora/fideera automática con peine de cinta fina de 4 mm.
+5. Conformar nidos tradicionales de 100g y envasar en cajas térmicas de 1 kg refrigeradas.`,
     tiempoElaboracionMin: 60,
     detalles: [
       { idReceta: 2, idMateriaPrima: 1, materiaPrimaId: 'MP-001', nombre: 'Harina de Trigo 0000', cantidad: 7.0, unidad: 'kg' },
@@ -588,14 +585,12 @@ export const RECETAS_INICIALES = [
     categoria: 'Pastas Rellenas',
     cantidad: 10,
     rendimientoBase: 10,
-    pasos: [
-      'Blanquear la espinaca fresca seleccionada, centrifugar y procesar finamente sin excedente de líquido.',
-      'Integrar la espinaca procesada con harina 0000 y huevos en amasadora rápida hasta color verde parejo.',
-      'Descansar la masa tapada y laminar en sobadora continua hasta espesor uniforme de 1.2 mm.',
-      'Elaborar relleno cremoso uniendo ricota fresca, queso parmesano rallado y condimentos.',
-      'Moldear en raviolera automática continua con control de dosificación constante de relleno.',
-      'Orear 15 minutos en secadero y envasar en cajas térmicas de 1 kg con control de peso exacto.',
-    ],
+    pasos: `1. Blanquear la espinaca fresca seleccionada, centrifugar y procesar finamente sin excedente de líquido.
+2. Integrar la espinaca procesada con harina 0000 y huevos en amasadora rápida hasta color verde parejo.
+3. Descansar la masa tapada y laminar en sobadora continua hasta espesor uniforme de 1.2 mm.
+4. Elaborar relleno cremoso uniendo ricota fresca, queso parmesano rallado y condimentos.
+5. Moldear en raviolera automática continua con control de dosificación constante de relleno.
+6. Orear 15 minutos en secadero y envasar en cajas térmicas de 1 kg con control de peso exacto.`,
     tiempoElaboracionMin: 100,
     detalles: [
       { idReceta: 3, idMateriaPrima: 1, materiaPrimaId: 'MP-001', nombre: 'Harina de Trigo 0000', cantidad: 4.5, unidad: 'kg' },
@@ -627,13 +622,11 @@ export const RECETAS_INICIALES = [
     categoria: 'Pastas Rellenas',
     cantidad: 10,
     rendimientoBase: 10,
-    pasos: [
-      'Brasear la carne vacuna picada especial a fuego lento, enfriar y procesar con condimentos y nuez moscada.',
-      'Elaborar masa al huevo firme en amasadora durante 15 minutos hasta lograr textura suave.',
-      'Laminar en sobadora continua calibrando a 1.0 mm de espesor uniforme.',
-      'Dosificar el relleno de carne, cortar discos y plegar en capeletis tradicionales en conformadora.',
-      'Espolvorear con lluvia de sémola antiadherente y envasar en cajas térmicas de 1 kg.',
-    ],
+    pasos: `1. Brasear la carne vacuna picada especial a fuego lento, enfriar y procesar con condimentos y nuez moscada.
+2. Elaborar masa al huevo firme en amasadora durante 15 minutos hasta lograr textura suave.
+3. Laminar en sobadora continua calibrando a 1.0 mm de espesor uniforme.
+4. Dosificar el relleno de carne, cortar discos y plegar en capeletis tradicionales en conformadora.
+5. Espolvorear con lluvia de sémola antiadherente y envasar en cajas térmicas de 1 kg.`,
     tiempoElaboracionMin: 120,
     detalles: [
       { idReceta: 4, idMateriaPrima: 1, materiaPrimaId: 'MP-001', nombre: 'Harina de Trigo 0000', cantidad: 5.0, unidad: 'kg' },
@@ -663,12 +656,10 @@ export const RECETAS_INICIALES = [
     categoria: 'Pastas Simples',
     cantidad: 10,
     rendimientoBase: 10,
-    pasos: [
-      'Hervir papas con piel, pelar en caliente y procesar en pasapuré industrial.',
-      'Enfriar el puré a 30°C e incorporar harina 0000, huevo y sal sin sobreamasar.',
-      'Alimentar la ñoquera extrusora automática para corte y acanalado tradicional.',
-      'Orear en bandejas ventiladas durante 10 minutos y envasar en cajas de 1 kg.',
-    ],
+    pasos: `1. Hervir papas con piel, pelar en caliente y procesar en pasapuré industrial.
+2. Enfriar el puré a 30°C e incorporar harina 0000, huevo y sal sin sobreamasar.
+3. Alimentar la ñoquera extrusora automática para corte y acanalado tradicional.
+4. Orear en bandejas ventiladas durante 10 minutos y envasar en cajas de 1 kg.`,
     tiempoElaboracionMin: 75,
     detalles: [
       { idReceta: 5, idMateriaPrima: 1, materiaPrimaId: 'MP-001', nombre: 'Harina de Trigo 0000', cantidad: 3.0, unidad: 'kg' },
@@ -694,13 +685,11 @@ export const RECETAS_INICIALES = [
     categoria: 'Pastas Rellenas',
     cantidad: 10,
     rendimientoBase: 10,
-    pasos: [
-      'Amasar harina 0000 con huevos y agua purificada durante 14 minutos.',
-      'Laminar láminas anchas en sobadora continua hasta 1.3 mm de espesor uniforme.',
-      'Procesar jamón cocido seleccionado e incorporar a la mozzarella homogénea con condimentos.',
-      'Moldear en sorrentinera circular de 5 cm de diámetro con cierre reforzado.',
-      'Orear 15 minutos en secadero y envasar en cajas térmicas de 1 kg con separadores antiadherentes.',
-    ],
+    pasos: `1. Amasar harina 0000 con huevos y agua purificada durante 14 minutos.
+2. Laminar láminas anchas en sobadora continua hasta 1.3 mm de espesor uniforme.
+3. Procesar jamón cocido seleccionado e incorporar a la mozzarella homogénea con condimentos.
+4. Moldear en sorrentinera circular de 5 cm de diámetro con cierre reforzado.
+5. Orear 15 minutos en secadero y envasar en cajas térmicas de 1 kg con separadores antiadherentes.`,
     tiempoElaboracionMin: 95,
     detalles: [
       { idReceta: 6, idMateriaPrima: 1, materiaPrimaId: 'MP-001', nombre: 'Harina de Trigo 0000', cantidad: 4.5, unidad: 'kg' },

@@ -44,7 +44,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import NotesIcon from '@mui/icons-material/Notes';
 
 import { PRODUCTOS_INICIALES, RECETAS_INICIALES, PRODUCTOS_BASE, VARIEDADES, TIPOS_PRODUCTO, UNIDADES } from './mockData';
 import { useApp } from '../../context/AppContext';
@@ -750,43 +750,40 @@ export const ProductosCompuestosScreen = () => {
                     ))}
                   </List>
 
-                  {/* Pasos de Elaboración */}
+                  {/* Instrucciones y Pasos de Elaboración (Texto Libre) */}
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <FormatListNumberedIcon color="primary" fontSize="small" />
-                    Pasos de Elaboración ({Array.isArray(recetaActiva.pasos) ? recetaActiva.pasos.length : (recetaActiva.pasos ? 1 : 0)}):
+                    <NotesIcon color="primary" fontSize="small" />
+                    Instrucciones y Pasos de Elaboración:
                   </Typography>
                   {(!recetaActiva.pasos || (Array.isArray(recetaActiva.pasos) && recetaActiva.pasos.length === 0)) ? (
                     <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderRadius: '8px' }}>
                       <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                        No se han registrado pasos para esta receta.
+                        No se han registrado instrucciones ni pasos para esta receta.
                       </Typography>
                     </Paper>
                   ) : (
-                    <List dense disablePadding sx={{ bgcolor: 'background.paper', borderRadius: '8px', border: '1px solid', borderColor: 'divider' }}>
-                      {(Array.isArray(recetaActiva.pasos) ? recetaActiva.pasos : [recetaActiva.pasos]).map((paso, idx, arr) => (
-                        <ListItem
-                          key={idx}
-                          sx={{
-                            py: 1,
-                            px: 1.5,
-                            borderBottom: idx < arr.length - 1 ? '1px dashed' : 'none',
-                            borderColor: 'divider',
-                            alignItems: 'flex-start',
-                          }}
-                        >
-                          <Chip
-                            size="small"
-                            color="primary"
-                            label={`Paso ${idx + 1}`}
-                            sx={{ mr: 1.5, mt: 0.2, fontWeight: 700, fontSize: '0.7rem', height: 22 }}
-                          />
-                          <ListItemText
-                            primary={paso}
-                            primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
+                    <Paper
+                      variant="outlined"
+                      sx={{
+                        p: 2,
+                        borderRadius: '8px',
+                        bgcolor: 'background.paper',
+                        borderColor: 'divider',
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          whiteSpace: 'pre-line',
+                          lineHeight: 1.6,
+                          color: 'text.primary',
+                        }}
+                      >
+                        {Array.isArray(recetaActiva.pasos)
+                          ? recetaActiva.pasos.join('\n')
+                          : recetaActiva.pasos}
+                      </Typography>
+                    </Paper>
                   )}
                 </Box>
               ) : (
