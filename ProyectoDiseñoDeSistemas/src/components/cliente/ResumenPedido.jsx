@@ -23,9 +23,7 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
 
   const [tipoPedido, setTipoPedido] = useState("Venta Mostrador / Local");
   const [modalidadEntrega, setModalidadEntrega] = useState("Retiro en Fábrica");
-  const [medioPago, setMedioPago] = useState(
-    "Efectivo en Mostrador / Contra entrega",
-  );
+  const [medioPago, setMedioPago] = useState("Efectivo en Mostrador");
   const [direccionEntrega, setDireccionEntrega] = useState(
     cliente?.direccion || "Av. Villegas 450",
   );
@@ -39,7 +37,7 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
   const totalItems = cart.reduce((acc, item) => acc + item.cantidad, 0);
 
   const isFijoSemanal = tipoPedido === "Pedido Fijo Semanal";
-  const isEventoEspecial = tipoPedido === "Evento Especial / Fiestas (48hs)";
+  const isEventoEspecial = tipoPedido === "Evento Especial";
 
   // Descuento automático del 10% si es Pedido Fijo Semanal
   const descuento = isFijoSemanal ? Math.round(subtotal * 0.1) : 0;
@@ -82,7 +80,7 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
         subtotal: item.subtotal ?? item.precio * item.cantidad,
       })),
       fechaEntregaEstimada: isEventoEspecial
-        ? "En 48hs hábiles (Coordinar horario con fábrica)"
+        ? "En 48hs hábiles"
         : modalidadEntrega === "Retiro en Fábrica"
           ? "Listo para retirar en 30-45 minutos"
           : "Entrega estimada en el transcurso del día",
@@ -129,13 +127,9 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
           label="Tipo de Pedido"
           onChange={(e) => setTipoPedido(e.target.value)}
         >
-          <MenuItem value="Venta Mostrador">Venta Mostrador / Local</MenuItem>
-          <MenuItem value="Pedido Fijo Semanal">
-            Pedido Fijo Semanal (10% Desc. Mayorista)
-          </MenuItem>
-          <MenuItem value="Evento Especial / Fiestas (48hs)">
-            Evento Especial / Fiestas (48hs - Seña 50%)
-          </MenuItem>
+          <MenuItem value="Venta Mostrador">Venta Mostrador</MenuItem>
+          <MenuItem value="Pedido Fijo Semanal">Pedido Fijo Semanal</MenuItem>
+          <MenuItem value="Evento Especial / Fiestas">Evento Especial</MenuItem>
         </Select>
       </FormControl>
 
@@ -221,8 +215,8 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
           label="Medio de Pago"
           onChange={(e) => setMedioPago(e.target.value)}
         >
-          <MenuItem value="Efectivo en Mostrador / Contra entrega">
-            Efectivo en Mostrador / Contra entrega
+          <MenuItem value="Efectivo en Mostrador">
+            Efectivo en Mostrador
           </MenuItem>
           <MenuItem value="Tarjeta de Débito Visa/Mastercard">
             Tarjeta de Débito Visa/Mastercard
@@ -230,12 +224,9 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
           <MenuItem value="Mercado Pago (Transferencia / QR)">
             Mercado Pago (Transferencia / QR)
           </MenuItem>
-          <MenuItem value="Cuenta DNI">Cuenta DNI (Banco Provincia)</MenuItem>
-          <MenuItem
-            value="Cuenta Corriente Comercial"
-            disabled={!cliente?.aceptaCredito}
-          >
-            Cuenta Corriente Comercial{" "}
+          <MenuItem value="Billetera Virtual">Billetera Virtual</MenuItem>
+          <MenuItem value="Cuenta Corriente" disabled={!cliente?.aceptaCredito}>
+            Cuenta Corriente{" "}
             {cliente?.aceptaCredito ? "(Habilitada)" : "(No Habilitada)"}
           </MenuItem>
         </Select>
@@ -370,7 +361,7 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
               lineHeight: 1.3,
             }}
           >
-            * Política de eventos: cancelación con mínimo 48hs de anticipación.
+            * Cancelación con mínimo 48hs de anticipación.
           </Typography>
         </Box>
       )}
@@ -406,8 +397,7 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
           fontSize: "0.74rem",
         }}
       >
-        Al confirmar, se emitirá automáticamente el comprobante oficial en el
-        sistema.
+        Al confirmar, se emitirá automáticamente tu pedido.
       </Typography>
     </Paper>
   );
