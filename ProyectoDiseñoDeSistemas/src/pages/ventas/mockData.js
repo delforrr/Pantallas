@@ -41,7 +41,6 @@ export const INITIAL_CLIENTES = [
     aceptaCredito: true,
     limiteCredito: 350000,
     creditoUsado: 120000,
-    diaEntregaHabitual: 'Jueves',
     estado: 'Activo',
   },
   {
@@ -62,7 +61,6 @@ export const INITIAL_CLIENTES = [
     aceptaCredito: true,
     limiteCredito: 800000,
     creditoUsado: 340000,
-    diaEntregaHabitual: 'Lunes',
     estado: 'Activo',
   },
   {
@@ -83,7 +81,6 @@ export const INITIAL_CLIENTES = [
     aceptaCredito: true,
     limiteCredito: 500000,
     creditoUsado: 520000, // Credito Usado > LimiteCredito -> Moroso Calculado
-    diaEntregaHabitual: 'Viernes',
     estado: 'Activo',
   },
   {
@@ -104,7 +101,6 @@ export const INITIAL_CLIENTES = [
     aceptaCredito: false,
     limiteCredito: 0,
     creditoUsado: 0,
-    diaEntregaHabitual: 'Mostrador / Retiro',
     estado: 'Activo',
   },
   {
@@ -125,7 +121,6 @@ export const INITIAL_CLIENTES = [
     aceptaCredito: false,
     limiteCredito: 0,
     creditoUsado: 0,
-    diaEntregaHabitual: 'Sábados (Donación)',
     estado: 'Activo',
   },
   {
@@ -146,7 +141,6 @@ export const INITIAL_CLIENTES = [
     aceptaCredito: false,
     limiteCredito: 0,
     creditoUsado: 0,
-    diaEntregaHabitual: 'Venta Directa',
     estado: 'Activo',
   },
 ];
@@ -223,6 +217,7 @@ export const INITIAL_PEDIDOS = [
     idCliente: 2,
     clienteNombre: 'Supermercados La Anónima Sucursal 12',
     tipoPedido: 'Mayorista Semanal Fijo',
+    diaEntregaHabitual: 'Lunes',
     calleEntrega: 'García Salinas',
     alturaEntrega: '1150',
     localidadEntrega: 'Trenque Lauquen',

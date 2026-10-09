@@ -37,7 +37,8 @@ import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import PrintIcon from '@mui/icons-material/Print';
 
 import { INITIAL_PRESUPUESTOS, INITIAL_CLIENTES } from './mockData';
-import { DetalleItemsVentasTable } from '../../components/ventas';
+import { DetalleItemsVentasTable, ComprobanteDocumentWrapper } from '../../components/ventas';
+
 
 export const PresupuestosScreen = () => {
   const [presupuestos, setPresupuestos] = useState(INITIAL_PRESUPUESTOS);
@@ -306,144 +307,202 @@ export const PresupuestosScreen = () => {
         </Table>
       </TableContainer>
 
-      {/* Modal Formulario */}
+      {/* Modal Formulario Estructurado de Presupuesto estilo Voucher / Comprobante */}
       <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
-        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {isEditing ? `Editar Presupuesto ${formData.nroPresupuesto}` : 'Nuevo Presupuesto para Cliente'}
+        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <DescriptionOutlinedIcon color="primary" />
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              {isEditing ? `Editar Presupuesto ${formData.nroPresupuesto}` : 'Formulario de Presupuesto / Cotización'}
+            </Typography>
+          </Box>
           <IconButton onClick={() => setOpenForm(false)}><CloseIcon /></IconButton>
         </DialogTitle>
-        <DialogContent dividers>
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={12} sm={4}>
-              <TextField label="Nro de Presupuesto" fullWidth size="small" disabled value={formData.nroPresupuesto} />
-            </Grid>
-            <Grid item xs={12} sm={8}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Cliente Solicitante</InputLabel>
-                <Select
-                  value={formData.idCliente}
-                  label="Cliente Solicitante"
-                  onChange={(e) => setFormData({ ...formData, idCliente: e.target.value })}
-                >
-                  {INITIAL_CLIENTES.map((c) => (
-                    <MenuItem key={c.idCliente} value={c.idCliente}>
-                      {c.razonSocial}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+        <DialogContent dividers sx={{ maxHeight: '80vh', overflowY: 'auto', p: { xs: 1.5, sm: 2.5 } }}>
+          <ComprobanteDocumentWrapper
+            tipoDocTitle="Presupuesto"
+            nroDocumento={formData.nroPresupuesto || 'PRE-2026-0001'}
+            headerGrid={
+              <Grid container spacing={0}>
+                {/* Fila 1: Cliente & Fecha Emisión */}
+                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' }, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Cliente:</Typography>
+                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
+                    <InputLabel>Cliente Solicitante</InputLabel>
+                    <Select
+                      value={formData.idCliente}
+                      label="Cliente Solicitante"
+                      onChange={(e) => setFormData({ ...formData, idCliente: e.target.value })}
+                    >
+                      {INITIAL_CLIENTES.map((c) => (
+                        <MenuItem key={c.idCliente} value={c.idCliente}>
+                          {c.razonSocial} ({c.cuit})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Tipo de Pedido / Evento"
-                fullWidth
-                size="small"
-                placeholder="Ej. Evento Especial (150 personas)"
-                value={formData.tipoPedido}
-                onChange={(e) => setFormData({ ...formData, tipoPedido: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={6} sm={3}>
-              <TextField
-                label="Fecha Emisión"
-                type="date"
-                fullWidth
-                size="small"
-                slotProps={{ inputLabel: { shrink: true } }}
-                value={formData.fechaEmision}
-                onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={6} sm={3}>
-              <TextField
-                label="Validez Hasta"
-                type="date"
-                fullWidth
-                size="small"
-                slotProps={{ inputLabel: { shrink: true } }}
-                value={formData.validezHasta}
-                onChange={(e) => setFormData({ ...formData, validezHasta: e.target.value })}
-              />
-            </Grid>
-          </Grid>
+                <Grid item xs={12} md={5} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Fecha de Emisión:</Typography>
+                  <TextField
+                    type="date"
+                    fullWidth
+                    size="small"
+                    sx={{ mt: 0.5 }}
+                    InputLabelProps={{ shrink: true }}
+                    value={formData.fechaEmision || ''}
+                    onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
+                  />
+                </Grid>
 
-          <DetalleItemsVentasTable
-            items={formData.items || []}
-            onChangeItems={(newItems) => setFormData({ ...formData, items: newItems })}
-          />
+                {/* Fila 2: Tipo de Pedido & Validez */}
+                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' } }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Tipo de Pedido / Evento:</Typography>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    sx={{ mt: 0.5 }}
+                    placeholder="Ej. Evento Especial (Cena 150 personas)"
+                    value={formData.tipoPedido || ''}
+                    onChange={(e) => setFormData({ ...formData, tipoPedido: e.target.value })}
+                  />
+                </Grid>
 
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Observaciones / Requisitos de entrega"
-                fullWidth
-                multiline
-                rows={2}
-                size="small"
-                value={formData.observaciones}
-                onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                <Grid item xs={12} md={5} sx={{ p: 1.5 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Validez Hasta:</Typography>
+                  <TextField
+                    type="date"
+                    fullWidth
+                    size="small"
+                    sx={{ mt: 0.5 }}
+                    InputLabelProps={{ shrink: true }}
+                    value={formData.validezHasta || ''}
+                    onChange={(e) => setFormData({ ...formData, validezHasta: e.target.value })}
+                  />
+                </Grid>
+              </Grid>
+            }
+            itemsTitle="Por favor suministrar lo siguiente"
+            itemsTable={
+              <DetalleItemsVentasTable
+                items={formData.items || []}
+                onChangeItems={(newItems) => setFormData({ ...formData, items: newItems })}
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Paper variant="outlined" sx={{ p: 2, borderRadius: '10px' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="body2">Subtotal:</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>${subtotalForm.toLocaleString()}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Descuento (%):</Typography>
+            }
+            footerGrid={
+              <Grid container spacing={0}>
+                <Grid item xs={12} sm={6} sx={{ p: 1.5, borderRight: '1px solid rgba(128,128,128,0.3)', borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Descuento Aplicado (%):</Typography>
                   <TextField
                     type="number"
+                    fullWidth
                     size="small"
-                    sx={{ width: '90px' }}
+                    sx={{ mt: 0.5 }}
                     value={formData.descuentoPorcentaje}
                     onChange={(e) => setFormData({ ...formData, descuentoPorcentaje: parseFloat(e.target.value) || 0 })}
                   />
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>Total Cotizado:</Typography>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#009246' }}>
-                    ${totalForm.toLocaleString()}
+                </Grid>
+                <Grid item xs={12} sm={6} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Adelanto 50% Seña Requerida:</Typography>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#ed6c02', mt: 0.5 }}>
+                    $ {adelanto50Form.toLocaleString()}
                   </Typography>
-                </Box>
-              </Paper>
-            </Grid>
-          </Grid>
+                </Grid>
+              </Grid>
+            }
+            observacionesInput={
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Observaciones / Condición de entrega:</Typography>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={2}
+                  size="small"
+                  sx={{ mt: 0.5 }}
+                  placeholder="Detalles de preparación, lugar o logística del evento..."
+                  value={formData.observaciones || ''}
+                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                />
+              </Box>
+            }
+            totalLabel="Valor total cotizado:"
+            totalAmount={totalForm}
+            extraTotals={
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="caption" color="text.secondary">Subtotal: ${subtotalForm.toLocaleString()}</Typography>
+                {formData.descuentoPorcentaje > 0 && (
+                  <Typography variant="caption" color="error" display="block">Descuento ({formData.descuentoPorcentaje}%): -${((subtotalForm * formData.descuentoPorcentaje) / 100).toLocaleString()}</Typography>
+                )}
+              </Box>
+            }
+          />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setOpenForm(false)} color="inherit">Cancelar</Button>
-          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave}>
+          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave} sx={{ px: 3, fontWeight: 700 }}>
             Guardar Presupuesto
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Modal Detalle Cotización */}
+      {/* Modal Vista Previa Documento Cotización */}
       <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="md" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           Cotización Oficial #{selectedPresupuesto?.nroPresupuesto}
           <IconButton onClick={() => setOpenDetail(false)}><CloseIcon /></IconButton>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ p: { xs: 1.5, sm: 2.5 } }}>
           {selectedPresupuesto && (
-            <Box sx={{ p: 1 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+            <ComprobanteDocumentWrapper
+              tipoDocTitle="Presupuesto"
+              nroDocumento={selectedPresupuesto.nroPresupuesto}
+              headerGrid={
+                <Grid container spacing={0}>
+                  <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' }, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>CLIENTE:</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{selectedPresupuesto.clienteNombre}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={5} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>FECHA EMISIÓN:</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPresupuesto.fechaEmision}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' } }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>TIPO DE EVENTO / PEDIDO:</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPresupuesto.tipoPedido}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={5} sx={{ p: 1.5 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>VALIDEZ HASTA:</Typography>
+                    <Typography variant="body2" color="error" sx={{ fontWeight: 700 }}>{selectedPresupuesto.validezHasta}</Typography>
+                  </Grid>
+                </Grid>
+              }
+              itemsTitle="Por favor suministrar lo siguiente"
+              itemsTable={<DetalleItemsVentasTable items={selectedPresupuesto.items || []} readOnly />}
+              footerGrid={
+                <Grid container spacing={0}>
+                  <Grid item xs={12} sm={6} sx={{ p: 1.5, borderRight: '1px solid rgba(128,128,128,0.3)', borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>DESCUENTO APLICADO:</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedPresupuesto.descuentoPorcentaje || 0}%</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>SEÑA 50% REQUERIDA:</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#ed6c02' }}>${(selectedPresupuesto.total * 0.5).toLocaleString()}</Typography>
+                  </Grid>
+                </Grid>
+              }
+              observacionesInput={
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#009246' }}>PASTAFAB S.A.</Typography>
-                  <Typography variant="caption" display="block">Presupuesto #{selectedPresupuesto.nroPresupuesto}</Typography>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>OBSERVACIONES:</Typography>
+                  <Typography variant="body2">{selectedPresupuesto.observaciones || 'Sin observaciones adicionales.'}</Typography>
                 </Box>
-                <Box align="right">
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>{selectedPresupuesto.nroPresupuesto}</Typography>
-                  <Typography variant="body2">Emisión: {selectedPresupuesto.fechaEmision}</Typography>
-                </Box>
-              </Box>
-
-              <DetalleItemsVentasTable items={selectedPresupuesto.items || []} readOnly />
-            </Box>
+              }
+              totalLabel="Valor total cotizado:"
+              totalAmount={selectedPresupuesto.total}
+            />
           )}
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ p: 2 }}>
           <Button startIcon={<PrintIcon />} onClick={() => window.print()} color="inherit">Imprimir Cotización</Button>
           <Button variant="contained" onClick={() => setOpenDetail(false)}>Cerrar</Button>
         </DialogActions>

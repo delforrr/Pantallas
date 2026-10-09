@@ -36,6 +36,8 @@ import PrintIcon from '@mui/icons-material/Print';
 import PaymentsIcon from '@mui/icons-material/Payments';
 
 import { INITIAL_COMPROBANTES_PAGO, INITIAL_CLIENTES, INITIAL_PEDIDOS, MEDIOS_DE_PAGO } from './mockData';
+import { ComprobanteDocumentWrapper, DetalleItemsVentasTable } from '../../components/ventas';
+
 
 export const ComprobantesPagoScreen = () => {
   const [pagos, setPagos] = useState(INITIAL_COMPROBANTES_PAGO);
@@ -272,92 +274,169 @@ export const ComprobantesPagoScreen = () => {
         </Table>
       </TableContainer>
 
-      {/* Modal Alta de Pago */}
-      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="sm" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
-        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          Registrar Cobro a Cliente
+      {/* Modal Formulario Estructurado de Recibo de Pago estilo Voucher */}
+      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
+        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PaidIcon color="primary" />
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>Registrar Cobro a Cliente</Typography>
+          </Box>
           <IconButton onClick={() => setOpenForm(false)}><CloseIcon /></IconButton>
         </DialogTitle>
-        <DialogContent dividers>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField label="Nro Recibo" fullWidth size="small" disabled value={formData.nroComprobantePago} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Medio de Pago</InputLabel>
-                <Select value={formData.idMedioDePagoCliente} label="Medio de Pago" onChange={(e) => setFormData({ ...formData, idMedioDePagoCliente: e.target.value })}>
-                  {MEDIOS_DE_PAGO.map((m) => (
-                    <MenuItem key={m.idMedioDePagoCliente} value={m.idMedioDePagoCliente}>{m.descripcion}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+        <DialogContent dividers sx={{ maxHeight: '80vh', overflowY: 'auto', p: { xs: 1.5, sm: 2.5 } }}>
+          <ComprobanteDocumentWrapper
+            tipoDocTitle="Recibo de Cobro"
+            nroDocumento={formData.nroComprobantePago || 'PAG-2026-0001'}
+            headerGrid={
+              <Grid container spacing={0}>
+                {/* Fila 1: Cliente & Medio de Pago */}
+                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' }, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Cliente Pagador:</Typography>
+                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
+                    <InputLabel>Cliente Solicitante</InputLabel>
+                    <Select value={formData.idCliente} label="Cliente Solicitante" onChange={(e) => setFormData({ ...formData, idCliente: e.target.value })}>
+                      {INITIAL_CLIENTES.map((c) => (
+                        <MenuItem key={c.idCliente} value={c.idCliente}>{c.razonSocial} ({c.cuit})</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Cliente</InputLabel>
-                <Select value={formData.idCliente} label="Cliente" onChange={(e) => setFormData({ ...formData, idCliente: e.target.value })}>
-                  {INITIAL_CLIENTES.map((c) => (
-                    <MenuItem key={c.idCliente} value={c.idCliente}>{c.razonSocial}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Pedido Vinculado</InputLabel>
-                <Select value={formData.idComprobantePedidoCliente} label="Pedido Vinculado" onChange={(e) => setFormData({ ...formData, idComprobantePedidoCliente: e.target.value })}>
-                  {INITIAL_PEDIDOS.map((p) => (
-                    <MenuItem key={p.idComprobantePedidoCliente} value={p.idComprobantePedidoCliente}>{p.nroPedido}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+                <Grid item xs={12} md={5} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Medio de Pago:</Typography>
+                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
+                    <Select value={formData.idMedioDePagoCliente} label="Medio de Pago" onChange={(e) => setFormData({ ...formData, idMedioDePagoCliente: e.target.value })}>
+                      {MEDIOS_DE_PAGO.map((m) => (
+                        <MenuItem key={m.idMedioDePagoCliente} value={m.idMedioDePagoCliente}>{m.descripcion}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Monto Abonado ($)"
-                type="number"
-                fullWidth
-                size="small"
-                value={formData.montoAbonado}
-                onChange={(e) => setFormData({ ...formData, montoAbonado: e.target.value })}
+                {/* Fila 2: Pedido Vinculado & Transacción */}
+                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' } }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Pedido Vinculado:</Typography>
+                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
+                    <Select value={formData.idComprobantePedidoCliente} onChange={(e) => setFormData({ ...formData, idComprobantePedidoCliente: e.target.value })}>
+                      {INITIAL_PEDIDOS.map((p) => (
+                        <MenuItem key={p.idComprobantePedidoCliente} value={p.idComprobantePedidoCliente}>{p.nroPedido} - {p.clienteNombre}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={5} sx={{ p: 1.5 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Nro Transacción / Ticket:</Typography>
+                  <TextField fullWidth size="small" sx={{ mt: 0.5 }} placeholder="Ej. EF-CAJA-05 / TRF-9921" value={formData.nroTransaccion || ''} onChange={(e) => setFormData({ ...formData, nroTransaccion: e.target.value })} />
+                </Grid>
+              </Grid>
+            }
+            itemsTitle="Por favor suministrar lo siguiente"
+            itemsTable={
+              <DetalleItemsVentasTable
+                items={[
+                  { idProductoCompuesto: 101, productoNombre: formData.concepto || 'Cobro de Venta / Imputación de Pedido', cantidad: 1, precioUnitario: parseFloat(formData.montoAbonado) || 0, subtotal: parseFloat(formData.montoAbonado) || 0 }
+                ]}
+                readOnly
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField label="Nro Transacción / Ticket" fullWidth size="small" value={formData.nroTransaccion} onChange={(e) => setFormData({ ...formData, nroTransaccion: e.target.value })} />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField label="Concepto del Pago" fullWidth size="small" value={formData.concepto} onChange={(e) => setFormData({ ...formData, concepto: e.target.value })} />
-            </Grid>
-          </Grid>
+            }
+            footerGrid={
+              <Grid container spacing={0}>
+                <Grid item xs={12} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Concepto del Pago:</Typography>
+                  <TextField fullWidth size="small" sx={{ mt: 0.5 }} value={formData.concepto || ''} onChange={(e) => setFormData({ ...formData, concepto: e.target.value })} />
+                </Grid>
+              </Grid>
+            }
+            observacionesInput={
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Monto Abonado ($):</Typography>
+                <TextField
+                  type="number"
+                  fullWidth
+                  size="small"
+                  sx={{ mt: 0.5 }}
+                  value={formData.montoAbonado}
+                  onChange={(e) => setFormData({ ...formData, montoAbonado: parseFloat(e.target.value) || 0 })}
+                />
+              </Box>
+            }
+            totalLabel="Monto total abonado:"
+            totalAmount={parseFloat(formData.montoAbonado) || 0}
+          />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenForm(false)}>Cancelar</Button>
-          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave}>Guardar Recibo</Button>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setOpenForm(false)} color="inherit">Cancelar</Button>
+          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave} sx={{ px: 3, fontWeight: 700 }}>
+            Guardar Recibo
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Modal Recibo Detalle */}
-      <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="sm" fullWidth>
+      {/* Modal Vista Previa Documento Recibo */}
+      <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="md" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           Recibo de Pago #{selectedPago?.nroComprobantePago}
           <IconButton onClick={() => setOpenDetail(false)}><CloseIcon /></IconButton>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ p: { xs: 1.5, sm: 2.5 } }}>
           {selectedPago && (
-            <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px' }}>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                Recibimos de <strong>{selectedPago.clienteNombre}</strong>:
-              </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800, color: '#009246', mb: 2 }}>
-                ${selectedPago.montoAbonado.toLocaleString()}
-              </Typography>
-            </Paper>
+            <ComprobanteDocumentWrapper
+              tipoDocTitle="Recibo de Pago"
+              nroDocumento={selectedPago.nroComprobantePago}
+              headerGrid={
+                <Grid container spacing={0}>
+                  <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' }, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>CLIENTE PAGADOR:</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{selectedPago.clienteNombre}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={5} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>FECHA EMISIÓN:</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPago.fechaEmision}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' } }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>MEDIO DE PAGO:</Typography>
+                    <Chip label={selectedPago.medioPago} color="info" size="small" sx={{ fontWeight: 700, ml: 1 }} />
+                  </Grid>
+                  <Grid item xs={12} md={5} sx={{ p: 1.5 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>TRANSACCIÓN / TICKET:</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedPago.nroTransaccion || '-'}</Typography>
+                  </Grid>
+                </Grid>
+              }
+              itemsTitle="Por favor suministrar lo siguiente"
+              itemsTable={
+                <DetalleItemsVentasTable
+                  items={[
+                    { idProductoCompuesto: 101, productoNombre: selectedPago.concepto, cantidad: 1, precioUnitario: selectedPago.montoAbonado, subtotal: selectedPago.montoAbonado }
+                  ]}
+                  readOnly
+                />
+              }
+              footerGrid={
+                <Grid container spacing={0}>
+                  <Grid item xs={12} sm={6} sx={{ p: 1.5, borderRight: '1px solid rgba(128,128,128,0.3)' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>PEDIDO IMPUTADO:</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>{selectedPago.nroPedido || 'Venta Directa'}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} sx={{ p: 1.5 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>FACTURA ASOCIADA:</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPago.nroFactura || 'Sin Factura Vinculada'}</Typography>
+                  </Grid>
+                </Grid>
+              }
+              observacionesInput={
+                <Box>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>OBSERVACIONES:</Typography>
+                  <Typography variant="body2">{selectedPago.observaciones || 'Pago registrado conforme.'}</Typography>
+                </Box>
+              }
+              totalLabel="Monto total abonado:"
+              totalAmount={selectedPago.montoAbonado}
+            />
           )}
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ p: 2 }}>
           <Button startIcon={<PrintIcon />} onClick={() => window.print()}>Imprimir Recibo</Button>
           <Button variant="contained" onClick={() => setOpenDetail(false)}>Cerrar</Button>
         </DialogActions>

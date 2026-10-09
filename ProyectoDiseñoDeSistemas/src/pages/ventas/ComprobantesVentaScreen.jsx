@@ -35,6 +35,8 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import PrintIcon from '@mui/icons-material/Print';
 
 import { INITIAL_COMPROBANTES_VENTA, INITIAL_CLIENTES, INITIAL_PEDIDOS } from './mockData';
+import { ComprobanteDocumentWrapper, DetalleItemsVentasTable } from '../../components/ventas';
+
 
 export const ComprobantesVentaScreen = () => {
   const [comprobantes, setComprobantes] = useState(INITIAL_COMPROBANTES_VENTA);
@@ -254,107 +256,197 @@ export const ComprobantesVentaScreen = () => {
         </Table>
       </TableContainer>
 
-      {/* Modal Emisión de Comprobante */}
-      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          Emitir Comprobante de Venta
+      {/* Modal Formulario Estructurado de Comprobante Fiscal estilo Voucher */}
+      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
+        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ReceiptLongIcon color="primary" />
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>Emisión de Comprobante Fiscal</Typography>
+          </Box>
           <IconButton onClick={() => setOpenForm(false)}><CloseIcon /></IconButton>
         </DialogTitle>
-        <DialogContent dividers>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField label="Nro Comprobante" fullWidth size="small" disabled value={formData.nroComprobante} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Tipo de Comprobante</InputLabel>
-                <Select value={formData.tipoComprobante} label="Tipo de Comprobante" onChange={(e) => setFormData({ ...formData, tipoComprobante: e.target.value })}>
-                  <MenuItem value="Factura A">Factura A (Resp. Inscripto)</MenuItem>
-                  <MenuItem value="Factura B">Factura B (Consumidor Final)</MenuItem>
-                  <MenuItem value="Recibo Venta">Recibo de Venta Oficial</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+        <DialogContent dividers sx={{ maxHeight: '80vh', overflowY: 'auto', p: { xs: 1.5, sm: 2.5 } }}>
+          <ComprobanteDocumentWrapper
+            tipoDocTitle={formData.tipoComprobante || 'Factura A'}
+            nroDocumento={formData.nroComprobante || 'FAC-A-0001-00000101'}
+            headerGrid={
+              <Grid container spacing={0}>
+                {/* Fila 1: Cliente & Tipo Comprobante */}
+                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' }, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Cliente Receptor:</Typography>
+                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
+                    <InputLabel>Cliente Receptor</InputLabel>
+                    <Select value={formData.idCliente} label="Cliente Receptor" onChange={(e) => setFormData({ ...formData, idCliente: e.target.value })}>
+                      {INITIAL_CLIENTES.map((c) => (
+                        <MenuItem key={c.idCliente} value={c.idCliente}>{c.razonSocial} ({c.cuit})</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Pedido Asociado</InputLabel>
-                <Select value={formData.idComprobantePedidoCliente} label="Pedido Asociado" onChange={(e) => setFormData({ ...formData, idComprobantePedidoCliente: e.target.value })}>
-                  {INITIAL_PEDIDOS.map((p) => (
-                    <MenuItem key={p.idComprobantePedidoCliente} value={p.idComprobantePedidoCliente}>{p.nroPedido} - {p.clienteNombre}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+                <Grid item xs={12} md={5} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Tipo Comprobante Fiscal:</Typography>
+                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
+                    <Select value={formData.tipoComprobante} onChange={(e) => setFormData({ ...formData, tipoComprobante: e.target.value })}>
+                      <MenuItem value="Factura A">Factura A (Resp. Inscripto)</MenuItem>
+                      <MenuItem value="Factura B">Factura B (Consumidor Final)</MenuItem>
+                      <MenuItem value="Recibo Venta">Recibo de Venta Oficial</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Cliente Receptor</InputLabel>
-                <Select value={formData.idCliente} label="Cliente Receptor" onChange={(e) => setFormData({ ...formData, idCliente: e.target.value })}>
-                  {INITIAL_CLIENTES.map((c) => (
-                    <MenuItem key={c.idCliente} value={c.idCliente}>{c.razonSocial}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+                {/* Fila 2: Pedido Vinculado & Fecha Emisión */}
+                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' } }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Pedido Asociado:</Typography>
+                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
+                    <Select value={formData.idComprobantePedidoCliente} onChange={(e) => setFormData({ ...formData, idComprobantePedidoCliente: e.target.value })}>
+                      {INITIAL_PEDIDOS.map((p) => (
+                        <MenuItem key={p.idComprobantePedidoCliente} value={p.idComprobantePedidoCliente}>{p.nroPedido} - {p.clienteNombre}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Monto Total a Facturar ($)"
-                type="number"
-                fullWidth
-                size="small"
-                value={formData.total}
-                onChange={(e) => setFormData({ ...formData, total: e.target.value })}
+                <Grid item xs={12} md={5} sx={{ p: 1.5 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Fecha & Hora Emisión:</Typography>
+                  <Grid container spacing={1} sx={{ mt: 0.2 }}>
+                    <Grid item xs={7}>
+                      <TextField type="date" fullWidth size="small" InputLabelProps={{ shrink: true }} value={formData.fechaEmision || ''} onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })} />
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField type="time" fullWidth size="small" InputLabelProps={{ shrink: true }} value={formData.horaEmision || ''} onChange={(e) => setFormData({ ...formData, horaEmision: e.target.value })} />
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
+            }
+            itemsTitle="Por favor suministrar lo siguiente"
+            itemsTable={
+              <DetalleItemsVentasTable
+                items={
+                  INITIAL_PEDIDOS.find((p) => p.idComprobantePedidoCliente === formData.idComprobantePedidoCliente)?.items || [
+                    { idProductoCompuesto: 101, productoNombre: 'Facturación Global de Pedido', cantidad: 1, precioUnitario: formData.total || 0, subtotal: formData.total || 0 }
+                  ]
+                }
+                readOnly
               />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField label="Condición de Pago" fullWidth size="small" value={formData.condicionPago} onChange={(e) => setFormData({ ...formData, condicionPago: e.target.value })} />
-            </Grid>
-          </Grid>
+            }
+            footerGrid={
+              <Grid container spacing={0}>
+                <Grid item xs={12} sm={6} sx={{ p: 1.5, borderRight: '1px solid rgba(128,128,128,0.3)', borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Condición de Pago:</Typography>
+                  <TextField fullWidth size="small" sx={{ mt: 0.5 }} value={formData.condicionPago || ''} onChange={(e) => setFormData({ ...formData, condicionPago: e.target.value })} />
+                </Grid>
+                <Grid item xs={12} sm={6} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Condición IVA Cliente:</Typography>
+                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
+                    <Select value={formData.tipoIva} onChange={(e) => setFormData({ ...formData, tipoIva: e.target.value })}>
+                      <MenuItem value="Responsable Inscripto">Responsable Inscripto</MenuItem>
+                      <MenuItem value="Consumidor Final">Consumidor Final</MenuItem>
+                      <MenuItem value="Monotributo">Monotributo</MenuItem>
+                      <MenuItem value="Exento">Exento</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            }
+            observacionesInput={
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Monto Total a Facturar ($):</Typography>
+                <TextField
+                  type="number"
+                  fullWidth
+                  size="small"
+                  sx={{ mt: 0.5 }}
+                  value={formData.total}
+                  onChange={(e) => setFormData({ ...formData, total: parseFloat(e.target.value) || 0 })}
+                />
+              </Box>
+            }
+            totalLabel="Valor total comprobante:"
+            totalAmount={parseFloat(formData.total) || 0}
+            extraTotals={
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="caption" color="text.secondary">Neto Gravado (21%): ${((parseFloat(formData.total) || 0) / 1.21).toLocaleString('es-AR', { maximumFractionDigits: 2 })}</Typography>
+                <Typography variant="caption" color="text.secondary" display="block">IVA (21%): ${((parseFloat(formData.total) || 0) - (parseFloat(formData.total) || 0) / 1.21).toLocaleString('es-AR', { maximumFractionDigits: 2 })}</Typography>
+              </Box>
+            }
+          />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenForm(false)}>Cancelar</Button>
-          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave}>Emitir Factura</Button>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setOpenForm(false)} color="inherit">Cancelar</Button>
+          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave} sx={{ px: 3, fontWeight: 700 }}>
+            Emitir Comprobante
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Modal Vista Previa Factura Fiscal */}
+      {/* Modal Vista Previa Documento Factura Fiscal */}
       <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="md" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           Vista Previa Comprobante Fiscal #{selectedComprobante?.nroComprobante}
           <IconButton onClick={() => setOpenDetail(false)}><CloseIcon /></IconButton>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ p: { xs: 1.5, sm: 2.5 } }}>
           {selectedComprobante && (
-            <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #009246', pb: 2, mb: 2 }}>
+            <ComprobanteDocumentWrapper
+              tipoDocTitle={selectedComprobante.tipoComprobante}
+              nroDocumento={selectedComprobante.nroComprobante}
+              headerGrid={
+                <Grid container spacing={0}>
+                  <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' }, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>CLIENTE RECEPTOR:</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{selectedComprobante.clienteNombre}</Typography>
+                    <Typography variant="caption" display="block" color="text.secondary">CUIT: {selectedComprobante.cuitCliente}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={5} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>FECHA & HORA:</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedComprobante.fechaEmision} ({selectedComprobante.horaEmision}hs)</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' } }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>PEDIDO ASOCIADO:</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>{selectedComprobante.nroPedido}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={5} sx={{ p: 1.5 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>CONDICIÓN IVA:</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedComprobante.tipoIva}</Typography>
+                  </Grid>
+                </Grid>
+              }
+              itemsTitle="Por favor suministrar lo siguiente"
+              itemsTable={
+                <DetalleItemsVentasTable
+                  items={[
+                    { idProductoCompuesto: 101, productoNombre: `Items según Pedido ${selectedComprobante.nroPedido}`, cantidad: 1, precioUnitario: selectedComprobante.importeNeto, subtotal: selectedComprobante.importeNeto }
+                  ]}
+                  readOnly
+                />
+              }
+              footerGrid={
+                <Grid container spacing={0}>
+                  <Grid item xs={12} sm={6} sx={{ p: 1.5, borderRight: '1px solid rgba(128,128,128,0.3)', borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>CONDICIÓN DE PAGO:</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedComprobante.condicionPago}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>ESTADO FISCAL:</Typography>
+                    <Chip label={selectedComprobante.estado} color={selectedComprobante.estado.includes('Pagada') ? 'success' : 'warning'} size="small" sx={{ fontWeight: 700, ml: 1 }} />
+                  </Grid>
+                </Grid>
+              }
+              observacionesInput={
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#009246' }}>PASTAFAB S.A.</Typography>
-                  <Typography variant="caption" display="block">Comprobante de Venta Oficial</Typography>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>DESGLOSE AFIP / FISCAL:</Typography>
+                  <Typography variant="caption" display="block">Neto Gravado: ${selectedComprobante.importeNeto.toLocaleString()}</Typography>
+                  <Typography variant="caption" display="block">IVA 21%: ${selectedComprobante.importeIva.toLocaleString()}</Typography>
                 </Box>
-                <Box align="right">
-                  <Chip label={selectedComprobante.tipoComprobante} color="primary" sx={{ fontWeight: 800, fontSize: '1rem', mb: 0.5 }} />
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{selectedComprobante.nroComprobante}</Typography>
-                </Box>
-              </Box>
-
-              <Grid container spacing={2} sx={{ mb: 2 }}>
-                <Grid item xs={6}>
-                  <Typography variant="caption" color="text.secondary">Cliente / Razón Social:</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedComprobante.clienteNombre}</Typography>
-                  <Typography variant="caption" display="block">CUIT: {selectedComprobante.cuitCliente}</Typography>
-                </Grid>
-                <Grid item xs={6} align="right">
-                  <Typography variant="caption" color="text.secondary">Pedido Asociado:</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedComprobante.nroPedido}</Typography>
-                </Grid>
-              </Grid>
-            </Paper>
+              }
+              totalLabel="Valor total del comprobante:"
+              totalAmount={selectedComprobante.total}
+            />
           )}
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ p: 2 }}>
           <Button startIcon={<PrintIcon />} onClick={() => window.print()}>Imprimir Comprobante</Button>
           <Button variant="contained" onClick={() => setOpenDetail(false)}>Cerrar</Button>
         </DialogActions>
