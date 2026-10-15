@@ -31,6 +31,7 @@ import {
 } from './mockData';
 import ClienteLanding from '../../components/cliente/ClienteLanding';
 import ClienteNavigation from '../../components/cliente/ClienteNavigation';
+import ingredientesPattern from '../../components/cliente/ingredientes-pattern.svg';
 import { ProductoCard, PresupuestoEventoModal } from '../../components/cliente';
 
 /**
@@ -130,10 +131,11 @@ export const CatalogoScreen = () => {
             2. VISTA DE CATÁLOGO COMPLETO (GRILLA CSS UNIFORME 1fr)
            ───────────────────────────────────────────────────────────── */
         <Fade in timeout={300}>
-          <Box sx={{ p: { xs: 1.5, md: 5 }, bgcolor: 'background.default' }}>
-            <Box sx={{ maxWidth: 1440, mx: 'auto', bgcolor: 'background.paper', boxShadow: '6px 8px 22px #51482d20' }}>
+          <Box sx={{ p: { xs: 1.5, md: 5 }, minHeight: '100vh', bgcolor: 'primary.main', backgroundImage: `url("${ingredientesPattern}")`, backgroundRepeat: 'repeat', backgroundSize: { xs: '320px', md: '440px' } }}>
+            <Box sx={{ maxWidth: 1440, mx: 'auto' }}>
             <ClienteNavigation onInicio={() => setVistaCompleta(false)} onProductos={handleClearFilters} />
-            <Box sx={{ px: { xs: 2, md: 4 }, py: 3 }}>
+            <Box sx={{ py: 3 }}>
+            <Box sx={{ bgcolor: 'background.paper', borderRadius: '14px', px: { xs: 2, md: 4 }, pt: 2, mb: 3, boxShadow: '0 5px 20px #20331520' }}>
             <Box sx={{ textAlign: 'center', py: 2, mb: 2 }}>
               <Typography sx={{ color: 'primary.main', fontSize: 10, letterSpacing: '0.2em', fontWeight: 700 }}>DE NUESTRA COCINA A TU MESA</Typography>
               <Typography component="h1" sx={{ fontFamily: 'Kristi, cursive', color: 'primary.main', fontSize: { xs: 58, md: 76 }, lineHeight: 1.2 }}>Nuestra carta</Typography>
@@ -231,6 +233,7 @@ export const CatalogoScreen = () => {
               </Tabs>
             </Box>
 
+            </Box>
             {/* GRILLA UNIFORME CON CSS GRID: Todas las tarjetas tienen idéntico ancho (1fr) y están equitativamente distribuidas */}
             {filteredProducts.length === 0 ? (
               <Paper
