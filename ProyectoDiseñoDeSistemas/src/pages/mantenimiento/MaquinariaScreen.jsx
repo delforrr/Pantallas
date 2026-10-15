@@ -69,16 +69,18 @@ const getWearLevel = (hours) => {
   return { label: "Alto", color: "error", text: "Desgaste Alto (> 3.000 hs)" };
 };
 
+// Función independiente para resolución de color de prioridad (evita ternario anidado S3358)
+const getPrioridadColor = (prioridad) => {
+  if (prioridad === "Alta") return "error";
+  if (prioridad === "Media") return "warning";
+  return "info";
+};
+
 const INITIAL_FORM_STATE = {
   codigo: "",
   nombre: "",
-  marca: "General",
-  modelo: "Estándar",
-  linea: "Elaboración de Masas",
   estado: "Operativa",
   horasUso: 0,
-  ultimoMantenimiento: "2026-03-10",
-  proximoMantenimiento: "2026-03-24",
   observaciones: "",
 };
 
@@ -1017,16 +1019,6 @@ export const MaquinariaScreen = () => {
                   color="text.secondary"
                   sx={{ display: "block", mb: 0.5 }}
                 >
-                  Técnico Responsable Habitual
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>
-                  {selectedMaq.responsable}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ display: "block", mb: 0.5 }}
-                >
                   Observaciones Técnicas
                 </Typography>
                 <Typography variant="body2" sx={{ fontStyle: "italic" }}>
@@ -1213,12 +1205,7 @@ export const MaquinariaScreen = () => {
                       })
                     }
                     renderValue={(val) => {
-                      const col =
-                        val === "Alta"
-                          ? "error"
-                          : val === "Media"
-                            ? "warning"
-                            : "info";
+                      const col = getPrioridadColor(val);
                       return (
                         <Chip
                           label={val}

@@ -22,6 +22,19 @@ const STATUS_COLOR_MAP = {
   "Fuera de Servicio": "default",
 };
 
+// Funciones independientes para resolución de colores del ícono (evita ternarios anidados S3358)
+const getIconBgColor = (estado) => {
+  if (estado === "Operativa") return "action.hover";
+  if (estado === "En Mantenimiento") return "warning.light";
+  return "error.light";
+};
+
+const getIconColor = (estado) => {
+  if (estado === "Operativa") return "primary.main";
+  if (estado === "En Mantenimiento") return "warning.dark";
+  return "error.dark";
+};
+
 export const MaquinariaCard = ({
   maquinaria,
   onEdit,
@@ -42,7 +55,7 @@ export const MaquinariaCard = ({
       sx={{
         borderRadius: "16px",
         border: "1px solid",
-        borderColor: maquinaria.alerta48hs ? "error.main" : "divider",
+        borderColor: "divider",
         p: 2.5,
         display: "flex",
         flexDirection: "column",
@@ -77,18 +90,8 @@ export const MaquinariaCard = ({
               width: 44,
               height: 44,
               borderRadius: "12px",
-              bgcolor:
-                maquinaria.estado === "Operativa"
-                  ? "action.hover"
-                  : maquinaria.estado === "En Mantenimiento"
-                    ? "warning.light"
-                    : "error.light",
-              color:
-                maquinaria.estado === "Operativa"
-                  ? "primary.main"
-                  : maquinaria.estado === "En Mantenimiento"
-                    ? "warning.dark"
-                    : "error.dark",
+              bgcolor: getIconBgColor(maquinaria.estado),
+              color: getIconColor(maquinaria.estado),
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
