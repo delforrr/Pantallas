@@ -127,10 +127,10 @@ export const CatalogoScreen = () => {
             2. VISTA DE CATÁLOGO COMPLETO (GRILLA CSS UNIFORME 1fr)
            ───────────────────────────────────────────────────────────── */
         <Fade in timeout={300}>
-          <Box sx={{ p: { xs: 1.5, md: 5 }, minHeight: '100vh', bgcolor: 'primary.main', backgroundImage: `url("${ingredientesPattern}")`, backgroundRepeat: 'repeat', backgroundSize: { xs: '320px', md: '440px' } }}>
+          <Box sx={{ p: { xs: 1.5, md: 5 }, minHeight: '100vh', bgcolor: 'primary.main' }}>
             <Box sx={{ maxWidth: 1440, mx: 'auto' }}>
             <ClienteNavigation sobreVerde onInicio={() => clientStore.setCatalogoModo('inicio')} onProductos={() => { handleClearFilters(); }} />
-            <Box sx={{ py: 3 }}>
+            <Box sx={{ py: 3, backgroundImage: `url("${ingredientesPattern}")`, backgroundRepeat: 'repeat', backgroundSize: { xs: '320px', md: '440px' } }}>
             <Box sx={{ bgcolor: 'transparent', px: { xs: 2, md: 4 }, pt: 2, mb: 3 }}>
             <Box sx={{ textAlign: 'center', py: 2, mb: 2, '& > .MuiTypography-root': { bgcolor: 'primary.main', width: 'fit-content', maxWidth: '100%', mx: 'auto', px: 2, py: 0.5, borderRadius: '8px' } }}>
               <Typography sx={{ color: '#fff', fontSize: 10, letterSpacing: '0.2em', fontWeight: 700 }}>DE NUESTRA COCINA A TU MESA</Typography>
