@@ -113,28 +113,7 @@ const CarritoHabitual = () => {
 
   return (
     <Box>
-      {/* Barra superior de navegación / UX para volver */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          mb: 2.5,
-          p: 1.5,
-          bgcolor: 'background.paper',
-          borderRadius: '12px',
-          border: '1px solid',
-          borderColor: 'divider',
-          flexWrap: 'wrap',
-          gap: 1.5,
-        }}
-      >
 
-
-        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-          Paso 1 de 2: Revisión de Ítems y Configuración del Pedido
-        </Typography>
-      </Box>
 
       <Box
         sx={{
