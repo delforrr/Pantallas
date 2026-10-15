@@ -3,6 +3,7 @@ import { Card, CardMedia, CardContent, Box, Typography, IconButton, Button } fro
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import { clientStore, MINIMO_MAYORISTA, PRODUCT_IMAGES } from '../../pages/cliente/mockData';
 
 export const ProductoCard = ({ producto, onAddToCartFeedback, modoMayorista = false, cantidadMayorista = 0, onAgregarMayorista }) => {
@@ -45,14 +46,15 @@ export const ProductoCard = ({ producto, onAddToCartFeedback, modoMayorista = fa
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5, mb: 1 }}>{producto.variedad}</Typography>
         {modoMayorista && <Typography variant="caption" color="text.secondary" sx={{ mb: 1 }}>Mínimo {minimo} por producto</Typography>}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap', mt: 'auto', pt: 1 }}>
-          <Box role="group" aria-label={`Cantidad de ${producto.nombre}`} sx={{ display: 'flex', alignItems: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 20 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: { xs: 0.5, sm: 1 }, flexWrap: { xs: 'nowrap', sm: 'wrap' }, mt: 'auto', pt: 1 }}>
+          <Box role="group" aria-label={`Cantidad de ${producto.nombre}`} sx={{ display: 'flex', alignItems: 'center', flex: { xs: 1, sm: '0 0 auto' }, minWidth: 0, border: '1px solid', borderColor: 'divider', borderRadius: 20, '& .MuiIconButton-root': { flex: { xs: 1, sm: '0 0 auto' }, minWidth: 0, px: { xs: 0.25, sm: 0.625 }, minHeight: { xs: 40, sm: 0 } } }}>
             <IconButton size="small" aria-label={`Reducir cantidad de ${producto.nombre}`} onClick={() => cambiarCantidad(-1)} disabled={cantidad <= minimo || agregadoAnim || sinStock}><RemoveIcon fontSize="small" /></IconButton>
-            <Typography aria-live="polite" sx={{ minWidth: 24, textAlign: 'center', fontWeight: 600 }}>{cantidad}</Typography>
+            <Typography aria-live="polite" sx={{ minWidth: { xs: 18, sm: 24 }, textAlign: 'center', fontWeight: 600 }}>{cantidad}</Typography>
             <IconButton size="small" aria-label={`Aumentar cantidad de ${producto.nombre}`} onClick={() => cambiarCantidad(1)} disabled={cantidad >= disponible || agregadoAnim || sinStock}><AddIcon fontSize="small" /></IconButton>
           </Box>
-          <Button variant="contained" color="secondary" onClick={handleAddToCart} disabled={sinStock || agregadoAnim} startIcon={agregadoAnim ? <CheckCircleIcon /> : undefined} aria-label={`Agregar ${cantidad} de ${producto.nombre} al carrito${modoMayorista ? ' mayorista' : ''}`} sx={{ borderRadius: 20, width: { xs: '100%', sm: 'auto' }, minWidth: 0, px: { xs: 0.75, sm: 2.5 }, py: 1.2, fontSize: { xs: '0.65rem', sm: '0.75rem' }, fontWeight: 700, letterSpacing: '0.04em', border: 0, boxShadow: 'none', '&:hover': { boxShadow: 'none' }, ml: 'auto' }}>
-            {sinStock ? (modoMayorista ? 'Stock menor al mínimo' : 'Sin stock') : agregadoAnim ? '¡Agregado!' : 'Agregar al carrito'}
+          <Button variant="contained" color="secondary" onClick={handleAddToCart} disabled={sinStock || agregadoAnim} startIcon={agregadoAnim ? <CheckCircleIcon /> : undefined} aria-label={`Agregar ${cantidad} de ${producto.nombre} al carrito${modoMayorista ? ' mayorista' : ''}`} sx={{ borderRadius: 20, width: { xs: 44, sm: 'auto' }, minWidth: { xs: 44, sm: 0 }, minHeight: 44, flexShrink: 0, px: { xs: 0, sm: 2.5 }, py: 1.2, fontSize: { xs: '0.65rem', sm: '0.75rem' }, fontWeight: 700, letterSpacing: '0.04em', border: 0, boxShadow: 'none', '&:hover': { boxShadow: 'none' }, '& .MuiButton-startIcon': { display: { xs: 'none', sm: 'inherit' } }, ml: 'auto' }}>
+            <Box component="span" sx={{ display: { xs: 'inline-flex', sm: 'none' } }}>{agregadoAnim ? <CheckCircleIcon fontSize="small" /> : <AddShoppingCartIcon fontSize="small" />}</Box>
+            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{sinStock ? (modoMayorista ? 'Stock menor al mínimo' : 'Sin stock') : agregadoAnim ? '¡Agregado!' : 'Agregar al carrito'}</Box>
           </Button>
         </Box>
       </CardContent>
