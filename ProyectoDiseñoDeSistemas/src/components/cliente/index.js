@@ -7,4 +7,3 @@ export { default as ProductoCard } from './ProductoCard';
 export { default as PresupuestoEventoModal } from './PresupuestoEventoModal';
 export { default as DetallePedidoModal } from './DetallePedidoModal';
 export { default as ReclamoCanjeModal } from './ReclamoCanjeModal';
-export { default as NotificacionesDrawer } from './NotificacionesDrawer';

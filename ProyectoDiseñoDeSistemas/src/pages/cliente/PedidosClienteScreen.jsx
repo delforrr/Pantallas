@@ -29,7 +29,6 @@ import {
   PedidoClienteItem,
   DetallePedidoModal,
   ReclamoCanjeModal,
-  NotificacionesDrawer,
 } from '../../components/cliente';
 
 const FILTROS_ESTADO = [
@@ -482,8 +481,6 @@ export const PedidosClienteScreen = () => {
         action={<CheckCircleIcon sx={{ fontSize: 20, color: 'success.light', mr: 1 }} />}
       />
 
-      {/* Drawer lateral de notificaciones */}
-      <NotificacionesDrawer />
     </Box>
   );
 };

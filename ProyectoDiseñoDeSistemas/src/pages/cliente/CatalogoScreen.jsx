@@ -42,7 +42,7 @@ import {
   CATEGORIAS_PRODUCTOS,
   CATALOGO_CLIENTE,
 } from './mockData';
-import { ProductoCard, PresupuestoEventoModal, NotificacionesDrawer } from '../../components/cliente';
+import { ProductoCard, PresupuestoEventoModal } from '../../components/cliente';
 
 /**
  * CatalogoScreen - Portal Cliente PastaFab ERP.
@@ -934,8 +934,6 @@ export const CatalogoScreen = () => {
         </Alert>
       </Snackbar>
 
-      {/* DRAWER LATERAL DE NOTIFICACIONES */}
-      <NotificacionesDrawer />
     </Box>
   );
 };
