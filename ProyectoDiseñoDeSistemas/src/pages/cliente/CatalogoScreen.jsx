@@ -19,10 +19,8 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import SearchOffIcon from '@mui/icons-material/SearchOff';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useApp } from '../../context/AppContext';
 import {
   useClientStore,
@@ -146,58 +144,6 @@ export const CatalogoScreen = () => {
             </Box>
             {!presupuestoVisible && <>
             {modoMayorista && <Alert severity="info" sx={{ mb: 3 }}>Elegí tus productos: mínimo {MINIMO_MAYORISTA} unidades de cada uno (kg, cajas o envases según su presentación). Después presioná Cotizar para revisar el presupuesto. El pedido requiere aprobación de la tienda.</Alert>}
-            {/* Barra superior de retorno */}
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                mb: 3,
-                p: 1.5,
-                bgcolor: 'background.paper',
-                borderRadius: '12px',
-                border: '1px solid',
-                borderColor: 'divider',
-                flexWrap: 'wrap',
-                gap: 1.5,
-              }}
-            >
-              <Button
-                startIcon={<ArrowBackIcon />}
-                onClick={() => setVistaCompleta(false)}
-                variant="outlined"
-                size="small"
-                sx={{
-                  fontWeight: 700,
-                  borderRadius: '8px',
-                  color: 'text.primary',
-                  borderColor: 'divider',
-                  textTransform: 'none',
-                  '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' },
-                }}
-              >
-                Volver al inicio
-              </Button>
-
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                  Mostrando {filteredProducts.length} de {CATALOGO_CLIENTE.length} productos
-                </Typography>
-                {cartSummary.totalItems > 0 && (
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color="primary"
-                    startIcon={<ShoppingCartIcon />}
-                    onClick={() => navigate('carrito')}
-                    sx={{ fontWeight: 700, borderRadius: '8px' }}
-                  >
-                    Carrito ({cartSummary.totalItems})
-                  </Button>
-                )}
-              </Box>
-            </Box>
-
             {/* Búsqueda y filtros */}
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
