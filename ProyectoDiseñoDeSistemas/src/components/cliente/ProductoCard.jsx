@@ -3,7 +3,7 @@ import { Card, CardMedia, CardContent, Box, Typography, IconButton, Button } fro
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { clientStore, MINIMO_MAYORISTA } from '../../pages/cliente/mockData';
+import { clientStore, MINIMO_MAYORISTA, PRODUCT_IMAGES } from '../../pages/cliente/mockData';
 
 export const ProductoCard = ({ producto, onAddToCartFeedback, modoMayorista = false, cantidadMayorista = 0, onAgregarMayorista }) => {
   const [cantidadMinorista, setCantidad] = useState(1);
@@ -36,7 +36,7 @@ export const ProductoCard = ({ producto, onAddToCartFeedback, modoMayorista = fa
   return (
     <Card component="article" elevation={0} sx={{ height: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', borderRadius: '10px', bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: '0 5px 18px rgba(0,0,0,0.06)', transition: 'transform 0.2s, box-shadow 0.2s', '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 10px 28px rgba(0,0,0,0.1)' } }}>
       <Box sx={{ p: 2, pb: 0, bgcolor: 'background.paper' }}>
-        <CardMedia component="img" image={producto.imagen} alt={producto.nombre} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = '/assets/pasta-dish.png'; }} sx={{ width: '100%', height: { xs: 220, sm: 230, lg: 260 }, objectFit: 'contain', borderRadius: '6px' }} />
+        <CardMedia component="img" image={producto.imagen} alt={producto.nombre} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = PRODUCT_IMAGES[100]; }} sx={{ width: '100%', height: { xs: 220, sm: 230, lg: 260 }, objectFit: 'contain', borderRadius: '6px' }} />
       </Box>
       <CardContent sx={{ p: 2.5, display: 'flex', flexDirection: 'column', flex: 1, '&:last-child': { pb: 2.5 } }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, mb: 1.5 }}>
