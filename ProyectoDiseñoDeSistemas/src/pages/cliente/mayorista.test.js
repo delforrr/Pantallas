@@ -59,3 +59,33 @@ test('agregar mayoristas abre su carrito, acumula cantidades y respeta el stock'
   assert.equal(clientStore.getState().cart, carritoHabitual);
   clientStore.setWholesaleQuantity(producto.idProducto, 0);
 });
+
+test('el mayorista semanal requiere día y lo conserva al aprobarse', () => {
+  const producto = CATALOGO_CLIENTE[0];
+  clientStore.setWholesaleQuantity(producto.idProducto, MINIMO_MAYORISTA);
+  clientStore.setWholesaleDelivery({ tipo: 'semanal' });
+  assert.equal(clientStore.createWholesaleOrder(), null);
+  assert.equal(clientStore.getState().mayoristaItems[producto.idProducto], MINIMO_MAYORISTA);
+  clientStore.setWholesaleDelivery({ tipo: 'semanal', dia: 'Día inválido' });
+  assert.equal(clientStore.getState().mayoristaEntrega.dia, '');
+  clientStore.setWholesaleDelivery({ tipo: 'semanal', dia: 'Miércoles' });
+  const pedido = clientStore.createWholesaleOrder();
+  assert.equal(pedido.tipoMayorista, 'semanal');
+  assert.equal(pedido.diaEntregaSemanal, 'Miércoles');
+  assert.equal(pedido.estadoPedido, 'Pendiente');
+  clientStore.acceptWholesaleOrder(pedido.nroPedido);
+  assert.equal(clientStore.getState().pedidos.find((p) => p.nroPedido === pedido.nroPedido).diaEntregaSemanal, 'Miércoles');
+});
+
+test('el mayorista para evento no guarda día semanal ni retiene una seña no abonada', () => {
+  const producto = CATALOGO_CLIENTE[0];
+  clientStore.setWholesaleDelivery({ tipo: 'semanal', dia: 'Lunes' });
+  clientStore.setWholesaleDelivery({ tipo: 'evento' });
+  assert.equal(clientStore.getState().mayoristaEntrega.dia, '');
+  clientStore.setWholesaleQuantity(producto.idProducto, MINIMO_MAYORISTA);
+  const pedido = clientStore.createWholesaleOrder();
+  assert.equal(pedido.tipoMayorista, 'evento');
+  assert.equal(pedido.diaEntregaSemanal, undefined);
+  clientStore.cancelOrder(pedido.nroPedido);
+  assert.notEqual(clientStore.getState().pedidos.find((p) => p.nroPedido === pedido.nroPedido).estadoPago, 'Seña Retenida (50%)');
+});

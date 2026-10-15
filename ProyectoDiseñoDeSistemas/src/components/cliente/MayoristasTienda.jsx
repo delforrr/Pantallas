@@ -13,7 +13,7 @@ export default function MayoristasTienda() {
   return <Paper component="section" sx={{ p: 3, mb: 3, border: '1px solid', borderColor: 'divider' }}>
     <Typography variant="h6" sx={{ mb: 2 }}>Pedidos mayoristas del portal cliente</Typography>
     {mayoristas.map((pedido) => <Box key={pedido.nroPedido} sx={{ py: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap', borderTop: '1px solid', borderColor: 'divider' }}>
-      <Typography sx={{ fontWeight: 700 }}>{pedido.nroPedido} · ${pedido.total.toLocaleString('es-AR')}</Typography>
+      <Box><Typography sx={{ fontWeight: 700 }}>{pedido.nroPedido} · ${pedido.total.toLocaleString('es-AR')}</Typography><Typography variant="body2" color="text.secondary">{pedido.tipoPedido}{pedido.diaEntregaSemanal && ` · Entrega: ${pedido.diaEntregaSemanal}`}</Typography></Box>
       <Chip label={pedido.estadoPedido === 'Cancelado' ? 'Cancelado' : pedido.aprobacionTienda === 'Pendiente' ? 'Pendiente de aprobación' : 'Aceptado'} color={pedido.estadoPedido === 'Cancelado' ? 'error' : pedido.aprobacionTienda === 'Pendiente' ? 'warning' : 'success'} />
       <Button onClick={() => setPedidoSeleccionado(pedido)}>Revisar presupuesto</Button>
     </Box>)}

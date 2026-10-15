@@ -4,6 +4,10 @@ const dinero = (valor) => `$${valor.toLocaleString('es-AR')}`;
 
 export function DetallePresupuestoMayorista({ pedido }) {
   return <>
+    {pedido.tipoMayorista && <Box sx={{ mb: 2 }}>
+      <Typography sx={{ fontWeight: 700 }}>Tipo de pedido: {pedido.tipoMayorista === 'semanal' ? 'Semanal' : 'Para un evento'}</Typography>
+      {pedido.diaEntregaSemanal && <Typography color="primary">Entrega semanal: {pedido.diaEntregaSemanal}</Typography>}
+    </Box>}
     <TableContainer sx={{ display: { xs: 'none', sm: 'block' } }}>
       <Table size="small" aria-label="Productos del presupuesto mayorista">
         <TableHead><TableRow><TableCell>Producto</TableCell><TableCell align="right">Cantidad</TableCell><TableCell align="right">Precio unitario</TableCell><TableCell align="right">Subtotal</TableCell></TableRow></TableHead>

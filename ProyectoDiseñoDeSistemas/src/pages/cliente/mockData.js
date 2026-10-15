@@ -19,6 +19,7 @@ export const CATEGORIAS_PRODUCTOS = [
 ];
 
 export const MINIMO_MAYORISTA = 10;
+export const DIAS_ENTREGA_SEMANAL = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
 export const calcularPresupuestoMayorista = (cantidades) => {
   const items = Object.entries(cantidades).map(([id, cantidad]) => {
@@ -449,6 +450,7 @@ export const INITIAL_PEDIDOS_CLIENTE = [
 // ============================================================================
 
 let currentStore = {
+  mayoristaEntrega: { tipo: 'evento', dia: '' },
   carritoModo: 'habitual',
   catalogoModo: 'inicio',
   mayoristaItems: {},
@@ -488,6 +490,12 @@ function emitChange() {
 }
 
 export const clientStore = {
+  setWholesaleDelivery({ tipo, dia = '' }) {
+    if (!['evento', 'semanal'].includes(tipo) || (dia && !DIAS_ENTREGA_SEMANAL.includes(dia))) return;
+    currentStore = { ...currentStore, mayoristaEntrega: { tipo, dia: tipo === 'semanal' ? dia : '' } };
+    emitChange();
+  },
+
   setCarritoModo(modo) {
     if (!['habitual', 'mayorista'].includes(modo)) return;
     currentStore = { ...currentStore, carritoModo: modo };
@@ -588,17 +596,21 @@ export const clientStore = {
   },
 
   createWholesaleOrder() {
+    const { tipo, dia } = currentStore.mayoristaEntrega;
+    if (tipo === 'semanal' && !DIAS_ENTREGA_SEMANAL.includes(dia)) return null;
     const presupuesto = calcularPresupuestoMayorista(currentStore.mayoristaItems);
     if (!presupuesto.valido) return null;
     const pedido = this.createOrder({
-      tipoPedido: 'Pedido Mayorista',
+      tipoPedido: tipo === 'semanal' ? 'Pedido Mayorista · Semanal' : 'Pedido Mayorista · Evento',
+      tipoMayorista: tipo,
+      diaEntregaSemanal: tipo === 'semanal' ? dia : undefined,
       requiereAprobacion: true,
       aprobacionTienda: 'Pendiente',
       estadoPago: 'Pendiente de aprobación',
-      modalidadEntrega: 'A coordinar con la tienda',
+      modalidadEntrega: tipo === 'semanal' ? 'Entrega semanal' : 'A coordinar con la tienda',
       domicilioEntrega: currentStore.cliente.direccion,
       telefonoContacto: currentStore.cliente.telefono,
-      fechaEntregaEstimada: 'A confirmar por la tienda',
+      fechaEntregaEstimada: tipo === 'semanal' ? `Entrega semanal: ${dia} (sujeto a aprobación)` : 'A confirmar por la tienda',
       medioPago: 'A coordinar tras la aprobación',
       nroFactura: 'No emitida',
       nroRemito: 'No emitido',
@@ -611,7 +623,7 @@ export const clientStore = {
       total: presupuesto.total,
       items: presupuesto.items,
     }, { clearCart: false });
-    currentStore = { ...currentStore, mayoristaItems: {} };
+    currentStore = { ...currentStore, mayoristaItems: {}, mayoristaEntrega: { tipo: 'evento', dia: '' } };
     emitChange();
     return pedido;
   },
@@ -653,7 +665,7 @@ export const clientStore = {
   cancelOrder(nroPedido, motivo) {
     const newPedidos = currentStore.pedidos.map((p) => {
       if (p.nroPedido === nroPedido) {
-        const esEvento = p.tipoPedido.includes('Evento');
+        const esEvento = p.tipoPedido.includes('Evento') && p.señaAbonada > 0;
         return {
           ...p,
           estadoPedido: 'Cancelado',
