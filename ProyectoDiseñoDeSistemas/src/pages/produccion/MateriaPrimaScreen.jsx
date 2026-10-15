@@ -64,13 +64,7 @@ export const MateriaPrimaScreen = () => {
   // Modal Ver Detalle
   const [viewingMP, setViewingMP] = useState(null);
 
-  // Modal Ajuste / Movimiento de Stock
-  const [stockModalMP, setStockModalMP] = useState(null);
-  const [stockMovimientoMP, setStockMovimientoMP] = useState({
-    tipo: 'Ingreso',
-    cantidad: '',
-    motivo: '',
-  });
+
 
   // Modal Alta / Edición
   const [modalOpen, setModalOpen] = useState(false);
@@ -93,70 +87,7 @@ export const MateriaPrimaScreen = () => {
   // Notificación Snackbar
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  // Abrir modal de ajuste de stock
-  const handleOpenStockModal = (mp) => {
-    setStockModalMP(mp);
-    setStockMovimientoMP({
-      tipo: 'Ingreso',
-      cantidad: '',
-      motivo: '',
-    });
-  };
 
-  // Guardar ajuste de stock en memoria
-  const handleSaveStockAdjustment = () => {
-    if (!stockModalMP) return;
-    const cant = Number(stockMovimientoMP.cantidad);
-    if (isNaN(cant) || (cant <= 0 && stockMovimientoMP.tipo !== 'Ajuste Directo')) {
-      setSnackbar({ open: true, message: 'Ingrese una cantidad válida mayor a 0.', severity: 'error' });
-      return;
-    }
-    if (stockMovimientoMP.tipo === 'Ajuste Directo' && (isNaN(cant) || cant < 0)) {
-      setSnackbar({ open: true, message: 'El valor de recuento físico debe ser 0 o superior.', severity: 'error' });
-      return;
-    }
-
-    const currentStock = Number(stockModalMP.stockActual) || 0;
-    let nuevoStock = currentStock;
-
-    if (stockMovimientoMP.tipo === 'Ingreso') {
-      nuevoStock = currentStock + cant;
-    } else if (stockMovimientoMP.tipo === 'Egreso') {
-      if (cant > currentStock) {
-        setSnackbar({
-          open: true,
-          message: `No se puede egresar más de las existencias actuales (${currentStock} ${stockModalMP.unidad}).`,
-          severity: 'error',
-        });
-        return;
-      }
-      nuevoStock = currentStock - cant;
-    } else if (stockMovimientoMP.tipo === 'Ajuste Directo') {
-      nuevoStock = cant;
-    }
-
-    setMateriasPrimas((prev) =>
-      prev.map((m) => (m.id === stockModalMP.id ? { ...m, stockActual: nuevoStock } : m))
-    );
-
-    setSnackbar({
-      open: true,
-      message: `Stock de "${stockModalMP.nombre}" actualizado a ${nuevoStock} ${stockModalMP.unidad}.`,
-      severity: 'success',
-    });
-    setStockModalMP(null);
-  };
-
-  // Cálculo del stock proyectado para preview en modal
-  const proyectedStockMP = useMemo(() => {
-    if (!stockModalMP) return 0;
-    const current = Number(stockModalMP.stockActual) || 0;
-    const cant = Number(stockMovimientoMP.cantidad) || 0;
-    if (stockMovimientoMP.tipo === 'Ingreso') return current + cant;
-    if (stockMovimientoMP.tipo === 'Egreso') return Math.max(0, current - cant);
-    if (stockMovimientoMP.tipo === 'Ajuste Directo') return cant;
-    return current;
-  }, [stockModalMP, stockMovimientoMP]);
 
   // Estadísticas discretas de resumen
   const stats = useMemo(() => {
@@ -411,7 +342,7 @@ export const MateriaPrimaScreen = () => {
                 <TableCell sx={{ fontWeight: 700, width: 120, whiteSpace: 'nowrap' }}>Stock Actual</TableCell>
                 <TableCell sx={{ fontWeight: 700, width: 110, whiteSpace: 'nowrap' }}>Stock Mínimo</TableCell>
                 <TableCell sx={{ fontWeight: 700, width: 105, whiteSpace: 'nowrap' }}>Estado</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700, width: 145, minWidth: 145, whiteSpace: 'nowrap' }}>
+                <TableCell align="right" sx={{ fontWeight: 700, width: 120, minWidth: 120, whiteSpace: 'nowrap' }}>
                   Acciones
                 </TableCell>
               </TableRow>
@@ -489,17 +420,8 @@ export const MateriaPrimaScreen = () => {
                         />
                       )}
                     </TableCell>
-                    <TableCell align="right" sx={{ whiteSpace: 'nowrap', width: 145, minWidth: 145, py: 1.5 }}>
+                    <TableCell align="right" sx={{ whiteSpace: 'nowrap', width: 120, minWidth: 120, py: 1.5 }}>
                       <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.2, flexWrap: 'nowrap' }}>
-                        <Tooltip title="Ajustar Stock de Materia Prima">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleOpenStockModal(mp)}
-                            sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
-                          >
-                            <InventoryIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
                         <Tooltip title="Ver Ficha de Materia Prima">
                           <IconButton
                             size="small"
@@ -538,126 +460,7 @@ export const MateriaPrimaScreen = () => {
         </TableContainer>
       )}
 
-      {/* ── Modal: Ajustar Stock de Materia Prima ────────────── */}
-      <Dialog
-        open={Boolean(stockModalMP)}
-        onClose={() => setStockModalMP(null)}
-        maxWidth="xs"
-        fullWidth
-        PaperProps={{ sx: { borderRadius: '14px' } }}
-      >
-        {stockModalMP && (
-          <>
-            <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block' }}>
-                {stockModalMP.codigo || stockModalMP.id} - Movimiento de Stock
-              </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                {stockModalMP.nombre}
-              </Typography>
-            </DialogTitle>
-            <Divider />
-            <DialogContent sx={{ pt: 2.5, display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Paper variant="outlined" sx={{ p: 1.5, borderRadius: '10px', bgcolor: 'action.hover' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Stock Actual:
-                  </Typography>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                    {stockModalMP.stockActual ?? 0} {stockModalMP.unidad}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Stock Mínimo de Seguridad:
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                    {stockModalMP.stockMinimo ?? 10} {stockModalMP.unidad}
-                  </Typography>
-                </Box>
-              </Paper>
 
-              <TextField
-                select
-                label="Tipo de Movimiento"
-                fullWidth
-                size="small"
-                value={stockMovimientoMP.tipo}
-                onChange={(e) => setStockMovimientoMP({ ...stockMovimientoMP, tipo: e.target.value })}
-              >
-                <MenuItem value="Ingreso">Ingreso (+ Recepción de Compra / Ajuste a favor)</MenuItem>
-                <MenuItem value="Egreso">Egreso (- Consumo / Merma / Rotura de saco)</MenuItem>
-                <MenuItem value="Ajuste Directo">Ajuste Directo (= Recuento físico en depósito)</MenuItem>
-              </TextField>
-
-              <TextField
-                label={
-                  stockMovimientoMP.tipo === 'Ajuste Directo'
-                    ? `Nuevo Stock Total (${stockModalMP.unidad})`
-                    : `Cantidad a ${stockMovimientoMP.tipo === 'Ingreso' ? 'Ingresar' : 'Egresar'} (${stockModalMP.unidad})`
-                }
-                type="number"
-                fullWidth
-                size="small"
-                value={stockMovimientoMP.cantidad}
-                onChange={(e) => setStockMovimientoMP({ ...stockMovimientoMP, cantidad: e.target.value })}
-                placeholder="0"
-                autoFocus
-              />
-
-              <TextField
-                label="Motivo u Observación"
-                fullWidth
-                size="small"
-                value={stockMovimientoMP.motivo}
-                onChange={(e) => setStockMovimientoMP({ ...stockMovimientoMP, motivo: e.target.value })}
-                placeholder="Ej. Recepción de proveedor, merma por humedad, inventario..."
-              />
-
-              {/* Previsualización del stock final */}
-              <Box
-                sx={{
-                  p: 1.5,
-                  borderRadius: '10px',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                  Stock Proyectado:
-                </Typography>
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontWeight: 700,
-                    color: proyectedStockMP <= Number(stockModalMP.stockMinimo) ? 'error.main' : 'primary.main',
-                  }}
-                >
-                  {proyectedStockMP} {stockModalMP.unidad}
-                </Typography>
-              </Box>
-            </DialogContent>
-            <Divider />
-            <DialogActions sx={{ p: 2 }}>
-              <Button onClick={() => setStockModalMP(null)} color="inherit" sx={{ textTransform: 'none', fontWeight: 600 }}>
-                Cancelar
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSaveStockAdjustment}
-                disabled={stockMovimientoMP.cantidad === ''}
-                sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '8px', px: 2.5 }}
-              >
-                Guardar Ajuste
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
 
       {/* ── Modal: Alta / Edición de Materia Prima ─────────────── */}
       <Dialog
@@ -896,19 +699,7 @@ export const MateriaPrimaScreen = () => {
                         {viewingMP.stockActual} {viewingMP.unidad}
                       </Typography>
                     </Box>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      color="inherit"
-                      onClick={() => {
-                        const mp = viewingMP;
-                        setViewingMP(null);
-                        handleOpenStockModal(mp);
-                      }}
-                      sx={{ textTransform: 'none', fontSize: '0.75rem', fontWeight: 600, borderRadius: '8px' }}
-                    >
-                      Ajustar
-                    </Button>
+
                   </Paper>
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -929,19 +720,7 @@ export const MateriaPrimaScreen = () => {
               <Button onClick={() => setViewingMP(null)} color="inherit" sx={{ textTransform: 'none', fontWeight: 600 }}>
                 Cerrar
               </Button>
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<InventoryIcon />}
-                onClick={() => {
-                  const mp = viewingMP;
-                  setViewingMP(null);
-                  handleOpenStockModal(mp);
-                }}
-                sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '8px' }}
-              >
-                Ajustar Stock
-              </Button>
+
               <Button
                 variant="contained"
                 color="primary"
