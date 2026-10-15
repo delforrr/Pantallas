@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import {
   Box,
   Typography,
-  Chip,
+  Tabs,
+  Tab,
   Button,
   TextField,
   InputAdornment,
@@ -19,7 +20,6 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import StarIcon from '@mui/icons-material/Star';
 import SearchOffIcon from '@mui/icons-material/SearchOff';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -31,6 +31,7 @@ import {
   CATALOGO_CLIENTE,
 } from './mockData';
 import ClienteLanding from '../../components/cliente/ClienteLanding';
+import ClienteNavigation from '../../components/cliente/ClienteNavigation';
 import { ProductoCard, PresupuestoEventoModal } from '../../components/cliente';
 
 /**
@@ -45,7 +46,6 @@ export const CatalogoScreen = () => {
   const [vistaCompleta, setVistaCompleta] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [soloDestacados, setSoloDestacados] = useState(false);
   const [modalEventoOpen, setModalEventoOpen] = useState(false);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
@@ -66,16 +66,6 @@ export const CatalogoScreen = () => {
     const totalPrice = store.cart.reduce((acc, item) => acc + item.subtotal, 0);
     return { totalItems, totalPrice };
   }, [store.cart]);
-
-  const categoryCounts = useMemo(() => {
-    const counts = { Todos: CATALOGO_CLIENTE.length };
-    CATEGORIAS_PRODUCTOS.forEach((cat) => {
-      if (cat !== 'Todos') {
-        counts[cat] = CATALOGO_CLIENTE.filter((p) => p.categoria === cat).length;
-      }
-    });
-    return counts;
-  }, []);
 
   const productosDestacados = useMemo(() => {
     return CATALOGO_CLIENTE.filter((p) => p.destacado);
@@ -150,11 +140,9 @@ export const CatalogoScreen = () => {
       const matchesCategory =
         selectedCategory === 'Todos' || producto.categoria === selectedCategory;
 
-      const matchesDestacado = !soloDestacados || producto.destacado;
-
-      return matchesSearch && matchesCategory && matchesDestacado;
+      return matchesSearch && matchesCategory;
     });
-  }, [searchTerm, selectedCategory, soloDestacados]);
+  }, [searchTerm, selectedCategory]);
 
   const handleProductAdded = (producto, cantidad) => {
     setSnackbar({
@@ -175,7 +163,6 @@ export const CatalogoScreen = () => {
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedCategory('Todos');
-    setSoloDestacados(false);
   };
 
   return (
@@ -205,7 +192,15 @@ export const CatalogoScreen = () => {
             2. VISTA DE CATÁLOGO COMPLETO (GRILLA CSS UNIFORME 1fr)
            ───────────────────────────────────────────────────────────── */
         <Fade in timeout={300}>
-          <Box>
+          <Box sx={{ p: { xs: 1.5, md: 5 }, bgcolor: 'background.default' }}>
+            <Box sx={{ maxWidth: 1440, mx: 'auto', bgcolor: 'background.paper', boxShadow: '6px 8px 22px #51482d20' }}>
+            <ClienteNavigation onInicio={() => setVistaCompleta(false)} onProductos={handleClearFilters} />
+            <Box sx={{ px: { xs: 2, md: 4 }, py: 3 }}>
+            <Box sx={{ textAlign: 'center', py: 2, mb: 2 }}>
+              <Typography sx={{ color: 'primary.main', fontSize: 10, letterSpacing: '0.2em', fontWeight: 700 }}>DE NUESTRA COCINA A TU MESA</Typography>
+              <Typography component="h1" sx={{ fontFamily: 'Kristi, cursive', color: 'primary.main', fontSize: { xs: 58, md: 76 }, lineHeight: 1.2 }}>Nuestra carta</Typography>
+              <Typography variant="body2" color="text.secondary">Pastas artesanales, salsas caseras y sabores para compartir.</Typography>
+            </Box>
             {/* Barra superior de retorno */}
             <Box
               sx={{
@@ -291,40 +286,11 @@ export const CatalogoScreen = () => {
                   }}
                 />
 
-                <Chip
-                  icon={<StarIcon sx={{ fontSize: '15px !important' }} />}
-                  label="Solo Destacados"
-                  clickable
-                  onClick={() => setSoloDestacados((prev) => !prev)}
-                  color={soloDestacados ? 'warning' : 'default'}
-                  variant={soloDestacados ? 'filled' : 'outlined'}
-                  sx={{ fontWeight: 700, borderRadius: '10px', height: 38 }}
-                />
               </Box>
 
-              {/* Categorías */}
-              <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', py: 0.5, alignItems: 'center' }}>
-                {CATEGORIAS_PRODUCTOS.map((categoria) => {
-                  const isSelected = selectedCategory === categoria;
-                  const count = categoryCounts[categoria] || 0;
-                  return (
-                    <Chip
-                      key={categoria}
-                      label={`${categoria} (${count})`}
-                      clickable
-                      onClick={() => setSelectedCategory(categoria)}
-                      color={isSelected ? 'primary' : 'default'}
-                      variant={isSelected ? 'filled' : 'outlined'}
-                      sx={{
-                        fontWeight: isSelected ? 700 : 500,
-                        borderRadius: '10px',
-                        fontSize: '0.8rem',
-                        transition: 'all 0.15s ease',
-                      }}
-                    />
-                  );
-                })}
-              </Box>
+              <Tabs value={selectedCategory} onChange={(_, value) => setSelectedCategory(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile aria-label="Tipos de producto" textColor="secondary" indicatorColor="secondary" sx={{ mb: 4, '& .MuiTabs-flexContainer, & .MuiTabs-list': { justifyContent: { sm: 'center' } }, '& .MuiTabs-indicator': { height: 3, borderRadius: 2 }, '& .MuiTab-root': { textTransform: 'none', fontWeight: 700, fontSize: '0.95rem', px: { xs: 2, md: 3 }, minHeight: 56 } }}>
+                {CATEGORIAS_PRODUCTOS.map((categoria) => <Tab key={categoria} value={categoria} label={categoria} />)}
+              </Tabs>
             </Box>
 
             {/* GRILLA UNIFORME CON CSS GRID: Todas las tarjetas tienen idéntico ancho (1fr) y están equitativamente distribuidas */}
@@ -382,6 +348,8 @@ export const CatalogoScreen = () => {
                 ))}
               </Box>
             )}
+            </Box>
+            </Box>
           </Box>
         </Fade>
       )}
