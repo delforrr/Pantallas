@@ -20,6 +20,18 @@ export const CATEGORIAS_PRODUCTOS = [
 
 export const CATALOGO_CLIENTE = [
   {
+    idProducto: 100,
+    nombre: 'Penne Rigate Tradizionale (Kg)',
+    categoria: 'Pastas Frescas',
+    variedad: 'Trefilado al bronce con 100% sémola candeal, tomates cherry confitados y finas hierbas',
+    precio: 3400,
+    unidad: 'Kg',
+    stock: 50,
+    destacado: true,
+    imagen: '/assets/pasta-dish.png',
+    maridajeSugerido: 'Tomates cherry dulces, albahaca fresca y aceite de oliva virgen extra',
+  },
+  {
     idProducto: 101,
     nombre: 'Sorrentinos Jamón y Queso (Caja 1kg)',
     categoria: 'Pastas Rellenas',
