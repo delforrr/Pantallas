@@ -1,10 +1,12 @@
 import React from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
-import { Box, Typography, Fade } from '@mui/material';
+import { Box, Typography, Fade, GlobalStyles } from '@mui/material';
 import { getTheme } from './theme';
 import { AppProvider, useApp } from './context/AppContext';
 import LoginPage from './pages/LoginPage';
 import { AppLayout } from './components/layout';
+import ClientePortalLayout from './components/cliente/ClientePortalLayout';
+import MayoristasTienda from './components/cliente/MayoristasTienda';
 
 // ── All screen imports ──────────────────────────────────────
 import CatalogoScreen from './pages/cliente/CatalogoScreen';
@@ -33,13 +35,15 @@ import MaquinariaScreen from './pages/mantenimiento/MaquinariaScreen';
 import OrdenesMantScreen from './pages/mantenimiento/OrdenesMantScreen';
 import { PAGE_LABELS } from './config/navigation';
 
+const PedidosTienda = () => <><MayoristasTienda /><PedidosScreen /></>;
+
 const SCREEN_MAP = {
   catalogo: CatalogoScreen,
   carrito: CarritoScreen,
   pedidos_cliente: PedidosClienteScreen,
   medios_pago: MediosPagoScreen,
   clientes: ClientesScreen,
-  pedidos: PedidosScreen,
+  pedidos: PedidosTienda,
   presupuestos: PresupuestosScreen,
   comprobantes_venta: ComprobantesVentaScreen,
   comprobantes_pago: ComprobantesPagoScreen,
@@ -58,20 +62,24 @@ const SCREEN_MAP = {
 
 // ── Page wrapper with fade animation ───────────────────────
 const PageContent = () => {
-  const { currentPage } = useApp();
+  const { currentPage, user } = useApp();
   const Screen = SCREEN_MAP[currentPage];
   const label = PAGE_LABELS[currentPage] || 'Dashboard';
+  const isCliente = user?.role === 'cliente' || ['catalogo', 'carrito', 'pedidos_cliente', 'medios_pago'].includes(currentPage);
 
   return (
     <Fade in key={currentPage} timeout={300}>
-      <Box sx={{ flex: 1, p: { xs: 1.5, sm: 2.5, md: 3 }, overflowY: 'auto', minWidth: 0, width: '100%', maxWidth: '100%' }}>
+      <Box sx={{ flex: 1, p: isCliente ? 0 : { xs: 1.5, sm: 2.5, md: 3 }, overflowY: 'auto', minWidth: 0, width: '100%', maxWidth: '100%' }}>
+        {isCliente && (
+          <GlobalStyles styles={{ '#notifications-btn': { display: 'none !important' } }} />
+        )}
         {/* Page header */}
-        <Box sx={{ mb: 3 }}>
+        {!isCliente && <Box sx={{ mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', letterSpacing: '-0.01em' }}>
             {label}
           </Typography>
           <Box sx={{ width: 40, height: 3, background: (theme) => `linear-gradient(90deg, ${theme.palette.primary.main}, transparent)`, borderRadius: 2, mt: 0.8 }} />
-        </Box>
+        </Box>}
         {Screen ? <Screen /> : (
           <Box sx={{ color: 'text.disabled', mt: 6, textAlign: 'center' }}>
             <Typography variant="h6">Seleccioná una sección del menú</Typography>
@@ -85,12 +93,14 @@ const PageContent = () => {
 // ── Root: switches between login and layout ─────────────────
 const AppRoot = () => {
   const { user, themeMode, sidebarOpen, toggleSidebar } = useApp();
-  const theme = React.useMemo(() => getTheme(themeMode), [themeMode]);
+  const theme = React.useMemo(() => getTheme(user?.role === 'cliente' ? 'light' : themeMode), [themeMode, user?.role]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {user ? (
+      {user ? user.role === 'cliente' ? (
+        <ClientePortalLayout><PageContent /></ClientePortalLayout>
+      ) : (
         <>
           {sidebarOpen && (
             <Box

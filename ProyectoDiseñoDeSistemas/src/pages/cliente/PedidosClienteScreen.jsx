@@ -29,7 +29,6 @@ import {
   PedidoClienteItem,
   DetallePedidoModal,
   ReclamoCanjeModal,
-  NotificacionesDrawer,
 } from '../../components/cliente';
 
 const FILTROS_ESTADO = [
@@ -93,11 +92,9 @@ export const PedidosClienteScreen = () => {
       const q = searchQuery.toLowerCase().trim();
 
       const nroMatch = p.nroPedido?.toLowerCase().includes(q);
-      const remitoMatch = p.nroRemito?.toLowerCase().includes(q);
-      const facturaMatch = p.nroFactura?.toLowerCase().includes(q);
       const itemsMatch = p.items?.some((i) => i.nombre.toLowerCase().includes(q));
 
-      return nroMatch || remitoMatch || facturaMatch || itemsMatch;
+      return nroMatch || itemsMatch;
     });
   }, [pedidos, filtroActivo, searchQuery]);
 
@@ -133,7 +130,7 @@ export const PedidosClienteScreen = () => {
       motivoCancelacion.trim() || undefined
     );
 
-    const esEvento = pedidoACancelar.tipoPedido?.includes('Evento');
+    const esEvento = pedidoACancelar.tipoPedido?.includes('Evento') && pedidoACancelar.señaAbonada > 0;
     setSnackbarMsg(
       esEvento
         ? `Pedido ${pedidoACancelar.nroPedido} cancelado. Se aplicó la retención de seña del 50%.`
@@ -315,7 +312,7 @@ export const PedidosClienteScreen = () => {
         }}
       >
         <TextField
-          placeholder="Buscar por nro de pedido, remito o producto..."
+          placeholder="Buscar por nro de pedido o producto..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           size="small"
@@ -428,7 +425,7 @@ export const PedidosClienteScreen = () => {
         </DialogTitle>
 
         <DialogContent sx={{ pt: '20px !important' }}>
-          {pedidoACancelar?.tipoPedido?.includes('Evento') ? (
+          {pedidoACancelar?.tipoPedido?.includes('Evento') && pedidoACancelar?.señaAbonada > 0 ? (
             <Alert severity="warning" sx={{ mb: 2.5, borderRadius: '12px' }}>
               <AlertTitle sx={{ fontWeight: 700 }}>
                 Condiciones de Cancelación de Evento (Seña del 50%)
@@ -482,8 +479,6 @@ export const PedidosClienteScreen = () => {
         action={<CheckCircleIcon sx={{ fontSize: 20, color: 'success.light', mr: 1 }} />}
       />
 
-      {/* Drawer lateral de notificaciones */}
-      <NotificacionesDrawer />
     </Box>
   );
 };

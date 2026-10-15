@@ -21,7 +21,7 @@ import { useClientStore, clientStore } from "../../pages/cliente/mockData";
 export const ResumenPedido = ({ onOrderSuccess }) => {
   const { cart, cliente } = useClientStore();
 
-  const [tipoPedido, setTipoPedido] = useState("Venta Mostrador / Local");
+  const [tipoPedido, setTipoPedido] = useState("Venta Mostrador");
   const [modalidadEntrega, setModalidadEntrega] = useState("Retiro en Fábrica");
   const [medioPago, setMedioPago] = useState("Efectivo en Mostrador");
   const [direccionEntrega, setDireccionEntrega] = useState(
@@ -129,7 +129,7 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
         >
           <MenuItem value="Venta Mostrador">Venta Mostrador</MenuItem>
           <MenuItem value="Pedido Fijo Semanal">Pedido Fijo Semanal</MenuItem>
-          <MenuItem value="Evento Especial / Fiestas">Evento Especial</MenuItem>
+          <MenuItem value="Evento Especial">Evento Especial</MenuItem>
         </Select>
       </FormControl>
 
@@ -180,7 +180,7 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
               Retiro en Fábrica
             </Box>
           </MenuItem>
-          <MenuItem value="Delivery Minorista (PedidosYa / Rappi)">
+          <MenuItem value="Delivery">
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <LocalShippingOutlinedIcon
                 fontSize="small"
