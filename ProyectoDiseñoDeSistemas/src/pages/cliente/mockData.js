@@ -18,7 +18,50 @@ export const CATEGORIAS_PRODUCTOS = [
   'Packs y Combos',
 ];
 
+export const PRODUCT_IMAGES = {
+  100: new URL('../../components/cliente/productos/penne.webp', import.meta.url).href,
+  101: new URL('../../components/cliente/productos/sorrentinos.webp', import.meta.url).href,
+  102: new URL('../../components/cliente/productos/ravioles.webp', import.meta.url).href,
+  103: new URL('../../components/cliente/productos/tallarines.webp', import.meta.url).href,
+  104: new URL('../../components/cliente/productos/noquis.webp', import.meta.url).href,
+  105: new URL('../../components/cliente/productos/panzotti.webp', import.meta.url).href,
+  106: new URL('../../components/cliente/productos/capeletis.webp', import.meta.url).href,
+  201: new URL('../../components/cliente/productos/tuco.webp', import.meta.url).href,
+  202: new URL('../../components/cliente/productos/bolognesa.webp', import.meta.url).href,
+  203: new URL('../../components/cliente/productos/cuatro-quesos.webp', import.meta.url).href,
+  204: new URL('../../components/cliente/productos/pesto.webp', import.meta.url).href,
+  301: new URL('../../components/cliente/productos/pack-familiar.webp', import.meta.url).href,
+  302: new URL('../../components/cliente/productos/combo-eventos.webp', import.meta.url).href,
+};
+
+export const MINIMO_MAYORISTA = 10;
+export const DIAS_ENTREGA_SEMANAL = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+export const calcularPresupuestoMayorista = (cantidades) => {
+  const items = Object.entries(cantidades).map(([id, cantidad]) => {
+    const producto = CATALOGO_CLIENTE.find((p) => p.idProducto === Number(id));
+    if (!producto || !Number.isInteger(cantidad) || cantidad < MINIMO_MAYORISTA || cantidad > producto.stock) return null;
+    return { idProducto: producto.idProducto, nombre: producto.nombre, cantidad, unidad: producto.unidad, precioUnitario: producto.precio, subtotal: producto.precio * cantidad };
+  });
+  const valido = items.length > 0 && items.every(Boolean);
+  const subtotal = valido ? items.reduce((total, item) => total + item.subtotal, 0) : 0;
+  const descuento = Math.round(subtotal * 0.1);
+  return { items: valido ? items : [], valido, subtotal, descuento, total: subtotal - descuento };
+};
+
 export const CATALOGO_CLIENTE = [
+  {
+    idProducto: 100,
+    nombre: 'Penne Rigate Tradizionale (Kg)',
+    categoria: 'Pastas Frescas',
+    variedad: 'Trefilado al bronce con 100% sémola candeal, tomates cherry confitados y finas hierbas',
+    precio: 3400,
+    unidad: 'Kg',
+    stock: 50,
+    destacado: true,
+    imagen: PRODUCT_IMAGES[100],
+    maridajeSugerido: 'Tomates cherry dulces, albahaca fresca y aceite de oliva virgen extra',
+  },
   {
     idProducto: 101,
     nombre: 'Sorrentinos Jamón y Queso (Caja 1kg)',
@@ -30,7 +73,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '8 - 10 min',
     stock: 45,
     destacado: true,
-    imagen: 'https://images.unsplash.com/photo-1587740896339-96a76170508d?auto=format&fit=crop&w=800&q=80',
+    imagen: PRODUCT_IMAGES[101],
     maridajeSugerido: 'Salsa Tuco Casero o Cuatro Quesos',
   },
   {
@@ -44,7 +87,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '6 - 8 min',
     stock: 60,
     destacado: true,
-    imagen: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=800&q=80',
+    imagen: PRODUCT_IMAGES[102],
     maridajeSugerido: 'Salsa Bolognesa o Filetto',
   },
   {
@@ -58,7 +101,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '4 - 5 min',
     stock: 80,
     destacado: false,
-    imagen: 'https://images.unsplash.com/photo-1621996346565-e3d5d6281072?auto=format&fit=crop&w=800&q=80',
+    imagen: PRODUCT_IMAGES[103],
     maridajeSugerido: 'Pesto Genovés o Bolognesa',
   },
   {
@@ -72,7 +115,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '2 - 3 min (hasta que floten)',
     stock: 50,
     destacado: true,
-    imagen: 'https://images.unsplash.com/photo-1546549032-9571cd6b27df?auto=format&fit=crop&w=800&q=80',
+    imagen: PRODUCT_IMAGES[104],
     maridajeSugerido: 'Tuco Casero o Estofado',
   },
   {
@@ -86,7 +129,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '8 - 10 min',
     stock: 25,
     destacado: true,
-    imagen: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+    imagen: PRODUCT_IMAGES[105],
     maridajeSugerido: 'Manteca de salvia y nueces o fondo de cocción',
   },
   {
@@ -100,7 +143,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '7 - 9 min',
     stock: 35,
     destacado: false,
-    imagen: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',
+    imagen: PRODUCT_IMAGES[106],
     maridajeSugerido: 'Crema de verdeo o caldo casero',
   },
   {
@@ -114,7 +157,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: 'Lista para calentar',
     stock: 40,
     destacado: true,
-    imagen: 'https://images.unsplash.com/photo-1607532941433-304659e8198a?auto=format&fit=crop&w=800&q=80',
+    imagen: PRODUCT_IMAGES[201],
     maridajeSugerido: 'Ideal para ñoquis, fideos y ravioles',
   },
   {
@@ -128,7 +171,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: 'Lista para calentar',
     stock: 35,
     destacado: false,
-    imagen: 'https://images.unsplash.com/photo-1598866594230-a7c12756260f?auto=format&fit=crop&w=800&q=80',
+    imagen: PRODUCT_IMAGES[202],
     maridajeSugerido: 'Pastas secas y rellenas',
   },
   {
@@ -142,7 +185,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: 'Lista para calentar a fuego bajo',
     stock: 30,
     destacado: false,
-    imagen: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&w=800&q=80',
+    imagen: PRODUCT_IMAGES[203],
     maridajeSugerido: 'Sorrentinos y panzottis',
   },
   {
@@ -156,7 +199,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: 'Listo para servir a temperatura ambiente',
     stock: 20,
     destacado: false,
-    imagen: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=800&q=80',
+    imagen: PRODUCT_IMAGES[204],
     maridajeSugerido: 'Tallarines o fusillis al dente',
   },
   {
@@ -170,7 +213,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: '8 - 10 min',
     stock: 15,
     destacado: true,
-    imagen: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80',
+    imagen: PRODUCT_IMAGES[301],
     maridajeSugerido: 'Almuerzo familiar completo',
   },
   {
@@ -184,7 +227,7 @@ export const CATALOGO_CLIENTE = [
     tiempoCoccion: 'Varios',
     stock: 10,
     destacado: false,
-    imagen: 'https://images.unsplash.com/photo-1579684947550-22e945225d9a?auto=format&fit=crop&w=800&q=80',
+    imagen: PRODUCT_IMAGES[302],
     maridajeSugerido: 'Cenas, celebraciones y reuniones empresariales',
   },
 ];
@@ -423,6 +466,10 @@ export const INITIAL_PEDIDOS_CLIENTE = [
 // ============================================================================
 
 let currentStore = {
+  mayoristaEntrega: { tipo: 'evento', dia: '' },
+  carritoModo: 'habitual',
+  catalogoModo: 'inicio',
+  mayoristaItems: {},
   cart: [
     {
       idProducto: 101,
@@ -432,7 +479,7 @@ let currentStore = {
       unidad: 'Caja 1kg',
       cantidad: 2,
       subtotal: 9000,
-      imagen: 'https://images.unsplash.com/photo-1587740896339-96a76170508d?auto=format&fit=crop&w=800&q=80',
+      imagen: PRODUCT_IMAGES[101],
     },
     {
       idProducto: 201,
@@ -442,7 +489,7 @@ let currentStore = {
       unidad: 'Pote 500cc',
       cantidad: 1,
       subtotal: 2500,
-      imagen: 'https://images.unsplash.com/photo-1607532941433-304659e8198a?auto=format&fit=crop&w=800&q=80',
+      imagen: PRODUCT_IMAGES[201],
     },
   ],
   pedidos: INITIAL_PEDIDOS_CLIENTE,
@@ -459,6 +506,33 @@ function emitChange() {
 }
 
 export const clientStore = {
+  setWholesaleDelivery({ tipo, dia = '' }) {
+    if (!['evento', 'semanal'].includes(tipo) || (dia && !DIAS_ENTREGA_SEMANAL.includes(dia))) return;
+    currentStore = { ...currentStore, mayoristaEntrega: { tipo, dia: tipo === 'semanal' ? dia : '' } };
+    emitChange();
+  },
+
+  setCarritoModo(modo) {
+    if (!['habitual', 'mayorista'].includes(modo)) return;
+    currentStore = { ...currentStore, carritoModo: modo };
+    emitChange();
+  },
+
+  addWholesaleToCart(producto, cantidad) {
+    const productoActual = CATALOGO_CLIENTE.find((p) => p.idProducto === producto.idProducto);
+    const total = (currentStore.mayoristaItems[producto.idProducto] || 0) + cantidad;
+    if (!productoActual || !Number.isInteger(cantidad) || cantidad < MINIMO_MAYORISTA || total > productoActual.stock) return false;
+    currentStore = { ...currentStore, carritoModo: 'mayorista', mayoristaItems: { ...currentStore.mayoristaItems, [producto.idProducto]: total } };
+    emitChange();
+    return true;
+  },
+
+  setCatalogoModo(modo) {
+    if (!['inicio', 'productos', 'mayorista'].includes(modo)) return;
+    currentStore = { ...currentStore, catalogoModo: modo };
+    emitChange();
+  },
+
   getState() {
     return currentStore;
   },
@@ -497,7 +571,7 @@ export const clientStore = {
         },
       ];
     }
-    currentStore = { ...currentStore, cart: newCart };
+    currentStore = { ...currentStore, cart: newCart, carritoModo: 'habitual' };
     emitChange();
   },
 
@@ -527,7 +601,59 @@ export const clientStore = {
   },
 
   // ── Acciones de Pedidos ──────────────────────────────────────────────────
-  createOrder(orderData) {
+  setWholesaleQuantity(idProducto, cantidad) {
+    const producto = CATALOGO_CLIENTE.find((p) => p.idProducto === idProducto);
+    if (!producto || !Number.isInteger(cantidad) || (cantidad !== 0 && (cantidad < MINIMO_MAYORISTA || cantidad > producto.stock))) return;
+    const mayoristaItems = { ...currentStore.mayoristaItems };
+    if (cantidad === 0) delete mayoristaItems[idProducto];
+    else mayoristaItems[idProducto] = cantidad;
+    currentStore = { ...currentStore, mayoristaItems };
+    emitChange();
+  },
+
+  createWholesaleOrder() {
+    const { tipo, dia } = currentStore.mayoristaEntrega;
+    if (tipo === 'semanal' && !DIAS_ENTREGA_SEMANAL.includes(dia)) return null;
+    const presupuesto = calcularPresupuestoMayorista(currentStore.mayoristaItems);
+    if (!presupuesto.valido) return null;
+    const pedido = this.createOrder({
+      tipoPedido: tipo === 'semanal' ? 'Pedido Mayorista · Semanal' : 'Pedido Mayorista · Evento',
+      tipoMayorista: tipo,
+      diaEntregaSemanal: tipo === 'semanal' ? dia : undefined,
+      requiereAprobacion: true,
+      aprobacionTienda: 'Pendiente',
+      estadoPago: 'Pendiente de aprobación',
+      modalidadEntrega: tipo === 'semanal' ? 'Entrega semanal' : 'A coordinar con la tienda',
+      domicilioEntrega: currentStore.cliente.direccion,
+      telefonoContacto: currentStore.cliente.telefono,
+      fechaEntregaEstimada: tipo === 'semanal' ? `Entrega semanal: ${dia} (sujeto a aprobación)` : 'A confirmar por la tienda',
+      medioPago: 'A coordinar tras la aprobación',
+      nroFactura: 'No emitida',
+      nroRemito: 'No emitido',
+      señaExigida: 0,
+      señaAbonada: 0,
+      saldoPendiente: presupuesto.total,
+      subtotal: presupuesto.subtotal,
+      descuento: presupuesto.descuento,
+      envio: 0,
+      total: presupuesto.total,
+      items: presupuesto.items,
+    }, { clearCart: false });
+    currentStore = { ...currentStore, mayoristaItems: {}, mayoristaEntrega: { tipo: 'evento', dia: '' } };
+    emitChange();
+    return pedido;
+  },
+
+  acceptWholesaleOrder(nroPedido) {
+    currentStore = { ...currentStore, pedidos: currentStore.pedidos.map((pedido) =>
+      pedido.nroPedido === nroPedido && pedido.requiereAprobacion && pedido.estadoPedido === 'Pendiente' && pedido.aprobacionTienda === 'Pendiente'
+        ? { ...pedido, aprobacionTienda: 'Aceptado', estadoPedido: 'En Producción', trackingStep: 1, estadoPago: 'Pendiente de pago' }
+        : pedido
+    ) };
+    emitChange();
+  },
+
+  createOrder(orderData, { clearCart = true } = {}) {
     const nextId = 1000 + currentStore.pedidos.length + 1;
     const nroPedido = `PED-2026-${String(nextId).padStart(3, '0')}`;
     const fechaActual = new Date().toISOString().split('T')[0];
@@ -546,7 +672,7 @@ export const clientStore = {
     currentStore = {
       ...currentStore,
       pedidos: [nuevoPedido, ...currentStore.pedidos],
-      cart: [], // Limpiar carrito tras confirmar
+      cart: clearCart ? [] : currentStore.cart,
     };
     emitChange();
     return nuevoPedido;
@@ -555,7 +681,7 @@ export const clientStore = {
   cancelOrder(nroPedido, motivo) {
     const newPedidos = currentStore.pedidos.map((p) => {
       if (p.nroPedido === nroPedido) {
-        const esEvento = p.tipoPedido.includes('Evento');
+        const esEvento = p.tipoPedido.includes('Evento') && p.señaAbonada > 0;
         return {
           ...p,
           estadoPedido: 'Cancelado',

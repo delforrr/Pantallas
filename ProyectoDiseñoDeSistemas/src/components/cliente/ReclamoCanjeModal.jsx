@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import PropTypes from 'prop-types';
+import { useState } from "react";
+import PropTypes from "prop-types";
 import {
   Dialog,
   DialogTitle,
@@ -15,22 +15,20 @@ import {
   Select,
   MenuItem,
   Alert,
-  AlertTitle,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import ChangeCircleOutlinedIcon from '@mui/icons-material/ChangeCircleOutlined';
-import VerifiedUserOutlinedIcon from '@mui/icons-material/VerifiedUserOutlined';
-import { clientStore } from '../../pages/cliente/mockData';
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import ChangeCircleOutlinedIcon from "@mui/icons-material/ChangeCircleOutlined";
+import { clientStore } from "../../pages/cliente/mockData";
 
 export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
-  const [productoSeleccionado, setProductoSeleccionado] = useState('');
+  const [productoSeleccionado, setProductoSeleccionado] = useState("");
   const [cantidad, setCantidad] = useState(1);
-  const [motivoFalla, setMotivoFalla] = useState('');
-  const [errorValidation, setErrorValidation] = useState('');
+  const [motivoFalla, setMotivoFalla] = useState("");
+  const [errorValidation, setErrorValidation] = useState("");
 
   if (!pedido) return null;
 
-  const primerItemNombre = pedido.items?.[0]?.nombre || '';
+  const primerItemNombre = pedido.items?.[0]?.nombre || "";
   const productoEfectivo = productoSeleccionado || primerItemNombre;
 
   const maxCantidad = (() => {
@@ -39,10 +37,10 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
   })();
 
   const handleClose = () => {
-    setProductoSeleccionado('');
+    setProductoSeleccionado("");
     setCantidad(1);
-    setMotivoFalla('');
-    setErrorValidation('');
+    setMotivoFalla("");
+    setErrorValidation("");
     onClose();
   };
 
@@ -50,12 +48,14 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
     e.preventDefault();
 
     if (!productoEfectivo) {
-      setErrorValidation('Por favor seleccione el producto afectado.');
+      setErrorValidation("Por favor seleccione el producto afectado.");
       return;
     }
 
     if (!motivoFalla.trim()) {
-      setErrorValidation('Por favor describa el motivo de la falla o defecto detectado.');
+      setErrorValidation(
+        "Por favor describa el motivo de la falla o defecto detectado.",
+      );
       return;
     }
 
@@ -86,10 +86,10 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
       fullWidth
       aria-labelledby="reclamo-canje-dialog-title"
       slotProps={{
-        backdrop: { sx: { backdropFilter: 'blur(4px)' } },
+        backdrop: { sx: { backdropFilter: "blur(4px)" } },
         paper: {
           sx: {
-            borderRadius: '16px',
+            borderRadius: "16px",
             boxShadow: 24,
           },
         },
@@ -100,20 +100,23 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
         sx={{
           m: 0,
           p: 2.5,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: "1px solid",
+          borderColor: "divider",
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <ChangeCircleOutlinedIcon color="primary" sx={{ fontSize: 30 }} />
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
               Solicitud de Canje sin Costo
             </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+            <Typography
+              variant="caption"
+              sx={{ color: "text.secondary", fontWeight: 600 }}
+            >
               Garantía de Calidad &bull; Pedido Ref: {pedido.nroPedido}
             </Typography>
           </Box>
@@ -122,61 +125,50 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
           aria-label="Cerrar modal"
           onClick={handleClose}
           size="small"
-          sx={{ color: 'text.secondary' }}
+          sx={{ color: "text.secondary" }}
         >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
 
       <Box component="form" onSubmit={handleSubmit} noValidate>
-        <DialogContent dividers sx={{ px: { xs: 2.5, sm: 3 }, pt: '24px !important', pb: 2.5 }}>
-          {/* Garantía de Calidad y Reposición */}
-          <Alert
-            severity="info"
-            icon={<VerifiedUserOutlinedIcon />}
-            sx={{
-              mb: 3,
-              borderRadius: '12px',
-              border: '1px solid',
-              borderColor: 'info.light',
-            }}
-          >
-            <AlertTitle sx={{ fontWeight: 700, fontSize: '0.9rem' }}>
-              Garantía de Calidad y Reposición PastaFab
-            </AlertTitle>
-            <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-              Ante cualquier producto en mal estado, rotura en empaque o falla en la cocción,
-              PastaFab genera una <strong>orden de canje inmediato a costo $0</strong> con
-              remito oficial de reposición sin cargo.
-            </Typography>
-          </Alert>
-
+        <DialogContent
+          dividers
+          sx={{ px: { xs: 2.5, sm: 3 }, pt: "24px !important", pb: 2.5 }}
+        >
           {errorValidation && (
-            <Alert severity="error" sx={{ mb: 2.5, borderRadius: '10px' }}>
+            <Alert severity="error" sx={{ mb: 2.5, borderRadius: "10px" }}>
               {errorValidation}
             </Alert>
           )}
 
           {/* Selector de producto afectado */}
           <FormControl fullWidth size="small" sx={{ mb: 2.5 }}>
-            <InputLabel id="producto-afectado-label">Producto Afectado *</InputLabel>
+            <InputLabel id="producto-afectado-label">
+              Producto Afectado *
+            </InputLabel>
             <Select
               labelId="producto-afectado-label"
               value={productoEfectivo}
               label="Producto Afectado *"
               onChange={(e) => {
                 setProductoSeleccionado(e.target.value);
-                setErrorValidation('');
+                setErrorValidation("");
               }}
             >
               {pedido.items && pedido.items.length > 0 ? (
                 pedido.items.map((item) => (
-                  <MenuItem key={item.idProducto || item.nombre} value={item.nombre}>
+                  <MenuItem
+                    key={item.idProducto || item.nombre}
+                    value={item.nombre}
+                  >
                     {item.nombre} (Comprados: {item.cantidad})
                   </MenuItem>
                 ))
               ) : (
-                <MenuItem value="Producto del pedido">Producto general del pedido</MenuItem>
+                <MenuItem value="Producto del pedido">
+                  Producto general del pedido
+                </MenuItem>
               )}
             </Select>
           </FormControl>
@@ -191,7 +183,7 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
             onChange={(e) => {
               const val = parseInt(e.target.value, 10) || 1;
               setCantidad(Math.min(Math.max(1, val), maxCantidad));
-              setErrorValidation('');
+              setErrorValidation("");
             }}
             slotProps={{
               htmlInput: { min: 1, max: maxCantidad },
@@ -212,7 +204,7 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
             value={motivoFalla}
             onChange={(e) => {
               setMotivoFalla(e.target.value);
-              setErrorValidation('');
+              setErrorValidation("");
             }}
             helperText="Esta descripción es remitida al área de Control de Calidad y Producción."
           />
@@ -222,12 +214,16 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
           sx={{
             p: 2,
             px: 3,
-            borderTop: '1px solid',
-            borderColor: 'divider',
+            borderTop: "1px solid",
+            borderColor: "divider",
             gap: 1,
           }}
         >
-          <Button onClick={handleClose} color="inherit" sx={{ borderRadius: '10px' }}>
+          <Button
+            onClick={handleClose}
+            color="inherit"
+            sx={{ borderRadius: "10px" }}
+          >
             Cancelar
           </Button>
           <Button
@@ -235,7 +231,7 @@ export const ReclamoCanjeModal = ({ open, onClose, pedido, onSuccess }) => {
             variant="contained"
             color="primary"
             startIcon={<ChangeCircleOutlinedIcon />}
-            sx={{ borderRadius: '10px', px: 2.5, fontWeight: 700 }}
+            sx={{ borderRadius: "10px", px: 2.5, fontWeight: 700 }}
           >
             Confirmar Canje ($0)
           </Button>
@@ -255,7 +251,7 @@ ReclamoCanjeModal.propTypes = {
         idProducto: PropTypes.number,
         nombre: PropTypes.string,
         cantidad: PropTypes.number,
-      })
+      }),
     ),
   }),
   onSuccess: PropTypes.func,

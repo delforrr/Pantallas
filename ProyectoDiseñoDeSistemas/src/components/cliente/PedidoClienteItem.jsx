@@ -56,7 +56,7 @@ export const PedidoClienteItem = ({
       : '$ 0';
   };
 
-  const esEvento = pedido.tipoPedido?.includes('Evento');
+  const esEvento = pedido.tipoPedido?.includes('Evento') && pedido.señaAbonada > 0;
   const esCancelado = pedido.estadoPedido === 'Cancelado';
   const puedeCancelar = pedido.estadoPedido === 'Pendiente' || pedido.estadoPedido === 'En Producción';
   const puedeCanjear = pedido.estadoPedido === 'Entregado';
@@ -132,6 +132,8 @@ export const PedidoClienteItem = ({
         </Box>
       </Box>
 
+      {pedido.requiereAprobacion && pedido.estadoPedido === 'Pendiente' && <Alert severity="info" sx={{ mb: 2 }}>Presupuesto aceptado. Tu pedido está pendiente de aprobación de la tienda; todavía no se ha cobrado ni iniciado su producción.</Alert>}
+      {pedido.diaEntregaSemanal && <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 700, mb: 2 }}>Entrega semanal: {pedido.diaEntregaSemanal}</Typography>}
       {/* Advertencia si es evento cancelado con seña retenida */}
       {esCancelado && (
         <Alert
@@ -279,6 +281,8 @@ PedidoClienteItem.propTypes = {
     domicilioEntrega: PropTypes.string,
     telefonoContacto: PropTypes.string,
     estadoPedido: PropTypes.string,
+    requiereAprobacion: PropTypes.bool,
+    diaEntregaSemanal: PropTypes.string,
     estadoPago: PropTypes.string,
     medioPago: PropTypes.string,
     trackingStep: PropTypes.number,

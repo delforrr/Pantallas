@@ -114,7 +114,7 @@ export const CarritoItem = ({ item }) => {
             border: '1px solid',
             borderColor: 'divider',
             borderRadius: '8px',
-            bgcolor: 'background.default',
+            bgcolor: '#fff',
             p: 0.25,
           }}
         >

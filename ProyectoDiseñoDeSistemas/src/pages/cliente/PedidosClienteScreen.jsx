@@ -130,7 +130,7 @@ export const PedidosClienteScreen = () => {
       motivoCancelacion.trim() || undefined
     );
 
-    const esEvento = pedidoACancelar.tipoPedido?.includes('Evento');
+    const esEvento = pedidoACancelar.tipoPedido?.includes('Evento') && pedidoACancelar.señaAbonada > 0;
     setSnackbarMsg(
       esEvento
         ? `Pedido ${pedidoACancelar.nroPedido} cancelado. Se aplicó la retención de seña del 50%.`
@@ -425,7 +425,7 @@ export const PedidosClienteScreen = () => {
         </DialogTitle>
 
         <DialogContent sx={{ pt: '20px !important' }}>
-          {pedidoACancelar?.tipoPedido?.includes('Evento') ? (
+          {pedidoACancelar?.tipoPedido?.includes('Evento') && pedidoACancelar?.señaAbonada > 0 ? (
             <Alert severity="warning" sx={{ mb: 2.5, borderRadius: '12px' }}>
               <AlertTitle sx={{ fontWeight: 700 }}>
                 Condiciones de Cancelación de Evento (Seña del 50%)
