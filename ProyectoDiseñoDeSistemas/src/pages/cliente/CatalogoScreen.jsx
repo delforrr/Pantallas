@@ -45,10 +45,10 @@ export const CatalogoScreen = () => {
   const store = useClientStore();
   const { navigate } = useApp();
 
-  const [vistaCompleta, setVistaCompleta] = useState(false);
+  const vistaCompleta = store.catalogoModo !== 'inicio';
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [modoMayorista, setModoMayorista] = useState(false);
+  const modoMayorista = store.catalogoModo === 'mayorista';
   const [presupuestoVisible, setPresupuestoVisible] = useState(false);
   const presupuesto = useMemo(() => calcularPresupuestoMayorista(store.mayoristaItems), [store.mayoristaItems]);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
@@ -121,8 +121,8 @@ export const CatalogoScreen = () => {
       {!vistaCompleta ? (
         <ClienteLanding
           cartSummary={cartSummary}
-          onCatalogo={() => { setModoMayorista(false); setPresupuestoVisible(false); setVistaCompleta(true); }}
-          onEvento={() => { setModoMayorista(true); setPresupuestoVisible(false); handleClearFilters(); setVistaCompleta(true); }}
+          onCatalogo={() => { clientStore.setCatalogoModo('productos'); setPresupuestoVisible(false); }}
+          onEvento={() => { clientStore.setCatalogoModo('mayorista'); setPresupuestoVisible(false); handleClearFilters(); }}
           onAbout={() => setAboutModalOpen(true)}
           onContact={() => setContactModalOpen(true)}
           onSocial={handleSocialClick}
@@ -134,7 +134,7 @@ export const CatalogoScreen = () => {
         <Fade in timeout={300}>
           <Box sx={{ p: { xs: 1.5, md: 5 }, minHeight: '100vh', bgcolor: 'primary.main', backgroundImage: `url("${ingredientesPattern}")`, backgroundRepeat: 'repeat', backgroundSize: { xs: '320px', md: '440px' } }}>
             <Box sx={{ maxWidth: 1440, mx: 'auto' }}>
-            <ClienteNavigation sobreVerde onInicio={() => setVistaCompleta(false)} onProductos={() => { handleClearFilters(); setPresupuestoVisible(false); }} />
+            <ClienteNavigation sobreVerde onInicio={() => clientStore.setCatalogoModo('inicio')} onProductos={() => { handleClearFilters(); setPresupuestoVisible(false); }} />
             <Box sx={{ py: 3 }}>
             <Box sx={{ bgcolor: 'transparent', px: { xs: 2, md: 4 }, pt: 2, mb: 3 }}>
             <Box sx={{ textAlign: 'center', py: 2, mb: 2 }}>

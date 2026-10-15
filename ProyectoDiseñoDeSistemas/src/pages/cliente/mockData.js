@@ -449,6 +449,7 @@ export const INITIAL_PEDIDOS_CLIENTE = [
 // ============================================================================
 
 let currentStore = {
+  catalogoModo: 'inicio',
   mayoristaItems: {},
   cart: [
     {
@@ -486,6 +487,12 @@ function emitChange() {
 }
 
 export const clientStore = {
+  setCatalogoModo(modo) {
+    if (!['inicio', 'productos', 'mayorista'].includes(modo)) return;
+    currentStore = { ...currentStore, catalogoModo: modo };
+    emitChange();
+  },
+
   getState() {
     return currentStore;
   },

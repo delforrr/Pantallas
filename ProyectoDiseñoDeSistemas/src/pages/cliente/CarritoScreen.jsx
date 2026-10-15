@@ -14,7 +14,6 @@ import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useApp } from '../../context/AppContext';
 import { useClientStore, clientStore } from './mockData';
 import { CarritoItem, ResumenPedido } from '../../components/cliente';
@@ -22,6 +21,10 @@ import { CarritoItem, ResumenPedido } from '../../components/cliente';
 export const CarritoScreen = () => {
   const { navigate } = useApp();
   const { cart } = useClientStore();
+  const abrirCatalogo = () => {
+    if (clientStore.getState().catalogoModo === 'inicio') clientStore.setCatalogoModo('productos');
+    navigate('catalogo');
+  };
 
   const [pedidoExitoso, setPedidoExitoso] = useState(null);
   const [openVaciarDialog, setOpenVaciarDialog] = useState(false);
@@ -88,7 +91,7 @@ export const CarritoScreen = () => {
           color="primary"
           size="large"
           startIcon={<RestaurantMenuIcon />}
-          onClick={() => navigate('catalogo')}
+          onClick={abrirCatalogo}
           sx={{
             borderRadius: '10px',
             px: 4,
@@ -123,22 +126,7 @@ export const CarritoScreen = () => {
           gap: 1.5,
         }}
       >
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('catalogo')}
-          variant="outlined"
-          size="small"
-          sx={{
-            fontWeight: 700,
-            borderRadius: '8px',
-            color: 'text.primary',
-            borderColor: 'divider',
-            textTransform: 'none',
-            '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' },
-          }}
-        >
-          Volver al Catálogo de Pastas
-        </Button>
+
 
         <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
           Paso 1 de 2: Revisión de Ítems y Configuración del Pedido
@@ -373,7 +361,7 @@ export const CarritoScreen = () => {
             variant="outlined"
             onClick={() => {
               setPedidoExitoso(null);
-              navigate('catalogo');
+              abrirCatalogo();
             }}
             sx={{ borderRadius: '10px', textTransform: 'none', px: 2.5 }}
           >
