@@ -64,6 +64,13 @@ const PRIORITY_COLOR_MAP = {
   Baja: "default",
 };
 
+// Formatea fecha y hora sin operadores ternarios anidados (S3358)
+const formatFechaHora = (fecha, hora) => {
+  if (!fecha) return null;
+  if (!hora) return fecha;
+  return `${fecha} ${hora}`;
+};
+
 export const OrdenesMantScreen = () => {
   const [ordenes, setOrdenes] = useState(INITIAL_ORDENES_MANTENIMIENTO);
   const [viewMode, setViewMode] = useState("table"); // 'table' o 'grid'
@@ -151,7 +158,9 @@ export const OrdenesMantScreen = () => {
   const handleOpenEdit = (orden) => {
     setIsEditing(true);
     setSelectedOrden(orden);
-    const [fIniFecha = "", fIniHora = ""] = (orden.fechaInicio || "").split(" ");
+    const [fIniFecha = "", fIniHora = ""] = (orden.fechaInicio || "").split(
+      " ",
+    );
     const [fFinFecha = "", fFinHora = ""] = (orden.fechaFin || "").split(" ");
     setFormData({
       maquinariaId: orden.maquinariaId,
@@ -200,11 +209,52 @@ export const OrdenesMantScreen = () => {
     }
   };
 
+  const renderBotonAccionOrden = (orden) => {
+    if (orden.estado === "Pendiente") {
+      return (
+        <Button
+          size="small"
+          variant="outlined"
+          color="info"
+          startIcon={<PlayArrowIcon />}
+          onClick={() => handleCambiarEstado(orden.id, "En Proceso")}
+          sx={{ borderRadius: "8px", fontSize: "0.74rem" }}
+        >
+          Iniciar
+        </Button>
+      );
+    }
+    if (orden.estado === "En Proceso") {
+      return (
+        <Button
+          size="small"
+          variant="contained"
+          color="success"
+          startIcon={<CheckCircleIcon />}
+          onClick={() => handleCambiarEstado(orden.id, "Finalizada")}
+          sx={{ borderRadius: "8px", fontSize: "0.74rem" }}
+        >
+          Finalizar
+        </Button>
+      );
+    }
+    return (
+      <Typography
+        variant="caption"
+        sx={{ color: "text.secondary", fontWeight: 600 }}
+      >
+        Completada
+      </Typography>
+    );
+  };
+
   const handleSaveForm = (e) => {
     if (e?.preventDefault) e.preventDefault();
 
     if (!formData.tareaRealizada?.trim()) {
-      setFormError("La descripción de la tarea es obligatoria para emitir la orden.");
+      setFormError(
+        "La descripción de la tarea es obligatoria para emitir la orden.",
+      );
       return;
     }
     setFormError("");
@@ -219,17 +269,15 @@ export const OrdenesMantScreen = () => {
       (r) => r.descripcion && r.descripcion.trim() !== "",
     );
 
-    const fechaInicioStr = formData.fechaInicioFecha
-      ? (formData.fechaInicioHora
-          ? `${formData.fechaInicioFecha} ${formData.fechaInicioHora}`
-          : formData.fechaInicioFecha)
-      : null;
+    const fechaInicioStr = formatFechaHora(
+      formData.fechaInicioFecha,
+      formData.fechaInicioHora,
+    );
 
-    const fechaFinStr = formData.fechaFinFecha
-      ? (formData.fechaFinHora
-          ? `${formData.fechaFinFecha} ${formData.fechaFinHora}`
-          : formData.fechaFinFecha)
-      : null;
+    const fechaFinStr = formatFechaHora(
+      formData.fechaFinFecha,
+      formData.fechaFinHora,
+    );
 
     if (isEditing && selectedOrden) {
       setOrdenes((prev) =>
@@ -807,40 +855,7 @@ export const OrdenesMantScreen = () => {
                       borderColor: "divider",
                     }}
                   >
-                    {orden.estado === "Pendiente" ? (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="info"
-                        startIcon={<PlayArrowIcon />}
-                        onClick={() =>
-                          handleCambiarEstado(orden.id, "En Proceso")
-                        }
-                        sx={{ borderRadius: "8px", fontSize: "0.74rem" }}
-                      >
-                        Iniciar
-                      </Button>
-                    ) : orden.estado === "En Proceso" ? (
-                      <Button
-                        size="small"
-                        variant="contained"
-                        color="success"
-                        startIcon={<CheckCircleIcon />}
-                        onClick={() =>
-                          handleCambiarEstado(orden.id, "Finalizada")
-                        }
-                        sx={{ borderRadius: "8px", fontSize: "0.74rem" }}
-                      >
-                        Finalizar
-                      </Button>
-                    ) : (
-                      <Typography
-                        variant="caption"
-                        sx={{ color: "text.secondary", fontWeight: 600 }}
-                      >
-                        Completada
-                      </Typography>
-                    )}
+                    {renderBotonAccionOrden(orden)}
 
                     <Box sx={{ display: "flex", gap: 0.5 }}>
                       <Tooltip title="Ver detalle de intervención">
@@ -1533,12 +1548,7 @@ export const OrdenesMantScreen = () => {
                       setFormData({ ...formData, prioridad: e.target.value })
                     }
                     renderValue={(val) => {
-                      const col =
-                        val === "Alta"
-                          ? "error"
-                          : val === "Media"
-                            ? "warning"
-                            : "info";
+                      const col = PRIORITY_COLOR_MAP[val] || "info";
                       return (
                         <Chip
                           label={val}
@@ -1715,22 +1725,7 @@ export const OrdenesMantScreen = () => {
               </Grid>
 
               {/* Fila 2: Fechas y Horas en una sola fila compacta y armónica (4 + 2 + 2 + 2 + 2 = 12 cols) */}
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  type="date"
-                  label="Fecha Emisión"
-                  value={formData.fechaEmision}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fechaEmision: e.target.value })
-                  }
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  required
-                />
-              </Grid>
-
-              <Grid size={{ xs: 6, sm: 2 }}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <TextField
                   fullWidth
                   size="small"
@@ -1747,7 +1742,7 @@ export const OrdenesMantScreen = () => {
                 />
               </Grid>
 
-              <Grid size={{ xs: 6, sm: 2 }}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <TextField
                   fullWidth
                   size="small"
@@ -1764,7 +1759,7 @@ export const OrdenesMantScreen = () => {
                 />
               </Grid>
 
-              <Grid size={{ xs: 6, sm: 2 }}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <TextField
                   fullWidth
                   size="small"
@@ -1781,7 +1776,7 @@ export const OrdenesMantScreen = () => {
                 />
               </Grid>
 
-              <Grid size={{ xs: 6, sm: 2 }}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <TextField
                   fullWidth
                   size="small"
@@ -1841,13 +1836,6 @@ export const OrdenesMantScreen = () => {
                   3. Diagnóstico final
                 </Typography>
               </Box>
-              <Chip
-                size="small"
-                label={`${formData.repuestos?.length || 0} repuestos`}
-                color="primary"
-                variant="outlined"
-                sx={{ fontWeight: 700 }}
-              />
             </Box>
 
             <Box sx={{ mb: 2 }}>
@@ -1866,21 +1854,6 @@ export const OrdenesMantScreen = () => {
                 error={Boolean(formError)}
                 helperText={formError}
                 required
-              />
-            </Box>
-
-            <Box>
-              <TextField
-                fullWidth
-                size="small"
-                multiline
-                rows={2}
-                label="Observaciones Técnicas Adicionales"
-                placeholder="Detalles sobre seguridad, tolerancias, pruebas en vacío..."
-                value={formData.observaciones}
-                onChange={(e) =>
-                  setFormData({ ...formData, observaciones: e.target.value })
-                }
               />
             </Box>
           </Paper>
