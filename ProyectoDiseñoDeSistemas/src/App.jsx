@@ -6,6 +6,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import LoginPage from './pages/LoginPage';
 import { AppLayout } from './components/layout';
 import ClientePortalLayout from './components/cliente/ClientePortalLayout';
+import MayoristasTienda from './components/cliente/MayoristasTienda';
 
 // ── All screen imports ──────────────────────────────────────
 import CatalogoScreen from './pages/cliente/CatalogoScreen';
@@ -34,13 +35,15 @@ import MaquinariaScreen from './pages/mantenimiento/MaquinariaScreen';
 import OrdenesMantScreen from './pages/mantenimiento/OrdenesMantScreen';
 import { PAGE_LABELS } from './config/navigation';
 
+const PedidosTienda = () => <><MayoristasTienda /><PedidosScreen /></>;
+
 const SCREEN_MAP = {
   catalogo: CatalogoScreen,
   carrito: CarritoScreen,
   pedidos_cliente: PedidosClienteScreen,
   medios_pago: MediosPagoScreen,
   clientes: ClientesScreen,
-  pedidos: PedidosScreen,
+  pedidos: PedidosTienda,
   presupuestos: PresupuestosScreen,
   comprobantes_venta: ComprobantesVentaScreen,
   comprobantes_pago: ComprobantesPagoScreen,

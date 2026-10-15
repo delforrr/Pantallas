@@ -38,7 +38,7 @@ export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAb
           <Typography sx={{ fontFamily: script, fontSize: { xs: 43, md: 38, lg: 54 }, lineHeight: 1.2, mt: 2.5 }}>El sabor de lo nuestro</Typography>
           <Typography sx={{ fontFamily: '"Montserrat", sans-serif', color: '#777467', fontSize: { xs: 13, lg: 14 }, lineHeight: 1.6, mt: 1, mb: 2.5 }}>Recetas de familia, ingredientes frescos y la pasión de siempre. Elegí tus pastas favoritas y llevá un pedacito de Italia a tu mesa.</Typography>
           <Button variant="contained" endIcon={<ArrowForwardIcon />} onClick={onCatalogo} sx={{ bgcolor: tomato, color: '#fff', borderRadius: 20, py: 1.3, width: '90%', fontSize: 14, boxShadow: 'none', '&:hover': { bgcolor: '#a52e00' } }}>Hacer un pedido</Button>
-          <Button size="small" onClick={onEvento} sx={{ color: olive, mt: 1.2, fontSize: 11, textTransform: 'none' }}>¿Tenés un evento? Pedí tu presupuesto</Button>
+          <Button size="small" onClick={onEvento} sx={{ color: olive, mt: 1.2, fontSize: 11, textTransform: 'none' }}>¿Pedido mayorista? Cotizá tus productos</Button>
         </Box>
       </Box>
 

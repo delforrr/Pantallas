@@ -18,6 +18,20 @@ export const CATEGORIAS_PRODUCTOS = [
   'Packs y Combos',
 ];
 
+export const MINIMO_MAYORISTA = 10;
+
+export const calcularPresupuestoMayorista = (cantidades) => {
+  const items = Object.entries(cantidades).map(([id, cantidad]) => {
+    const producto = CATALOGO_CLIENTE.find((p) => p.idProducto === Number(id));
+    if (!producto || !Number.isInteger(cantidad) || cantidad < MINIMO_MAYORISTA || cantidad > producto.stock) return null;
+    return { idProducto: producto.idProducto, nombre: producto.nombre, cantidad, unidad: producto.unidad, precioUnitario: producto.precio, subtotal: producto.precio * cantidad };
+  });
+  const valido = items.length > 0 && items.every(Boolean);
+  const subtotal = valido ? items.reduce((total, item) => total + item.subtotal, 0) : 0;
+  const descuento = Math.round(subtotal * 0.1);
+  return { items: valido ? items : [], valido, subtotal, descuento, total: subtotal - descuento };
+};
+
 export const CATALOGO_CLIENTE = [
   {
     idProducto: 100,
@@ -435,6 +449,7 @@ export const INITIAL_PEDIDOS_CLIENTE = [
 // ============================================================================
 
 let currentStore = {
+  mayoristaItems: {},
   cart: [
     {
       idProducto: 101,
@@ -539,7 +554,55 @@ export const clientStore = {
   },
 
   // ── Acciones de Pedidos ──────────────────────────────────────────────────
-  createOrder(orderData) {
+  setWholesaleQuantity(idProducto, cantidad) {
+    const producto = CATALOGO_CLIENTE.find((p) => p.idProducto === idProducto);
+    if (!producto || !Number.isInteger(cantidad) || (cantidad !== 0 && (cantidad < MINIMO_MAYORISTA || cantidad > producto.stock))) return;
+    const mayoristaItems = { ...currentStore.mayoristaItems };
+    if (cantidad === 0) delete mayoristaItems[idProducto];
+    else mayoristaItems[idProducto] = cantidad;
+    currentStore = { ...currentStore, mayoristaItems };
+    emitChange();
+  },
+
+  createWholesaleOrder() {
+    const presupuesto = calcularPresupuestoMayorista(currentStore.mayoristaItems);
+    if (!presupuesto.valido) return null;
+    const pedido = this.createOrder({
+      tipoPedido: 'Pedido Mayorista',
+      requiereAprobacion: true,
+      aprobacionTienda: 'Pendiente',
+      estadoPago: 'Pendiente de aprobación',
+      modalidadEntrega: 'A coordinar con la tienda',
+      domicilioEntrega: currentStore.cliente.direccion,
+      telefonoContacto: currentStore.cliente.telefono,
+      fechaEntregaEstimada: 'A confirmar por la tienda',
+      medioPago: 'A coordinar tras la aprobación',
+      nroFactura: 'No emitida',
+      nroRemito: 'No emitido',
+      señaExigida: 0,
+      señaAbonada: 0,
+      saldoPendiente: presupuesto.total,
+      subtotal: presupuesto.subtotal,
+      descuento: presupuesto.descuento,
+      envio: 0,
+      total: presupuesto.total,
+      items: presupuesto.items,
+    }, { clearCart: false });
+    currentStore = { ...currentStore, mayoristaItems: {} };
+    emitChange();
+    return pedido;
+  },
+
+  acceptWholesaleOrder(nroPedido) {
+    currentStore = { ...currentStore, pedidos: currentStore.pedidos.map((pedido) =>
+      pedido.nroPedido === nroPedido && pedido.requiereAprobacion && pedido.estadoPedido === 'Pendiente' && pedido.aprobacionTienda === 'Pendiente'
+        ? { ...pedido, aprobacionTienda: 'Aceptado', estadoPedido: 'En Producción', trackingStep: 1, estadoPago: 'Pendiente de pago' }
+        : pedido
+    ) };
+    emitChange();
+  },
+
+  createOrder(orderData, { clearCart = true } = {}) {
     const nextId = 1000 + currentStore.pedidos.length + 1;
     const nroPedido = `PED-2026-${String(nextId).padStart(3, '0')}`;
     const fechaActual = new Date().toISOString().split('T')[0];
@@ -558,7 +621,7 @@ export const clientStore = {
     currentStore = {
       ...currentStore,
       pedidos: [nuevoPedido, ...currentStore.pedidos],
-      cart: [], // Limpiar carrito tras confirmar
+      cart: clearCart ? [] : currentStore.cart,
     };
     emitChange();
     return nuevoPedido;

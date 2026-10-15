@@ -132,6 +132,7 @@ export const PedidoClienteItem = ({
         </Box>
       </Box>
 
+      {pedido.requiereAprobacion && pedido.estadoPedido === 'Pendiente' && <Alert severity="info" sx={{ mb: 2 }}>Presupuesto aceptado. Tu pedido está pendiente de aprobación de la tienda; todavía no se ha cobrado ni iniciado su producción.</Alert>}
       {/* Advertencia si es evento cancelado con seña retenida */}
       {esCancelado && (
         <Alert
@@ -279,6 +280,7 @@ PedidoClienteItem.propTypes = {
     domicilioEntrega: PropTypes.string,
     telefonoContacto: PropTypes.string,
     estadoPedido: PropTypes.string,
+    requiereAprobacion: PropTypes.bool,
     estadoPago: PropTypes.string,
     medioPago: PropTypes.string,
     trackingStep: PropTypes.number,

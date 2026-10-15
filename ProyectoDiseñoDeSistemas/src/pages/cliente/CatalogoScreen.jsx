@@ -26,13 +26,17 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useApp } from '../../context/AppContext';
 import {
   useClientStore,
+  clientStore,
+  MINIMO_MAYORISTA,
+  calcularPresupuestoMayorista,
   CATEGORIAS_PRODUCTOS,
   CATALOGO_CLIENTE,
 } from './mockData';
 import ClienteLanding from '../../components/cliente/ClienteLanding';
 import ClienteNavigation from '../../components/cliente/ClienteNavigation';
 import ingredientesPattern from '../../components/cliente/ingredientes-pattern.svg';
-import { ProductoCard, PresupuestoEventoModal } from '../../components/cliente';
+import PresupuestoMayorista from '../../components/cliente/PresupuestoMayorista';
+import { ProductoCard } from '../../components/cliente';
 
 /**
  * CatalogoScreen - Portal Cliente PastaFab ERP.
@@ -46,7 +50,9 @@ export const CatalogoScreen = () => {
   const [vistaCompleta, setVistaCompleta] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [modalEventoOpen, setModalEventoOpen] = useState(false);
+  const [modoMayorista, setModoMayorista] = useState(false);
+  const [presupuestoVisible, setPresupuestoVisible] = useState(false);
+  const presupuesto = useMemo(() => calcularPresupuestoMayorista(store.mayoristaItems), [store.mayoristaItems]);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -99,12 +105,9 @@ export const CatalogoScreen = () => {
     });
   };
 
-  const handleEventoConfirmed = (resumenEvento) => {
-    setSnackbar({
-      open: true,
-      message: `¡Presupuesto para "${resumenEvento.nombreEvento}" cargado en el carrito! (10% OFF y seña del 50%).`,
-      severity: 'success',
-    });
+  const handleAceptarPresupuesto = () => {
+    const pedido = clientStore.createWholesaleOrder();
+    if (pedido) navigate('pedidos_cliente');
   };
 
   const handleClearFilters = () => {
@@ -120,8 +123,8 @@ export const CatalogoScreen = () => {
       {!vistaCompleta ? (
         <ClienteLanding
           cartSummary={cartSummary}
-          onCatalogo={() => setVistaCompleta(true)}
-          onEvento={() => setModalEventoOpen(true)}
+          onCatalogo={() => { setModoMayorista(false); setPresupuestoVisible(false); setVistaCompleta(true); }}
+          onEvento={() => { setModoMayorista(true); setPresupuestoVisible(false); handleClearFilters(); setVistaCompleta(true); }}
           onAbout={() => setAboutModalOpen(true)}
           onContact={() => setContactModalOpen(true)}
           onSocial={handleSocialClick}
@@ -133,14 +136,16 @@ export const CatalogoScreen = () => {
         <Fade in timeout={300}>
           <Box sx={{ p: { xs: 1.5, md: 5 }, minHeight: '100vh', bgcolor: 'primary.main', backgroundImage: `url("${ingredientesPattern}")`, backgroundRepeat: 'repeat', backgroundSize: { xs: '320px', md: '440px' } }}>
             <Box sx={{ maxWidth: 1440, mx: 'auto' }}>
-            <ClienteNavigation onInicio={() => setVistaCompleta(false)} onProductos={handleClearFilters} />
+            <ClienteNavigation onInicio={() => setVistaCompleta(false)} onProductos={() => { handleClearFilters(); setPresupuestoVisible(false); }} />
             <Box sx={{ py: 3 }}>
             <Box sx={{ bgcolor: 'background.paper', borderRadius: '14px', px: { xs: 2, md: 4 }, pt: 2, mb: 3, boxShadow: '0 5px 20px #20331520' }}>
             <Box sx={{ textAlign: 'center', py: 2, mb: 2 }}>
               <Typography sx={{ color: 'primary.main', fontSize: 10, letterSpacing: '0.2em', fontWeight: 700 }}>DE NUESTRA COCINA A TU MESA</Typography>
-              <Typography component="h1" sx={{ fontFamily: 'Kristi, cursive', color: 'primary.main', fontSize: { xs: 58, md: 76 }, lineHeight: 1.2 }}>Nuestra carta</Typography>
+              <Typography component="h1" sx={{ fontFamily: 'Kristi, cursive', color: 'primary.main', fontSize: { xs: 58, md: 76 }, lineHeight: 1.2 }}>{modoMayorista ? 'Pedidos mayoristas' : 'Nuestra carta'}</Typography>
               <Typography variant="body2" color="text.secondary">Pastas artesanales, salsas caseras y sabores para compartir.</Typography>
             </Box>
+            {!presupuestoVisible && <>
+            {modoMayorista && <Alert severity="info" sx={{ mb: 3 }}>Elegí tus productos: mínimo {MINIMO_MAYORISTA} unidades de cada uno (kg, cajas o envases según su presentación). Después presioná Cotizar para revisar el presupuesto. El pedido requiere aprobación de la tienda.</Alert>}
             {/* Barra superior de retorno */}
             <Box
               sx={{
@@ -232,10 +237,18 @@ export const CatalogoScreen = () => {
                 {CATEGORIAS_PRODUCTOS.map((categoria) => <Tab key={categoria} value={categoria} label={categoria} />)}
               </Tabs>
             </Box>
+            </>}
 
             </Box>
             {/* GRILLA UNIFORME CON CSS GRID: Todas las tarjetas tienen idéntico ancho (1fr) y están equitativamente distribuidas */}
-            {filteredProducts.length === 0 ? (
+            {modoMayorista && !presupuestoVisible && <Paper sx={{ p: 2.5, mb: 3, borderRadius: '14px', position: 'sticky', top: 12, zIndex: 2, boxShadow: '0 5px 20px #20331530' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+                <Box><Typography sx={{ fontWeight: 700 }}>{presupuesto.items.length} productos seleccionados para cotizar</Typography><Typography variant="body2" color="text.secondary">10% de descuento mayorista · Sin cobro hasta la aprobación</Typography></Box>
+                <Button variant="contained" color="secondary" disabled={!presupuesto.valido} onClick={() => setPresupuestoVisible(true)}>Cotizar</Button>
+              </Box>
+              <Box sx={{ maxHeight: 120, overflowY: 'auto' }}>{presupuesto.items.map((item) => <Box key={item.idProducto} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, mt: 1 }}><Typography variant="body2">{item.nombre} × {item.cantidad}</Typography><Button size="small" onClick={() => clientStore.setWholesaleQuantity(item.idProducto, 0)} aria-label={`Quitar ${item.nombre} de la selección`}>Quitar</Button></Box>)}</Box>
+            </Paper>}
+            {modoMayorista && presupuestoVisible ? <PresupuestoMayorista presupuesto={presupuesto} onEditar={() => setPresupuestoVisible(false)} onAceptar={handleAceptarPresupuesto} /> : filteredProducts.length === 0 ? (
               <Paper
                 elevation={0}
                 sx={{
@@ -282,8 +295,11 @@ export const CatalogoScreen = () => {
               >
                 {filteredProducts.map((producto) => (
                   <ProductoCard
-                    key={producto.idProducto}
+                    key={`${modoMayorista ? 'mayorista' : 'minorista'}-${producto.idProducto}`}
                     producto={producto}
+                    modoMayorista={modoMayorista}
+                    cantidadMayorista={store.mayoristaItems[producto.idProducto] || 0}
+                    onCantidadMayorista={(id, cantidad) => clientStore.setWholesaleQuantity(id, cantidad)}
                     onAddToCartFeedback={handleProductAdded}
                   />
                 ))}
@@ -295,13 +311,6 @@ export const CatalogoScreen = () => {
         </Fade>
       )}
 
-      {/* MODAL DE COTIZACIÓN DE EVENTOS ESPECIALES (48HS + SEÑA 50%) */}
-      {modalEventoOpen && <PresupuestoEventoModal
-        open={modalEventoOpen}
-        onClose={() => setModalEventoOpen(false)}
-        onConfirmed={handleEventoConfirmed}
-      />}
-
       <Dialog open={aboutModalOpen} onClose={() => setAboutModalOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>La tradición de PastaFab</DialogTitle>
         <DialogContent><Typography>Elaboramos pastas frescas cada mañana con sémola candeal, huevos de campo y recetas familiares italianas. Completá tu mesa con nuestras salsas caseras, o pedí un presupuesto para tu próximo evento.</Typography></DialogContent>
@@ -309,7 +318,7 @@ export const CatalogoScreen = () => {
       </Dialog>
       <Dialog open={contactModalOpen} onClose={() => setContactModalOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>Estamos para ayudarte</DialogTitle>
-        <DialogContent><Typography>Consultanos por productos, pedidos regulares o eventos especiales. Los eventos se reservan con 48 horas de anticipación y una seña del 50%.</Typography></DialogContent>
+        <DialogContent><Typography>Consultanos por productos, pedidos regulares o eventos especiales. Los pedidos mayoristas se cotizan desde los productos y quedan sujetos a la aprobación de la tienda.</Typography></DialogContent>
         <DialogActions><Button onClick={() => setContactModalOpen(false)}>Cerrar</Button><Button variant="contained" onClick={() => handleSocialClick('WhatsApp')}>Consultar por WhatsApp</Button></DialogActions>
       </Dialog>
 
