@@ -6,6 +6,7 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { useApp } from '../../context/AppContext';
 import ClientePerfilMenu from './ClientePerfilMenu';
+import pastaPrincipal from './pasta-principal.png';
 
 // Colors belong to this restaurant illustration, independently of the ERP theme.
 const olive = '#416522';
@@ -20,6 +21,7 @@ export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAb
       <Box component="section" aria-label="Bienvenidos a PastaFab" sx={{ position: 'relative', isolation: 'isolate', bgcolor: '#fff', color: olive, boxShadow: '8px 12px 22px #51482d40', minHeight: { xs: 740, sm: 820, md: 540, lg: 610 }, aspectRatio: { md: '2629 / 1527' }, overflow: 'hidden', backgroundImage: { xs: 'none', md: 'url(/assets/landing-template-card.jpg)' }, backgroundSize: '100% 100%' }}>
         {/* Preserve the illustration; replace all template text with live content. */}
         <Box aria-hidden="true" sx={{ display: { xs: 'none', md: 'block' }, position: 'absolute', zIndex: -1, left: '48.5%', right: '13%', top: '17%', bottom: 0, bgcolor: '#fff' }} />
+        <Box component="img" src={pastaPrincipal} alt="Pastas con espárragos, arvejas y salsa cremosa" sx={{ display: { xs: 'none', md: 'block' }, position: 'absolute', left: '7.8%', top: '18.8%', width: '41%', height: '70.5%', objectFit: 'cover', borderRadius: '50%', border: `4px solid ${tomato}` }} />
         <Box role="navigation" aria-label="Navegación del cliente" sx={{ position: 'relative', ml: { md: '25.8%' }, bgcolor: '#fff', minHeight: { md: 84, lg: 100 }, px: { xs: 1, lg: 3 }, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', flexWrap: 'wrap', gap: 1 }}>
           <Button sx={{ ...navStyle, bgcolor: olive, color: '#fff', '&:hover': { bgcolor: '#325018' } }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Inicio</Button>
           <Button sx={navStyle} onClick={onCatalogo}>Productos</Button>
@@ -29,7 +31,7 @@ export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAb
           <ClientePerfilMenu />
         </Box>
         <Box sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center', py: 3, background: `linear-gradient(90deg, ${olive} 50%, #fff 50%)` }}>
-          <Box component="img" src="/assets/pasta-dish.png" alt="Penne con tomates frescos y hierbas" sx={{ width: '75%', maxWidth: 340, aspectRatio: '1', objectFit: 'contain' }} />
+          <Box component="img" src={pastaPrincipal} alt="Pastas con espárragos, arvejas y salsa cremosa" sx={{ width: '75%', maxWidth: 340, aspectRatio: '1', objectFit: 'cover', borderRadius: '50%', border: `3px solid ${tomato}` }} />
         </Box>
         <Box sx={{ ml: { md: '49%' }, width: { md: '38%' }, textAlign: 'center', px: { xs: 3, md: 1.5 }, pt: { xs: 1, md: 1, lg: 2 }, pb: 4 }}>
           <Typography component="h1" sx={{ fontFamily: script, fontSize: { xs: 90, sm: 110, md: 84, lg: 134 }, lineHeight: 1.05, fontWeight: 400 }}>PastaFab</Typography>
