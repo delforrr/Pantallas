@@ -1080,6 +1080,14 @@ export const MaquinariaScreen = () => {
                   : "rgba(15, 23, 42, 0.45)",
             },
           },
+          paper: {
+            component: "form",
+            onSubmit: (e) => {
+              e.preventDefault();
+              handleConfirmQuickOrder();
+            },
+            sx: { borderRadius: "20px", overflow: "hidden" },
+          },
         }}
         PaperProps={{
           component: "form",
@@ -1143,11 +1151,25 @@ export const MaquinariaScreen = () => {
           <Paper
             variant="outlined"
             sx={{
-              p: 2.5,
+              p: 2,
               borderRadius: "14px",
               display: "flex",
               flexDirection: "column",
               gap: 2,
+              "& .MuiInputBase-root": {
+                height: 38,
+                fontSize: "0.8125rem",
+              },
+              "& .MuiInputBase-input": {
+                fontSize: "0.8125rem",
+              },
+              "& .MuiInputLabel-root": {
+                fontSize: "0.8125rem",
+              },
+              "& .MuiSelect-select": {
+                display: "flex",
+                alignItems: "center",
+              },
             }}
           >
             <Grid container spacing={2}>
@@ -1305,7 +1327,7 @@ export const MaquinariaScreen = () => {
                   fullWidth
                   size="small"
                   multiline
-                  rows={3}
+                  rows={2}
                   label="Descripción de la Tarea / Síntoma de Falla"
                   placeholder="Detallar diagnóstico o tareas a realizar..."
                   value={quickOrderForm.tarea}
@@ -1316,6 +1338,11 @@ export const MaquinariaScreen = () => {
                     })
                   }
                   required
+                  sx={{
+                    "& .MuiInputBase-root": { height: "auto" },
+                    "& .MuiInputBase-input": { fontSize: "0.8125rem" },
+                    "& .MuiInputLabel-root": { fontSize: "0.8125rem" },
+                  }}
                 />
               </Grid>
             </Grid>
@@ -1324,20 +1351,30 @@ export const MaquinariaScreen = () => {
         <DialogActions
           sx={{
             px: 3.5,
-            py: 2,
+            py: 1.5,
             borderTop: "1px solid",
             borderColor: "divider",
             bgcolor: "action.hover",
           }}
         >
-          <Button onClick={() => setOpenQuickOrder(false)} color="inherit">
+          <Button
+            onClick={() => setOpenQuickOrder(false)}
+            color="inherit"
+            size="small"
+            sx={{ fontWeight: 600, fontSize: "0.8125rem" }}
+          >
             Cancelar
           </Button>
           <Button
             type="submit"
             variant="contained"
             color="primary"
-            sx={{ fontWeight: 700 }}
+            size="small"
+            onClick={(e) => {
+              e.preventDefault();
+              handleConfirmQuickOrder();
+            }}
+            sx={{ px: 2.5, fontWeight: 700, fontSize: "0.8125rem", height: 36 }}
           >
             Emitir Orden
           </Button>

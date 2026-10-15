@@ -88,8 +88,10 @@ export const OrdenesMantScreen = () => {
     prioridad: "Media",
     empleadoId: 1,
     fechaEmision: new Date().toISOString().split("T")[0],
-    fechaInicio: "",
-    fechaFin: "",
+    fechaInicioFecha: "",
+    fechaInicioHora: "",
+    fechaFinFecha: "",
+    fechaFinHora: "",
     estado: "Pendiente",
     tareaRealizada: "",
     repuestos: [
@@ -103,6 +105,7 @@ export const OrdenesMantScreen = () => {
     observaciones: "",
   };
   const [formData, setFormData] = useState(initialFormState);
+  const [formError, setFormError] = useState("");
 
   // Filtrado
   const filteredOrdenes = useMemo(() => {
@@ -139,21 +142,27 @@ export const OrdenesMantScreen = () => {
 
   const handleOpenCreate = () => {
     setIsEditing(false);
+    setSelectedOrden(null);
     setFormData(initialFormState);
+    setFormError("");
     setOpenForm(true);
   };
 
   const handleOpenEdit = (orden) => {
     setIsEditing(true);
     setSelectedOrden(orden);
+    const [fIniFecha = "", fIniHora = ""] = (orden.fechaInicio || "").split(" ");
+    const [fFinFecha = "", fFinHora = ""] = (orden.fechaFin || "").split(" ");
     setFormData({
       maquinariaId: orden.maquinariaId,
       tipo: orden.tipo,
       prioridad: orden.prioridad,
       empleadoId: orden.empleadoId,
       fechaEmision: orden.fechaEmision,
-      fechaInicio: orden.fechaInicio || "",
-      fechaFin: orden.fechaFin || "",
+      fechaInicioFecha: fIniFecha,
+      fechaInicioHora: fIniHora,
+      fechaFinFecha: fFinFecha,
+      fechaFinHora: fFinHora,
       estado: orden.estado,
       tareaRealizada: orden.tareaRealizada || "",
       repuestos:
@@ -162,6 +171,7 @@ export const OrdenesMantScreen = () => {
           : [],
       observaciones: orden.observaciones || "",
     });
+    setFormError("");
     setOpenForm(true);
   };
 
@@ -191,7 +201,14 @@ export const OrdenesMantScreen = () => {
   };
 
   const handleSaveForm = (e) => {
-    e.preventDefault();
+    if (e?.preventDefault) e.preventDefault();
+
+    if (!formData.tareaRealizada?.trim()) {
+      setFormError("La descripción de la tarea es obligatoria para emitir la orden.");
+      return;
+    }
+    setFormError("");
+
     const maq = INITIAL_MAQUINARIAS.find(
       (m) => m.id === Number(formData.maquinariaId),
     );
@@ -201,6 +218,18 @@ export const OrdenesMantScreen = () => {
     const repuestos = (formData.repuestos || []).filter(
       (r) => r.descripcion && r.descripcion.trim() !== "",
     );
+
+    const fechaInicioStr = formData.fechaInicioFecha
+      ? (formData.fechaInicioHora
+          ? `${formData.fechaInicioFecha} ${formData.fechaInicioHora}`
+          : formData.fechaInicioFecha)
+      : null;
+
+    const fechaFinStr = formData.fechaFinFecha
+      ? (formData.fechaFinHora
+          ? `${formData.fechaFinFecha} ${formData.fechaFinHora}`
+          : formData.fechaFinFecha)
+      : null;
 
     if (isEditing && selectedOrden) {
       setOrdenes((prev) =>
@@ -216,10 +245,10 @@ export const OrdenesMantScreen = () => {
                 empleadoId: tec?.id || 1,
                 tecnicoNombre: tec?.nombre || "Carlos Vignolo",
                 fechaEmision: formData.fechaEmision,
-                fechaInicio: formData.fechaInicio || null,
-                fechaFin: formData.fechaFin || null,
+                fechaInicio: fechaInicioStr,
+                fechaFin: fechaFinStr,
                 estado: formData.estado,
-                tareaRealizada: formData.tareaRealizada,
+                tareaRealizada: formData.tareaRealizada.trim(),
                 repuestos,
                 observaciones: formData.observaciones,
               }
@@ -238,10 +267,10 @@ export const OrdenesMantScreen = () => {
         empleadoId: tec?.id || 1,
         tecnicoNombre: tec?.nombre || "Carlos Vignolo",
         fechaEmision: formData.fechaEmision,
-        fechaInicio: formData.fechaInicio || null,
-        fechaFin: formData.fechaFin || null,
+        fechaInicio: fechaInicioStr,
+        fechaFin: fechaFinStr,
         estado: formData.estado,
-        tareaRealizada: formData.tareaRealizada,
+        tareaRealizada: formData.tareaRealizada.trim(),
         repuestos,
         observaciones: formData.observaciones,
       };
@@ -1259,6 +1288,18 @@ export const OrdenesMantScreen = () => {
                   : "rgba(15, 23, 42, 0.45)",
             },
           },
+          paper: {
+            component: "form",
+            onSubmit: handleSaveForm,
+            sx: {
+              borderRadius: "20px",
+              overflow: "hidden",
+              boxShadow: "0 24px 60px rgba(0,0,0,0.45)",
+              maxHeight: "92vh",
+              display: "flex",
+              flexDirection: "column",
+            },
+          },
         }}
         PaperProps={{
           component: "form",
@@ -1335,7 +1376,25 @@ export const OrdenesMantScreen = () => {
           {/* 1. Maquinaria y Asignación de Técnico */}
           <Paper
             variant="outlined"
-            sx={{ p: 2.5, borderRadius: "14px", bgcolor: "background.paper" }}
+            sx={{
+              p: 2,
+              borderRadius: "14px",
+              bgcolor: "background.paper",
+              "& .MuiInputBase-root": {
+                height: 38,
+                fontSize: "0.8125rem",
+              },
+              "& .MuiInputBase-input": {
+                fontSize: "0.8125rem",
+              },
+              "& .MuiInputLabel-root": {
+                fontSize: "0.8125rem",
+              },
+              "& .MuiSelect-select": {
+                display: "flex",
+                alignItems: "center",
+              },
+            }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
               <PrecisionManufacturingIcon
@@ -1403,7 +1462,25 @@ export const OrdenesMantScreen = () => {
           {/* 2. Clasificación, Estado y Fechas */}
           <Paper
             variant="outlined"
-            sx={{ p: 2.5, borderRadius: "14px", bgcolor: "background.paper" }}
+            sx={{
+              p: 2,
+              borderRadius: "14px",
+              bgcolor: "background.paper",
+              "& .MuiInputBase-root": {
+                height: 38,
+                fontSize: "0.8125rem",
+              },
+              "& .MuiInputBase-input": {
+                fontSize: "0.8125rem",
+              },
+              "& .MuiInputLabel-root": {
+                fontSize: "0.8125rem",
+              },
+              "& .MuiSelect-select": {
+                display: "flex",
+                alignItems: "center",
+              },
+            }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
               <CalendarMonthIcon
@@ -1468,8 +1545,8 @@ export const OrdenesMantScreen = () => {
                           size="small"
                           color={col}
                           sx={{
-                            height: 22,
-                            fontSize: "0.75rem",
+                            height: 20,
+                            fontSize: "0.7rem",
                             fontWeight: 700,
                           }}
                         />
@@ -1558,8 +1635,8 @@ export const OrdenesMantScreen = () => {
                         size="small"
                         color={STATUS_COLOR_MAP[val] || "default"}
                         sx={{
-                          height: 22,
-                          fontSize: "0.75rem",
+                          height: 20,
+                          fontSize: "0.7rem",
                           fontWeight: 700,
                         }}
                       />
@@ -1637,6 +1714,7 @@ export const OrdenesMantScreen = () => {
                 </FormControl>
               </Grid>
 
+              {/* Fila 2: Fechas y Horas en una sola fila compacta y armónica (4 + 2 + 2 + 2 + 2 = 12 cols) */}
               <Grid size={{ xs: 12, sm: 4 }}>
                 <TextField
                   fullWidth
@@ -1652,29 +1730,71 @@ export const OrdenesMantScreen = () => {
                 />
               </Grid>
 
-              <Grid size={{ xs: 12, sm: 4 }}>
+              <Grid size={{ xs: 6, sm: 2 }}>
                 <TextField
                   fullWidth
                   size="small"
-                  label="Fecha y Hora Inicio"
-                  value={formData.fechaInicio}
-                  placeholder="AAAA-MM-DD HH:MM"
+                  type="date"
+                  label="Fecha Inicio"
+                  value={formData.fechaInicioFecha}
                   onChange={(e) =>
-                    setFormData({ ...formData, fechaInicio: e.target.value })
+                    setFormData({
+                      ...formData,
+                      fechaInicioFecha: e.target.value,
+                    })
                   }
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
               </Grid>
 
-              <Grid size={{ xs: 12, sm: 4 }}>
+              <Grid size={{ xs: 6, sm: 2 }}>
                 <TextField
                   fullWidth
                   size="small"
-                  label="Fecha y Hora Fin"
-                  value={formData.fechaFin}
-                  placeholder="AAAA-MM-DD HH:MM"
+                  type="time"
+                  label="Hora Inicio"
+                  value={formData.fechaInicioHora}
                   onChange={(e) =>
-                    setFormData({ ...formData, fechaFin: e.target.value })
+                    setFormData({
+                      ...formData,
+                      fechaInicioHora: e.target.value,
+                    })
                   }
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 6, sm: 2 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type="date"
+                  label="Fecha Fin"
+                  value={formData.fechaFinFecha}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      fechaFinFecha: e.target.value,
+                    })
+                  }
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 6, sm: 2 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type="time"
+                  label="Hora Fin"
+                  value={formData.fechaFinHora}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      fechaFinHora: e.target.value,
+                    })
+                  }
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
               </Grid>
             </Grid>
@@ -1683,7 +1803,17 @@ export const OrdenesMantScreen = () => {
           {/* 3. Diagnóstico y Repuestos Requeridos */}
           <Paper
             variant="outlined"
-            sx={{ p: 2.5, borderRadius: "14px", bgcolor: "background.paper" }}
+            sx={{
+              p: 2,
+              borderRadius: "14px",
+              bgcolor: "background.paper",
+              "& .MuiInputBase-input": {
+                fontSize: "0.8125rem",
+              },
+              "& .MuiInputLabel-root": {
+                fontSize: "0.8125rem",
+              },
+            }}
           >
             <Box
               sx={{
@@ -1729,10 +1859,28 @@ export const OrdenesMantScreen = () => {
                 label="Descripción de la Tarea / Fallo Observado *"
                 placeholder="Detalle la rutina técnica o causa raíz del incidente según el dominio..."
                 value={formData.tareaRealizada}
-                onChange={(e) =>
-                  setFormData({ ...formData, tareaRealizada: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, tareaRealizada: e.target.value });
+                  if (formError) setFormError("");
+                }}
+                error={Boolean(formError)}
+                helperText={formError}
                 required
+              />
+            </Box>
+
+            <Box>
+              <TextField
+                fullWidth
+                size="small"
+                multiline
+                rows={2}
+                label="Observaciones Técnicas Adicionales"
+                placeholder="Detalles sobre seguridad, tolerancias, pruebas en vacío..."
+                value={formData.observaciones}
+                onChange={(e) =>
+                  setFormData({ ...formData, observaciones: e.target.value })
+                }
               />
             </Box>
           </Paper>
@@ -1741,7 +1889,7 @@ export const OrdenesMantScreen = () => {
         <DialogActions
           sx={{
             px: 3.5,
-            py: 2,
+            py: 1.5,
             borderTop: "1px solid",
             borderColor: "divider",
             bgcolor: "action.hover",
@@ -1750,7 +1898,8 @@ export const OrdenesMantScreen = () => {
           <Button
             onClick={() => setOpenForm(false)}
             color="inherit"
-            sx={{ fontWeight: 600 }}
+            size="small"
+            sx={{ fontWeight: 600, fontSize: "0.8125rem" }}
           >
             Cancelar
           </Button>
@@ -1758,8 +1907,10 @@ export const OrdenesMantScreen = () => {
             type="submit"
             variant="contained"
             color="primary"
-            startIcon={<SaveIcon />}
-            sx={{ px: 3, fontWeight: 700 }}
+            size="small"
+            startIcon={<SaveIcon fontSize="small" />}
+            onClick={handleSaveForm}
+            sx={{ px: 2.5, fontWeight: 700, fontSize: "0.8125rem", height: 36 }}
           >
             {isEditing ? "Guardar Cambios" : "Emitir Orden"}
           </Button>
