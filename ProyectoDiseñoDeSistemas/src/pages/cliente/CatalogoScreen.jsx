@@ -134,13 +134,13 @@ export const CatalogoScreen = () => {
         <Fade in timeout={300}>
           <Box sx={{ p: { xs: 1.5, md: 5 }, minHeight: '100vh', bgcolor: 'primary.main', backgroundImage: `url("${ingredientesPattern}")`, backgroundRepeat: 'repeat', backgroundSize: { xs: '320px', md: '440px' } }}>
             <Box sx={{ maxWidth: 1440, mx: 'auto' }}>
-            <ClienteNavigation onInicio={() => setVistaCompleta(false)} onProductos={() => { handleClearFilters(); setPresupuestoVisible(false); }} />
+            <ClienteNavigation sobreVerde onInicio={() => setVistaCompleta(false)} onProductos={() => { handleClearFilters(); setPresupuestoVisible(false); }} />
             <Box sx={{ py: 3 }}>
-            <Box sx={{ bgcolor: 'background.paper', borderRadius: '14px', px: { xs: 2, md: 4 }, pt: 2, mb: 3, boxShadow: '0 5px 20px #20331520' }}>
+            <Box sx={{ bgcolor: 'transparent', px: { xs: 2, md: 4 }, pt: 2, mb: 3 }}>
             <Box sx={{ textAlign: 'center', py: 2, mb: 2 }}>
-              <Typography sx={{ color: 'primary.main', fontSize: 10, letterSpacing: '0.2em', fontWeight: 700 }}>DE NUESTRA COCINA A TU MESA</Typography>
-              <Typography component="h1" sx={{ fontFamily: 'Kristi, cursive', color: 'primary.main', fontSize: { xs: 58, md: 76 }, lineHeight: 1.2 }}>{modoMayorista ? 'Pedidos mayoristas' : 'Nuestra carta'}</Typography>
-              <Typography variant="body2" color="text.secondary">Pastas artesanales, salsas caseras y sabores para compartir.</Typography>
+              <Typography sx={{ color: '#fff', fontSize: 10, letterSpacing: '0.2em', fontWeight: 700 }}>DE NUESTRA COCINA A TU MESA</Typography>
+              <Typography component="h1" sx={{ fontFamily: 'Kristi, cursive', color: '#fff', fontSize: { xs: 58, md: 76 }, lineHeight: 1.2 }}>{modoMayorista ? 'Pedidos mayoristas' : 'Nuestra carta'}</Typography>
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>Pastas artesanales, salsas caseras y sabores para compartir.</Typography>
             </Box>
             {!presupuestoVisible && <>
             {modoMayorista && <Alert severity="info" sx={{ mb: 3 }}>Elegí tus productos: mínimo {MINIMO_MAYORISTA} unidades de cada uno (kg, cajas o envases según su presentación). Después presioná Cotizar para revisar el presupuesto. El pedido requiere aprobación de la tienda.</Alert>}
@@ -179,7 +179,7 @@ export const CatalogoScreen = () => {
 
               </Box>
 
-              <Tabs value={selectedCategory} onChange={(_, value) => setSelectedCategory(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile aria-label="Tipos de producto" textColor="secondary" indicatorColor="secondary" sx={{ mb: 4, '& .MuiTabs-flexContainer, & .MuiTabs-list': { justifyContent: { sm: 'center' } }, '& .MuiTabs-indicator': { height: 3, borderRadius: 2 }, '& .MuiTab-root': { textTransform: 'none', fontWeight: 700, fontSize: '0.95rem', px: { xs: 2, md: 3 }, minHeight: 56 } }}>
+              <Tabs value={selectedCategory} onChange={(_, value) => setSelectedCategory(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile aria-label="Tipos de producto" textColor="secondary" indicatorColor="secondary" sx={{ mb: 4, '& .MuiTabs-flexContainer, & .MuiTabs-list': { justifyContent: { sm: 'center' } }, '& .MuiTabs-indicator': { height: 3, borderRadius: 2, bgcolor: '#fff' }, '& .MuiTabs-scrollButtons': { color: '#fff' }, '& .MuiTab-root': { color: 'rgba(255,255,255,0.8)', '&.Mui-selected': { color: '#fff' }, textTransform: 'none', fontWeight: 700, fontSize: '0.95rem', px: { xs: 2, md: 3 }, minHeight: 56 } }}>
                 {CATEGORIAS_PRODUCTOS.map((categoria) => <Tab key={categoria} value={categoria} label={categoria} />)}
               </Tabs>
             </Box>
