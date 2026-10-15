@@ -1,6 +1,6 @@
 import React from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
-import { Box, Typography, Fade } from '@mui/material';
+import { Box, Typography, Fade, GlobalStyles } from '@mui/material';
 import { getTheme } from './theme';
 import { AppProvider, useApp } from './context/AppContext';
 import LoginPage from './pages/LoginPage';
@@ -58,13 +58,17 @@ const SCREEN_MAP = {
 
 // ── Page wrapper with fade animation ───────────────────────
 const PageContent = () => {
-  const { currentPage } = useApp();
+  const { currentPage, user } = useApp();
   const Screen = SCREEN_MAP[currentPage];
   const label = PAGE_LABELS[currentPage] || 'Dashboard';
+  const isCliente = user?.role === 'cliente' || ['catalogo', 'carrito', 'pedidos_cliente', 'medios_pago'].includes(currentPage);
 
   return (
     <Fade in key={currentPage} timeout={300}>
       <Box sx={{ flex: 1, p: { xs: 1.5, sm: 2.5, md: 3 }, overflowY: 'auto', minWidth: 0, width: '100%', maxWidth: '100%' }}>
+        {isCliente && (
+          <GlobalStyles styles={{ '#notifications-btn': { display: 'none !important' } }} />
+        )}
         {/* Page header */}
         <Box sx={{ mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', letterSpacing: '-0.01em' }}>
