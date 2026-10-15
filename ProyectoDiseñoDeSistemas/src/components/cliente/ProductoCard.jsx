@@ -13,15 +13,13 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import PeopleIcon from '@mui/icons-material/People';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import StarIcon from '@mui/icons-material/Star';
 import { clientStore } from '../../pages/cliente/mockData';
 
 /**
  * ProductoCard - Tarjeta gastronómica uniforme (mismo tamaño) sin emojis y con imagen stock real.
- * Diseñada para catálogos y carruseles con altura fija de 490px.
+ * Diseñada para catálogos y carruseles con altura fija uniforme.
  */
 export const ProductoCard = ({ producto, onAddToCartFeedback }) => {
   const [cantidad, setCantidad] = useState(1);
@@ -75,7 +73,7 @@ export const ProductoCard = ({ producto, onAddToCartFeedback }) => {
         width: '100%',
         maxWidth: '100%',
         boxSizing: 'border-box',
-        height: 490,
+        height: 460,
         display: 'flex',
         flexDirection: 'column',
         borderRadius: '16px',
@@ -236,33 +234,6 @@ export const ProductoCard = ({ producto, onAddToCartFeedback }) => {
           {producto.variedad}
         </Typography>
 
-        {/* Chips de Especificaciones (Porciones y Cocción) */}
-        <Box sx={{ display: 'flex', gap: 1, mb: 1.5, height: 26, alignItems: 'center' }}>
-          <Chip
-            icon={<PeopleIcon sx={{ fontSize: '13px !important' }} />}
-            label={producto.rinde}
-            size="small"
-            variant="outlined"
-            sx={{
-              fontSize: '0.68rem',
-              height: 24,
-              borderColor: 'divider',
-              color: 'text.secondary',
-            }}
-          />
-          <Chip
-            icon={<AccessTimeIcon sx={{ fontSize: '13px !important' }} />}
-            label={producto.tiempoCoccion}
-            size="small"
-            variant="outlined"
-            sx={{
-              fontSize: '0.68rem',
-              height: 24,
-              borderColor: 'divider',
-              color: 'text.secondary',
-            }}
-          />
-        </Box>
 
         {/* Maridaje Sugerido en caja fija */}
         <Box

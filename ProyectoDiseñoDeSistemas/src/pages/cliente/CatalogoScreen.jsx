@@ -28,7 +28,6 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import GrassIcon from '@mui/icons-material/Grass';
 import EggAltIcon from '@mui/icons-material/EggAlt';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import PeopleIcon from '@mui/icons-material/People';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddIcon from '@mui/icons-material/Add';
@@ -567,23 +566,6 @@ export const CatalogoScreen = () => {
                     {currentFeaturedProduct.variedad}
                   </Typography>
 
-                  {/* Chips de porciones y cocción */}
-                  <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                    <Chip
-                      icon={<PeopleIcon sx={{ fontSize: '13px !important' }} />}
-                      label={currentFeaturedProduct.rinde}
-                      size="small"
-                      variant="outlined"
-                      sx={{ fontSize: '0.68rem', height: 22, borderColor: 'divider' }}
-                    />
-                    <Chip
-                      icon={<AccessTimeIcon sx={{ fontSize: '13px !important' }} />}
-                      label={currentFeaturedProduct.tiempoCoccion}
-                      size="small"
-                      variant="outlined"
-                      sx={{ fontSize: '0.68rem', height: 22, borderColor: 'divider' }}
-                    />
-                  </Box>
 
                   {/* Maridaje Sugerido */}
                   <Box
