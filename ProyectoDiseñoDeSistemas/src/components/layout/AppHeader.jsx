@@ -4,19 +4,15 @@ import {
   Toolbar,
   IconButton,
   Typography,
-  InputBase,
   Box,
   Avatar,
   Menu,
   MenuItem,
   Chip,
-  Badge,
   Tooltip,
   Divider,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";

@@ -101,15 +101,6 @@ export const OrdenesMantScreen = () => {
     fechaFinHora: "",
     estado: "Pendiente",
     tareaRealizada: "",
-    repuestos: [
-      {
-        id: 1,
-        codigo: "SKF-6204",
-        descripcion: "Rulemán blindado 2RS",
-        cantidad: "2 unidades",
-      },
-    ],
-    observaciones: "",
   };
   const [formData, setFormData] = useState(initialFormState);
   const [formError, setFormError] = useState("");
@@ -174,11 +165,6 @@ export const OrdenesMantScreen = () => {
       fechaFinHora: fFinHora,
       estado: orden.estado,
       tareaRealizada: orden.tareaRealizada || "",
-      repuestos:
-        orden.repuestos && orden.repuestos.length > 0
-          ? orden.repuestos.map((r, idx) => ({ ...r, id: r.id || idx + 1 }))
-          : [],
-      observaciones: orden.observaciones || "",
     });
     setFormError("");
     setOpenForm(true);
@@ -275,9 +261,6 @@ export const OrdenesMantScreen = () => {
     const tec = INITIAL_TECNICOS.find(
       (t) => t.id === Number(formData.empleadoId),
     );
-    const repuestos = (formData.repuestos || []).filter(
-      (r) => r.descripcion && r.descripcion.trim() !== "",
-    );
 
     const fechaInicioStr = formatFechaHora(
       formData.fechaInicioFecha,
@@ -307,8 +290,6 @@ export const OrdenesMantScreen = () => {
                 fechaFin: fechaFinStr,
                 estado: formData.estado,
                 tareaRealizada: formData.tareaRealizada.trim(),
-                repuestos,
-                observaciones: formData.observaciones,
               }
             : o,
         ),
@@ -329,8 +310,6 @@ export const OrdenesMantScreen = () => {
         fechaFin: fechaFinStr,
         estado: "Pendiente",
         tareaRealizada: formData.tareaRealizada.trim(),
-        repuestos,
-        observaciones: formData.observaciones,
       };
       setOrdenes((prev) => [newOrden, ...prev]);
     }
@@ -845,14 +824,6 @@ export const OrdenesMantScreen = () => {
                         {orden.tareaRealizada || "Sin diagnóstico registrado."}
                       </Typography>
                     </Paper>
-
-                    {orden.repuestos && orden.repuestos.length > 0 && (
-                      <Chip
-                        label={`${orden.repuestos.length} repuesto(s) registrado(s)`}
-                        size="small"
-                        sx={{ alignSelf: "flex-start", fontSize: "0.7rem" }}
-                      />
-                    )}
                   </Box>
 
                   {/* Actions Footer */}
@@ -869,7 +840,9 @@ export const OrdenesMantScreen = () => {
                   >
                     {renderBotonAccionOrden(orden)}
 
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                    >
                       <Tooltip title="Ver detalle de intervención">
                         <IconButton
                           size="small"
@@ -1412,8 +1385,7 @@ export const OrdenesMantScreen = () => {
                   : "Generar Nueva Orden de Mantenimiento"}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Asignación a técnicos de planta, repuestos y control
-                preventivo/correctivo
+                Asignación a técnicos de planta y control preventivo/correctivo
               </Typography>
             </Box>
           </Box>
@@ -1702,7 +1674,11 @@ export const OrdenesMantScreen = () => {
                     >
                       <MenuItem value="Pendiente">
                         <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                          }}
                         >
                           <Box
                             sx={{
@@ -1719,7 +1695,11 @@ export const OrdenesMantScreen = () => {
                       </MenuItem>
                       <MenuItem value="En Proceso">
                         <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                          }}
                         >
                           <Box
                             sx={{
@@ -1736,7 +1716,11 @@ export const OrdenesMantScreen = () => {
                       </MenuItem>
                       <MenuItem value="Finalizada">
                         <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                          }}
                         >
                           <Box
                             sx={{
@@ -1753,7 +1737,11 @@ export const OrdenesMantScreen = () => {
                       </MenuItem>
                       <MenuItem value="Cancelada">
                         <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                          }}
                         >
                           <Box
                             sx={{
@@ -1844,7 +1832,7 @@ export const OrdenesMantScreen = () => {
             </Grid>
           </Paper>
 
-          {/* 3. Diagnóstico y Repuestos Requeridos */}
+          {/* 3. Diagnóstico */}
           <Paper
             variant="outlined"
             sx={{
