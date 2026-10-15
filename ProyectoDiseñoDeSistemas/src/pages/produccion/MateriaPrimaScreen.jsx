@@ -430,9 +430,11 @@ export const MateriaPrimaScreen = () => {
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>
                         {mp.nombre}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', maxWidth: 280 }} noWrap>
-                        {mp.marca ? `Marca: ${mp.marca} • ` : ''}{mp.descripcion || ''}
-                      </Typography>
+                      {mp.marca && (
+                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', maxWidth: 280 }} noWrap>
+                          Marca: {mp.marca}
+                        </Typography>
+                      )}
                     </TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
                       <Chip
@@ -777,16 +779,6 @@ export const MateriaPrimaScreen = () => {
               </TextField>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Descripción / Especificaciones"
-                fullWidth
-                size="small"
-                value={formState.descripcion}
-                onChange={(e) => setFormState({ ...formState, descripcion: e.target.value })}
-                placeholder="Detalle de calidad, conservación o alérgenos"
-              />
-            </Grid>
           </Grid>
         </DialogContent>
         <Divider />
@@ -930,18 +922,6 @@ export const MateriaPrimaScreen = () => {
                   </Paper>
                 </Grid>
 
-                {viewingMP.descripcion && (
-                  <Grid item xs={12}>
-                    <Paper variant="outlined" sx={{ p: 2, borderRadius: '10px' }}>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                        Especificaciones y Conservación:
-                      </Typography>
-                      <Typography variant="body2" sx={{ mt: 0.5, color: 'text.primary' }}>
-                        {viewingMP.descripcion}
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                )}
               </Grid>
             </DialogContent>
             <Divider />

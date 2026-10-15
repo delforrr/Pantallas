@@ -188,7 +188,7 @@ export const OrdenProduccionCard = ({
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, overflow: 'hidden' }}>
                 <WarningAmberIcon fontSize="small" color="warning" sx={{ flexShrink: 0 }} />
                 <Typography variant="caption" sx={{ fontWeight: 700 }} noWrap>
-                  Falta insumo ({orden.proveedorSugerido?.split(' ')?.[0] || 'Local'})
+                  Falta materia prima ({orden.proveedorSugerido?.split(' ')?.[0] || 'Local'})
                 </Typography>
               </Box>
               {orden.solicitudCompraGenerada ? (
@@ -225,7 +225,7 @@ export const OrdenProduccionCard = ({
             >
               <CheckCircleIcon fontSize="small" color="success" sx={{ flexShrink: 0 }} />
               <Typography variant="caption" sx={{ fontWeight: 700 }} noWrap>
-                Insumos disponibles en almacén
+                Materia prima disponible en almacén
               </Typography>
             </Box>
           )}
@@ -269,7 +269,7 @@ export const OrdenProduccionCard = ({
               onClick={() => onViewDetail(orden)}
               sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.8rem' }}
             >
-              Nota Insumos
+              Nota Materia Prima
             </Button>
 
             <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
