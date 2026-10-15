@@ -11,29 +11,18 @@ import {
   Alert,
   IconButton,
   Fade,
-  CardMedia,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-import CelebrationIcon from '@mui/icons-material/Celebration';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import StarIcon from '@mui/icons-material/Star';
 import SearchOffIcon from '@mui/icons-material/SearchOff';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import GrassIcon from '@mui/icons-material/Grass';
-import EggAltIcon from '@mui/icons-material/EggAlt';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import VerifiedIcon from '@mui/icons-material/Verified';
 import { useApp } from '../../context/AppContext';
 import {
   useClientStore,
@@ -41,11 +30,12 @@ import {
   CATEGORIAS_PRODUCTOS,
   CATALOGO_CLIENTE,
 } from './mockData';
+import ClienteLanding from '../../components/cliente/ClienteLanding';
 import { ProductoCard, PresupuestoEventoModal } from '../../components/cliente';
 
 /**
  * CatalogoScreen - Portal Cliente PastaFab ERP.
- * Vista 1 (Landing): Hero de 70% welcome + 30% carousel a pantalla completa con botón "Ver todos los productos".
+ * Vista 1: Portada italiana y carrusel de especialidades con compra en memoria.
  * Vista 2 (Catálogo Completo): Grilla CSS uniforme (1fr por columna) con buscador y filtros por categoría.
  */
 export const CatalogoScreen = () => {
@@ -57,9 +47,11 @@ export const CatalogoScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [soloDestacados, setSoloDestacados] = useState(false);
   const [modalEventoOpen, setModalEventoOpen] = useState(false);
+  const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
 
-  // Estado para la tarjeta del carrusel en el 30%
+  // Estado del carrusel de especialidades
   const [carouselCantidad, setCarouselCantidad] = useState(1);
   const [carouselAgregado, setCarouselAgregado] = useState(false);
 
@@ -122,6 +114,28 @@ export const CatalogoScreen = () => {
     }, 1800);
   };
 
+  const handleAddSignatureDish = () => {
+    const signature = CATALOGO_CLIENTE.find((p) => p.idProducto === 100) || CATALOGO_CLIENTE[0];
+    clientStore.addToCart(signature, 1);
+    setSnackbar({
+      open: true,
+      message: `¡Agregaste 1 ${signature.unidad} de "${signature.nombre}" al carrito!`,
+      severity: 'success',
+    });
+  };
+
+  const handleSocialClick = (network) => {
+    if (network === 'WhatsApp') {
+      window.open('https://wa.me/5491123456789?text=Hola%20PastaFab!%20Quiero%20hacer%20un%20pedido', '_blank');
+    } else {
+      setSnackbar({
+        open: true,
+        message: `Conectando con las redes de PastaFab en ${network}...`,
+        severity: 'info',
+      });
+    }
+  };
+
   // Filtrado para la vista de catálogo completo
   const filteredProducts = useMemo(() => {
     return CATALOGO_CLIENTE.filter((producto) => {
@@ -167,538 +181,25 @@ export const CatalogoScreen = () => {
   return (
     <Box sx={{ pb: vistaCompleta ? 3 : 0, width: '100%' }}>
       {/* ─────────────────────────────────────────────────────────────
-          1. LANDING: 70% WELCOME HERO + 30% CAROUSEL (ALTO COMPLETO)
+          1. PORTADA ITALIANA Y ESPECIALIDADES DESTACADAS
          ───────────────────────────────────────────────────────────── */}
       {!vistaCompleta ? (
-        <Fade in timeout={350}>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
-              gap: 2.5,
-              width: '100%',
-              height: { xs: 'auto', md: 'calc(100vh - 185px)' },
-              maxHeight: { md: 'calc(100vh - 185px)' },
-              boxSizing: 'border-box',
-              overflow: 'hidden',
-            }}
-          >
-            {/* HERO WELCOME (70% WIDTH) */}
-            <Paper
-              elevation={0}
-              sx={{
-                width: { xs: '100%', md: '70%' },
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                p: { xs: 2.5, sm: 3, md: 3 },
-                borderRadius: '20px',
-                border: '1px solid',
-                borderColor: 'divider',
-                bgcolor: 'background.default',
-                boxShadow: 'none',
-                overflow: 'hidden',
-                boxSizing: 'border-box',
-              }}
-            >
-              {/* Barra superior de badges y acceso al carrito */}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, mb: 2 }}>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  <Chip
-                    icon={<GrassIcon sx={{ fontSize: '14px !important' }} />}
-                    label="Sémola Candeal 100% Pura"
-                    size="small"
-                    sx={{ fontWeight: 700, fontSize: '0.72rem', bgcolor: 'background.paper', borderColor: 'divider' }}
-                    variant="outlined"
-                  />
-                  <Chip
-                    icon={<EggAltIcon sx={{ fontSize: '14px !important' }} />}
-                    label="6 Huevos de Campo por Kilo"
-                    size="small"
-                    sx={{ fontWeight: 700, fontSize: '0.72rem', bgcolor: 'background.paper', borderColor: 'divider' }}
-                    variant="outlined"
-                  />
-                  <Chip
-                    icon={<AccessTimeIcon sx={{ fontSize: '14px !important' }} />}
-                    label="Elaboración Matutina Diaria"
-                    size="small"
-                    sx={{ fontWeight: 700, fontSize: '0.72rem', bgcolor: 'background.paper', borderColor: 'divider' }}
-                    variant="outlined"
-                  />
-                </Box>
-
-                {cartSummary.totalItems > 0 && (
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    startIcon={<ShoppingCartIcon />}
-                    onClick={() => navigate('carrito')}
-                    sx={{
-                      fontWeight: 700,
-                      borderRadius: '10px',
-                      bgcolor: 'background.paper',
-                    }}
-                  >
-                    Carrito ({cartSummary.totalItems} u. • ${cartSummary.totalPrice.toLocaleString('es-AR')})
-                  </Button>
-                )}
-              </Box>
-
-              {/* Contenido principal del Hero */}
-              <Box sx={{ my: 'auto', py: { xs: 1, md: 2 } }}>
-                <Typography
-                  variant="overline"
-                  sx={{
-                    color: 'primary.main',
-                    fontWeight: 800,
-                    letterSpacing: '0.12em',
-                    fontSize: '0.82rem',
-                    display: 'block',
-                    mb: 0.5,
-                  }}
-                >
-                  PASTAS FRESCAS ARTESANALES & SALSAS TRADICIONALES
-                </Typography>
-
-                <Typography
-                  variant="h3"
-                  sx={{
-                    fontWeight: 900,
-                    letterSpacing: '-0.025em',
-                    color: 'text.primary',
-                    fontSize: { xs: '1.85rem', sm: '2.4rem', md: '2.8rem' },
-                    lineHeight: 1.15,
-                    mb: 1.5,
-                  }}
-                >
-                  La pasión de la pasta hecha en casa, todos los días.
-                </Typography>
-
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: 'text.secondary',
-                    maxWidth: 680,
-                    lineHeight: 1.5,
-                    fontSize: { xs: '0.9rem', md: '0.98rem' },
-                    mb: 2,
-                  }}
-                >
-                  Elaboramos pastas frescas con recetas familiares italianas. Atendemos pedidos familiares,
-                  suministro regular para restaurantes gastronómicos y cotizaciones especiales para eventos
-                  con 48 hs de anticipación y seña del 50%.
-                </Typography>
-
-                {/* 3 Pilares Gastronómicos */}
-                <Box
-                  sx={{
-                    display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
-                    gap: 1.5,
-                    mb: 2,
-                  }}
-                >
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 1.5,
-                      borderRadius: '12px',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      bgcolor: 'background.paper',
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                      <VerifiedIcon color="primary" sx={{ fontSize: 18 }} />
-                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                        Amasado Diario
-                      </Typography>
-                    </Box>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.3, display: 'block' }}>
-                      Frescura garantizada, sin conservantes químicos ni colorantes artificiales.
-                    </Typography>
-                  </Paper>
-
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 1.5,
-                      borderRadius: '12px',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      bgcolor: 'background.paper',
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                      <RestaurantMenuIcon sx={{ color: '#E74C3C', fontSize: 18 }} />
-                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                        Salsas Caseras
-                      </Typography>
-                    </Box>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.3, display: 'block' }}>
-                      Vendidas por separado, listas para servir y maridar a la perfección.
-                    </Typography>
-                  </Paper>
-
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 1.5,
-                      borderRadius: '12px',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      bgcolor: 'background.paper',
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                      <LocalOfferIcon sx={{ color: '#F39C12', fontSize: 18 }} />
-                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                        Eventos (48hs)
-                      </Typography>
-                    </Box>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.3, display: 'block' }}>
-                      10% de descuento por volumen, entrega programada y 50% de seña.
-                    </Typography>
-                  </Paper>
-                </Box>
-              </Box>
-
-              {/* Botonera de Acción */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  flexWrap: 'wrap',
-                  pt: 2,
-                  borderTop: '1px solid',
-                  borderColor: 'divider',
-                }}
-              >
-                <Button
-                  variant="contained"
-                  size="large"
-                  startIcon={<RestaurantMenuIcon />}
-                  endIcon={<ArrowForwardIcon />}
-                  onClick={() => setVistaCompleta(true)}
-                  sx={{
-                    py: 1.4,
-                    px: 3.5,
-                    borderRadius: '12px',
-                    fontWeight: 700,
-                    fontSize: '0.95rem',
-                    letterSpacing: '0.02em',
-                    boxShadow: 'none',
-                    bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1e7e34' : 'primary.main'),
-                    color: '#FFFFFF',
-                    '&:hover': {
-                      boxShadow: 'none',
-                      bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#19692c' : 'primary.dark'),
-                    },
-                  }}
-                >
-                  Ver Todos los Productos ({CATALOGO_CLIENTE.length} variedades)
-                </Button>
-
-                <Button
-                  variant="outlined"
-                  size="large"
-                  startIcon={<CelebrationIcon />}
-                  onClick={() => setModalEventoOpen(true)}
-                  sx={{
-                    py: 1.4,
-                    px: 3,
-                    borderRadius: '12px',
-                    fontWeight: 700,
-                    fontSize: '0.92rem',
-                    color: 'text.primary',
-                    borderColor: 'divider',
-                    boxShadow: 'none',
-                    '&:hover': {
-                      borderColor: 'text.secondary',
-                      bgcolor: 'action.hover',
-                      boxShadow: 'none',
-                    },
-                  }}
-                >
-                  Cotizar Evento (48hs)
-                </Button>
-              </Box>
-            </Paper>
-
-            {/* CAROUSEL CON PRODUCTOS DESTACADOS (30% WIDTH) */}
-            <Paper
-              elevation={0}
-              sx={{
-                width: { xs: '100%', md: '30%' },
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                borderRadius: '20px',
-                border: '1px solid',
-                borderColor: 'divider',
-                p: { xs: 2, md: 2.25 },
-                bgcolor: 'background.paper',
-                boxShadow: 'none',
-                overflow: 'hidden',
-                boxSizing: 'border-box',
-              }}
-            >
-              {/* Cabecera del Carrusel */}
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <StarIcon sx={{ color: '#F39C12', fontSize: 20 }} />
-                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'text.primary', fontSize: '0.95rem' }}>
-                    Especialidad Destacada
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, mr: 0.5 }}>
-                    {carouselIndex + 1}/{productosDestacados.length}
-                  </Typography>
-                  <IconButton
-                    size="small"
-                    onClick={handlePrevSlide}
-                    sx={{ border: '1px solid', borderColor: 'divider' }}
-                  >
-                    <ChevronLeftIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={handleNextSlide}
-                    sx={{ border: '1px solid', borderColor: 'divider' }}
-                  >
-                    <ChevronRightIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              </Box>
-
-              {/* Contenido del Producto en el Carrusel */}
-              {currentFeaturedProduct && (
-                <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  {/* Imagen Stock con Badges (Agrandada verticalmente) */}
-                  <Box
-                    sx={{
-                      position: 'relative',
-                      height: { xs: 200, sm: 240, md: 275 },
-                      borderRadius: '14px',
-                      overflow: 'hidden',
-                      mb: 1.2,
-                      flexShrink: 0,
-                    }}
-                  >
-                    <CardMedia
-                      component="img"
-                      image={currentFeaturedProduct.imagen}
-                      alt={currentFeaturedProduct.nombre}
-                      sx={{ height: '100%', width: '100%', objectFit: 'cover' }}
-                    />
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: 8,
-                        left: 8,
-                        right: 8,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <Chip
-                        label={currentFeaturedProduct.categoria}
-                        size="small"
-                        sx={{
-                          fontWeight: 700,
-                          fontSize: '0.68rem',
-                          bgcolor: 'background.paper',
-                          backdropFilter: 'blur(4px)',
-                        }}
-                      />
-                      <Chip
-                        icon={<StarIcon sx={{ fontSize: 13, color: '#F39C12 !important' }} />}
-                        label="Top Ventas"
-                        size="small"
-                        sx={{
-                          fontWeight: 700,
-                          fontSize: '0.68rem',
-                          bgcolor: 'background.paper',
-                          color: '#B7950B',
-                        }}
-                      />
-                    </Box>
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        bottom: 8,
-                        right: 8,
-                        bgcolor: 'rgba(0,0,0,0.7)',
-                        borderRadius: '6px',
-                        px: 0.8,
-                        py: 0.2,
-                      }}
-                    >
-                      <Typography variant="caption" sx={{ color: '#58D68D', fontWeight: 700, fontSize: '0.68rem' }}>
-                        Stock: {currentFeaturedProduct.stock} disp.
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  {/* Textos del Producto */}
-                  <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2, mb: 0.4, color: 'text.primary', fontSize: '1rem' }}>
-                    {currentFeaturedProduct.nombre}
-                  </Typography>
-
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: 'text.secondary',
-                      mb: 1,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      height: 30,
-                    }}
-                  >
-                    {currentFeaturedProduct.variedad}
-                  </Typography>
-
-
-                  {/* Maridaje Sugerido */}
-                  <Box
-                    sx={{
-                      p: 0.8,
-                      borderRadius: '8px',
-                      border: '1px dashed',
-                      borderColor: 'divider',
-                      bgcolor: 'action.hover',
-                      mb: 1.2,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.8,
-                    }}
-                  >
-                    <RestaurantMenuIcon sx={{ fontSize: 15, color: 'secondary.main', flexShrink: 0 }} />
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: 'text.secondary',
-                        fontSize: '0.68rem',
-                        fontStyle: 'italic',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      Maridaje: {currentFeaturedProduct.maridajeSugerido}
-                    </Typography>
-                  </Box>
-
-                  {/* Selector y Botón Agregar (anclado al fondo del carrusel) */}
-                  <Box sx={{ mt: 'auto', pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 1.2 }}>
-                      <Box>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.68rem' }}>
-                          Precio ({currentFeaturedProduct.unidad})
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main', lineHeight: 1 }}>
-                          ${currentFeaturedProduct.precio.toLocaleString('es-AR')}
-                        </Typography>
-                      </Box>
-
-                      {/* Contador de unidades */}
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          borderRadius: '8px',
-                          bgcolor: 'background.paper',
-                        }}
-                      >
-                        <IconButton
-                          size="small"
-                          onClick={() => setCarouselCantidad((p) => Math.max(1, p - 1))}
-                          disabled={carouselCantidad <= 1 || carouselAgregado}
-                          sx={{ p: 0.3 }}
-                        >
-                          <RemoveIcon sx={{ fontSize: 14 }} />
-                        </IconButton>
-                        <Typography sx={{ px: 1, fontSize: '0.8rem', fontWeight: 700, minWidth: 18, textAlign: 'center' }}>
-                          {carouselCantidad}
-                        </Typography>
-                        <IconButton
-                          size="small"
-                          onClick={() => setCarouselCantidad((p) => Math.min(currentFeaturedProduct.stock, p + 1))}
-                          disabled={carouselCantidad >= currentFeaturedProduct.stock || carouselAgregado}
-                          sx={{ p: 0.3 }}
-                        >
-                          <AddIcon sx={{ fontSize: 14 }} />
-                        </IconButton>
-                      </Box>
-                    </Box>
-
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      size="small"
-                      startIcon={carouselAgregado ? <CheckCircleIcon /> : <AddShoppingCartIcon />}
-                      onClick={handleAddCarouselItem}
-                      disabled={currentFeaturedProduct.stock === 0}
-                      sx={{
-                        py: 0.9,
-                        borderRadius: '10px',
-                        fontWeight: 700,
-                        fontSize: '0.82rem',
-                        boxShadow: 'none',
-                        color: '#FFFFFF',
-                        bgcolor: carouselAgregado
-                          ? 'success.main'
-                          : (theme) => (theme.palette.mode === 'dark' ? '#1e7e34' : 'primary.main'),
-                        '&:hover': {
-                          boxShadow: 'none',
-                          bgcolor: carouselAgregado
-                            ? 'success.dark'
-                            : (theme) => (theme.palette.mode === 'dark' ? '#19692c' : 'primary.dark'),
-                        },
-                      }}
-                    >
-                      {carouselAgregado
-                        ? `¡Agregado (${carouselCantidad})!`
-                        : `Agregar • $${(currentFeaturedProduct.precio * carouselCantidad).toLocaleString('es-AR')}`}
-                    </Button>
-                  </Box>
-                </Box>
-              )}
-
-              {/* Indicadores de bolitas / dots del Carrusel */}
-              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.8, mt: 1.5 }}>
-                {productosDestacados.map((_, idx) => (
-                  <Box
-                    key={idx}
-                    onClick={() => {
-                      setCarouselIndex(idx);
-                      setCarouselCantidad(1);
-                      setCarouselAgregado(false);
-                    }}
-                    sx={{
-                      width: carouselIndex === idx ? 18 : 6,
-                      height: 6,
-                      borderRadius: 3,
-                      bgcolor: carouselIndex === idx ? 'primary.main' : 'divider',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
-                  />
-                ))}
-              </Box>
-            </Paper>
-          </Box>
-        </Fade>
+        <ClienteLanding
+          cartSummary={cartSummary}
+          onCatalogo={() => setVistaCompleta(true)}
+          onEvento={() => setModalEventoOpen(true)}
+          onAbout={() => setAboutModalOpen(true)}
+          onContact={() => setContactModalOpen(true)}
+          onSocial={handleSocialClick}
+          producto={currentFeaturedProduct}
+          cantidad={carouselCantidad}
+          agregado={carouselAgregado}
+          onPrev={handlePrevSlide}
+          onNext={handleNextSlide}
+          onCantidad={setCarouselCantidad}
+          onAdd={handleAddCarouselItem}
+          onSignature={handleAddSignatureDish}
+        />
       ) : (
         /* ─────────────────────────────────────────────────────────────
             2. VISTA DE CATÁLOGO COMPLETO (GRILLA CSS UNIFORME 1fr)
@@ -891,6 +392,17 @@ export const CatalogoScreen = () => {
         onClose={() => setModalEventoOpen(false)}
         onConfirmed={handleEventoConfirmed}
       />
+
+      <Dialog open={aboutModalOpen} onClose={() => setAboutModalOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>La tradición de PastaFab</DialogTitle>
+        <DialogContent><Typography>Elaboramos pastas frescas cada mañana con sémola candeal, huevos de campo y recetas familiares italianas. Completá tu mesa con nuestras salsas caseras, o pedí un presupuesto para tu próximo evento.</Typography></DialogContent>
+        <DialogActions><Button onClick={() => setAboutModalOpen(false)}>Cerrar</Button></DialogActions>
+      </Dialog>
+      <Dialog open={contactModalOpen} onClose={() => setContactModalOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Estamos para ayudarte</DialogTitle>
+        <DialogContent><Typography>Consultanos por productos, pedidos regulares o eventos especiales. Los eventos se reservan con 48 horas de anticipación y una seña del 50%.</Typography></DialogContent>
+        <DialogActions><Button onClick={() => setContactModalOpen(false)}>Cerrar</Button><Button variant="contained" onClick={() => handleSocialClick('WhatsApp')}>Consultar por WhatsApp</Button></DialogActions>
+      </Dialog>
 
       {/* SNACKBAR DE CONFIRMACIÓN */}
       <Snackbar
