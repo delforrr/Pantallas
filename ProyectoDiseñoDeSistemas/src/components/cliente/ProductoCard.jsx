@@ -51,7 +51,7 @@ export const ProductoCard = ({ producto, onAddToCartFeedback, modoMayorista = fa
             <Typography aria-live="polite" sx={{ minWidth: 24, textAlign: 'center', fontWeight: 600 }}>{cantidad}</Typography>
             <IconButton size="small" aria-label={`Aumentar cantidad de ${producto.nombre}`} onClick={() => cambiarCantidad(1)} disabled={cantidad >= disponible || agregadoAnim || sinStock}><AddIcon fontSize="small" /></IconButton>
           </Box>
-          <Button variant="contained" color="secondary" onClick={handleAddToCart} disabled={sinStock || agregadoAnim} startIcon={agregadoAnim ? <CheckCircleIcon /> : undefined} aria-label={`Agregar ${cantidad} de ${producto.nombre} al carrito${modoMayorista ? ' mayorista' : ''}`} sx={{ borderRadius: 20, width: { xs: '100%', sm: 'auto' }, minWidth: 0, px: { xs: 0.75, sm: 2.5 }, py: 1.2, fontSize: { xs: '0.65rem', sm: '0.75rem' }, fontWeight: 700, letterSpacing: '0.04em', boxShadow: '0 0 0 6px rgba(206,43,55,0.07)', ml: 'auto' }}>
+          <Button variant="contained" color="secondary" onClick={handleAddToCart} disabled={sinStock || agregadoAnim} startIcon={agregadoAnim ? <CheckCircleIcon /> : undefined} aria-label={`Agregar ${cantidad} de ${producto.nombre} al carrito${modoMayorista ? ' mayorista' : ''}`} sx={{ borderRadius: 20, width: { xs: '100%', sm: 'auto' }, minWidth: 0, px: { xs: 0.75, sm: 2.5 }, py: 1.2, fontSize: { xs: '0.65rem', sm: '0.75rem' }, fontWeight: 700, letterSpacing: '0.04em', border: 0, boxShadow: 'none', '&:hover': { boxShadow: 'none' }, ml: 'auto' }}>
             {sinStock ? (modoMayorista ? 'Stock menor al mínimo' : 'Sin stock') : agregadoAnim ? '¡Agregado!' : 'Agregar al carrito'}
           </Button>
         </Box>
