@@ -5,23 +5,23 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { clientStore, MINIMO_MAYORISTA } from '../../pages/cliente/mockData';
 
-export const ProductoCard = ({ producto, onAddToCartFeedback, modoMayorista = false, cantidadMayorista = 0, onCantidadMayorista }) => {
+export const ProductoCard = ({ producto, onAddToCartFeedback, modoMayorista = false, cantidadMayorista = 0, onAgregarMayorista }) => {
   const [cantidadMinorista, setCantidad] = useState(1);
-  const cantidad = modoMayorista ? cantidadMayorista : cantidadMinorista;
+  const [cantidadParaMayorista, setCantidadParaMayorista] = useState(MINIMO_MAYORISTA);
+  const cantidad = modoMayorista ? cantidadParaMayorista : cantidadMinorista;
   const minimo = modoMayorista ? MINIMO_MAYORISTA : 1;
-  const sinStock = producto.stock < minimo;
+  const disponible = producto.stock - (modoMayorista ? cantidadMayorista : 0);
+  const sinStock = disponible < minimo;
   const cambiarCantidad = (delta) => {
-    if (modoMayorista) {
-      const siguiente = delta > 0 ? (cantidad === 0 ? minimo : cantidad + 1) : (cantidad === minimo ? 0 : cantidad - 1);
-      onCantidadMayorista(producto.idProducto, siguiente);
-    } else setCantidad((n) => Math.max(1, Math.min(producto.stock, n + delta)));
+    if (modoMayorista) setCantidadParaMayorista((n) => Math.max(minimo, Math.min(disponible, n + delta)));
+    else setCantidad((n) => Math.max(1, Math.min(producto.stock, n + delta)));
   };
   const [agregadoAnim, setAgregadoAnim] = useState(false);
 
   const handleAddToCart = () => {
     if (sinStock || agregadoAnim) return;
     if (modoMayorista) {
-      onCantidadMayorista(producto.idProducto, cantidad > 0 ? 0 : minimo);
+      onAgregarMayorista(producto, cantidad);
       return;
     }
     clientStore.addToCart(producto, cantidad);
@@ -48,12 +48,12 @@ export const ProductoCard = ({ producto, onAddToCartFeedback, modoMayorista = fa
         {producto.maridajeSugerido && <Typography variant="caption" color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>Ideal con {producto.maridajeSugerido}</Typography>}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, flexWrap: 'wrap', mt: 'auto', pt: 1.5 }}>
           <Box role="group" aria-label={`Cantidad de ${producto.nombre}`} sx={{ display: 'flex', alignItems: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 20 }}>
-            <IconButton size="small" aria-label={`Reducir cantidad de ${producto.nombre}`} onClick={() => cambiarCantidad(-1)} disabled={cantidad <= (modoMayorista ? 0 : 1) || agregadoAnim || sinStock}><RemoveIcon fontSize="small" /></IconButton>
+            <IconButton size="small" aria-label={`Reducir cantidad de ${producto.nombre}`} onClick={() => cambiarCantidad(-1)} disabled={cantidad <= minimo || agregadoAnim || sinStock}><RemoveIcon fontSize="small" /></IconButton>
             <Typography aria-live="polite" sx={{ minWidth: 24, textAlign: 'center', fontWeight: 600 }}>{cantidad}</Typography>
-            <IconButton size="small" aria-label={`Aumentar cantidad de ${producto.nombre}`} onClick={() => cambiarCantidad(1)} disabled={cantidad >= producto.stock || agregadoAnim || sinStock}><AddIcon fontSize="small" /></IconButton>
+            <IconButton size="small" aria-label={`Aumentar cantidad de ${producto.nombre}`} onClick={() => cambiarCantidad(1)} disabled={cantidad >= disponible || agregadoAnim || sinStock}><AddIcon fontSize="small" /></IconButton>
           </Box>
-          <Button variant="contained" color="secondary" onClick={handleAddToCart} disabled={sinStock || agregadoAnim} startIcon={agregadoAnim ? <CheckCircleIcon /> : undefined} aria-label={modoMayorista ? `${cantidad > 0 ? 'Quitar' : 'Seleccionar'} ${producto.nombre} para presupuesto` : `Agregar ${cantidad} de ${producto.nombre} al carrito`} sx={{ borderRadius: 20, px: 2.5, py: 1.2, fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', boxShadow: '0 0 0 6px rgba(206,43,55,0.07)', ml: 'auto' }}>
-            {sinStock ? (modoMayorista ? 'Stock menor al mínimo' : 'Sin stock') : modoMayorista ? (cantidad > 0 ? 'Quitar selección' : `Seleccionar ${minimo}`) : agregadoAnim ? '¡Agregado!' : 'Agregar al carrito'}
+          <Button variant="contained" color="secondary" onClick={handleAddToCart} disabled={sinStock || agregadoAnim} startIcon={agregadoAnim ? <CheckCircleIcon /> : undefined} aria-label={`Agregar ${cantidad} de ${producto.nombre} al carrito${modoMayorista ? ' mayorista' : ''}`} sx={{ borderRadius: 20, px: 2.5, py: 1.2, fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', boxShadow: '0 0 0 6px rgba(206,43,55,0.07)', ml: 'auto' }}>
+            {sinStock ? (modoMayorista ? 'Stock menor al mínimo' : 'Sin stock') : agregadoAnim ? '¡Agregado!' : 'Agregar al carrito'}
           </Button>
         </Box>
       </CardContent>

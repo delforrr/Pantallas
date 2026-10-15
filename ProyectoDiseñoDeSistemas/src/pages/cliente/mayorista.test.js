@@ -46,3 +46,16 @@ test('la tienda no puede aceptar un mayorista cancelado por el cliente', () => {
   clientStore.acceptWholesaleOrder(pedido.nroPedido);
   assert.equal(clientStore.getState().pedidos.find((p) => p.nroPedido === pedido.nroPedido).estadoPedido, 'Cancelado');
 });
+
+test('agregar mayoristas abre su carrito, acumula cantidades y respeta el stock', () => {
+  const producto = CATALOGO_CLIENTE[0];
+  const carritoHabitual = clientStore.getState().cart;
+  assert.equal(clientStore.addWholesaleToCart(producto, MINIMO_MAYORISTA - 1), false);
+  assert.equal(clientStore.addWholesaleToCart(producto, MINIMO_MAYORISTA), true);
+  assert.equal(clientStore.getState().carritoModo, 'mayorista');
+  assert.equal(clientStore.addWholesaleToCart(producto, MINIMO_MAYORISTA), true);
+  assert.equal(clientStore.getState().mayoristaItems[producto.idProducto], 2 * MINIMO_MAYORISTA);
+  assert.equal(clientStore.addWholesaleToCart(producto, producto.stock), false);
+  assert.equal(clientStore.getState().cart, carritoHabitual);
+  clientStore.setWholesaleQuantity(producto.idProducto, 0);
+});

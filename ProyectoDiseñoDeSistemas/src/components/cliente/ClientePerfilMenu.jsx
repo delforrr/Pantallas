@@ -17,7 +17,7 @@ export default function ClientePerfilMenu({ sobreVerde = false }) {
   return (
     <>
       <Tooltip title="Mi cuenta">
-        <IconButton id={`${id}-button`} aria-label="Mi cuenta" aria-haspopup="menu" aria-controls={open ? `${id}-menu` : undefined} aria-expanded={open ? 'true' : undefined} onClick={(event) => setAnchorEl(event.currentTarget)} sx={{ color: sobreVerde ? '#fff' : 'primary.main', border: '1px solid', borderColor: sobreVerde ? 'rgba(255,255,255,0.6)' : 'divider', bgcolor: sobreVerde ? 'transparent' : 'background.paper', '&:hover': { bgcolor: sobreVerde ? 'rgba(255,255,255,0.12)' : 'action.hover' } }}>
+        <IconButton id={`${id}-button`} aria-label="Mi cuenta" aria-haspopup="menu" aria-controls={open ? `${id}-menu` : undefined} aria-expanded={open ? 'true' : undefined} onClick={(event) => setAnchorEl(event.currentTarget)} sx={{ color: sobreVerde ? '#fff' : 'primary.main', border: '1px solid', borderColor: sobreVerde ? 'rgba(255,255,255,0.6)' : 'divider', bgcolor: sobreVerde ? 'primary.main' : 'background.paper', '&:hover': { bgcolor: sobreVerde ? 'primary.dark' : 'action.hover' } }}>
           <AccountCircleIcon />
         </IconButton>
       </Tooltip>

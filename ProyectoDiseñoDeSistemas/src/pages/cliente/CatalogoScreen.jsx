@@ -26,14 +26,12 @@ import {
   useClientStore,
   clientStore,
   MINIMO_MAYORISTA,
-  calcularPresupuestoMayorista,
   CATEGORIAS_PRODUCTOS,
   CATALOGO_CLIENTE,
 } from './mockData';
 import ClienteLanding from '../../components/cliente/ClienteLanding';
 import ClienteNavigation from '../../components/cliente/ClienteNavigation';
 import ingredientesPattern from '../../components/cliente/ingredientes-pattern.svg';
-import PresupuestoMayorista from '../../components/cliente/PresupuestoMayorista';
 import { ProductoCard } from '../../components/cliente';
 
 /**
@@ -49,8 +47,6 @@ export const CatalogoScreen = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const modoMayorista = store.catalogoModo === 'mayorista';
-  const [presupuestoVisible, setPresupuestoVisible] = useState(false);
-  const presupuesto = useMemo(() => calcularPresupuestoMayorista(store.mayoristaItems), [store.mayoristaItems]);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -103,9 +99,8 @@ export const CatalogoScreen = () => {
     });
   };
 
-  const handleAceptarPresupuesto = () => {
-    const pedido = clientStore.createWholesaleOrder();
-    if (pedido) navigate('pedidos_cliente');
+  const handleAgregarMayorista = (producto, cantidad) => {
+    if (clientStore.addWholesaleToCart(producto, cantidad)) navigate('carrito');
   };
 
   const handleClearFilters = () => {
@@ -121,8 +116,8 @@ export const CatalogoScreen = () => {
       {!vistaCompleta ? (
         <ClienteLanding
           cartSummary={cartSummary}
-          onCatalogo={() => { clientStore.setCatalogoModo('productos'); setPresupuestoVisible(false); }}
-          onEvento={() => { clientStore.setCatalogoModo('mayorista'); setPresupuestoVisible(false); handleClearFilters(); }}
+          onCatalogo={() => { clientStore.setCatalogoModo('productos'); }}
+          onEvento={() => { clientStore.setCatalogoModo('mayorista'); handleClearFilters(); }}
           onAbout={() => setAboutModalOpen(true)}
           onContact={() => setContactModalOpen(true)}
           onSocial={handleSocialClick}
@@ -134,16 +129,15 @@ export const CatalogoScreen = () => {
         <Fade in timeout={300}>
           <Box sx={{ p: { xs: 1.5, md: 5 }, minHeight: '100vh', bgcolor: 'primary.main', backgroundImage: `url("${ingredientesPattern}")`, backgroundRepeat: 'repeat', backgroundSize: { xs: '320px', md: '440px' } }}>
             <Box sx={{ maxWidth: 1440, mx: 'auto' }}>
-            <ClienteNavigation sobreVerde onInicio={() => clientStore.setCatalogoModo('inicio')} onProductos={() => { handleClearFilters(); setPresupuestoVisible(false); }} />
+            <ClienteNavigation sobreVerde onInicio={() => clientStore.setCatalogoModo('inicio')} onProductos={() => { handleClearFilters(); }} />
             <Box sx={{ py: 3 }}>
             <Box sx={{ bgcolor: 'transparent', px: { xs: 2, md: 4 }, pt: 2, mb: 3 }}>
-            <Box sx={{ textAlign: 'center', py: 2, mb: 2 }}>
+            <Box sx={{ textAlign: 'center', py: 2, mb: 2, '& > .MuiTypography-root': { bgcolor: 'primary.main', width: 'fit-content', maxWidth: '100%', mx: 'auto', px: 2, py: 0.5, borderRadius: '8px' } }}>
               <Typography sx={{ color: '#fff', fontSize: 10, letterSpacing: '0.2em', fontWeight: 700 }}>DE NUESTRA COCINA A TU MESA</Typography>
               <Typography component="h1" sx={{ fontFamily: 'Kristi, cursive', color: '#fff', fontSize: { xs: 58, md: 76 }, lineHeight: 1.2 }}>{modoMayorista ? 'Pedidos mayoristas' : 'Nuestra carta'}</Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>Pastas artesanales, salsas caseras y sabores para compartir.</Typography>
             </Box>
-            {!presupuestoVisible && <>
-            {modoMayorista && <Alert severity="info" sx={{ mb: 3 }}>Elegí tus productos: mínimo {MINIMO_MAYORISTA} unidades de cada uno (kg, cajas o envases según su presentación). Después presioná Cotizar para revisar el presupuesto. El pedido requiere aprobación de la tienda.</Alert>}
+            {modoMayorista && <Alert severity="info" sx={{ mb: 3 }}>Elegí tus productos: mínimo {MINIMO_MAYORISTA} unidades de cada uno (kg, cajas o envases según su presentación). Agregalos al carrito para cotizar y revisar el presupuesto. El pedido requiere aprobación de la tienda.</Alert>}
             {/* Búsqueda y filtros */}
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -179,22 +173,14 @@ export const CatalogoScreen = () => {
 
               </Box>
 
-              <Tabs value={selectedCategory} onChange={(_, value) => setSelectedCategory(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile aria-label="Tipos de producto" textColor="secondary" indicatorColor="secondary" sx={{ mb: 4, '& .MuiTabs-flexContainer, & .MuiTabs-list': { justifyContent: { sm: 'center' } }, '& .MuiTabs-indicator': { height: 3, borderRadius: 2, bgcolor: '#fff' }, '& .MuiTabs-scrollButtons': { color: '#fff' }, '& .MuiTab-root': { color: 'rgba(255,255,255,0.8)', '&.Mui-selected': { color: '#fff' }, textTransform: 'none', fontWeight: 700, fontSize: '0.95rem', px: { xs: 2, md: 3 }, minHeight: 56 } }}>
+              <Tabs value={selectedCategory} onChange={(_, value) => setSelectedCategory(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile aria-label="Tipos de producto" textColor="secondary" indicatorColor="secondary" sx={{ mb: 4, '& .MuiTabs-flexContainer, & .MuiTabs-list': { justifyContent: { sm: 'center' } }, '& .MuiTabs-indicator': { height: 3, borderRadius: 2, bgcolor: '#CE2B37' }, '& .MuiTabs-scrollButtons': { color: '#fff', bgcolor: 'primary.main' }, '& .MuiTab-root': { bgcolor: 'primary.main', borderRadius: '8px 8px 0 0', color: 'rgba(255,255,255,0.8)', '&.Mui-selected': { color: '#fff' }, textTransform: 'none', fontWeight: 700, fontSize: '0.95rem', px: { xs: 2, md: 3 }, minHeight: 56 } }}>
                 {CATEGORIAS_PRODUCTOS.map((categoria) => <Tab key={categoria} value={categoria} label={categoria} />)}
               </Tabs>
             </Box>
-            </>}
 
             </Box>
             {/* GRILLA UNIFORME CON CSS GRID: Todas las tarjetas tienen idéntico ancho (1fr) y están equitativamente distribuidas */}
-            {modoMayorista && !presupuestoVisible && <Paper sx={{ p: 2.5, mb: 3, borderRadius: '14px', position: 'sticky', top: 12, zIndex: 2, boxShadow: '0 5px 20px #20331530' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-                <Box><Typography sx={{ fontWeight: 700 }}>{presupuesto.items.length} productos seleccionados para cotizar</Typography><Typography variant="body2" color="text.secondary">10% de descuento mayorista · Sin cobro hasta la aprobación</Typography></Box>
-                <Button variant="contained" color="secondary" disabled={!presupuesto.valido} onClick={() => setPresupuestoVisible(true)}>Cotizar</Button>
-              </Box>
-              <Box sx={{ maxHeight: 120, overflowY: 'auto' }}>{presupuesto.items.map((item) => <Box key={item.idProducto} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, mt: 1 }}><Typography variant="body2">{item.nombre} × {item.cantidad}</Typography><Button size="small" onClick={() => clientStore.setWholesaleQuantity(item.idProducto, 0)} aria-label={`Quitar ${item.nombre} de la selección`}>Quitar</Button></Box>)}</Box>
-            </Paper>}
-            {modoMayorista && presupuestoVisible ? <PresupuestoMayorista presupuesto={presupuesto} onEditar={() => setPresupuestoVisible(false)} onAceptar={handleAceptarPresupuesto} /> : filteredProducts.length === 0 ? (
+            {filteredProducts.length === 0 ? (
               <Paper
                 elevation={0}
                 sx={{
@@ -245,7 +231,7 @@ export const CatalogoScreen = () => {
                     producto={producto}
                     modoMayorista={modoMayorista}
                     cantidadMayorista={store.mayoristaItems[producto.idProducto] || 0}
-                    onCantidadMayorista={(id, cantidad) => clientStore.setWholesaleQuantity(id, cantidad)}
+                    onAgregarMayorista={handleAgregarMayorista}
                     onAddToCartFeedback={handleProductAdded}
                   />
                 ))}

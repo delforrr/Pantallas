@@ -449,6 +449,7 @@ export const INITIAL_PEDIDOS_CLIENTE = [
 // ============================================================================
 
 let currentStore = {
+  carritoModo: 'habitual',
   catalogoModo: 'inicio',
   mayoristaItems: {},
   cart: [
@@ -487,6 +488,21 @@ function emitChange() {
 }
 
 export const clientStore = {
+  setCarritoModo(modo) {
+    if (!['habitual', 'mayorista'].includes(modo)) return;
+    currentStore = { ...currentStore, carritoModo: modo };
+    emitChange();
+  },
+
+  addWholesaleToCart(producto, cantidad) {
+    const productoActual = CATALOGO_CLIENTE.find((p) => p.idProducto === producto.idProducto);
+    const total = (currentStore.mayoristaItems[producto.idProducto] || 0) + cantidad;
+    if (!productoActual || !Number.isInteger(cantidad) || cantidad < MINIMO_MAYORISTA || total > productoActual.stock) return false;
+    currentStore = { ...currentStore, carritoModo: 'mayorista', mayoristaItems: { ...currentStore.mayoristaItems, [producto.idProducto]: total } };
+    emitChange();
+    return true;
+  },
+
   setCatalogoModo(modo) {
     if (!['inicio', 'productos', 'mayorista'].includes(modo)) return;
     currentStore = { ...currentStore, catalogoModo: modo };
@@ -531,7 +547,7 @@ export const clientStore = {
         },
       ];
     }
-    currentStore = { ...currentStore, cart: newCart };
+    currentStore = { ...currentStore, cart: newCart, carritoModo: 'habitual' };
     emitChange();
   },
 
