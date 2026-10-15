@@ -26,6 +26,7 @@ import {
   useClientStore,
   clientStore,
   MINIMO_MAYORISTA,
+  calcularPresupuestoMayorista,
   CATEGORIAS_PRODUCTOS,
   CATALOGO_CLIENTE,
 } from './mockData';
@@ -56,10 +57,10 @@ export const CatalogoScreen = () => {
   });
 
   const cartSummary = useMemo(() => {
-    const totalItems = store.cart.reduce((acc, item) => acc + item.cantidad, 0);
-    const totalPrice = store.cart.reduce((acc, item) => acc + item.subtotal, 0);
+    const totalItems = store.cart.length + Object.keys(store.mayoristaItems).length;
+    const totalPrice = store.cart.reduce((acc, item) => acc + item.subtotal, 0) + calcularPresupuestoMayorista(store.mayoristaItems).total;
     return { totalItems, totalPrice };
-  }, [store.cart]);
+  }, [store.cart, store.mayoristaItems]);
 
   const handleSocialClick = (network) => {
     if (network === 'WhatsApp') {

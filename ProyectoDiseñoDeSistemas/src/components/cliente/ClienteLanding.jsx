@@ -26,7 +26,7 @@ export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAb
           <Button sx={{ ...navStyle, bgcolor: olive, color: '#fff', '&:hover': { bgcolor: '#325018' } }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Inicio</Button>
           <Button sx={navStyle} onClick={onCatalogo}>Productos</Button>
           <Tooltip title={`Ver carrito · $${cartSummary.totalPrice.toLocaleString('es-AR')}`}>
-            <IconButton aria-label={`Carrito, ${cartSummary.totalItems} unidades`} onClick={() => navigate('carrito')} sx={{ color: olive }}><Badge badgeContent={cartSummary.totalItems} color="secondary"><ShoppingBagOutlinedIcon /></Badge></IconButton>
+            <IconButton aria-label={`Carrito, ${cartSummary.totalItems} ítems`} onClick={() => navigate('carrito')} sx={{ color: olive }}><Badge badgeContent={cartSummary.totalItems} showZero sx={{ '& .MuiBadge-badge': { bgcolor: '#CE2B37', color: '#fff' } }}><ShoppingBagOutlinedIcon /></Badge></IconButton>
           </Tooltip>
           <ClientePerfilMenu />
         </Box>
