@@ -1,4 +1,4 @@
-import { Box, Button, Typography, ThemeProvider, createTheme } from '@mui/material';
+import { Box, Typography, ThemeProvider, createTheme } from '@mui/material';
 import { useApp } from '../../context/AppContext';
 import { getTheme } from '../../theme';
 import ClienteNavigation from './ClienteNavigation';
@@ -29,7 +29,7 @@ const clienteTheme = createTheme(getTheme('light'), {
 });
 
 export default function ClientePortalLayout({ children }) {
-  const { currentPage, user, logout } = useApp();
+  const { currentPage } = useApp();
   return (
     <ThemeProvider theme={clienteTheme}>
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
@@ -43,8 +43,7 @@ export default function ClientePortalLayout({ children }) {
         {children}
       </Box>
       <Box component="footer" sx={{ mt: 'auto', py: 2, px: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, color: 'text.secondary' }}>
-        <Typography variant="caption" sx={{ color: 'primary.main' }}>PastaFab · {user.name}</Typography>
-        <Button onClick={logout} size="small" color="inherit" sx={{ textTransform: 'none' }}>Cerrar sesión</Button>
+        <Typography variant="caption" sx={{ color: 'primary.main' }}>PastaFab · Pastas artesanales</Typography>
       </Box>
     </Box>
     </ThemeProvider>

@@ -9,6 +9,7 @@ import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { useApp } from '../../context/AppContext';
+import ClientePerfilMenu from './ClientePerfilMenu';
 
 // Colors belong to this restaurant illustration, independently of the ERP theme.
 const olive = '#416522';
@@ -26,11 +27,10 @@ export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAb
         <Box role="navigation" aria-label="Navegación del cliente" sx={{ position: 'relative', ml: { md: '25.8%' }, bgcolor: '#fff', minHeight: { md: 84, lg: 100 }, px: { xs: 1, lg: 3 }, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', flexWrap: 'wrap', gap: 1 }}>
           <Button sx={{ ...navStyle, bgcolor: olive, color: '#fff', '&:hover': { bgcolor: '#325018' } }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Inicio</Button>
           <Button sx={navStyle} onClick={onCatalogo}>Productos</Button>
-          <Button sx={navStyle} onClick={() => navigate('pedidos_cliente')}>Mis pedidos</Button>
-          <Button sx={navStyle} onClick={() => navigate('medios_pago')}>Medios de pago</Button>
           <Tooltip title={`Ver carrito · $${cartSummary.totalPrice.toLocaleString('es-AR')}`}>
             <IconButton aria-label={`Carrito, ${cartSummary.totalItems} unidades`} onClick={() => navigate('carrito')} sx={{ color: olive }}><Badge badgeContent={cartSummary.totalItems} color="secondary"><ShoppingBagOutlinedIcon /></Badge></IconButton>
           </Tooltip>
+          <ClientePerfilMenu />
         </Box>
         <Box sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center', py: 3, background: `linear-gradient(90deg, ${olive} 50%, #fff 50%)` }}>
           <Box component="img" src="/assets/pasta-dish.png" alt="Penne con tomates frescos y hierbas" sx={{ width: '75%', maxWidth: 340, aspectRatio: '1', objectFit: 'contain' }} />
