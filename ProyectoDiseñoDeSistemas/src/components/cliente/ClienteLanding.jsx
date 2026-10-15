@@ -1,10 +1,6 @@
-import { Box, Typography, Button, IconButton, Badge, Stack, Paper, Tooltip } from '@mui/material';
+import { Box, Typography, Button, IconButton, Badge, Stack, Tooltip } from '@mui/material';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -16,7 +12,7 @@ const olive = '#416522';
 const tomato = '#c93600';
 const script = '"Kristi", "Brush Script MT", cursive';
 
-export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAbout, onContact, onSocial, producto, cantidad, agregado, onPrev, onNext, onCantidad, onAdd, onSignature }) {
+export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAbout, onContact, onSocial }) {
   const { navigate } = useApp();
   const navStyle = { color: olive, fontSize: { xs: 11, lg: 13 }, fontWeight: 700, borderRadius: 8, px: { xs: 1.2, lg: 2 }, whiteSpace: 'nowrap' };
   return (
@@ -55,30 +51,7 @@ export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAb
         </Stack>
       </Stack>
 
-      {producto && <Paper component="section" aria-label="Especialidades destacadas" elevation={0} sx={{ borderRadius: 2, p: { xs: 2, sm: 3 }, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, bgcolor: 'background.paper' }}>
-        <Box sx={{ flex: '1 1 190px' }}>
-          <Typography variant="overline" color="primary" sx={{ letterSpacing: '0.15em' }}>De nuestra cocina</Typography>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>Especialidades destacadas</Typography>
-          <Button onClick={onSignature} size="small" sx={{ mt: 1 }}>Agregar el plato de la casa</Button>
-        </Box>
-        <Box component="img" src={producto.imagen} alt={producto.nombre} sx={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover' }} />
-        <Box sx={{ flex: '1 1 220px' }}>
-          <Typography sx={{ fontWeight: 700 }}>{producto.nombre}</Typography>
-          <Typography variant="body2" color="text.secondary">{producto.variedad}</Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>Maridaje: {producto.maridajeSugerido}</Typography>
-          <Typography color="primary" sx={{ fontWeight: 700, mt: 1 }}>${producto.precio.toLocaleString('es-AR')} / {producto.unidad} · Stock: {producto.stock}</Typography>
-        </Box>
-        <Stack spacing={1} sx={{ width: { xs: '100%', sm: 'auto' } }}>
-          <Stack direction="row" justifyContent="center" alignItems="center">
-            <IconButton aria-label="Especialidad anterior" onClick={onPrev}><ChevronLeftIcon /></IconButton>
-            <IconButton aria-label="Reducir cantidad" disabled={cantidad <= 1 || agregado} onClick={() => onCantidad((n) => Math.max(1, n - 1))}><RemoveIcon fontSize="small" /></IconButton>
-            <Typography sx={{ minWidth: 26, textAlign: 'center' }}>{cantidad}</Typography>
-            <IconButton aria-label="Aumentar cantidad" disabled={cantidad >= producto.stock || agregado} onClick={() => onCantidad((n) => Math.min(producto.stock, n + 1))}><AddIcon fontSize="small" /></IconButton>
-            <IconButton aria-label="Siguiente especialidad" onClick={onNext}><ChevronRightIcon /></IconButton>
-          </Stack>
-          <Button variant="contained" disabled={agregado || producto.stock < 1} onClick={onAdd}>{agregado ? '¡Agregado!' : `Agregar · $${(producto.precio * cantidad).toLocaleString('es-AR')}`}</Button>
-        </Stack>
-      </Paper>}
+
     </Box>
   );
 }

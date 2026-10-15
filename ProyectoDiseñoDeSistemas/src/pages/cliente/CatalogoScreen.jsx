@@ -26,7 +26,6 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useApp } from '../../context/AppContext';
 import {
   useClientStore,
-  clientStore,
   CATEGORIAS_PRODUCTOS,
   CATALOGO_CLIENTE,
 } from './mockData';
@@ -36,7 +35,7 @@ import { ProductoCard, PresupuestoEventoModal } from '../../components/cliente';
 
 /**
  * CatalogoScreen - Portal Cliente PastaFab ERP.
- * Vista 1: Portada italiana y carrusel de especialidades con compra en memoria.
+ * Vista 1: Portada italiana con acceso al catálogo y presupuesto de eventos.
  * Vista 2 (Catálogo Completo): Grilla CSS uniforme (1fr por columna) con buscador y filtros por categoría.
  */
 export const CatalogoScreen = () => {
@@ -49,12 +48,6 @@ export const CatalogoScreen = () => {
   const [modalEventoOpen, setModalEventoOpen] = useState(false);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
-  const [carouselIndex, setCarouselIndex] = useState(0);
-
-  // Estado del carrusel de especialidades
-  const [carouselCantidad, setCarouselCantidad] = useState(1);
-  const [carouselAgregado, setCarouselAgregado] = useState(false);
-
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -66,53 +59,6 @@ export const CatalogoScreen = () => {
     const totalPrice = store.cart.reduce((acc, item) => acc + item.subtotal, 0);
     return { totalItems, totalPrice };
   }, [store.cart]);
-
-  const productosDestacados = useMemo(() => {
-    return CATALOGO_CLIENTE.filter((p) => p.destacado);
-  }, []);
-
-  const currentFeaturedProduct = useMemo(() => {
-    if (productosDestacados.length === 0) return null;
-    return productosDestacados[carouselIndex % productosDestacados.length];
-  }, [productosDestacados, carouselIndex]);
-
-  // Manejador del carrusel
-  const handleNextSlide = () => {
-    setCarouselIndex((prev) => (prev + 1) % productosDestacados.length);
-    setCarouselCantidad(1);
-    setCarouselAgregado(false);
-  };
-
-  const handlePrevSlide = () => {
-    setCarouselIndex((prev) => (prev - 1 + productosDestacados.length) % productosDestacados.length);
-    setCarouselCantidad(1);
-    setCarouselAgregado(false);
-  };
-
-  const handleAddCarouselItem = () => {
-    if (!currentFeaturedProduct) return;
-    clientStore.addToCart(currentFeaturedProduct, carouselCantidad);
-    setCarouselAgregado(true);
-    setSnackbar({
-      open: true,
-      message: `¡Agregaste ${carouselCantidad} ${currentFeaturedProduct.unidad} de "${currentFeaturedProduct.nombre}" al carrito!`,
-      severity: 'success',
-    });
-    setTimeout(() => {
-      setCarouselAgregado(false);
-      setCarouselCantidad(1);
-    }, 1800);
-  };
-
-  const handleAddSignatureDish = () => {
-    const signature = CATALOGO_CLIENTE.find((p) => p.idProducto === 100) || CATALOGO_CLIENTE[0];
-    clientStore.addToCart(signature, 1);
-    setSnackbar({
-      open: true,
-      message: `¡Agregaste 1 ${signature.unidad} de "${signature.nombre}" al carrito!`,
-      severity: 'success',
-    });
-  };
 
   const handleSocialClick = (network) => {
     if (network === 'WhatsApp') {
@@ -168,7 +114,7 @@ export const CatalogoScreen = () => {
   return (
     <Box sx={{ pb: vistaCompleta ? 3 : 0, width: '100%' }}>
       {/* ─────────────────────────────────────────────────────────────
-          1. PORTADA ITALIANA Y ESPECIALIDADES DESTACADAS
+          1. PORTADA ITALIANA
          ───────────────────────────────────────────────────────────── */}
       {!vistaCompleta ? (
         <ClienteLanding
@@ -178,14 +124,6 @@ export const CatalogoScreen = () => {
           onAbout={() => setAboutModalOpen(true)}
           onContact={() => setContactModalOpen(true)}
           onSocial={handleSocialClick}
-          producto={currentFeaturedProduct}
-          cantidad={carouselCantidad}
-          agregado={carouselAgregado}
-          onPrev={handlePrevSlide}
-          onNext={handleNextSlide}
-          onCantidad={setCarouselCantidad}
-          onAdd={handleAddCarouselItem}
-          onSignature={handleAddSignatureDish}
         />
       ) : (
         /* ─────────────────────────────────────────────────────────────
@@ -231,7 +169,7 @@ export const CatalogoScreen = () => {
                   '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' },
                 }}
               >
-                Volver a Especialidades Destacadas
+                Volver al inicio
               </Button>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -355,11 +293,11 @@ export const CatalogoScreen = () => {
       )}
 
       {/* MODAL DE COTIZACIÓN DE EVENTOS ESPECIALES (48HS + SEÑA 50%) */}
-      <PresupuestoEventoModal
+      {modalEventoOpen && <PresupuestoEventoModal
         open={modalEventoOpen}
         onClose={() => setModalEventoOpen(false)}
         onConfirmed={handleEventoConfirmed}
-      />
+      />}
 
       <Dialog open={aboutModalOpen} onClose={() => setAboutModalOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>La tradición de PastaFab</DialogTitle>

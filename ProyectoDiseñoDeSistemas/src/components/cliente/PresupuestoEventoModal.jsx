@@ -56,12 +56,7 @@ export const PresupuestoEventoModal = ({ open, onClose, onConfirmed }) => {
   });
 
   const [comensales, setComensales] = useState(25);
-  const [selectedItems, setSelectedItems] = useState({
-    101: 5, // 5kg Sorrentinos
-    102: 4, // 4kg Ravioles
-    201: 5, // 5 potes Tuco
-    203: 4, // 4 potes Cuatro Quesos
-  });
+  const [selectedItems, setSelectedItems] = useState({});
   const [activeTab, setActiveTab] = useState(0);
   const [modalidad, setModalidad] = useState('reparto');
   const [nombreEvento, setNombreEvento] = useState('Cena Familiar / Agasajo');
