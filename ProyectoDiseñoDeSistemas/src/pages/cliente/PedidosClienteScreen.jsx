@@ -92,11 +92,9 @@ export const PedidosClienteScreen = () => {
       const q = searchQuery.toLowerCase().trim();
 
       const nroMatch = p.nroPedido?.toLowerCase().includes(q);
-      const remitoMatch = p.nroRemito?.toLowerCase().includes(q);
-      const facturaMatch = p.nroFactura?.toLowerCase().includes(q);
       const itemsMatch = p.items?.some((i) => i.nombre.toLowerCase().includes(q));
 
-      return nroMatch || remitoMatch || facturaMatch || itemsMatch;
+      return nroMatch || itemsMatch;
     });
   }, [pedidos, filtroActivo, searchQuery]);
 
@@ -314,7 +312,7 @@ export const PedidosClienteScreen = () => {
         }}
       >
         <TextField
-          placeholder="Buscar por nro de pedido, remito o producto..."
+          placeholder="Buscar por nro de pedido o producto..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           size="small"

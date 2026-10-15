@@ -195,11 +195,6 @@ export const PedidoClienteItem = ({
                 {pedido.modalidadEntrega || 'Retiro en Fábrica'} &bull; Estimado: {pedido.fechaEntregaEstimada || 'A coordinar'}
               </Typography>
             </Box>
-            {pedido.nroRemito && (
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>
-                Remito: {pedido.nroRemito}
-              </Typography>
-            )}
           </Box>
         </Box>
 

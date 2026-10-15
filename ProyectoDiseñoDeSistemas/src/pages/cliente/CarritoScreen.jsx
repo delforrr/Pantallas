@@ -365,14 +365,6 @@ export const CarritoScreen = () => {
               </Box>
             )}
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
-              <Typography variant="caption" color="text.secondary">
-                Comprobantes oficiales:
-              </Typography>
-              <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                {pedidoExitoso?.nroRemito} • {pedidoExitoso?.nroFactura}
-              </Typography>
-            </Box>
           </Box>
         </DialogContent>
 
