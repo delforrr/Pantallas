@@ -91,18 +91,6 @@ export const CatalogoScreen = () => {
     });
   }, [searchTerm, selectedCategory]);
 
-  const handleProductAdded = (producto, cantidad) => {
-    setSnackbar({
-      open: true,
-      message: `¡Agregaste ${cantidad} ${producto.unidad} de "${producto.nombre}" al carrito!`,
-      severity: 'success',
-    });
-  };
-
-  const handleAgregarMayorista = (producto, cantidad) => {
-    if (clientStore.addWholesaleToCart(producto, cantidad)) navigate('carrito');
-  };
-
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedCategory('Todos');
@@ -137,7 +125,7 @@ export const CatalogoScreen = () => {
               <Typography component="h1" sx={{ fontFamily: 'Kristi, cursive', color: '#fff', fontSize: { xs: 58, md: 76 }, lineHeight: 1.2 }}>{modoMayorista ? 'Pedidos mayoristas' : 'Nuestra carta'}</Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>Pastas artesanales, salsas caseras y sabores para compartir.</Typography>
             </Box>
-            {modoMayorista && <Alert severity="info" sx={{ mb: 3 }}>Elegí tus productos: mínimo {MINIMO_MAYORISTA} unidades de cada uno (kg, cajas o envases según su presentación). Agregalos al carrito para cotizar y revisar el presupuesto. El pedido requiere aprobación de la tienda.</Alert>}
+            {modoMayorista && <Alert severity="info" sx={{ mb: 3 }}>Elegí tus productos: mínimo {MINIMO_MAYORISTA} unidades de cada uno (kg, cajas o envases según su presentación). Agregalos al carrito para revisar el total del pedido. El pedido requiere aprobación de la tienda.</Alert>}
             {/* Búsqueda y filtros */}
             <Box sx={{ pb: 4, bgcolor: 'primary.main', boxShadow: (theme) => `0 0 0 100vmax ${theme.palette.primary.main}`, clipPath: 'inset(0 -100vmax)' }}>
               <Box sx={{ display: 'flex', gap: 2, mb: 0, pb: 2, flexWrap: 'wrap', alignItems: 'center', bgcolor: 'primary.main', boxShadow: (theme) => `0 0 0 100vmax ${theme.palette.primary.main}`, clipPath: 'inset(0 -100vmax)' }}>
@@ -231,8 +219,7 @@ export const CatalogoScreen = () => {
                     producto={producto}
                     modoMayorista={modoMayorista}
                     cantidadMayorista={store.mayoristaItems[producto.idProducto] || 0}
-                    onAgregarMayorista={handleAgregarMayorista}
-                    onAddToCartFeedback={handleProductAdded}
+                    onAgregarMayorista={(producto, cantidad) => clientStore.addWholesaleToCart(producto, cantidad)}
                   />
                 ))}
               </Box>

@@ -1,4 +1,4 @@
-import { Box, Paper, Typography, Button, Alert, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Divider } from '@mui/material';
+import { Box, Typography, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Divider } from '@mui/material';
 
 const dinero = (valor) => `$${valor.toLocaleString('es-AR')}`;
 
@@ -21,6 +21,12 @@ export function DetallePresupuestoMayorista({ pedido }) {
         <Typography sx={{ fontWeight: 700, textAlign: 'right', mt: 1 }}>{dinero(item.subtotal)}</Typography>
       </Box>)}
     </Box>
+    <ResumenImportesMayorista pedido={pedido} />
+  </>;
+}
+
+export function ResumenImportesMayorista({ pedido }) {
+  return (
     <Box sx={{ maxWidth: 360, ml: 'auto', py: 2 }}>
       <Typography sx={{ display: 'flex', justifyContent: 'space-between' }}>Subtotal <span>{dinero(pedido.subtotal)}</span></Typography>
       <Typography sx={{ display: 'flex', justifyContent: 'space-between', color: 'primary.main', my: 1 }}>Descuento mayorista (10%) <span>−{dinero(pedido.descuento)}</span></Typography>
@@ -28,17 +34,5 @@ export function DetallePresupuestoMayorista({ pedido }) {
       <Typography sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 20 }}>Total <span>{dinero(pedido.total)}</span></Typography>
       <Typography variant="caption" color="text.secondary">Retiro sin cargo. Entrega y pago a coordinar con la tienda.</Typography>
     </Box>
-  </>;
-}
-
-export default function PresupuestoMayorista({ presupuesto, onEditar, onAceptar }) {
-  return <Paper component="section" sx={{ p: { xs: 2, md: 4 }, borderRadius: '14px' }}>
-    <Typography component="h2" variant="h5" sx={{ mb: 1 }}>Tu presupuesto mayorista</Typography>
-    <Alert severity="info" sx={{ mb: 3 }}>Al aceptar, tu pedido quedará pendiente de aprobación de la tienda. Todavía no se cobra ni se confirma la producción.</Alert>
-    <DetallePresupuestoMayorista pedido={presupuesto} />
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap', mt: 2 }}>
-      <Button variant="outlined" onClick={onEditar}>Modificar selección</Button>
-      <Button variant="contained" color="secondary" onClick={onAceptar}>Aceptar presupuesto y enviar pedido</Button>
-    </Box>
-  </Paper>;
+  );
 }
