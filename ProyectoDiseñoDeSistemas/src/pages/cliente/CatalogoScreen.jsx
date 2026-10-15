@@ -140,7 +140,7 @@ export const CatalogoScreen = () => {
             {modoMayorista && <Alert severity="info" sx={{ mb: 3 }}>Elegí tus productos: mínimo {MINIMO_MAYORISTA} unidades de cada uno (kg, cajas o envases según su presentación). Agregalos al carrito para cotizar y revisar el presupuesto. El pedido requiere aprobación de la tienda.</Alert>}
             {/* Búsqueda y filtros */}
             <Box sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', gap: 2, mb: 0, pb: 2, flexWrap: 'wrap', alignItems: 'center', bgcolor: 'primary.main', boxShadow: (theme) => `0 0 0 100vmax ${theme.palette.primary.main}`, clipPath: 'inset(0 -100vmax)' }}>
                 <TextField
                   size="small"
                   placeholder="Buscar por variedad de pasta, salsa o ingredientes..."
