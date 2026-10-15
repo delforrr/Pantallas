@@ -36,17 +36,16 @@ export const ProductoCard = ({ producto, onAddToCartFeedback, modoMayorista = fa
   return (
     <Card component="article" elevation={0} sx={{ height: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', borderRadius: '10px', bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: '0 5px 18px rgba(0,0,0,0.06)', transition: 'transform 0.2s, box-shadow 0.2s', '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 10px 28px rgba(0,0,0,0.1)' } }}>
       <Box sx={{ p: { xs: 1, sm: 2 }, pb: 0, bgcolor: 'background.paper' }}>
-        <CardMedia component="img" image={producto.imagen} alt={producto.nombre} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = PRODUCT_IMAGES[100]; }} sx={{ width: '100%', height: { xs: 140, sm: 200, lg: 220 }, objectFit: 'contain', borderRadius: '6px' }} />
+        <CardMedia component="img" image={producto.imagen} alt={producto.nombre} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = PRODUCT_IMAGES[100]; }} sx={{ width: '100%', height: { xs: 125, sm: 175, lg: 190 }, objectFit: 'contain', borderRadius: '6px' }} />
       </Box>
-      <CardContent sx={{ p: { xs: 1.25, sm: 2.5 }, display: 'flex', flexDirection: 'column', flex: 1, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1, mb: 1.5 }}>
+      <CardContent sx={{ p: { xs: 1.25, sm: 2 }, display: 'flex', flexDirection: 'column', flex: 1, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1, mb: 1 }}>
           <Typography component="h2" variant="h6" sx={{ flex: '1 1 140px', minWidth: 0, overflowWrap: 'anywhere', fontWeight: 700, fontSize: { xs: '0.85rem', sm: '1.05rem' }, lineHeight: 1.4 }}>{producto.nombre}</Typography>
           <Typography sx={{ color: 'secondary.main', fontSize: { xs: '1rem', sm: '1.15rem' }, fontWeight: 800, whiteSpace: 'nowrap' }}>${producto.precio.toLocaleString('es-AR')}</Typography>
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8, mb: 1.5 }}>{producto.variedad}</Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ mb: 1 }}>{producto.unidad} · {producto.stock > 0 ? `${producto.stock} disponibles` : 'Sin stock'}{modoMayorista && ` · Mínimo ${minimo} por producto`}</Typography>
-        {producto.maridajeSugerido && <Typography variant="caption" color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>Ideal con {producto.maridajeSugerido}</Typography>}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, flexWrap: 'wrap', mt: 'auto', pt: 1.5 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5, mb: 1 }}>{producto.variedad}</Typography>
+        {modoMayorista && <Typography variant="caption" color="text.secondary" sx={{ mb: 1 }}>Mínimo {minimo} por producto</Typography>}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap', mt: 'auto', pt: 1 }}>
           <Box role="group" aria-label={`Cantidad de ${producto.nombre}`} sx={{ display: 'flex', alignItems: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 20 }}>
             <IconButton size="small" aria-label={`Reducir cantidad de ${producto.nombre}`} onClick={() => cambiarCantidad(-1)} disabled={cantidad <= minimo || agregadoAnim || sinStock}><RemoveIcon fontSize="small" /></IconButton>
             <Typography aria-live="polite" sx={{ minWidth: 24, textAlign: 'center', fontWeight: 600 }}>{cantidad}</Typography>
