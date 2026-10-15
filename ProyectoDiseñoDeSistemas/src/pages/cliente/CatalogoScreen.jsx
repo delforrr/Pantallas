@@ -197,14 +197,8 @@ export const CatalogoScreen = () => {
                 borderRadius: '20px',
                 border: '1px solid',
                 borderColor: 'divider',
-                background: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'linear-gradient(135deg, rgba(46,204,113,0.12) 0%, rgba(26,26,26,0.96) 55%, rgba(231,76,60,0.10) 100%)'
-                    : 'linear-gradient(135deg, rgba(0,146,70,0.07) 0%, #FFFFFF 55%, rgba(206,43,55,0.05) 100%)',
-                boxShadow: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? '0 10px 30px rgba(0,0,0,0.5)'
-                    : '0 10px 30px rgba(0,146,70,0.06)',
+                bgcolor: 'background.default',
+                boxShadow: 'none',
                 overflow: 'hidden',
                 boxSizing: 'border-box',
               }}
@@ -314,7 +308,7 @@ export const CatalogoScreen = () => {
                       borderRadius: '12px',
                       border: '1px solid',
                       borderColor: 'divider',
-                      bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#FFFFFF'),
+                      bgcolor: 'background.paper',
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
@@ -335,7 +329,7 @@ export const CatalogoScreen = () => {
                       borderRadius: '12px',
                       border: '1px solid',
                       borderColor: 'divider',
-                      bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#FFFFFF'),
+                      bgcolor: 'background.paper',
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
@@ -356,7 +350,7 @@ export const CatalogoScreen = () => {
                       borderRadius: '12px',
                       border: '1px solid',
                       borderColor: 'divider',
-                      bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#FFFFFF'),
+                      bgcolor: 'background.paper',
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
@@ -386,23 +380,23 @@ export const CatalogoScreen = () => {
               >
                 <Button
                   variant="contained"
-                  color="primary"
                   size="large"
                   startIcon={<RestaurantMenuIcon />}
                   endIcon={<ArrowForwardIcon />}
                   onClick={() => setVistaCompleta(true)}
                   sx={{
-                    py: 1.5,
+                    py: 1.4,
                     px: 3.5,
                     borderRadius: '12px',
-                    fontWeight: 800,
+                    fontWeight: 700,
                     fontSize: '0.95rem',
                     letterSpacing: '0.02em',
-                    boxShadow: (theme) => `0 6px 20px ${theme.palette.primary.main}40`,
-                    transition: 'all 0.25s',
+                    boxShadow: 'none',
+                    bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1e7e34' : 'primary.main'),
+                    color: '#FFFFFF',
                     '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: (theme) => `0 8px 24px ${theme.palette.primary.main}60`,
+                      boxShadow: 'none',
+                      bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#19692c' : 'primary.dark'),
                     },
                   }}
                 >
@@ -410,18 +404,24 @@ export const CatalogoScreen = () => {
                 </Button>
 
                 <Button
-                  variant="contained"
-                  color="secondary"
+                  variant="outlined"
                   size="large"
                   startIcon={<CelebrationIcon />}
                   onClick={() => setModalEventoOpen(true)}
                   sx={{
-                    py: 1.5,
+                    py: 1.4,
                     px: 3,
                     borderRadius: '12px',
                     fontWeight: 700,
                     fontSize: '0.92rem',
-                    boxShadow: '0 4px 14px rgba(231,76,60,0.3)',
+                    color: 'text.primary',
+                    borderColor: 'divider',
+                    boxShadow: 'none',
+                    '&:hover': {
+                      borderColor: 'text.secondary',
+                      bgcolor: 'action.hover',
+                      boxShadow: 'none',
+                    },
                   }}
                 >
                   Cotizar Evento (48hs)
@@ -443,10 +443,7 @@ export const CatalogoScreen = () => {
                 borderColor: 'divider',
                 p: { xs: 2, md: 2.25 },
                 bgcolor: 'background.paper',
-                boxShadow: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? '0 10px 30px rgba(0,0,0,0.45)'
-                    : '0 10px 30px rgba(0,0,0,0.06)',
+                boxShadow: 'none',
                 overflow: 'hidden',
                 boxSizing: 'border-box',
               }}
@@ -665,7 +662,6 @@ export const CatalogoScreen = () => {
 
                     <Button
                       variant="contained"
-                      color={carouselAgregado ? 'success' : 'primary'}
                       fullWidth
                       size="small"
                       startIcon={carouselAgregado ? <CheckCircleIcon /> : <AddShoppingCartIcon />}
@@ -676,6 +672,17 @@ export const CatalogoScreen = () => {
                         borderRadius: '10px',
                         fontWeight: 700,
                         fontSize: '0.82rem',
+                        boxShadow: 'none',
+                        color: '#FFFFFF',
+                        bgcolor: carouselAgregado
+                          ? 'success.main'
+                          : (theme) => (theme.palette.mode === 'dark' ? '#1e7e34' : 'primary.main'),
+                        '&:hover': {
+                          boxShadow: 'none',
+                          bgcolor: carouselAgregado
+                            ? 'success.dark'
+                            : (theme) => (theme.palette.mode === 'dark' ? '#19692c' : 'primary.dark'),
+                        },
                       }}
                     >
                       {carouselAgregado
