@@ -206,11 +206,10 @@ export const CatalogoScreen = () => {
                 sx={{
                   display: 'grid',
                   gridTemplateColumns: {
-                    xs: '1fr',
-                    sm: 'repeat(2, 1fr)',
-                    md: 'repeat(3, 1fr)',
+                    xs: 'repeat(2, minmax(0, 1fr))',
+                    md: 'repeat(4, minmax(0, 1fr))',
                   },
-                  gap: 3,
+                  gap: { xs: 1.5, sm: 3 },
                   width: '100%',
                 }}
               >
