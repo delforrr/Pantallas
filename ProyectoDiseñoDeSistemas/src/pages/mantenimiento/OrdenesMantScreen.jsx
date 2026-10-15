@@ -194,18 +194,28 @@ export const OrdenesMantScreen = () => {
     setOrdenes((prev) =>
       prev.map((o) => {
         if (o.id !== id) return o;
+        const updated = { ...o, estado: nuevoEstado };
         if (nuevoEstado === "En Proceso" && !o.fechaInicio) {
-          return { ...o, estado: nuevoEstado, fechaInicio: nowStr };
+          updated.fechaInicio = nowStr;
         }
         if (nuevoEstado === "Finalizada") {
-          return { ...o, estado: nuevoEstado, fechaFin: nowStr };
+          updated.fechaFin = nowStr;
         }
-        return { ...o, estado: nuevoEstado };
+        return updated;
       }),
     );
 
     if (selectedOrden?.id === id) {
-      setSelectedOrden((prev) => ({ ...prev, estado: nuevoEstado }));
+      setSelectedOrden((prev) => {
+        const updated = { ...prev, estado: nuevoEstado };
+        if (nuevoEstado === "En Proceso" && !prev.fechaInicio) {
+          updated.fechaInicio = nowStr;
+        }
+        if (nuevoEstado === "Finalizada") {
+          updated.fechaFin = nowStr;
+        }
+        return updated;
+      });
     }
   };
 
@@ -317,7 +327,7 @@ export const OrdenesMantScreen = () => {
         fechaEmision: formData.fechaEmision,
         fechaInicio: fechaInicioStr,
         fechaFin: fechaFinStr,
-        estado: formData.estado,
+        estado: "Pendiente",
         tareaRealizada: formData.tareaRealizada.trim(),
         repuestos,
         observaciones: formData.observaciones,
@@ -756,16 +766,18 @@ export const OrdenesMantScreen = () => {
                     <Box
                       sx={{
                         display: "flex",
-                        flexDirection: "column",
-                        gap: 0.5,
-                        alignItems: "flex-end",
+                        alignItems: "center",
+                        gap: 1,
                       }}
                     >
                       <Chip
                         label={orden.estado}
                         size="small"
                         color={STATUS_COLOR_MAP[orden.estado] || "default"}
-                        sx={{ fontWeight: 700, fontSize: "0.72rem" }}
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: "0.72rem",
+                        }}
                       />
                       <Chip
                         label={`Prioridad ${orden.prioridad}`}
@@ -773,9 +785,9 @@ export const OrdenesMantScreen = () => {
                         color={PRIORITY_COLOR_MAP[orden.prioridad] || "default"}
                         variant="outlined"
                         sx={{
-                          fontWeight: 600,
-                          fontSize: "0.68rem",
-                          height: 20,
+                          fontWeight: 700,
+                          fontSize: "0.72rem",
+                          height: 24,
                         }}
                       />
                     </Box>
@@ -857,7 +869,7 @@ export const OrdenesMantScreen = () => {
                   >
                     {renderBotonAccionOrden(orden)}
 
-                    <Box sx={{ display: "flex", gap: 0.5 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                       <Tooltip title="Ver detalle de intervención">
                         <IconButton
                           size="small"
@@ -1104,12 +1116,45 @@ export const OrdenesMantScreen = () => {
               </Typography>
             </Box>
           </Box>
-          <Chip
-            label={selectedOrden?.estado}
-            size="small"
-            color={STATUS_COLOR_MAP[selectedOrden?.estado] || "default"}
-            sx={{ fontWeight: 700 }}
-          />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 700 }}
+            >
+              Estado:
+            </Typography>
+            <FormControl size="small" variant="standard">
+              <Select
+                value={selectedOrden?.estado || "Pendiente"}
+                onChange={(e) =>
+                  handleCambiarEstado(selectedOrden.id, e.target.value)
+                }
+                disableUnderline
+                renderValue={(val) => (
+                  <Chip
+                    label={val}
+                    size="small"
+                    color={STATUS_COLOR_MAP[val] || "default"}
+                    sx={{ fontWeight: 700, cursor: "pointer" }}
+                  />
+                )}
+                sx={{
+                  "& .MuiSelect-select": {
+                    py: 0.25,
+                    px: 0.5,
+                    borderRadius: "8px",
+                    "&:focus": { backgroundColor: "transparent" },
+                  },
+                }}
+              >
+                <MenuItem value="Pendiente">Pendiente</MenuItem>
+                <MenuItem value="En Proceso">En Proceso</MenuItem>
+                <MenuItem value="Finalizada">Finalizada</MenuItem>
+                <MenuItem value="Cancelada">Cancelada</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
         </DialogTitle>
         <DialogContent
           sx={{
@@ -1510,11 +1555,13 @@ export const OrdenesMantScreen = () => {
                   textTransform: "uppercase",
                 }}
               >
-                2. Clasificación, Estado y Fechas
+                {isEditing
+                  ? "2. Clasificación, Estado y Fechas"
+                  : "2. Clasificación y Fechas"}
               </Typography>
             </Box>
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 4 }}>
+              <Grid size={{ xs: 12, sm: isEditing ? 4 : 6 }}>
                 <FormControl fullWidth size="small">
                   <InputLabel id="orden-tipo-label">
                     Tipo de Mantenimiento
@@ -1537,7 +1584,7 @@ export const OrdenesMantScreen = () => {
                 </FormControl>
               </Grid>
 
-              <Grid size={{ xs: 12, sm: 4 }}>
+              <Grid size={{ xs: 12, sm: isEditing ? 4 : 6 }}>
                 <FormControl fullWidth size="small">
                   <InputLabel id="orden-prioridad-label">Prioridad</InputLabel>
                   <Select
@@ -1627,102 +1674,104 @@ export const OrdenesMantScreen = () => {
                 </FormControl>
               </Grid>
 
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="orden-form-estado-label">
-                    Estado de la Orden
-                  </InputLabel>
-                  <Select
-                    labelId="orden-form-estado-label"
-                    value={formData.estado}
-                    label="Estado de la Orden"
-                    onChange={(e) =>
-                      setFormData({ ...formData, estado: e.target.value })
-                    }
-                    renderValue={(val) => (
-                      <Chip
-                        label={val}
-                        size="small"
-                        color={STATUS_COLOR_MAP[val] || "default"}
-                        sx={{
-                          height: 20,
-                          fontSize: "0.7rem",
-                          fontWeight: 700,
-                        }}
-                      />
-                    )}
-                  >
-                    <MenuItem value="Pendiente">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Box
+              {isEditing && (
+                <Grid size={{ xs: 12, sm: 4 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel id="orden-form-estado-label">
+                      Estado de la Orden
+                    </InputLabel>
+                    <Select
+                      labelId="orden-form-estado-label"
+                      value={formData.estado}
+                      label="Estado de la Orden"
+                      onChange={(e) =>
+                        setFormData({ ...formData, estado: e.target.value })
+                      }
+                      renderValue={(val) => (
+                        <Chip
+                          label={val}
+                          size="small"
+                          color={STATUS_COLOR_MAP[val] || "default"}
                           sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "warning.main",
+                            height: 20,
+                            fontSize: "0.7rem",
+                            fontWeight: 700,
                           }}
                         />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          Pendiente
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="En Proceso">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
+                      )}
+                    >
+                      <MenuItem value="Pendiente">
                         <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "info.main",
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          En Proceso
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Finalizada">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
+                          sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                        >
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: "50%",
+                              bgcolor: "warning.main",
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            Pendiente
+                          </Typography>
+                        </Box>
+                      </MenuItem>
+                      <MenuItem value="En Proceso">
                         <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "success.main",
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          Finalizada
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Cancelada">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
+                          sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                        >
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: "50%",
+                              bgcolor: "info.main",
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            En Proceso
+                          </Typography>
+                        </Box>
+                      </MenuItem>
+                      <MenuItem value="Finalizada">
                         <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "error.main",
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          Cancelada
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+                          sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                        >
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: "50%",
+                              bgcolor: "success.main",
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            Finalizada
+                          </Typography>
+                        </Box>
+                      </MenuItem>
+                      <MenuItem value="Cancelada">
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                        >
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: "50%",
+                              bgcolor: "error.main",
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            Cancelada
+                          </Typography>
+                        </Box>
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              )}
 
               {/* Fila 2: Fechas y Horas en una sola fila compacta y armónica (4 + 2 + 2 + 2 + 2 = 12 cols) */}
               <Grid size={{ xs: 6, sm: 3 }}>
