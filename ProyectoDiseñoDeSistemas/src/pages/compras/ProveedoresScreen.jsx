@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo } from "react";
 import {
   Box,
   Paper,
@@ -26,35 +26,114 @@ import {
   Grid,
   ToggleButtonGroup,
   ToggleButton,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import StorefrontIcon from '@mui/icons-material/Storefront';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
-import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
-import GrassIcon from '@mui/icons-material/Grass';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
-import ViewListIcon from '@mui/icons-material/ViewList';
-import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
-import PhoneIcon from '@mui/icons-material/Phone';
-import EmailIcon from '@mui/icons-material/Email';
-import PlaceIcon from '@mui/icons-material/Place';
-import BusinessIcon from '@mui/icons-material/Business';
-import StarIcon from '@mui/icons-material/Star';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import AddIcon from "@mui/icons-material/Add";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
+import GrassIcon from "@mui/icons-material/Grass";
+import ViewModuleIcon from "@mui/icons-material/ViewModule";
+import ViewListIcon from "@mui/icons-material/ViewList";
+import CloseIcon from "@mui/icons-material/Close";
+import SaveIcon from "@mui/icons-material/Save";
+import PhoneIcon from "@mui/icons-material/Phone";
+import EmailIcon from "@mui/icons-material/Email";
+import PlaceIcon from "@mui/icons-material/Place";
+import BusinessIcon from "@mui/icons-material/Business";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
-import { INITIAL_PROVEEDORES } from './mockData';
+import { INITIAL_PROVEEDORES } from "./mockData";
+
+// Componente de Select compacto para Estado de Proveedor (Grilla y Cards) con estilo idéntico a los demás Chips
+const EstadoSelect = ({
+  value,
+  onChange,
+  ariaLabel = "Cambiar estado del proveedor",
+  size = "small",
+  disabled = false,
+}) => {
+  const isActivo = value === "Activo";
+
+  return (
+    <FormControl size={size} sx={{ flexShrink: 0 }}>
+      <Select
+        size={size}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        onClick={(e) => e.stopPropagation()}
+        renderValue={(val) => val}
+        sx={{
+          height: 24,
+          borderRadius: "8px",
+          fontSize: "0.72rem",
+          fontWeight: 700,
+          cursor: "pointer",
+          bgcolor: isActivo
+            ? "success.main"
+            : (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.16)"
+                  : "rgba(0, 0, 0, 0.08)",
+          color: isActivo ? "#ffffff" : "text.primary",
+          "& .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+          },
+          "&:hover": {
+            bgcolor: isActivo
+              ? "success.dark"
+              : (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.24)"
+                    : "rgba(0, 0, 0, 0.14)",
+          },
+          "& .MuiSelect-select": {
+            py: 0,
+            pl: 1,
+            pr: "22px !important",
+            display: "inline-flex",
+            alignItems: "center",
+            lineHeight: "24px",
+          },
+          "& .MuiSvgIcon-root": {
+            fontSize: "1rem",
+            right: 3,
+            color: isActivo ? "#ffffff" : "text.secondary",
+          },
+        }}
+      >
+        <MenuItem value="Activo">
+          <Chip
+            label="Activo"
+            size="small"
+            color="success"
+            sx={{ fontWeight: 700, fontSize: "0.72rem", pointerEvents: "none" }}
+          />
+        </MenuItem>
+        <MenuItem value="Inactivo">
+          <Chip
+            label="Inactivo"
+            size="small"
+            color="default"
+            sx={{ fontWeight: 700, fontSize: "0.72rem", pointerEvents: "none" }}
+          />
+        </MenuItem>
+      </Select>
+    </FormControl>
+  );
+};
 
 export const ProveedoresScreen = () => {
   const [proveedores, setProveedores] = useState(INITIAL_PROVEEDORES);
-  const [viewMode, setViewMode] = useState('table'); // 'table' o 'grid'
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoriaFilter, setCategoriaFilter] = useState('TODAS');
-  const [estadoFilter, setEstadoFilter] = useState('TODOS');
+  const [viewMode, setViewMode] = useState("table"); // 'table' o 'grid'
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoriaFilter, setCategoriaFilter] = useState("TODAS");
+  const [estadoFilter, setEstadoFilter] = useState("TODOS");
 
   // Modales
   const [openForm, setOpenForm] = useState(false);
@@ -67,19 +146,18 @@ export const ProveedoresScreen = () => {
 
   // Form State
   const initialFormState = {
-    cuit: '',
-    razonSocial: '',
-    contacto: '',
-    telefono: '',
-    email: '',
-    calle: '',
-    altura: '',
-    localidad: 'Trenque Lauquen',
-    provincia: 'Buenos Aires',
-    categoria: 'Insumos Locales / Frescos',
-    calificacion: 'Alta',
-    insumosPrincipales: '',
-    estado: 'Activo',
+    cuit: "",
+    razonSocial: "",
+    contacto: "",
+    telefono: "",
+    email: "",
+    calle: "",
+    altura: "",
+    localidad: "Trenque Lauquen",
+    provincia: "Buenos Aires",
+    categoria: "Insumos Locales / Frescos",
+    insumosPrincipales: "",
+    estado: "Activo",
   };
   const [formData, setFormData] = useState(initialFormState);
 
@@ -92,8 +170,9 @@ export const ProveedoresScreen = () => {
         p.contacto.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.insumosPrincipales.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesCat = categoriaFilter === 'TODAS' || p.categoria === categoriaFilter;
-      const matchesEst = estadoFilter === 'TODOS' || p.estado === estadoFilter;
+      const matchesCat =
+        categoriaFilter === "TODAS" || p.categoria === categoriaFilter;
+      const matchesEst = estadoFilter === "TODOS" || p.estado === estadoFilter;
 
       return matchesSearch && matchesCat && matchesEst;
     });
@@ -102,13 +181,26 @@ export const ProveedoresScreen = () => {
   // Métricas
   const stats = useMemo(() => {
     const total = proveedores.length;
-    const activos = proveedores.filter((p) => p.estado === 'Activo').length;
-    const principales = proveedores.filter((p) => p.categoria.includes('Principal')).length;
-    const locales = proveedores.filter((p) => p.categoria.includes('Locales')).length;
+    const activos = proveedores.filter((p) => p.estado === "Activo").length;
+    const principales = proveedores.filter((p) =>
+      p.categoria.includes("Principal"),
+    ).length;
+    const locales = proveedores.filter((p) =>
+      p.categoria.includes("Locales"),
+    ).length;
     return { total, activos, principales, locales };
   }, [proveedores]);
 
   // Handlers
+  const handleStatusChange = (provId, newStatus) => {
+    setProveedores((prev) =>
+      prev.map((p) => (p.id === provId ? { ...p, estado: newStatus } : p)),
+    );
+    setSelectedProveedor((prev) =>
+      prev && prev.id === provId ? { ...prev, estado: newStatus } : prev,
+    );
+  };
+
   const handleOpenCreate = () => {
     setIsEditing(false);
     setFormData(initialFormState);
@@ -118,7 +210,7 @@ export const ProveedoresScreen = () => {
   const handleOpenEdit = (prov) => {
     setIsEditing(true);
     setSelectedProveedor(prov);
-    setFormData({ ...prov });
+    setFormData({ ...prov, estado: prov.estado || "Activo" });
     setOpenForm(true);
   };
 
@@ -138,12 +230,20 @@ export const ProveedoresScreen = () => {
 
     if (isEditing) {
       setProveedores((prev) =>
-        prev.map((p) => (p.id === selectedProveedor.id ? { ...formData, id: p.id } : p))
+        prev.map((p) =>
+          p.id === selectedProveedor.id ? { ...formData, id: p.id } : p,
+        ),
+      );
+      setSelectedProveedor((prev) =>
+        prev && prev.id === selectedProveedor.id
+          ? { ...formData, id: prev.id }
+          : prev,
       );
     } else {
       const newProv = {
         ...formData,
         id: Date.now(),
+        estado: "Activo", // Siempre creamos un proveedor activo
       };
       setProveedores((prev) => [newProv, ...prev]);
     }
@@ -161,11 +261,11 @@ export const ProveedoresScreen = () => {
       {/* Tarjetas de Métricas Rápidas - Responsivas con igual ancho apiladas */}
       <Box
         sx={{
-          display: 'grid',
+          display: "grid",
           gridTemplateColumns: {
-            xs: '1fr',
-            sm: 'repeat(2, 1fr)',
-            md: 'repeat(4, 1fr)',
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(4, 1fr)",
           },
           gap: 2,
           mb: 3,
@@ -175,21 +275,34 @@ export const ProveedoresScreen = () => {
           elevation={1}
           sx={{
             p: 2,
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
+            borderRadius: "14px",
+            border: "1px solid",
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
             gap: 1.5,
-            width: '100%',
-            height: '100%',
+            width: "100%",
+            height: "100%",
           }}
         >
-          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'primary.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: "10px",
+              bgcolor: "primary.main",
+              color: "white",
+              display: "flex",
+              flexShrink: 0,
+            }}
+          >
             <StorefrontIcon />
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 600, display: "block" }}
+            >
               Total Proveedores
             </Typography>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
@@ -202,24 +315,40 @@ export const ProveedoresScreen = () => {
           elevation={1}
           sx={{
             p: 2,
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
+            borderRadius: "14px",
+            border: "1px solid",
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
             gap: 1.5,
-            width: '100%',
-            height: '100%',
+            width: "100%",
+            height: "100%",
           }}
         >
-          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'success.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: "10px",
+              bgcolor: "success.main",
+              color: "white",
+              display: "flex",
+              flexShrink: 0,
+            }}
+          >
             <CheckCircleOutlineIcon />
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 600, display: "block" }}
+            >
               Proveedores Activos
             </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
+            <Typography
+              variant="h5"
+              sx={{ fontWeight: 700, color: "success.main" }}
+            >
               {stats.activos}
             </Typography>
           </Box>
@@ -229,21 +358,34 @@ export const ProveedoresScreen = () => {
           elevation={1}
           sx={{
             p: 2,
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
+            borderRadius: "14px",
+            border: "1px solid",
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
             gap: 1.5,
-            width: '100%',
-            height: '100%',
+            width: "100%",
+            height: "100%",
           }}
         >
-          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'info.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: "10px",
+              bgcolor: "info.main",
+              color: "white",
+              display: "flex",
+              flexShrink: 0,
+            }}
+          >
             <LocalShippingOutlinedIcon />
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 600, display: "block" }}
+            >
               Semestrales (Harina/Levadura)
             </Typography>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
@@ -256,21 +398,34 @@ export const ProveedoresScreen = () => {
           elevation={1}
           sx={{
             p: 2,
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
+            borderRadius: "14px",
+            border: "1px solid",
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
             gap: 1.5,
-            width: '100%',
-            height: '100%',
+            width: "100%",
+            height: "100%",
           }}
         >
-          <Box sx={{ p: 1, borderRadius: '10px', bgcolor: 'warning.main', color: 'white', display: 'flex', flexShrink: 0 }}>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: "10px",
+              bgcolor: "warning.main",
+              color: "white",
+              display: "flex",
+              flexShrink: 0,
+            }}
+          >
             <GrassIcon />
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 600, display: "block" }}
+            >
               Insumos Locales / Frescos
             </Typography>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
@@ -283,15 +438,23 @@ export const ProveedoresScreen = () => {
       {/* Barra de Filtros y Acción */}
       <Box
         sx={{
-          display: 'flex',
+          display: "flex",
           gap: 2,
           mb: 3,
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', flex: 1, minWidth: 260 }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            flexWrap: "wrap",
+            flex: 1,
+            minWidth: 260,
+          }}
+        >
           <TextField
             size="small"
             placeholder="Buscar por Razón Social, CUIT o Insumo..."
@@ -300,14 +463,32 @@ export const ProveedoresScreen = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                  <SearchIcon
+                    fontSize="small"
+                    sx={{ color: "text.secondary" }}
+                  />
                 </InputAdornment>
               ),
             }}
-            sx={{ minWidth: { xs: '100%', sm: 280 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}
+            sx={{
+              minWidth: { xs: "100%", sm: 280 },
+              "& .MuiOutlinedInput-root": {
+                bgcolor: "background.paper",
+                borderRadius: "10px",
+              },
+            }}
           />
 
-          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
+          <FormControl
+            size="small"
+            sx={{
+              minWidth: { xs: "100%", sm: 220, md: 240 },
+              "& .MuiOutlinedInput-root": {
+                bgcolor: "background.paper",
+                borderRadius: "10px",
+              },
+            }}
+          >
             <InputLabel id="categoria-select-label">Categoría</InputLabel>
             <Select
               labelId="categoria-select-label"
@@ -316,13 +497,28 @@ export const ProveedoresScreen = () => {
               onChange={(e) => setCategoriaFilter(e.target.value)}
             >
               <MenuItem value="TODAS">Todas las Categorías</MenuItem>
-              <MenuItem value="Materia Prima Principal (Semestral)">Materia Prima Semestral</MenuItem>
-              <MenuItem value="Insumos Locales / Frescos">Insumos Locales / Frescos</MenuItem>
-              <MenuItem value="Descartables & Packaging">Descartables & Packaging</MenuItem>
+              <MenuItem value="Materia Prima Principal (Semestral)">
+                Materia Prima Semestral
+              </MenuItem>
+              <MenuItem value="Insumos Locales / Frescos">
+                Insumos Locales / Frescos
+              </MenuItem>
+              <MenuItem value="Descartables & Packaging">
+                Descartables & Packaging
+              </MenuItem>
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220, md: 240 }, '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: '10px' } }}>
+          <FormControl
+            size="small"
+            sx={{
+              minWidth: { xs: "100%", sm: 220, md: 240 },
+              "& .MuiOutlinedInput-root": {
+                bgcolor: "background.paper",
+                borderRadius: "10px",
+              },
+            }}
+          >
             <InputLabel id="estado-select-label">Estado</InputLabel>
             <Select
               labelId="estado-select-label"
@@ -337,13 +533,13 @@ export const ProveedoresScreen = () => {
           </FormControl>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
           <ToggleButtonGroup
             value={viewMode}
             exclusive
             onChange={(e, val) => val && setViewMode(val)}
             size="small"
-            sx={{ bgcolor: 'background.paper' }}
+            sx={{ bgcolor: "background.paper" }}
           >
             <ToggleButton value="table" aria-label="vista tabla">
               <Tooltip title="Vista Tabla">
@@ -362,7 +558,7 @@ export const ProveedoresScreen = () => {
             color="primary"
             startIcon={<AddIcon />}
             onClick={handleOpenCreate}
-            sx={{ whiteSpace: 'nowrap' }}
+            sx={{ whiteSpace: "nowrap" }}
           >
             Nuevo Proveedor
           </Button>
@@ -370,10 +566,18 @@ export const ProveedoresScreen = () => {
       </Box>
 
       {/* Vista de Cuadrícula (Cards) para Dispositivos Móviles y Escritorio */}
-      {viewMode === 'grid' && (
+      {viewMode === "grid" && (
         <Box sx={{ mb: 2 }}>
           {filteredProveedores.length === 0 ? (
-            <Paper sx={{ p: 6, textAlign: 'center', borderRadius: '14px', border: '1px solid', borderColor: 'divider' }}>
+            <Paper
+              sx={{
+                p: 6,
+                textAlign: "center",
+                borderRadius: "14px",
+                border: "1px solid",
+                borderColor: "divider",
+              }}
+            >
               <Typography variant="body2" color="text.secondary">
                 No se encontraron proveedores para los filtros seleccionados
               </Typography>
@@ -381,14 +585,14 @@ export const ProveedoresScreen = () => {
           ) : (
             <Box
               sx={{
-                display: 'grid',
+                display: "grid",
                 gridTemplateColumns: {
-                  xs: '1fr',
-                  sm: 'repeat(2, 1fr)',
-                  lg: 'repeat(3, 1fr)',
+                  xs: "1fr",
+                  sm: "repeat(2, 1fr)",
+                  lg: "repeat(3, 1fr)",
                 },
                 gap: 2.5,
-                alignItems: 'stretch',
+                alignItems: "stretch",
               }}
             >
               {filteredProveedores.map((prov) => (
@@ -397,37 +601,51 @@ export const ProveedoresScreen = () => {
                   elevation={1}
                   sx={{
                     p: 2.5,
-                    borderRadius: '16px',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: '100%',
-                    width: '100%',
-                    bgcolor: 'background.paper',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
+                    borderRadius: "16px",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                    width: "100%",
+                    bgcolor: "background.paper",
+                    transition: "transform 0.2s, box-shadow 0.2s",
+                    "&:hover": {
                       boxShadow: (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? '0 8px 24px rgba(0,0,0,0.6)'
-                          : '0 8px 24px rgba(0,0,0,0.08)',
-                      transform: 'translateY(-2px)',
+                        theme.palette.mode === "dark"
+                          ? "0 8px 24px rgba(0,0,0,0.6)"
+                          : "0 8px 24px rgba(0,0,0,0.08)",
+                      transform: "translateY(-2px)",
                     },
                   }}
                 >
                   {/* Header */}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      mb: 1.5,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        minWidth: 0,
+                      }}
+                    >
                       <Box
                         sx={{
                           width: 42,
                           height: 42,
-                          borderRadius: '12px',
-                          bgcolor: 'action.hover',
-                          color: 'primary.main',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
+                          borderRadius: "12px",
+                          bgcolor: "action.hover",
+                          color: "primary.main",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                           flexShrink: 0,
                         }}
                       >
@@ -439,96 +657,148 @@ export const ProveedoresScreen = () => {
                           sx={{
                             fontWeight: 800,
                             lineHeight: 1.25,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
                           }}
                           title={prov.razonSocial}
                         >
                           {prov.razonSocial}
                         </Typography>
-                        <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 600, color: 'text.secondary', display: 'block' }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontFamily: "monospace",
+                            fontWeight: 600,
+                            color: "text.secondary",
+                            display: "block",
+                          }}
+                        >
                           CUIT: {prov.cuit}
                         </Typography>
                       </Box>
                     </Box>
 
-                    <Chip
-                      label={prov.estado}
-                      size="small"
-                      color={prov.estado === 'Activo' ? 'success' : 'default'}
-                      sx={{ fontWeight: 700, fontSize: '0.72rem', flexShrink: 0, ml: 1 }}
+                    <EstadoSelect
+                      value={prov.estado}
+                      onChange={(e) =>
+                        handleStatusChange(prov.id, e.target.value)
+                      }
+                      ariaLabel={`Cambiar estado de ${prov.razonSocial}`}
                     />
                   </Box>
 
                   {/* Body */}
-                  <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                      <PhoneIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                  <Box
+                    sx={{
+                      mb: 2,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 1,
+                    }}
+                  >
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 0.8 }}
+                    >
+                      <PhoneIcon
+                        sx={{ fontSize: 16, color: "text.secondary" }}
+                      />
                       <Typography variant="caption" color="text.secondary">
                         {prov.contacto} ({prov.telefono})
                       </Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                      <EmailIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                      <Typography variant="caption" color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 0.8 }}
+                    >
+                      <EmailIcon
+                        sx={{ fontSize: 16, color: "text.secondary" }}
+                      />
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
                         {prov.email}
                       </Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                      <PlaceIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 0.8 }}
+                    >
+                      <PlaceIcon
+                        sx={{ fontSize: 16, color: "text.secondary" }}
+                      />
                       <Typography variant="caption" color="text.secondary">
                         {prov.localidad}, {prov.provincia}
                       </Typography>
                     </Box>
 
-                    <Box sx={{ display: 'flex', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 1,
+                        mt: 0.5,
+                        flexWrap: "wrap",
+                      }}
+                    >
                       <Chip
-                        icon={<StarIcon sx={{ fontSize: '14px !important' }} />}
-                        label={`Calidad: ${prov.calificacion}`}
+                        label={
+                          prov.categoria.includes("Semestral")
+                            ? "Semestral"
+                            : "Local / Fresco"
+                        }
                         size="small"
-                        color={prov.calificacion === 'Excelente' ? 'success' : 'info'}
-                        variant="outlined"
-                        sx={{ fontSize: '0.7rem', height: 22 }}
-                      />
-                      <Chip
-                        label={prov.categoria.includes('Semestral') ? 'Semestral' : 'Local / Fresco'}
-                        size="small"
-                        color={prov.categoria.includes('Semestral') ? 'primary' : 'warning'}
-                        sx={{ fontSize: '0.7rem', height: 22 }}
+                        color={
+                          prov.categoria.includes("Semestral")
+                            ? "primary"
+                            : "warning"
+                        }
+                        sx={{ fontSize: "0.7rem", height: 22 }}
                       />
                     </Box>
-
-                    <Paper variant="outlined" sx={{ p: 1.2, borderRadius: '10px', bgcolor: 'action.hover', mt: 0.5 }}>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase' }}>
-                        Insumos Principales:
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 500 }}>
-                        {prov.insumosPrincipales}
-                      </Typography>
-                    </Paper>
                   </Box>
 
                   {/* Actions Footer */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1.5, mt: 'auto', borderTop: '1px solid', borderColor: 'divider' }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      pt: 1.5,
+                      mt: "auto",
+                      borderTop: "1px solid",
+                      borderColor: "divider",
+                    }}
+                  >
                     <Button
                       size="small"
                       variant="outlined"
                       color="primary"
                       onClick={() => handleOpenDetail(prov)}
-                      sx={{ borderRadius: '8px', fontSize: '0.74rem' }}
+                      sx={{ borderRadius: "8px", fontSize: "0.74rem" }}
                     >
                       Ficha Fiscal
                     </Button>
 
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <Box sx={{ display: "flex", gap: 0.5 }}>
                       <Tooltip title="Editar proveedor">
-                        <IconButton size="small" onClick={() => handleOpenEdit(prov)} sx={{ color: 'primary.main' }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenEdit(prov)}
+                          sx={{ color: "primary.main" }}
+                        >
                           <EditOutlinedIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Eliminar proveedor">
-                        <IconButton size="small" onClick={() => handleOpenDelete(prov)} sx={{ color: 'error.main' }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenDelete(prov)}
+                          sx={{ color: "error.main" }}
+                        >
                           <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -542,26 +812,29 @@ export const ProveedoresScreen = () => {
       )}
 
       {/* Tabla de Proveedores */}
-      {viewMode === 'table' && (
+      {viewMode === "table" && (
         <TableContainer
           component={Paper}
           elevation={1}
           sx={{
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            overflow: 'hidden',
+            borderRadius: "14px",
+            border: "1px solid",
+            borderColor: "divider",
+            overflow: "hidden",
           }}
         >
           <Table sx={{ minWidth: 780 }}>
-            <TableHead sx={{ bgcolor: 'action.hover' }}>
+            <TableHead sx={{ bgcolor: "action.hover" }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>CUIT</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Razón Social</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Categoría de Compra</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Contacto & Teléfono</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>
+                  Categoría de Compra
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>
+                  Contacto & Teléfono
+                </TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Ubicación</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Calificación</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700 }}>
                   Acciones
@@ -571,14 +844,30 @@ export const ProveedoresScreen = () => {
             <TableBody>
               {filteredProveedores.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
-                    <Typography variant="body2">No se encontraron proveedores para la búsqueda</Typography>
+                  <TableCell
+                    colSpan={8}
+                    align="center"
+                    sx={{ py: 6, color: "text.secondary" }}
+                  >
+                    <Typography variant="body2">
+                      No se encontraron proveedores para la búsqueda
+                    </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredProveedores.map((row) => (
-                  <TableRow key={row.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell sx={{ fontWeight: 700, fontFamily: 'monospace', color: 'primary.main' }}>
+                  <TableRow
+                    key={row.id}
+                    hover
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontFamily: "monospace",
+                        color: "primary.main",
+                      }}
+                    >
                       {row.cuit}
                     </TableCell>
                     <TableCell>
@@ -593,9 +882,17 @@ export const ProveedoresScreen = () => {
                       <Chip
                         label={row.categoria}
                         size="small"
-                        color={row.categoria.includes('Semestral') ? 'primary' : 'default'}
-                        variant={row.categoria.includes('Semestral') ? 'filled' : 'outlined'}
-                        sx={{ fontSize: '0.72rem', fontWeight: 600 }}
+                        color={
+                          row.categoria.includes("Semestral")
+                            ? "primary"
+                            : "default"
+                        }
+                        variant={
+                          row.categoria.includes("Semestral")
+                            ? "filled"
+                            : "outlined"
+                        }
+                        sx={{ fontSize: "0.72rem", fontWeight: 600 }}
                       />
                     </TableCell>
                     <TableCell>
@@ -608,40 +905,39 @@ export const ProveedoresScreen = () => {
                       {row.localidad}, {row.provincia}
                     </TableCell>
                     <TableCell>
-                      <Chip
-                        label={row.calificacion}
-                        size="small"
-                        color={
-                          row.calificacion === 'Excelente'
-                            ? 'success'
-                            : row.calificacion === 'Alta'
-                            ? 'info'
-                            : 'default'
+                      <EstadoSelect
+                        value={row.estado}
+                        onChange={(e) =>
+                          handleStatusChange(row.id, e.target.value)
                         }
-                        sx={{ fontWeight: 600, fontSize: '0.72rem' }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={row.estado}
-                        size="small"
-                        color={row.estado === 'Activo' ? 'success' : 'default'}
-                        sx={{ fontWeight: 600, fontSize: '0.72rem' }}
+                        ariaLabel={`Cambiar estado de ${row.razonSocial}`}
                       />
                     </TableCell>
                     <TableCell align="right">
                       <Tooltip title="Ver detalles fiscales y de entrega">
-                        <IconButton size="small" onClick={() => handleOpenDetail(row)} sx={{ color: 'text.secondary' }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenDetail(row)}
+                          sx={{ color: "text.secondary" }}
+                        >
                           <VisibilityOutlinedIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Editar proveedor">
-                        <IconButton size="small" onClick={() => handleOpenEdit(row)} sx={{ color: 'primary.main' }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenEdit(row)}
+                          sx={{ color: "primary.main" }}
+                        >
                           <EditOutlinedIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Eliminar proveedor">
-                        <IconButton size="small" onClick={() => handleOpenDelete(row)} sx={{ color: 'error.main' }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenDelete(row)}
+                          sx={{ color: "error.main" }}
+                        >
                           <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -663,57 +959,70 @@ export const ProveedoresScreen = () => {
         slotProps={{
           backdrop: {
             sx: {
-              backdropFilter: 'blur(8px)',
-              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(15, 23, 42, 0.45)',
+              backdropFilter: "blur(8px)",
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(0, 0, 0, 0.7)"
+                  : "rgba(15, 23, 42, 0.45)",
             },
           },
         }}
         PaperProps={{
-          component: 'form',
+          component: "form",
           onSubmit: handleSaveForm,
           sx: {
-            borderRadius: '20px',
-            overflow: 'hidden',
-            boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 24px 60px rgba(0,0,0,0.6)' : '0 24px 60px rgba(15, 23, 42, 0.2)',
-            maxHeight: '92vh',
-            display: 'flex',
-            flexDirection: 'column',
+            borderRadius: "20px",
+            overflow: "hidden",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 24px 60px rgba(0,0,0,0.6)"
+                : "0 24px 60px rgba(15, 23, 42, 0.2)",
+            maxHeight: "92vh",
+            display: "flex",
+            flexDirection: "column",
           },
         }}
       >
         <DialogTitle
           sx={{
             p: 2.5,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
+            borderBottom: "1px solid",
+            borderColor: "divider",
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Box
               sx={{
                 width: 42,
                 height: 42,
-                borderRadius: '12px',
-                bgcolor: 'primary.main',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                borderRadius: "12px",
+                bgcolor: "primary.main",
+                color: "white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 boxShadow: 2,
               }}
             >
               <StorefrontIcon />
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-                {isEditing ? `Editar Proveedor · ${selectedProveedor?.razonSocial}` : 'Registrar Nuevo Proveedor'}
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 800, lineHeight: 1.2 }}
+              >
+                {isEditing
+                  ? `Editar Proveedor · ${selectedProveedor?.razonSocial}`
+                  : "Registrar Nuevo Proveedor"}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Alta fiscal, condiciones de entrega y categoría de suministro de insumos
+                Alta fiscal, condiciones de entrega y categoría de suministro de
+                insumos
               </Typography>
             </Box>
           </Box>
@@ -722,22 +1031,44 @@ export const ProveedoresScreen = () => {
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5, overflowY: 'auto' }}>
+        <DialogContent
+          sx={{
+            px: 3.5,
+            pt: "24px !important",
+            pb: 2.5,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2.5,
+            overflowY: "auto",
+          }}
+        >
           {/* Sección 1: Datos Fiscales */}
           <Paper
             variant="outlined"
             sx={{
               p: 2.5,
-              borderRadius: '14px',
-              bgcolor: (theme) => theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff',
-              border: '1px solid',
-              borderColor: (theme) => theme.palette.mode === 'dark' ? 'divider' : '#e2e8f0',
-              boxShadow: (theme) => theme.palette.mode === 'dark' ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
+              borderRadius: "14px",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark" ? "background.paper" : "#ffffff",
+              border: "1px solid",
+              borderColor: (theme) =>
+                theme.palette.mode === "dark" ? "divider" : "#e2e8f0",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "none"
+                  : "0 1px 3px rgba(0,0,0,0.04)",
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+              <BusinessIcon fontSize="small" sx={{ color: "primary.main" }} />
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: "0.02em",
+                  textTransform: "uppercase",
+                }}
+              >
                 1. Datos Fiscales y Razón Social
               </Typography>
             </Box>
@@ -749,7 +1080,9 @@ export const ProveedoresScreen = () => {
                   label="CUIT"
                   placeholder="30-XXXXXXXX-X"
                   value={formData.cuit}
-                  onChange={(e) => setFormData({ ...formData, cuit: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, cuit: e.target.value })
+                  }
                   required
                 />
               </Grid>
@@ -760,66 +1093,89 @@ export const ProveedoresScreen = () => {
                   label="Razón Social"
                   placeholder="Ej: Molino Harinero Central S.A."
                   value={formData.razonSocial}
-                  onChange={(e) => setFormData({ ...formData, razonSocial: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, razonSocial: e.target.value })
+                  }
                   required
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid size={{ xs: 12, sm: isEditing ? 6 : 12 }}>
                 <FormControl fullWidth size="small">
-                  <InputLabel id="prov-cat-label">Categoría de Proveedor</InputLabel>
+                  <InputLabel id="prov-cat-label">
+                    Categoría de Proveedor
+                  </InputLabel>
                   <Select
                     labelId="prov-cat-label"
                     value={formData.categoria}
                     label="Categoría de Proveedor"
-                    onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, categoria: e.target.value })
+                    }
                   >
-                    <MenuItem value="Materia Prima Principal (Semestral)">Materia Prima Principal (Semestral)</MenuItem>
-                    <MenuItem value="Insumos Locales / Frescos">Insumos Locales / Frescos</MenuItem>
-                    <MenuItem value="Descartables & Packaging">Descartables & Packaging</MenuItem>
+                    <MenuItem value="Materia Prima Principal (Semestral)">
+                      Materia Prima Principal (Semestral)
+                    </MenuItem>
+                    <MenuItem value="Insumos Locales / Frescos">
+                      Insumos Locales / Frescos
+                    </MenuItem>
+                    <MenuItem value="Descartables & Packaging">
+                      Descartables & Packaging
+                    </MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="prov-calif-label">Evaluación de Calidad</InputLabel>
-                  <Select
-                    labelId="prov-calif-label"
-                    value={formData.calificacion}
-                    label="Evaluación de Calidad"
-                    onChange={(e) => setFormData({ ...formData, calificacion: e.target.value })}
-                    renderValue={(val) => {
-                      const color = val === 'Excelente' ? 'success' : val === 'Alta' ? 'info' : 'warning';
-                      return (
+              {isEditing && (
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel id="prov-estado-label">
+                      Estado del Proveedor
+                    </InputLabel>
+                    <Select
+                      labelId="prov-estado-label"
+                      value={formData.estado || "Activo"}
+                      label="Estado del Proveedor"
+                      onChange={(e) =>
+                        setFormData({ ...formData, estado: e.target.value })
+                      }
+                      renderValue={(val) => (
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <Chip
+                            label={val}
+                            size="small"
+                            color={val === "Activo" ? "success" : "default"}
+                            sx={{ fontWeight: 700, fontSize: "0.72rem" }}
+                          />
+                        </Box>
+                      )}
+                    >
+                      <MenuItem value="Activo">
                         <Chip
-                          label={val}
+                          label="Activo"
                           size="small"
-                          color={color}
-                          sx={{ height: 22, fontSize: '0.75rem', fontWeight: 700 }}
+                          color="success"
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: "0.72rem",
+                            pointerEvents: "none",
+                          }}
                         />
-                      );
-                    }}
-                  >
-                    <MenuItem value="Excelente">
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Excelente (Certificada)</Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Alta">
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'info.main' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Alta (Conforme PastaFab)</Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Media">
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'warning.main' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Media (Estándar)</Typography>
-                      </Box>
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+                      </MenuItem>
+                      <MenuItem value="Inactivo">
+                        <Chip
+                          label="Inactivo"
+                          size="small"
+                          color="default"
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: "0.72rem",
+                            pointerEvents: "none",
+                          }}
+                        />
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              )}
             </Grid>
           </Paper>
 
@@ -828,16 +1184,28 @@ export const ProveedoresScreen = () => {
             variant="outlined"
             sx={{
               p: 2.5,
-              borderRadius: '14px',
-              bgcolor: (theme) => theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff',
-              border: '1px solid',
-              borderColor: (theme) => theme.palette.mode === 'dark' ? 'divider' : '#e2e8f0',
-              boxShadow: (theme) => theme.palette.mode === 'dark' ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
+              borderRadius: "14px",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark" ? "background.paper" : "#ffffff",
+              border: "1px solid",
+              borderColor: (theme) =>
+                theme.palette.mode === "dark" ? "divider" : "#e2e8f0",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "none"
+                  : "0 1px 3px rgba(0,0,0,0.04)",
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <PhoneIcon fontSize="small" sx={{ color: 'primary.main' }} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+              <PhoneIcon fontSize="small" sx={{ color: "primary.main" }} />
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: "0.02em",
+                  textTransform: "uppercase",
+                }}
+              >
                 2. Contacto Comercial y Comunicación
               </Typography>
             </Box>
@@ -846,21 +1214,12 @@ export const ProveedoresScreen = () => {
                 <TextField
                   fullWidth
                   size="small"
-                  label="Persona de Contacto"
-                  placeholder="Ej: Marcelo Gómez"
-                  value={formData.contacto}
-                  onChange={(e) => setFormData({ ...formData, contacto: e.target.value })}
-                  required
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  size="small"
                   label="Teléfono"
                   placeholder="Ej: (02392) 42-8819"
                   value={formData.telefono}
-                  onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, telefono: e.target.value })
+                  }
                   required
                 />
               </Grid>
@@ -872,7 +1231,9 @@ export const ProveedoresScreen = () => {
                   type="email"
                   placeholder="ventas@molinoharinas.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   required
                 />
               </Grid>
@@ -884,16 +1245,28 @@ export const ProveedoresScreen = () => {
             variant="outlined"
             sx={{
               p: 2.5,
-              borderRadius: '14px',
-              bgcolor: (theme) => theme.palette.mode === 'dark' ? 'background.paper' : '#ffffff',
-              border: '1px solid',
-              borderColor: (theme) => theme.palette.mode === 'dark' ? 'divider' : '#e2e8f0',
-              boxShadow: (theme) => theme.palette.mode === 'dark' ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
+              borderRadius: "14px",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark" ? "background.paper" : "#ffffff",
+              border: "1px solid",
+              borderColor: (theme) =>
+                theme.palette.mode === "dark" ? "divider" : "#e2e8f0",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "none"
+                  : "0 1px 3px rgba(0,0,0,0.04)",
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <PlaceIcon fontSize="small" sx={{ color: 'primary.main' }} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+              <PlaceIcon fontSize="small" sx={{ color: "primary.main" }} />
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: "0.02em",
+                  textTransform: "uppercase",
+                }}
+              >
                 3. Domicilio Fiscal e Insumos Suministrados
               </Typography>
             </Box>
@@ -904,7 +1277,9 @@ export const ProveedoresScreen = () => {
                   size="small"
                   label="Calle"
                   value={formData.calle}
-                  onChange={(e) => setFormData({ ...formData, calle: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, calle: e.target.value })
+                  }
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
@@ -913,7 +1288,9 @@ export const ProveedoresScreen = () => {
                   size="small"
                   label="Altura / Nro"
                   value={formData.altura}
-                  onChange={(e) => setFormData({ ...formData, altura: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, altura: e.target.value })
+                  }
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
@@ -922,7 +1299,9 @@ export const ProveedoresScreen = () => {
                   size="small"
                   label="Localidad"
                   value={formData.localidad}
-                  onChange={(e) => setFormData({ ...formData, localidad: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, localidad: e.target.value })
+                  }
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
@@ -931,51 +1310,10 @@ export const ProveedoresScreen = () => {
                   size="small"
                   label="Provincia"
                   value={formData.provincia}
-                  onChange={(e) => setFormData({ ...formData, provincia: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, provincia: e.target.value })
+                  }
                 />
-              </Grid>
-
-              <Grid size={{ xs: 12 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Insumos Principales Suministrados"
-                  placeholder="Ej: Harina 0000 Especial, Levadura fresca, Huevos campo"
-                  value={formData.insumosPrincipales}
-                  onChange={(e) => setFormData({ ...formData, insumosPrincipales: e.target.value })}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="prov-form-estado-label">Estado Operativo</InputLabel>
-                  <Select
-                    labelId="prov-form-estado-label"
-                    value={formData.estado}
-                    label="Estado Operativo"
-                    onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                    renderValue={(val) => (
-                      <Chip
-                        label={val}
-                        size="small"
-                        color={val === 'Activo' ? 'success' : 'default'}
-                        sx={{ height: 22, fontSize: '0.75rem', fontWeight: 700 }}
-                      />
-                    )}
-                  >
-                    <MenuItem value="Activo">
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Activo (Proveedor Habilitado)</Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Inactivo">
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'text.disabled' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Inactivo (Suspendido)</Typography>
-                      </Box>
-                    </MenuItem>
-                  </Select>
-                </FormControl>
               </Grid>
             </Grid>
           </Paper>
@@ -985,12 +1323,17 @@ export const ProveedoresScreen = () => {
           sx={{
             px: 3.5,
             py: 2,
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc',
+            borderTop: "1px solid",
+            borderColor: "divider",
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
           }}
         >
-          <Button onClick={() => setOpenForm(false)} color="inherit" sx={{ fontWeight: 600 }}>
+          <Button
+            onClick={() => setOpenForm(false)}
+            color="inherit"
+            sx={{ fontWeight: 600 }}
+          >
             Cancelar
           </Button>
           <Button
@@ -1001,11 +1344,11 @@ export const ProveedoresScreen = () => {
             sx={{
               px: 3,
               fontWeight: 700,
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              '&:hover': { transform: 'translateY(-1px)' },
+              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": { transform: "translateY(-1px)" },
             }}
           >
-            {isEditing ? 'Guardar Cambios' : 'Registrar Proveedor'}
+            {isEditing ? "Guardar Cambios" : "Registrar Proveedor"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1019,32 +1362,50 @@ export const ProveedoresScreen = () => {
         slotProps={{
           backdrop: {
             sx: {
-              backdropFilter: 'blur(8px)',
-              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(15, 23, 42, 0.45)',
+              backdropFilter: "blur(8px)",
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(0, 0, 0, 0.7)"
+                  : "rgba(15, 23, 42, 0.45)",
             },
           },
         }}
         PaperProps={{
           sx: {
-            borderRadius: '20px',
-            overflow: 'hidden',
-            boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 24px 60px rgba(0,0,0,0.6)' : '0 24px 60px rgba(15, 23, 42, 0.2)',
+            borderRadius: "20px",
+            overflow: "hidden",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 24px 60px rgba(0,0,0,0.6)"
+                : "0 24px 60px rgba(15, 23, 42, 0.2)",
           },
         }}
       >
         <DialogTitle
           sx={{
             p: 2.5,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
+            borderBottom: "1px solid",
+            borderColor: "divider",
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box sx={{ width: 40, height: 40, borderRadius: '10px', bgcolor: 'primary.main', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: "10px",
+                bgcolor: "primary.main",
+                color: "white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <BusinessIcon />
             </Box>
             <Box>
@@ -1056,13 +1417,32 @@ export const ProveedoresScreen = () => {
               </Typography>
             </Box>
           </Box>
-          <Chip label={selectedProveedor?.estado} size="small" color={selectedProveedor?.estado === 'Activo' ? 'success' : 'default'} sx={{ fontWeight: 700 }} />
+          <EstadoSelect
+            value={selectedProveedor?.estado || "Activo"}
+            onChange={(e) =>
+              selectedProveedor &&
+              handleStatusChange(selectedProveedor.id, e.target.value)
+            }
+            ariaLabel={`Cambiar estado de ${selectedProveedor?.razonSocial}`}
+          />
         </DialogTitle>
-        <DialogContent sx={{ px: 3.5, pt: '24px !important', pb: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        <DialogContent
+          sx={{
+            px: 3.5,
+            pt: "24px !important",
+            pb: 2.5,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2.5,
+          }}
+        >
           {selectedProveedor && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main' }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 800, color: "primary.main" }}
+                >
                   {selectedProveedor.razonSocial}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -1070,51 +1450,79 @@ export const ProveedoresScreen = () => {
                 </Typography>
               </Box>
 
-              <Paper variant="outlined" sx={{ p: 2, borderRadius: '12px' }}>
+              <Paper variant="outlined" sx={{ p: 2, borderRadius: "12px" }}>
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 6 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Contacto Comercial</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedProveedor.contacto}</Typography>
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Teléfono</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedProveedor.telefono}</Typography>
-                  </Grid>
-                  <Grid size={{ xs: 12 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Correo Electrónico</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedProveedor.email}</Typography>
-                  </Grid>
-                  <Grid size={{ xs: 12 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Domicilio Fiscal Registrado</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {selectedProveedor.calle} {selectedProveedor.altura}, {selectedProveedor.localidad}, {selectedProveedor.provincia}
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block" }}
+                    >
+                      Contacto Comercial
                     </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 12 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Insumos y Materias Primas Provistas</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {selectedProveedor.insumosPrincipales}
+                      {selectedProveedor.contacto}
                     </Typography>
                   </Grid>
                   <Grid size={{ xs: 6 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Calificación de Calidad</Typography>
-                    <Box sx={{ mt: 0.5 }}>
-                      <Chip label={selectedProveedor.calificacion} size="small" color="info" sx={{ fontWeight: 700 }} />
-                    </Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block" }}
+                    >
+                      Teléfono
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {selectedProveedor.telefono}
+                    </Typography>
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Estado en Sistema</Typography>
-                    <Box sx={{ mt: 0.5 }}>
-                      <Chip label={selectedProveedor.estado} size="small" color={selectedProveedor.estado === 'Activo' ? 'success' : 'default'} sx={{ fontWeight: 700 }} />
-                    </Box>
+                  <Grid size={{ xs: 12 }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block" }}
+                    >
+                      Correo Electrónico
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {selectedProveedor.email}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block" }}
+                    >
+                      Domicilio Fiscal Registrado
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {selectedProveedor.calle} {selectedProveedor.altura},{" "}
+                      {selectedProveedor.localidad},{" "}
+                      {selectedProveedor.provincia}
+                    </Typography>
                   </Grid>
                 </Grid>
               </Paper>
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: (theme) => theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc' }}>
-          <Button onClick={() => setOpenDetail(false)} variant="contained" color="primary" sx={{ fontWeight: 700 }}>
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            borderTop: "1px solid",
+            borderColor: "divider",
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
+          }}
+        >
+          <Button
+            onClick={() => setOpenDetail(false)}
+            variant="contained"
+            color="primary"
+            sx={{ fontWeight: 700 }}
+          >
             Cerrar
           </Button>
         </DialogActions>
@@ -1129,39 +1537,82 @@ export const ProveedoresScreen = () => {
         slotProps={{
           backdrop: {
             sx: {
-              backdropFilter: 'blur(8px)',
-              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(15, 23, 42, 0.45)',
+              backdropFilter: "blur(8px)",
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(0, 0, 0, 0.7)"
+                  : "rgba(15, 23, 42, 0.45)",
             },
           },
         }}
         PaperProps={{
           sx: {
-            borderRadius: '16px',
-            overflow: 'hidden',
-            boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 24px 60px rgba(0,0,0,0.6)' : '0 24px 60px rgba(15, 23, 42, 0.2)',
+            borderRadius: "16px",
+            overflow: "hidden",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 24px 60px rgba(0,0,0,0.6)"
+                : "0 24px 60px rgba(15, 23, 42, 0.2)",
           },
         }}
       >
-        <DialogTitle sx={{ p: 2.5, bgcolor: (theme) => theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'error.main', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <DialogTitle
+          sx={{
+            p: 2.5,
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+          }}
+        >
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: "10px",
+              bgcolor: "error.main",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <WarningAmberIcon fontSize="small" />
           </Box>
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             Confirmar Baja de Proveedor
           </Typography>
         </DialogTitle>
-        <DialogContent sx={{ px: 3, pt: '24px !important', pb: 2 }}>
+        <DialogContent sx={{ px: 3, pt: "24px !important", pb: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            ¿Está seguro de que desea dar de baja al proveedor{' '}
-            <strong>{selectedProveedor?.razonSocial}</strong> (CUIT {selectedProveedor?.cuit})?
-            Esta acción se reflejará en memoria inmediatamente.
+            ¿Está seguro de que desea dar de baja al proveedor{" "}
+            <strong>{selectedProveedor?.razonSocial}</strong> (CUIT{" "}
+            {selectedProveedor?.cuit})? Esta acción se reflejará en memoria
+            inmediatamente.
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: (theme) => theme.palette.mode === 'dark' ? 'action.hover' : '#f8fafc' }}>
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            borderTop: "1px solid",
+            borderColor: "divider",
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
+          }}
+        >
           <Button onClick={() => setOpenDelete(false)} color="inherit">
             Cancelar
           </Button>
-          <Button onClick={handleDeleteConfirm} variant="contained" color="error" sx={{ fontWeight: 700 }}>
+          <Button
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            color="error"
+            sx={{ fontWeight: 700 }}
+          >
             Eliminar Proveedor
           </Button>
         </DialogActions>
