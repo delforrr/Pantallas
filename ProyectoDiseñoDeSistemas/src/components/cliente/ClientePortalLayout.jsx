@@ -1,5 +1,6 @@
-import { Box, Typography, ThemeProvider, createTheme } from '@mui/material';
+import { Box, Typography, ThemeProvider, createTheme, GlobalStyles } from '@mui/material';
 import { useApp } from '../../context/AppContext';
+import { useClientStore } from '../../pages/cliente/mockData';
 import { getTheme } from '../../theme';
 import ClienteNavigation from './ClienteNavigation';
 import ingredientesPattern from './ingredientes-pattern.svg';
@@ -31,24 +32,72 @@ const clienteTheme = createTheme(getTheme('light'), {
 
 export default function ClientePortalLayout({ children }) {
   const { currentPage } = useApp();
+  const store = useClientStore();
+  const isInicio = currentPage === 'catalogo' && store.catalogoModo === 'inicio';
+
   return (
     <ThemeProvider theme={clienteTheme}>
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
-      {currentPage !== 'catalogo' && <Box sx={{ mx: { xs: 1.5, md: 5 }, mt: { xs: 1.5, md: 4 }, boxShadow: '6px 8px 22px #51482d20' }}><ClienteNavigation /></Box>}
-      <Box sx={{ flex: 1, mx: currentPage === 'catalogo' ? 0 : { xs: 1.5, md: 5 }, mb: 2, p: currentPage === 'catalogo' ? 0 : { xs: 2, md: 4 }, bgcolor: currentPage === 'catalogo' ? 'transparent' : 'background.paper', borderTop: currentPage === 'catalogo' ? 0 : '4px solid', borderColor: 'primary.main', boxShadow: currentPage === 'catalogo' ? 'none' : '6px 8px 22px #51482d20' }}>
-        {currentPage !== 'catalogo' && <Box sx={{ position: 'relative', overflow: 'hidden', pb: 3, mb: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Box aria-hidden="true" sx={{ position: 'absolute', inset: 0, bgcolor: 'primary.main', maskImage: `url("${ingredientesPattern}")`, maskSize: '240px 240px', maskRepeat: 'repeat', maskPosition: 'right center', opacity: 0.3 }} />
-          <Box sx={{ position: 'relative', width: 'fit-content', maxWidth: { xs: 'calc(100% - 36px)', sm: '100%' }, pr: 3, bgcolor: 'background.paper' }}>
-          <Typography sx={{ color: 'primary.main', fontSize: 10, letterSpacing: '0.2em', fontWeight: 700 }}>PASTAS FRESCAS · HECHAS CON TRADICIÓN</Typography>
-          <Typography sx={{ fontFamily: 'Kristi, cursive', color: 'primary.main', fontSize: { xs: 48, md: 64 }, lineHeight: 1.2, mt: 1 }}>{currentPage === 'carrito' ? 'Tu próxima mesa' : currentPage === 'pedidos_cliente' ? 'De nuestra cocina a tu mesa' : 'Todo listo para disfrutar'}</Typography>
+      {isInicio && (
+        <GlobalStyles
+          styles={{
+            'html, body, #root': {
+              overflow: 'hidden !important',
+              height: '100% !important',
+              maxHeight: '100vh !important',
+            },
+          }}
+        />
+      )}
+      <Box
+        sx={{
+          minHeight: '100vh',
+          height: isInicio ? '100vh' : 'auto',
+          maxHeight: isInicio ? '100vh' : 'none',
+          overflow: isInicio ? 'hidden' : 'visible',
+          bgcolor: 'background.default',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {currentPage !== 'catalogo' && (
+          <Box sx={{ mx: { xs: 1.5, md: 5 }, mt: { xs: 1.5, md: 4 }, boxShadow: '6px 8px 22px #51482d20' }}>
+            <ClienteNavigation />
           </Box>
-        </Box>}
-        {children}
+        )}
+        <Box
+          sx={{
+            flex: 1,
+            height: isInicio ? '100%' : 'auto',
+            maxHeight: isInicio ? '100%' : 'none',
+            overflow: isInicio ? 'hidden' : 'visible',
+            display: isInicio ? 'flex' : 'block',
+            flexDirection: isInicio ? 'column' : 'initial',
+            mx: currentPage === 'catalogo' ? 0 : { xs: 1.5, md: 5 },
+            mb: isInicio ? 0 : 2,
+            p: currentPage === 'catalogo' ? 0 : { xs: 2, md: 4 },
+            bgcolor: currentPage === 'catalogo' ? 'transparent' : 'background.paper',
+            borderTop: currentPage === 'catalogo' ? 0 : '4px solid',
+            borderColor: 'primary.main',
+            boxShadow: currentPage === 'catalogo' ? 'none' : '6px 8px 22px #51482d20',
+          }}
+        >
+          {currentPage !== 'catalogo' && (
+            <Box sx={{ position: 'relative', overflow: 'hidden', pb: 3, mb: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box aria-hidden="true" sx={{ position: 'absolute', inset: 0, bgcolor: 'primary.main', maskImage: `url("${ingredientesPattern}")`, maskSize: '240px 240px', maskRepeat: 'repeat', maskPosition: 'right center', opacity: 0.3 }} />
+              <Box sx={{ position: 'relative', width: 'fit-content', maxWidth: { xs: 'calc(100% - 36px)', sm: '100%' }, pr: 3, bgcolor: 'background.paper' }}>
+                <Typography sx={{ color: 'primary.main', fontSize: 10, letterSpacing: '0.2em', fontWeight: 700 }}>PASTAS FRESCAS · HECHAS CON TRADICIÓN</Typography>
+                <Typography sx={{ fontFamily: 'Kristi, cursive', color: 'primary.main', fontSize: { xs: 48, md: 64 }, lineHeight: 1.2, mt: 1 }}>{currentPage === 'carrito' ? 'Tu próxima mesa' : currentPage === 'pedidos_cliente' ? 'De nuestra cocina a tu mesa' : 'Todo listo para disfrutar'}</Typography>
+              </Box>
+            </Box>
+          )}
+          {children}
+        </Box>
+        {!isInicio && (
+          <Box component="footer" sx={{ mt: 'auto', py: 2, px: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, color: 'text.secondary' }}>
+            <Typography variant="caption" sx={{ color: 'primary.main' }}>PastaFab · Pastas artesanales</Typography>
+          </Box>
+        )}
       </Box>
-      <Box component="footer" sx={{ mt: 'auto', py: 2, px: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, color: 'text.secondary' }}>
-        <Typography variant="caption" sx={{ color: 'primary.main' }}>PastaFab · Pastas artesanales</Typography>
-      </Box>
-    </Box>
     </ThemeProvider>
   );
 }
