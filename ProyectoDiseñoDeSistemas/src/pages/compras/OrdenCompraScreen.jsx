@@ -105,8 +105,7 @@ export const OrdenCompraScreen = () => {
       const matchesSearch =
         o.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         o.proveedorNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (o.presupuestoId &&
-          o.presupuestoId.toLowerCase().includes(searchTerm.toLowerCase()));
+        o.presupuestoId?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesStatus =
         statusFilter === "TODOS" || o.estado === statusFilter;
@@ -171,7 +170,7 @@ export const OrdenCompraScreen = () => {
     const p = INITIAL_PRESUPUESTOS.find(
       (item) => item.id === formData.presupuestoId,
     );
-    if (p && p.items && p.items.length > 0) {
+    if (p?.items?.length > 0) {
       setFormData((prev) => ({
         ...prev,
         proveedorId: p.proveedorId || prev.proveedorId,
@@ -545,8 +544,8 @@ export const OrdenCompraScreen = () => {
       </Box>
 
       {/* Vista de Cuadrícula / Tarjetas Responsiva */}
-      {viewMode === "grid" ? (
-        filteredOrdenes.length === 0 ? (
+      {viewMode === "grid" &&
+        (filteredOrdenes.length === 0 ? (
           <Paper
             elevation={1}
             sx={{
@@ -802,9 +801,10 @@ export const OrdenCompraScreen = () => {
               </Paper>
             ))}
           </Box>
-        )
-      ) : (
-        /* Vista Tabla Estándar */
+        ))}
+
+      {/* Vista Tabla Estándar */}
+      {viewMode === "table" && (
         <TableContainer
           component={Paper}
           elevation={1}
@@ -826,7 +826,6 @@ export const OrdenCompraScreen = () => {
                 <TableCell sx={{ fontWeight: 700 }}>
                   Emisión / Entrega
                 </TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Condición Pago</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Total</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700 }}>
@@ -891,9 +890,6 @@ export const OrdenCompraScreen = () => {
                       <Typography variant="caption" color="text.secondary">
                         Entrega: {row.fechaEntregaEstimada}
                       </Typography>
-                    </TableCell>
-                    <TableCell sx={{ fontSize: "0.8rem" }}>
-                      {row.formaPago}
                     </TableCell>
                     <TableCell sx={{ fontWeight: 700 }}>
                       ${row.total.toLocaleString("es-AR")}
@@ -1108,23 +1104,14 @@ export const OrdenCompraScreen = () => {
                     </Typography>
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      Condición de Pago Acordada
+                    <Typography variant="body2" color="text.secondary">
+                      Fecha de Emisión:{" "}
+                      <strong>{selectedOrden.fechaEmision}</strong>
                     </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {selectedOrden.formaPago}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <br />
+                    <Typography variant="body2" color="text.secondary">
                       Fecha Estimada de Entrega:{" "}
                       <strong>{selectedOrden.fechaEntregaEstimada}</strong>
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      Fecha de Emisión
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {selectedOrden.fechaEmision}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -1175,7 +1162,7 @@ export const OrdenCompraScreen = () => {
                     </TableHead>
                     <TableBody>
                       {selectedOrden.items.map((item, idx) => (
-                        <TableRow key={idx}>
+                        <TableRow key={item.id ?? `${item.materiaPrima}-${idx}`}>
                           <TableCell sx={{ fontWeight: 600 }}>
                             {item.materiaPrima}
                           </TableCell>
@@ -1212,29 +1199,6 @@ export const OrdenCompraScreen = () => {
                   </Table>
                 </TableContainer>
               </Paper>
-
-              {selectedOrden.observaciones && (
-                <Box
-                  sx={{
-                    p: 2,
-                    bgcolor: "action.hover",
-                    borderRadius: "12px",
-                    border: "1px solid",
-                    borderColor: "divider",
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ fontWeight: 700, display: "block" }}
-                  >
-                    Instrucciones de Recepción y Control en Planta:
-                  </Typography>
-                  <Typography variant="body2" sx={{ mt: 0.5 }}>
-                    {selectedOrden.observaciones}
-                  </Typography>
-                </Box>
-              )}
             </>
           )}
         </DialogContent>
@@ -1416,7 +1380,7 @@ export const OrdenCompraScreen = () => {
                       const p = INITIAL_PRESUPUESTOS.find(
                         (item) => item.id === val,
                       );
-                      if (p && p.items && p.items.length > 0) {
+                      if (p?.items && p.items.length > 0) {
                         setFormData((prev) => ({
                           ...prev,
                           presupuestoId: val,
@@ -1435,7 +1399,7 @@ export const OrdenCompraScreen = () => {
                     }}
                   >
                     <MenuItem value="">
-                      Sin presupuesto (Compra Directa Faltante)
+                      Sin presupuesto (Compra Directa)
                     </MenuItem>
                     {INITIAL_PRESUPUESTOS.map((p) => (
                       <MenuItem key={p.id} value={p.id}>
@@ -1445,20 +1409,6 @@ export const OrdenCompraScreen = () => {
                     ))}
                   </Select>
                 </FormControl>
-              </Grid>
-
-              <Grid size={{ xs: 12 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Forma de Pago Acordada"
-                  placeholder="Ej: Transferencia 30 días, Contado contra entrega, Cuenta Corriente..."
-                  value={formData.formaPago}
-                  onChange={(e) =>
-                    setFormData({ ...formData, formaPago: e.target.value })
-                  }
-                  required
-                />
               </Grid>
             </Grid>
           </Paper>
@@ -1482,7 +1432,7 @@ export const OrdenCompraScreen = () => {
               </Typography>
             </Box>
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 4 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth
                   size="small"
@@ -1496,7 +1446,7 @@ export const OrdenCompraScreen = () => {
                   required
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth
                   size="small"
@@ -1512,119 +1462,6 @@ export const OrdenCompraScreen = () => {
                   slotProps={{ inputLabel: { shrink: true } }}
                   required
                 />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="orden-estado-label">
-                    Estado de la Orden
-                  </InputLabel>
-                  <Select
-                    labelId="orden-estado-label"
-                    value={formData.estado}
-                    label="Estado de la Orden"
-                    onChange={(e) =>
-                      setFormData({ ...formData, estado: e.target.value })
-                    }
-                    renderValue={(val) => (
-                      <Chip
-                        label={val}
-                        size="small"
-                        color={STATUS_COLOR_MAP[val] || "default"}
-                        sx={{
-                          height: 22,
-                          fontSize: "0.75rem",
-                          fontWeight: 700,
-                        }}
-                      />
-                    )}
-                  >
-                    <MenuItem value="Pendiente">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "warning.main",
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          Pendiente
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Enviada">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "info.main",
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          Enviada al Proveedor
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Recibida Parcial">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "warning.light",
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          Recibida Parcial
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Cumplida">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "success.main",
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          Cumplida (Recepción Total)
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Cancelada">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "error.main",
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          Cancelada
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                  </Select>
-                </FormControl>
               </Grid>
             </Grid>
           </Paper>
@@ -1676,22 +1513,9 @@ export const OrdenCompraScreen = () => {
               }
               presupuestoDisponible={Boolean(formData.presupuestoId)}
               onImportPresupuesto={handleImportarPresupuesto}
+              unitReadOnly
+              priceReadOnly
             />
-
-            <Box sx={{ mt: 2.5 }}>
-              <TextField
-                fullWidth
-                size="small"
-                multiline
-                rows={2}
-                label="Instrucciones de Recepción y Control en Planta"
-                placeholder="Verificar temperatura en frío, estibar en depósito de secos, inspección bromatológica..."
-                value={formData.observaciones}
-                onChange={(e) =>
-                  setFormData({ ...formData, observaciones: e.target.value })
-                }
-              />
-            </Box>
           </Paper>
         </DialogContent>
 
