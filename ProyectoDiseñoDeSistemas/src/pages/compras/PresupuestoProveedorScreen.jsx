@@ -48,7 +48,11 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
 
-import { INITIAL_PRESUPUESTOS, INITIAL_PROVEEDORES, MOCK_DOC_PRESUPUESTO } from "./mockData";
+import {
+  INITIAL_PRESUPUESTOS,
+  INITIAL_PROVEEDORES,
+  MOCK_DOC_PRESUPUESTO,
+} from "./mockData";
 import { DocumentoUploader } from "../../components/compras";
 
 const STATUS_COLOR_MAP = {
@@ -75,7 +79,7 @@ export const PresupuestoProveedorScreen = () => {
   const [presupuestos, setPresupuestos] = useState(INITIAL_PRESUPUESTOS);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("TODOS");
-  const [tipoFilter, setTipoFilter] = useState("TODOS");
+  const [tipoFilter] = useState("TODOS");
   const [viewMode, setViewMode] = useState("table");
 
   // Modales
@@ -199,7 +203,10 @@ export const PresupuestoProveedorScreen = () => {
                 condicionPago: formData.condicionPago,
                 observaciones: formData.observaciones,
                 total: totalMonto,
-                documentoUrl: formData.documentoUrl || p.documentoUrl || MOCK_DOC_PRESUPUESTO,
+                documentoUrl:
+                  formData.documentoUrl ||
+                  p.documentoUrl ||
+                  MOCK_DOC_PRESUPUESTO,
               }
             : p,
         ),
@@ -483,29 +490,6 @@ export const PresupuestoProveedorScreen = () => {
               <MenuItem value="Aprobado">Aprobado</MenuItem>
               <MenuItem value="Rechazado">Rechazado</MenuItem>
               <MenuItem value="Vencido">Vencido</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl
-            size="small"
-            sx={{
-              minWidth: { xs: "100%", sm: 220, md: 240 },
-              "& .MuiOutlinedInput-root": {
-                bgcolor: "background.paper",
-                borderRadius: "10px",
-              },
-            }}
-          >
-            <InputLabel id="tipo-pres-label">Modalidad de Compra</InputLabel>
-            <Select
-              labelId="tipo-pres-label"
-              value={tipoFilter}
-              label="Modalidad de Compra"
-              onChange={(e) => setTipoFilter(e.target.value)}
-            >
-              <MenuItem value="TODOS">Todas las Modalidades</MenuItem>
-              <MenuItem value="Semestral">Semestral (Marzo/Diciembre)</MenuItem>
-              <MenuItem value="Locales">Insumos Locales / Frescos</MenuItem>
             </Select>
           </FormControl>
         </Box>
@@ -1067,14 +1051,6 @@ export const PresupuestoProveedorScreen = () => {
                   </Typography>
                 </Box>
                 <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      Modalidad de Compra
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {selectedPresupuesto.tipoCompra}
-                    </Typography>
-                  </Grid>
                   <Grid size={{ xs: 6, sm: 4 }}>
                     <Typography variant="caption" color="text.secondary">
                       Fecha de Emisión
@@ -1105,77 +1081,87 @@ export const PresupuestoProveedorScreen = () => {
               >
                 <DocumentoUploader
                   label="Comprobante / Cotización Oficial Adjunta"
-                  value={selectedPresupuesto.documentoUrl || MOCK_DOC_PRESUPUESTO}
+                  value={
+                    selectedPresupuesto.documentoUrl || MOCK_DOC_PRESUPUESTO
+                  }
                   readOnly
                 />
               </Paper>
 
               {/* Sección 3: Desglose de Insumos (si existen cargados históricamente) */}
-              {selectedPresupuesto.items && selectedPresupuesto.items.length > 0 && (
-                <Paper
-                  variant="outlined"
-                  sx={{
-                    p: 2.5,
-                    borderRadius: "14px",
-                    bgcolor: "background.paper",
-                  }}
-                >
-                  <Box
-                    sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
-                  >
-                    <ShoppingCartOutlinedIcon
-                      fontSize="small"
-                      sx={{ color: "primary.main" }}
-                    />
-                    <Typography
-                      variant="subtitle2"
-                      sx={{ fontWeight: 700, textTransform: "uppercase" }}
-                    >
-                      Materias Primas Cotizadas (Histórico)
-                    </Typography>
-                  </Box>
-                  <TableContainer
-                    component={Paper}
+              {selectedPresupuesto.items &&
+                selectedPresupuesto.items.length > 0 && (
+                  <Paper
                     variant="outlined"
-                    sx={{ borderRadius: "10px" }}
+                    sx={{
+                      p: 2.5,
+                      borderRadius: "14px",
+                      bgcolor: "background.paper",
+                    }}
                   >
-                    <Table size="small">
-                      <TableHead sx={{ bgcolor: "action.hover" }}>
-                        <TableRow>
-                          <TableCell sx={{ fontWeight: 700 }}>
-                            Materia Prima / Insumo
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: 700 }}>Cantidad</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }}>
-                            Precio Unitario
-                          </TableCell>
-                          <TableCell align="right" sx={{ fontWeight: 700 }}>
-                            Subtotal
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {selectedPresupuesto.items.map((item) => (
-                          <TableRow key={item.id}>
-                            <TableCell sx={{ fontWeight: 600 }}>
-                              {item.materiaPrima}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mb: 2,
+                      }}
+                    >
+                      <ShoppingCartOutlinedIcon
+                        fontSize="small"
+                        sx={{ color: "primary.main" }}
+                      />
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ fontWeight: 700, textTransform: "uppercase" }}
+                      >
+                        Materias Primas Cotizadas (Histórico)
+                      </Typography>
+                    </Box>
+                    <TableContainer
+                      component={Paper}
+                      variant="outlined"
+                      sx={{ borderRadius: "10px" }}
+                    >
+                      <Table size="small">
+                        <TableHead sx={{ bgcolor: "action.hover" }}>
+                          <TableRow>
+                            <TableCell sx={{ fontWeight: 700 }}>
+                              Materia Prima / Insumo
                             </TableCell>
-                            <TableCell>
-                              {item.cantidad} {item.unidad}
+                            <TableCell sx={{ fontWeight: 700 }}>
+                              Cantidad
                             </TableCell>
-                            <TableCell>
-                              ${item.precioUnitario.toLocaleString("es-AR")}
+                            <TableCell sx={{ fontWeight: 700 }}>
+                              Precio Unitario
                             </TableCell>
                             <TableCell align="right" sx={{ fontWeight: 700 }}>
-                              ${item.subtotal.toLocaleString("es-AR")}
+                              Subtotal
                             </TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Paper>
-              )}
+                        </TableHead>
+                        <TableBody>
+                          {selectedPresupuesto.items.map((item) => (
+                            <TableRow key={item.id}>
+                              <TableCell sx={{ fontWeight: 600 }}>
+                                {item.materiaPrima}
+                              </TableCell>
+                              <TableCell>
+                                {item.cantidad} {item.unidad}
+                              </TableCell>
+                              <TableCell>
+                                ${item.precioUnitario.toLocaleString("es-AR")}
+                              </TableCell>
+                              <TableCell align="right" sx={{ fontWeight: 700 }}>
+                                ${item.subtotal.toLocaleString("es-AR")}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Paper>
+                )}
 
               {/* Resumen de Monto Total */}
               <Paper
@@ -1369,32 +1355,6 @@ export const PresupuestoProveedorScreen = () => {
                   </Select>
                 </FormControl>
               </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="modalidad-compra-label">
-                    Modalidad de Compra
-                  </InputLabel>
-                  <Select
-                    labelId="modalidad-compra-label"
-                    value={formData.tipoCompra}
-                    label="Modalidad de Compra"
-                    onChange={(e) =>
-                      setFormData({ ...formData, tipoCompra: e.target.value })
-                    }
-                  >
-                    <MenuItem value="Semestral (Marzo - Temporada Baja)">
-                      Semestral (Marzo - Temporada Baja)
-                    </MenuItem>
-                    <MenuItem value="Semestral (Diciembre - Temporada Baja)">
-                      Semestral (Diciembre - Temporada Baja)
-                    </MenuItem>
-                    <MenuItem value="Insumos Locales / Reposición">
-                      Insumos Locales / Reposición
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
             </Grid>
           </Paper>
 
@@ -1465,25 +1425,6 @@ export const PresupuestoProveedorScreen = () => {
                   required
                 />
               </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="form-condicion-pago">Condición de Pago</InputLabel>
-                  <Select
-                    labelId="form-condicion-pago"
-                    value={formData.condicionPago || "30 días Fecha Factura"}
-                    label="Condición de Pago"
-                    onChange={(e) =>
-                      setFormData({ ...formData, condicionPago: e.target.value })
-                    }
-                  >
-                    <MenuItem value="Contado Contra Entrega">Contado Contra Entrega</MenuItem>
-                    <MenuItem value="30 días Fecha Factura">30 días Fecha Factura</MenuItem>
-                    <MenuItem value="Transferencia Inmediata">Transferencia Inmediata</MenuItem>
-                    <MenuItem value="Cuenta Corriente 60 días">Cuenta Corriente 60 días</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
             </Grid>
           </Paper>
 
@@ -1498,7 +1439,7 @@ export const PresupuestoProveedorScreen = () => {
               onChange={(newUrl) =>
                 setFormData((prev) => ({ ...prev, documentoUrl: newUrl }))
               }
-              helperText="Cargue la foto o escaneo del presupuesto emitido por el proveedor para respaldar la cotización sin transcribir renglones."
+              helperText="Cargue la foto o escaneo del presupuesto emitido por el proveedor."
               mockPlaceholder={MOCK_DOC_PRESUPUESTO}
             />
           </Paper>
@@ -1591,8 +1532,9 @@ export const PresupuestoProveedorScreen = () => {
             ¿Confirma que desea eliminar la cotización{" "}
             <strong>{selectedPresupuesto?.id}</strong> de{" "}
             <strong>{selectedPresupuesto?.proveedorNombre}</strong> por valor de{" "}
-            <strong>${selectedPresupuesto?.total?.toLocaleString("es-AR")}</strong>?{" "}
-            Esta acción no se puede deshacer.
+            <strong>
+              ${selectedPresupuesto?.total?.toLocaleString("es-AR")}
+            </strong>? Esta acción no se puede deshacer.
           </Typography>
         </DialogContent>
         <DialogActions
