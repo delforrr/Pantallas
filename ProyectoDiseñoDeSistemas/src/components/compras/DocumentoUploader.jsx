@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -140,12 +139,12 @@ export const DocumentoUploader = ({
             transition: "all 0.2s ease-in-out",
             "&:hover": {
               borderColor: readOnly ? "divider" : "primary.main",
-              bgcolor: (theme) =>
-                readOnly
-                  ? "transparent"
-                  : theme.palette.mode === "dark"
-                    ? "rgba(0, 146, 70, 0.06)"
-                    : "rgba(0, 146, 70, 0.04)",
+              bgcolor: (theme) => {
+                if (readOnly) return "transparent";
+                return theme.palette.mode === "dark"
+                  ? "rgba(0, 146, 70, 0.06)"
+                  : "rgba(0, 146, 70, 0.04)";
+              },
             },
           }}
         >
@@ -292,16 +291,6 @@ export const DocumentoUploader = ({
 
           {/* Botones de acción */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Tooltip title="Ver comprobante en pantalla completa">
-              <IconButton
-                size="small"
-                onClick={() => setPreviewOpen(true)}
-                sx={{ color: "primary.main" }}
-              >
-                <VisibilityOutlinedIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-
             {!readOnly && (
               <>
                 <Button
@@ -313,11 +302,7 @@ export const DocumentoUploader = ({
                   Cambiar
                 </Button>
                 <Tooltip title="Eliminar comprobante adjunto">
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={handleRemove}
-                  >
+                  <IconButton size="small" color="error" onClick={handleRemove}>
                     <DeleteOutlineIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
@@ -395,7 +380,14 @@ export const DocumentoUploader = ({
           )}
         </DialogContent>
 
-        <DialogActions sx={{ px: 2.5, py: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
+        <DialogActions
+          sx={{
+            px: 2.5,
+            py: 1.5,
+            borderTop: "1px solid",
+            borderColor: "divider",
+          }}
+        >
           <Button onClick={() => setPreviewOpen(false)} color="inherit">
             Cerrar
           </Button>
