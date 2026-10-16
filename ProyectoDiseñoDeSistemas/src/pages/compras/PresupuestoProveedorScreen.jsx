@@ -24,7 +24,6 @@ import {
   DialogContent,
   DialogActions,
   Grid,
-  Alert,
   ToggleButtonGroup,
   ToggleButton,
 } from "@mui/material";
@@ -48,16 +47,28 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
-import StarRateIcon from "@mui/icons-material/StarRate";
 
-import { INITIAL_PRESUPUESTOS, INITIAL_PROVEEDORES } from "./mockData";
-import { DetalleItemsTable } from "../../components/compras";
+import { INITIAL_PRESUPUESTOS, INITIAL_PROVEEDORES, MOCK_DOC_PRESUPUESTO } from "./mockData";
+import { DocumentoUploader } from "../../components/compras";
 
 const STATUS_COLOR_MAP = {
   Aprobado: "success",
   Pendiente: "warning",
   Rechazado: "error",
   Vencido: "default",
+};
+
+const INITIAL_FORM_STATE = {
+  proveedorId: 1,
+  fechaEmision: "2026-03-15",
+  validezHasta: "2026-04-04",
+  tipoCompra: "Semestral (Marzo - Temporada Baja)",
+  estado: "Pendiente",
+  condicionPago: "30 días Fecha Factura",
+  total: 3500000,
+  observaciones: "",
+  documentoUrl: "",
+  items: [],
 };
 
 export const PresupuestoProveedorScreen = () => {
@@ -77,35 +88,7 @@ export const PresupuestoProveedorScreen = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   // Form State
-  const initialFormState = {
-    proveedorId: 1,
-    fechaEmision: new Date().toISOString().split("T")[0],
-    validezHasta: "",
-    tipoCompra: "Semestral (Marzo - Temporada Baja)",
-    estado: "Pendiente",
-    calificacion: "Alta",
-    condicionPago: "30 días Fecha Factura",
-    observaciones: "",
-    items: [
-      {
-        id: 1,
-        materiaPrima: "Harina 0000 Especial Pastas (bolsa 50kg)",
-        unidad: "Bolsas",
-        cantidad: 40,
-        precioUnitario: 32000,
-        subtotal: 1280000,
-      },
-      {
-        id: 2,
-        materiaPrima: "Semolín de Trigo Candeal (bolsa 25kg)",
-        unidad: "Bolsas",
-        cantidad: 20,
-        precioUnitario: 32000,
-        subtotal: 640000,
-      },
-    ],
-  };
-  const [formData, setFormData] = useState(initialFormState);
+  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
 
   // Filtrado
   const filteredPresupuestos = useMemo(() => {
@@ -148,7 +131,7 @@ export const PresupuestoProveedorScreen = () => {
 
   const handleOpenCreate = () => {
     setIsEditing(false);
-    setFormData(initialFormState);
+    setFormData(INITIAL_FORM_STATE);
     setOpenForm(true);
   };
 
@@ -161,13 +144,11 @@ export const PresupuestoProveedorScreen = () => {
       validezHasta: item.validezHasta,
       tipoCompra: item.tipoCompra,
       estado: item.estado,
-      calificacion: item.calificacion,
-      condicionPago: item.condicionPago,
+      condicionPago: item.condicionPago || "30 días Fecha Factura",
+      total: item.total || 0,
       observaciones: item.observaciones || "",
-      items:
-        item.items && item.items.length > 0
-          ? item.items.map((it, idx) => ({ ...it, id: it.id || idx + 1 }))
-          : [...initialFormState.items],
+      documentoUrl: item.documentoUrl || MOCK_DOC_PRESUPUESTO,
+      items: item.items || [],
     });
     setOpenForm(true);
   };
@@ -197,17 +178,10 @@ export const PresupuestoProveedorScreen = () => {
 
   const handleSaveForm = (e) => {
     e.preventDefault();
-    if (!formData.items || formData.items.length === 0) {
-      alert("Debe incluir al menos un insumo o ítem en el presupuesto.");
-      return;
-    }
     const prov = INITIAL_PROVEEDORES.find(
       (p) => p.id === Number(formData.proveedorId),
     );
-    const total = formData.items.reduce(
-      (acc, it) => acc + (Number(it.subtotal) || 0),
-      0,
-    );
+    const totalMonto = Number(formData.total) || 0;
 
     if (isEditing && selectedPresupuesto) {
       setPresupuestos((prev) =>
@@ -222,11 +196,10 @@ export const PresupuestoProveedorScreen = () => {
                 validezHasta: formData.validezHasta,
                 tipoCompra: formData.tipoCompra,
                 estado: formData.estado,
-                calificacion: formData.calificacion,
                 condicionPago: formData.condicionPago,
                 observaciones: formData.observaciones,
-                items: formData.items,
-                total,
+                total: totalMonto,
+                documentoUrl: formData.documentoUrl || p.documentoUrl || MOCK_DOC_PRESUPUESTO,
               }
             : p,
         ),
@@ -242,11 +215,11 @@ export const PresupuestoProveedorScreen = () => {
         validezHasta: formData.validezHasta || "2026-03-31",
         tipoCompra: formData.tipoCompra,
         estado: formData.estado,
-        calificacion: formData.calificacion,
         condicionPago: formData.condicionPago,
         observaciones: formData.observaciones,
-        items: formData.items,
-        total,
+        items: [],
+        total: totalMonto,
+        documentoUrl: formData.documentoUrl || MOCK_DOC_PRESUPUESTO,
       };
       setPresupuestos((prev) => [newPresupuesto, ...prev]);
     }
@@ -264,15 +237,6 @@ export const PresupuestoProveedorScreen = () => {
 
   return (
     <Box>
-      {/* Banner Informativo del Dominio */}
-      <Alert severity="info" sx={{ mb: 3, borderRadius: "12px" }}>
-        <strong>Proceso de Cotización:</strong> Las compras de materias primas
-        principales (Harina, Levadura, Descartables) se evalúan semestralmente
-        en marzo y diciembre comparando proveedores por{" "}
-        <strong>precio y calidad</strong>. Los insumos frescos se cotizan
-        semanalmente con proveedores locales.
-      </Alert>
-
       {/* Tarjetas de Métricas Rápidas - Responsivas con igual ancho apiladas */}
       <Box
         sx={{
@@ -579,8 +543,8 @@ export const PresupuestoProveedorScreen = () => {
       </Box>
 
       {/* Vista de Cuadrícula / Tarjetas Responsiva */}
-      {viewMode === "grid" ? (
-        filteredPresupuestos.length === 0 ? (
+      {viewMode === "grid" &&
+        (filteredPresupuestos.length === 0 ? (
           <Paper
             elevation={1}
             sx={{
@@ -670,23 +634,8 @@ export const PresupuestoProveedorScreen = () => {
                   CUIT: {item.cuit}
                 </Typography>
 
-                {/* Modalidad y Calificación */}
+                {/* Modalidad */}
                 <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
-                  <Chip
-                    size="small"
-                    icon={
-                      <StarRateIcon sx={{ fontSize: "0.9rem !important" }} />
-                    }
-                    label={`Calidad: ${item.calificacion}`}
-                    color={
-                      item.calificacion === "Excelente"
-                        ? "success"
-                        : item.calificacion === "Alta"
-                          ? "info"
-                          : "default"
-                    }
-                    sx={{ fontWeight: 600, fontSize: "0.72rem" }}
-                  />
                   <Chip
                     size="small"
                     variant="outlined"
@@ -854,9 +803,10 @@ export const PresupuestoProveedorScreen = () => {
               </Paper>
             ))}
           </Box>
-        )
-      ) : (
-        /* Vista Tabla Estándar */
+        ))}
+
+      {/* Vista Tabla Estándar */}
+      {viewMode === "table" && (
         <TableContainer
           component={Paper}
           elevation={1}
@@ -875,7 +825,6 @@ export const PresupuestoProveedorScreen = () => {
                 <TableCell sx={{ fontWeight: 700 }}>Tipo de Compra</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Validez Hasta</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Total Cotizado</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Calidad</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700 }}>
                   Acciones
@@ -933,20 +882,6 @@ export const PresupuestoProveedorScreen = () => {
                     <TableCell>{row.validezHasta}</TableCell>
                     <TableCell sx={{ fontWeight: 700 }}>
                       ${row.total.toLocaleString("es-AR")}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        size="small"
-                        label={row.calificacion}
-                        color={
-                          row.calificacion === "Excelente"
-                            ? "success"
-                            : row.calificacion === "Alta"
-                              ? "info"
-                              : "default"
-                        }
-                        sx={{ fontWeight: 600, fontSize: "0.72rem" }}
-                      />
                     </TableCell>
                     <TableCell>
                       <Chip
@@ -1132,7 +1067,7 @@ export const PresupuestoProveedorScreen = () => {
                   </Typography>
                 </Box>
                 <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, sm: 6 }}>
+                  <Grid size={{ xs: 12, sm: 4 }}>
                     <Typography variant="caption" color="text.secondary">
                       Modalidad de Compra
                     </Typography>
@@ -1140,15 +1075,7 @@ export const PresupuestoProveedorScreen = () => {
                       {selectedPresupuesto.tipoCompra}
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      Forma de Pago
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {selectedPresupuesto.condicionPago}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 6, sm: 3 }}>
+                  <Grid size={{ xs: 6, sm: 4 }}>
                     <Typography variant="caption" color="text.secondary">
                       Fecha de Emisión
                     </Typography>
@@ -1156,7 +1083,7 @@ export const PresupuestoProveedorScreen = () => {
                       {selectedPresupuesto.fechaEmision}
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 6, sm: 3 }}>
+                  <Grid size={{ xs: 6, sm: 4 }}>
                     <Typography variant="caption" color="text.secondary">
                       Validez de Oferta
                     </Typography>
@@ -1164,29 +1091,10 @@ export const PresupuestoProveedorScreen = () => {
                       {selectedPresupuesto.validezHasta}
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      Calificación Histórica
-                    </Typography>
-                    <Box sx={{ mt: 0.5 }}>
-                      <Chip
-                        size="small"
-                        label={selectedPresupuesto.calificacion}
-                        color={
-                          selectedPresupuesto.calificacion === "Excelente"
-                            ? "success"
-                            : selectedPresupuesto.calificacion === "Alta"
-                              ? "info"
-                              : "default"
-                        }
-                        sx={{ fontWeight: 600 }}
-                      />
-                    </Box>
-                  </Grid>
                 </Grid>
               </Paper>
 
-              {/* Sección 2: Desglose de Insumos */}
+              {/* Sección 2: Comprobante Oficial Adjunto */}
               <Paper
                 variant="outlined"
                 sx={{
@@ -1195,102 +1103,105 @@ export const PresupuestoProveedorScreen = () => {
                   bgcolor: "background.paper",
                 }}
               >
-                <Box
-                  sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
-                >
-                  <ShoppingCartOutlinedIcon
-                    fontSize="small"
-                    sx={{ color: "primary.main" }}
-                  />
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ fontWeight: 700, textTransform: "uppercase" }}
-                  >
-                    Materias Primas Cotizadas
-                  </Typography>
-                </Box>
-                <TableContainer
-                  component={Paper}
-                  variant="outlined"
-                  sx={{ borderRadius: "10px" }}
-                >
-                  <Table size="small">
-                    <TableHead sx={{ bgcolor: "action.hover" }}>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 700 }}>
-                          Materia Prima / Insumo
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>Cantidad</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>
-                          Precio Unitario
-                        </TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 700 }}>
-                          Subtotal
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {selectedPresupuesto.items.map((item, idx) => (
-                        <TableRow key={idx}>
-                          <TableCell sx={{ fontWeight: 600 }}>
-                            {item.materiaPrima}
-                          </TableCell>
-                          <TableCell>
-                            {item.cantidad} {item.unidad}
-                          </TableCell>
-                          <TableCell>
-                            ${item.precioUnitario.toLocaleString("es-AR")}
-                          </TableCell>
-                          <TableCell align="right" sx={{ fontWeight: 700 }}>
-                            ${item.subtotal.toLocaleString("es-AR")}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      <TableRow sx={{ bgcolor: "action.hover" }}>
-                        <TableCell
-                          colSpan={3}
-                          sx={{ fontWeight: 700, textAlign: "right" }}
-                        >
-                          TOTAL COTIZADO:
-                        </TableCell>
-                        <TableCell
-                          align="right"
-                          sx={{
-                            fontWeight: 800,
-                            color: "primary.main",
-                            fontSize: "1.1rem",
-                          }}
-                        >
-                          ${selectedPresupuesto.total.toLocaleString("es-AR")}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                <DocumentoUploader
+                  label="Comprobante / Cotización Oficial Adjunta"
+                  value={selectedPresupuesto.documentoUrl || MOCK_DOC_PRESUPUESTO}
+                  readOnly
+                />
               </Paper>
 
-              {selectedPresupuesto.observaciones && (
-                <Box
+              {/* Sección 3: Desglose de Insumos (si existen cargados históricamente) */}
+              {selectedPresupuesto.items && selectedPresupuesto.items.length > 0 && (
+                <Paper
+                  variant="outlined"
                   sx={{
-                    p: 2,
-                    bgcolor: "action.hover",
-                    borderRadius: "12px",
-                    border: "1px solid",
-                    borderColor: "divider",
+                    p: 2.5,
+                    borderRadius: "14px",
+                    bgcolor: "background.paper",
                   }}
                 >
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ fontWeight: 700, display: "block" }}
+                  <Box
+                    sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
                   >
-                    Justificación y Observaciones de Compra:
-                  </Typography>
-                  <Typography variant="body2" sx={{ mt: 0.5 }}>
-                    {selectedPresupuesto.observaciones}
-                  </Typography>
-                </Box>
+                    <ShoppingCartOutlinedIcon
+                      fontSize="small"
+                      sx={{ color: "primary.main" }}
+                    />
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ fontWeight: 700, textTransform: "uppercase" }}
+                    >
+                      Materias Primas Cotizadas (Histórico)
+                    </Typography>
+                  </Box>
+                  <TableContainer
+                    component={Paper}
+                    variant="outlined"
+                    sx={{ borderRadius: "10px" }}
+                  >
+                    <Table size="small">
+                      <TableHead sx={{ bgcolor: "action.hover" }}>
+                        <TableRow>
+                          <TableCell sx={{ fontWeight: 700 }}>
+                            Materia Prima / Insumo
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>Cantidad</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>
+                            Precio Unitario
+                          </TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>
+                            Subtotal
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {selectedPresupuesto.items.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell sx={{ fontWeight: 600 }}>
+                              {item.materiaPrima}
+                            </TableCell>
+                            <TableCell>
+                              {item.cantidad} {item.unidad}
+                            </TableCell>
+                            <TableCell>
+                              ${item.precioUnitario.toLocaleString("es-AR")}
+                            </TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 700 }}>
+                              ${item.subtotal.toLocaleString("es-AR")}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Paper>
               )}
+
+              {/* Resumen de Monto Total */}
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2.5,
+                  borderRadius: "14px",
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(0, 146, 70, 0.12)"
+                      : "rgba(0, 146, 70, 0.06)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  Monto Total Cotizado:
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: 800, color: "primary.main" }}
+                >
+                  ${selectedPresupuesto.total.toLocaleString("es-AR")}
+                </Typography>
+              </Paper>
             </>
           )}
         </DialogContent>
@@ -1484,20 +1395,6 @@ export const PresupuestoProveedorScreen = () => {
                   </Select>
                 </FormControl>
               </Grid>
-
-              <Grid size={{ xs: 12 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Condición de Pago Acordada"
-                  placeholder="Ej: Contado contra entrega, 30 días FF..."
-                  value={formData.condicionPago}
-                  onChange={(e) =>
-                    setFormData({ ...formData, condicionPago: e.target.value })
-                  }
-                  required
-                />
-              </Grid>
             </Grid>
           </Paper>
 
@@ -1516,7 +1413,7 @@ export const PresupuestoProveedorScreen = () => {
                   textTransform: "uppercase",
                 }}
               >
-                2. Vigencia, Calidad y Estado
+                2. Vigencia, Importe y Condiciones
               </Typography>
             </Box>
             <Grid container spacing={2}>
@@ -1551,245 +1448,59 @@ export const PresupuestoProveedorScreen = () => {
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="calidad-eval-label">
-                    Calidad Evaluada
-                  </InputLabel>
-                  <Select
-                    labelId="calidad-eval-label"
-                    value={formData.calificacion}
-                    label="Calidad Evaluada"
-                    onChange={(e) =>
-                      setFormData({ ...formData, calificacion: e.target.value })
-                    }
-                    renderValue={(val) => {
-                      const col =
-                        val === "Excelente"
-                          ? "success"
-                          : val === "Alta"
-                            ? "info"
-                            : "warning";
-                      return (
-                        <Chip
-                          label={val}
-                          size="small"
-                          color={col}
-                          sx={{
-                            height: 22,
-                            fontSize: "0.75rem",
-                            fontWeight: 700,
-                          }}
-                        />
-                      );
-                    }}
-                  >
-                    <MenuItem value="Excelente">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "success.main",
-                          }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{ fontWeight: 600, color: "success.main" }}
-                        >
-                          Excelente (Alta Pureza / Certificada)
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Alta">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "info.main",
-                          }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{ fontWeight: 600, color: "info.main" }}
-                        >
-                          Alta (Estándar Industrial PastaFab)
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Media">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "warning.main",
-                          }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{ fontWeight: 600, color: "warning.main" }}
-                        >
-                          Media (Calidad Básica / Apta)
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                  </Select>
-                </FormControl>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type="number"
+                  label="Monto Total Cotizado"
+                  value={formData.total}
+                  onChange={(e) =>
+                    setFormData({ ...formData, total: e.target.value })
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">$</InputAdornment>
+                    ),
+                  }}
+                  required
+                />
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth size="small">
-                  <InputLabel id="estado-inicial-label">
-                    Estado Inicial
-                  </InputLabel>
+                  <InputLabel id="form-condicion-pago">Condición de Pago</InputLabel>
                   <Select
-                    labelId="estado-inicial-label"
-                    value={formData.estado}
-                    label="Estado Inicial"
+                    labelId="form-condicion-pago"
+                    value={formData.condicionPago || "30 días Fecha Factura"}
+                    label="Condición de Pago"
                     onChange={(e) =>
-                      setFormData({ ...formData, estado: e.target.value })
+                      setFormData({ ...formData, condicionPago: e.target.value })
                     }
-                    renderValue={(val) => (
-                      <Chip
-                        label={val}
-                        size="small"
-                        color={STATUS_COLOR_MAP[val] || "default"}
-                        sx={{
-                          height: 22,
-                          fontSize: "0.75rem",
-                          fontWeight: 700,
-                        }}
-                      />
-                    )}
                   >
-                    <MenuItem value="Pendiente">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "warning.main",
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          Pendiente
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Aprobado">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "success.main",
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          Aprobado
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="Rechazado">
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            bgcolor: "error.main",
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          Rechazado
-                        </Typography>
-                      </Box>
-                    </MenuItem>
+                    <MenuItem value="Contado Contra Entrega">Contado Contra Entrega</MenuItem>
+                    <MenuItem value="30 días Fecha Factura">30 días Fecha Factura</MenuItem>
+                    <MenuItem value="Transferencia Inmediata">Transferencia Inmediata</MenuItem>
+                    <MenuItem value="Cuenta Corriente 60 días">Cuenta Corriente 60 días</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
             </Grid>
           </Paper>
 
-          {/* Sección 3: Materias Primas Cotizadas - Tabla Dinámica Ergonómica */}
+          {/* Sección 3: Carga de Comprobante / Presupuesto del Proveedor */}
           <Paper
             variant="outlined"
             sx={{ p: 2.5, borderRadius: "14px", bgcolor: "background.paper" }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                mb: 2,
-                flexWrap: "wrap",
-                gap: 1,
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <ShoppingCartOutlinedIcon
-                  fontSize="small"
-                  sx={{ color: "primary.main" }}
-                />
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontWeight: 700,
-                    letterSpacing: "0.02em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  3. Detalle de Materias Primas Cotizadas
-                </Typography>
-              </Box>
-              <Chip
-                size="small"
-                label={`${formData.items?.length || 0} ${formData.items?.length === 1 ? "insumo" : "insumos"}`}
-                color="primary"
-                variant="outlined"
-                sx={{ fontWeight: 700 }}
-              />
-            </Box>
-
-            <DetalleItemsTable
-              items={formData.items || []}
-              onChange={(newItems) =>
-                setFormData((prev) => ({ ...prev, items: newItems }))
+            <DocumentoUploader
+              label="Comprobante / Presupuesto Oficial del Proveedor"
+              value={formData.documentoUrl}
+              onChange={(newUrl) =>
+                setFormData((prev) => ({ ...prev, documentoUrl: newUrl }))
               }
+              helperText="Cargue la foto o escaneo del presupuesto emitido por el proveedor para respaldar la cotización sin transcribir renglones."
+              mockPlaceholder={MOCK_DOC_PRESUPUESTO}
             />
-
-            <Box sx={{ mt: 2.5 }}>
-              <TextField
-                fullWidth
-                size="small"
-                multiline
-                rows={2}
-                label="Observaciones y Justificación de Compra"
-                placeholder="Fundamentación de precio o estacionalidad según requerimientos de producción..."
-                value={formData.observaciones}
-                onChange={(e) =>
-                  setFormData({ ...formData, observaciones: e.target.value })
-                }
-              />
-            </Box>
           </Paper>
         </DialogContent>
 
@@ -1880,10 +1591,8 @@ export const PresupuestoProveedorScreen = () => {
             ¿Confirma que desea eliminar la cotización{" "}
             <strong>{selectedPresupuesto?.id}</strong> de{" "}
             <strong>{selectedPresupuesto?.proveedorNombre}</strong> por valor de{" "}
-            <strong>
-              ${selectedPresupuesto?.total?.toLocaleString("es-AR")}
-            </strong>
-            ? Esta acción no se puede deshacer.
+            <strong>${selectedPresupuesto?.total?.toLocaleString("es-AR")}</strong>?{" "}
+            Esta acción no se puede deshacer.
           </Typography>
         </DialogContent>
         <DialogActions

@@ -51,7 +51,11 @@ import {
   INITIAL_COMPROBANTES_PAGO,
   INITIAL_PROVEEDORES,
   INITIAL_ORDENES_COMPRA,
+  MOCK_DOC_FACTURA,
+  MOCK_DOC_REMITO,
+  MOCK_DOC_PAGO,
 } from "./mockData";
+import { DocumentoUploader } from "../../components/compras";
 
 // Generador seguro de sufijo aleatorio para evitar alertas de PRNG inseguro (S2245)
 const getSecureRandomSuffix = () => {
@@ -111,6 +115,7 @@ export const FacturasRemitosScreen = () => {
     iva21: 170083,
     total: 980000,
     estado: "Pendiente de Pago",
+    documentoUrl: "",
   });
 
   const [remitoForm, setRemitoForm] = useState({
@@ -119,17 +124,15 @@ export const FacturasRemitosScreen = () => {
     proveedorId: 2,
     fechaEmision: new Date().toISOString().split("T")[0],
     fechaEntregaReal: new Date().toISOString().split("T")[0],
-    recepcionista: "Juan Borlini (Jefe de Planta)",
     estado: "Recibido Conforme",
     observaciones:
       "Control visual y de peso verificado al ingresar a depósito.",
+    documentoUrl: "",
   });
 
   const [pagoForm, setPagoForm] = useState({
     medioPago: "Transferencia Bancaria",
-    banco: "Banco de la Provincia de Buenos Aires",
-    nroTransaccion: "TRX-894102",
-    observaciones: "Liquidación de compra de insumos de producción.",
+    documentoUrl: "",
   });
 
   // Filtrado de Facturas
@@ -201,6 +204,7 @@ export const FacturasRemitosScreen = () => {
       total,
       estado: facturaForm.estado,
       comprobantePagoId: null,
+      documentoUrl: facturaForm.documentoUrl || MOCK_DOC_FACTURA,
     };
 
     setFacturas((prev) => [newFactura, ...prev]);
@@ -222,9 +226,9 @@ export const FacturasRemitosScreen = () => {
       proveedorNombre: prov?.razonSocial || "Proveedor S.A.",
       fechaEmision: remitoForm.fechaEmision,
       fechaEntregaReal: remitoForm.fechaEntregaReal,
-      recepcionista: remitoForm.recepcionista,
       estado: remitoForm.estado,
       observaciones: remitoForm.observaciones,
+      documentoUrl: remitoForm.documentoUrl || MOCK_DOC_REMITO,
       items: [
         {
           materiaPrima: "Insumos verificados según orden de compra",
@@ -242,6 +246,10 @@ export const FacturasRemitosScreen = () => {
   // Registrar Pago a Factura
   const handleOpenPagar = (factura) => {
     setSelectedItem(factura);
+    setPagoForm({
+      medioPago: "Transferencia Bancaria",
+      documentoUrl: "",
+    });
     setOpenPagarFactura(true);
   };
 
@@ -256,11 +264,15 @@ export const FacturasRemitosScreen = () => {
       proveedorNombre: selectedItem.proveedorNombre,
       fechaEmision: new Date().toISOString().split("T")[0],
       medioPago: pagoForm.medioPago,
-      nroTransaccion: pagoForm.nroTransaccion,
-      banco: pagoForm.banco,
+      nroTransaccion: `TRX-${Date.now().toString().slice(-6)}`,
+      banco:
+        pagoForm.medioPago === "Efectivo"
+          ? "Caja Principal Planta"
+          : "Banco de la Provincia de Buenos Aires",
       total: selectedItem.total,
       estado: "Conciliado",
-      observaciones: pagoForm.observaciones,
+      observaciones: "Pago liquidado con comprobante adjunto.",
+      documentoUrl: pagoForm.documentoUrl || MOCK_DOC_PAGO,
     };
 
     // Actualizar factura a Pagada
@@ -313,14 +325,14 @@ export const FacturasRemitosScreen = () => {
             label={`Facturas Proveedores (${facturas.length})`}
           />
           <Tab
-            icon={<LocalShippingIcon />}
-            iconPosition="start"
-            label={`Remitos de Entrega (${remitos.length})`}
-          />
-          <Tab
             icon={<PaymentIcon />}
             iconPosition="start"
             label={`Comprobantes de Pago (${pagos.length})`}
+          />
+          <Tab
+            icon={<LocalShippingIcon />}
+            iconPosition="start"
+            label={`Remitos de Entrega (${remitos.length})`}
           />
         </Tabs>
       </Paper>
@@ -973,7 +985,7 @@ export const FacturasRemitosScreen = () => {
             >
               <TextField
                 size="small"
-                placeholder="Buscar por Nº Remito, Proveedor o Recepcionista..."
+                placeholder="Buscar por Nº Remito, Proveedor o Estado..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 InputProps={{
@@ -1161,9 +1173,6 @@ export const FacturasRemitosScreen = () => {
                         variant="body2"
                         sx={{ fontWeight: 600, mt: 0.3 }}
                       >
-                        {row.recepcionista}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
                         Fecha Ingreso: {row.fechaEntregaReal}
                       </Typography>
                     </Paper>
@@ -1224,9 +1233,6 @@ export const FacturasRemitosScreen = () => {
                       Fecha Recepción
                     </TableCell>
                     <TableCell sx={{ fontWeight: 700 }}>
-                      Recepcionista (Planta)
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>
                       Estado de Carga
                     </TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700 }}>
@@ -1238,7 +1244,7 @@ export const FacturasRemitosScreen = () => {
                   {filteredRemitos.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
+                        colSpan={6}
                         align="center"
                         sx={{ py: 6, color: "text.secondary" }}
                       >
@@ -1277,7 +1283,6 @@ export const FacturasRemitosScreen = () => {
                           />
                         </TableCell>
                         <TableCell>{row.fechaEntregaReal}</TableCell>
-                        <TableCell>{row.recepcionista}</TableCell>
                         <TableCell>
                           <Chip
                             label={row.estado}
@@ -2086,6 +2091,30 @@ export const FacturasRemitosScreen = () => {
               </Grid>
             </Grid>
           </Paper>
+
+          {/* Sección 4: Carga de Comprobante / Factura Oficial */}
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2.5,
+              borderRadius: "14px",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark" ? "background.paper" : "#ffffff",
+              border: "1px solid",
+              borderColor: (theme) =>
+                theme.palette.mode === "dark" ? "divider" : "#e2e8f0",
+            }}
+          >
+            <DocumentoUploader
+              label="Comprobante / Foto de la Factura Oficial"
+              value={facturaForm.documentoUrl}
+              onChange={(newUrl) =>
+                setFacturaForm((prev) => ({ ...prev, documentoUrl: newUrl }))
+              }
+              helperText="Cargue la foto o escaneo digital de la factura fiscal emitida por el proveedor."
+              mockPlaceholder={MOCK_DOC_FACTURA}
+            />
+          </Paper>
         </DialogContent>
 
         <DialogActions
@@ -2304,21 +2333,6 @@ export const FacturasRemitosScreen = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Recepcionista Responsable (Planta)"
-                  value={remitoForm.recepcionista}
-                  onChange={(e) =>
-                    setRemitoForm({
-                      ...remitoForm,
-                      recepcionista: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </Grid>
             </Grid>
           </Paper>
 
@@ -2415,6 +2429,30 @@ export const FacturasRemitosScreen = () => {
                 />
               </Grid>
             </Grid>
+          </Paper>
+
+          {/* Sección 3: Carga de Comprobante / Remito Firmado */}
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2.5,
+              borderRadius: "14px",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark" ? "background.paper" : "#ffffff",
+              border: "1px solid",
+              borderColor: (theme) =>
+                theme.palette.mode === "dark" ? "divider" : "#e2e8f0",
+            }}
+          >
+            <DocumentoUploader
+              label="Comprobante / Foto del Remito Firmado"
+              value={remitoForm.documentoUrl}
+              onChange={(newUrl) =>
+                setRemitoForm((prev) => ({ ...prev, documentoUrl: newUrl }))
+              }
+              helperText="Cargue la foto o escaneo del remito físico firmado y sellado por el chofer y depósito."
+              mockPlaceholder={MOCK_DOC_REMITO}
+            />
           </Paper>
         </DialogContent>
 
@@ -2587,37 +2625,14 @@ export const FacturasRemitosScreen = () => {
                 </Select>
               </FormControl>
 
-              <TextField
-                fullWidth
-                size="small"
-                label="Nº Comprobante / Transacción Bancaria"
-                value={pagoForm.nroTransaccion}
-                onChange={(e) =>
-                  setPagoForm({ ...pagoForm, nroTransaccion: e.target.value })
+              <DocumentoUploader
+                label="Comprobante de Transferencia / Recibo de Pago"
+                value={pagoForm.documentoUrl}
+                onChange={(newUrl) =>
+                  setPagoForm((prev) => ({ ...prev, documentoUrl: newUrl }))
                 }
-                required
-              />
-
-              <TextField
-                fullWidth
-                size="small"
-                label="Banco u Origen de Fondos"
-                value={pagoForm.banco}
-                onChange={(e) =>
-                  setPagoForm({ ...pagoForm, banco: e.target.value })
-                }
-              />
-
-              <TextField
-                fullWidth
-                size="small"
-                multiline
-                rows={2}
-                label="Notas y Conciliación"
-                value={pagoForm.observaciones}
-                onChange={(e) =>
-                  setPagoForm({ ...pagoForm, observaciones: e.target.value })
-                }
+                helperText="Cargue la foto o comprobante bancario para respaldar la liquidación del pago."
+                mockPlaceholder={MOCK_DOC_PAGO}
               />
             </>
           )}
@@ -2818,18 +2833,10 @@ export const FacturasRemitosScreen = () => {
                   <>
                     <Grid size={{ xs: 12 }}>
                       <Typography variant="caption" color="text.secondary">
-                        Recepcionista
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {selectedItem.recepcionista}
-                      </Typography>
-                    </Grid>
-                    <Grid size={{ xs: 12 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        Observaciones
+                        Observaciones de Entrega
                       </Typography>
                       <Typography variant="body2">
-                        {selectedItem.observaciones}
+                        {selectedItem.observaciones || "Recepción conforme sin observaciones."}
                       </Typography>
                     </Grid>
                   </>
@@ -2866,6 +2873,28 @@ export const FacturasRemitosScreen = () => {
                     </Grid>
                   </>
                 )}
+
+                {/* Comprobante Adjunto */}
+                <Grid size={{ xs: 12 }}>
+                  <DocumentoUploader
+                    label={
+                      detailType === "factura"
+                        ? "Factura Adjunta del Proveedor"
+                        : detailType === "remito"
+                          ? "Remito Firmado Adjunto"
+                          : "Comprobante de Transferencia / Pago"
+                    }
+                    value={
+                      selectedItem.documentoUrl ||
+                      (detailType === "factura"
+                        ? MOCK_DOC_FACTURA
+                        : detailType === "remito"
+                          ? MOCK_DOC_REMITO
+                          : MOCK_DOC_PAGO)
+                    }
+                    readOnly
+                  />
+                </Grid>
               </Grid>
             </Paper>
           )}
