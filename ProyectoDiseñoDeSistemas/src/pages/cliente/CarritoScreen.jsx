@@ -9,19 +9,25 @@ import {
   DialogActions,
   Chip,
   Divider,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useApp } from '../../context/AppContext';
 import { useClientStore, clientStore } from './mockData';
+import CarritoMayorista from '../../components/cliente/CarritoMayorista';
 import { CarritoItem, ResumenPedido } from '../../components/cliente';
 
-export const CarritoScreen = () => {
+const CarritoHabitual = () => {
   const { navigate } = useApp();
   const { cart } = useClientStore();
+  const abrirCatalogo = () => {
+    if (clientStore.getState().catalogoModo === 'inicio') clientStore.setCatalogoModo('productos');
+    navigate('catalogo');
+  };
 
   const [pedidoExitoso, setPedidoExitoso] = useState(null);
   const [openVaciarDialog, setOpenVaciarDialog] = useState(false);
@@ -88,7 +94,7 @@ export const CarritoScreen = () => {
           color="primary"
           size="large"
           startIcon={<RestaurantMenuIcon />}
-          onClick={() => navigate('catalogo')}
+          onClick={abrirCatalogo}
           sx={{
             borderRadius: '10px',
             px: 4,
@@ -107,43 +113,7 @@ export const CarritoScreen = () => {
 
   return (
     <Box>
-      {/* Barra superior de navegación / UX para volver */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          mb: 2.5,
-          p: 1.5,
-          bgcolor: 'background.paper',
-          borderRadius: '12px',
-          border: '1px solid',
-          borderColor: 'divider',
-          flexWrap: 'wrap',
-          gap: 1.5,
-        }}
-      >
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('catalogo')}
-          variant="outlined"
-          size="small"
-          sx={{
-            fontWeight: 700,
-            borderRadius: '8px',
-            color: 'text.primary',
-            borderColor: 'divider',
-            textTransform: 'none',
-            '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' },
-          }}
-        >
-          Volver al Catálogo de Pastas
-        </Button>
 
-        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-          Paso 1 de 2: Revisión de Ítems y Configuración del Pedido
-        </Typography>
-      </Box>
 
       <Box
         sx={{
@@ -365,14 +335,6 @@ export const CarritoScreen = () => {
               </Box>
             )}
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
-              <Typography variant="caption" color="text.secondary">
-                Comprobantes oficiales:
-              </Typography>
-              <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                {pedidoExitoso?.nroRemito} • {pedidoExitoso?.nroFactura}
-              </Typography>
-            </Box>
           </Box>
         </DialogContent>
 
@@ -381,7 +343,7 @@ export const CarritoScreen = () => {
             variant="outlined"
             onClick={() => {
               setPedidoExitoso(null);
-              navigate('catalogo');
+              abrirCatalogo();
             }}
             sx={{ borderRadius: '10px', textTransform: 'none', px: 2.5 }}
           >
@@ -402,6 +364,19 @@ export const CarritoScreen = () => {
       </Dialog>
     </Box>
   );
+};
+
+export const CarritoScreen = () => {
+  const { carritoModo, mayoristaItems, cart } = useClientStore();
+  const cantidadMayorista = Object.keys(mayoristaItems).length;
+  const cantidadHabitual = cart.length;
+  return <Box>
+    {(cantidadMayorista > 0 || carritoModo === 'mayorista') && <Tabs value={carritoModo} onChange={(_, modo) => clientStore.setCarritoModo(modo)} variant="fullWidth" sx={{ mb: 3 }} aria-label="Tipo de carrito">
+      <Tab value="habitual" label={`Compra habitual (${cantidadHabitual})`} />
+      <Tab value="mayorista" label={`Pedido mayorista (${cantidadMayorista})`} />
+    </Tabs>}
+    {carritoModo === 'mayorista' ? <CarritoMayorista /> : <CarritoHabitual />}
+  </Box>;
 };
 
 export default CarritoScreen;

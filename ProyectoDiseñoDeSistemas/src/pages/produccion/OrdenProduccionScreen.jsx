@@ -94,7 +94,7 @@ export const OrdenProduccionScreen = () => {
   const [materiasPrimas] = useState(MATERIAS_PRIMAS_INICIALES);
   const [recetas] = useState(RECETAS_INICIALES);
 
-  // Selector de entidad normalizada (0: Órdenes de Producción, 1: Notas de Pedido de Insumos)
+  // Selector de entidad normalizada (0: Órdenes de Producción, 1: Notas de Pedido de Materia Prima)
   const [tabIndex, setTabIndex] = useState(0);
 
   // Filtros y vista
@@ -285,8 +285,8 @@ export const OrdenProduccionScreen = () => {
         const falta = Math.max(0, Number((cant - stock).toFixed(2)));
         return {
           idMateriaPrima: d.idMateriaPrima || mp?.idMateriaPrima || idx + 1,
-          nombre: d.materiaPrimaNombre || d.nombre || mp?.nombre || `Insumo #${idx + 1}`,
-          tipo: mp?.tipo || 'Insumo',
+          nombre: d.materiaPrimaNombre || d.nombre || mp?.nombre || `Materia Prima #${idx + 1}`,
+          tipo: mp?.tipo || 'Materia Prima',
           cantidadRequerida: cant,
           stockActual: stock,
           unidad: d.unidad || mp?.unidad || 'kg',
@@ -585,7 +585,7 @@ export const OrdenProduccionScreen = () => {
       open: true,
       message: calculo.hayFaltante
         ? `Orden ${nuevoNumero} creada con ${formItems.length} productos (${totalKilos} kg). Alerta de faltante enviada a compras.`
-        : `Orden ${nuevoNumero} creada con ${formItems.length} productos (${totalKilos} kg) e insumos completos.`,
+        : `Orden ${nuevoNumero} creada con ${formItems.length} productos (${totalKilos} kg) y materia prima completa.`,
       severity: calculo.hayFaltante ? 'warning' : 'success',
     });
   };
@@ -597,7 +597,7 @@ export const OrdenProduccionScreen = () => {
 
   return (
     <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
-      {/* ── Selector de Entidades Normalizadas: Órdenes de Producción vs Notas de Pedido de Insumos ── */}
+      {/* ── Selector de Entidades Normalizadas: Órdenes de Producción vs Notas de Pedido de Materia Prima ── */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs
           value={tabIndex}
@@ -673,8 +673,8 @@ export const OrdenProduccionScreen = () => {
               label="Materia Prima"
               onChange={(e) => setFiltroInsumos(e.target.value)}
             >
-              <MenuItem value="TODOS">Todos los insumos</MenuItem>
-              <MenuItem value="Completo">Insumos completos</MenuItem>
+              <MenuItem value="TODOS">Todas las materias primas</MenuItem>
+              <MenuItem value="Completo">Materia prima completa</MenuItem>
               <MenuItem value="Faltante">Con faltante</MenuItem>
             </Select>
           </FormControl>
@@ -810,12 +810,12 @@ export const OrdenProduccionScreen = () => {
             <TableHead sx={{ bgcolor: 'action.hover' }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>N° Orden (OP)</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Nota de Pedido Insumos</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Nota de Pedido MP</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Productos y Volumen Total</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Fecha Prog. / Turno</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Máquinas Asignadas</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Empleado</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Insumos</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Materia Prima</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Estado OP</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700, width: 170, whiteSpace: 'nowrap' }}>Acciones</TableCell>
               </TableRow>
@@ -832,7 +832,7 @@ export const OrdenProduccionScreen = () => {
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                    <Tooltip title="Ver Nota de Pedido de Insumos asociada">
+                    <Tooltip title="Ver Nota de Pedido de Materia Prima asociada">
                       <Chip
                         icon={<AssignmentIcon style={{ fontSize: 14 }} />}
                         label={row.notaPedidoId}
@@ -936,7 +936,7 @@ export const OrdenProduccionScreen = () => {
                   </TableCell>
                   <TableCell align="right" sx={{ whiteSpace: 'nowrap', width: 170 }}>
                     <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5, flexWrap: 'nowrap' }}>
-                      <Tooltip title="Ver Detalle y Nota de Insumos">
+                      <Tooltip title="Ver Detalle y Nota de Materia Prima">
                         <IconButton size="small" onClick={() => handleOpenDetail(row)} sx={{ color: 'text.secondary' }}>
                           <VisibilityOutlinedIcon fontSize="small" />
                         </IconButton>
@@ -1003,10 +1003,10 @@ export const OrdenProduccionScreen = () => {
           <Box sx={{ mb: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                Notas de Pedido de Materia Prima e Insumos
+                Notas de Pedido de Materia Prima
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Entidad normalizada de requerimientos de insumos emitida por Cuadra hacia Almacén y Compras.
+                Entidad normalizada de requerimientos de materia prima emitida por Cuadra hacia Almacén y Compras.
               </Typography>
             </Box>
             <Chip
@@ -1031,7 +1031,7 @@ export const OrdenProduccionScreen = () => {
                   <TableCell sx={{ fontWeight: 700 }}>Fecha Emisión</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Turno de Cuadra</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Empleado</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Insumos Solicitados</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Materia Prima Solicitada</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Disponibilidad Stock</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700, width: 180 }}>Acciones</TableCell>
                 </TableRow>
@@ -1069,7 +1069,7 @@ export const OrdenProduccionScreen = () => {
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {np.detalles.length} insumo{np.detalles.length !== 1 ? 's' : ''}
+                          {np.detalles.length} materia{np.detalles.length !== 1 ? 's' : ''} prima{np.detalles.length !== 1 ? 's' : ''}
                         </Typography>
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {np.detalles.map((d) => d.materiaPrimaNombre).join(', ')}
@@ -1084,7 +1084,7 @@ export const OrdenProduccionScreen = () => {
                               <WarningAmberIcon style={{ fontSize: 15 }} />
                             )
                           }
-                          label={np.estadoInsumos === 'Completo' ? 'Insumos Completos' : 'Con Faltante'}
+                          label={np.estadoInsumos === 'Completo' ? 'Materia Prima Completa' : 'Con Faltante'}
                           size="small"
                           color={np.estadoInsumos === 'Completo' ? 'success' : 'warning'}
                           variant={np.estadoInsumos === 'Completo' ? 'outlined' : 'filled'}
@@ -1109,8 +1109,8 @@ export const OrdenProduccionScreen = () => {
                                 const falta = Math.max(0, Number((cant - stock).toFixed(2)));
                                 return {
                                   idMateriaPrima: d.idMateriaPrima || mp?.idMateriaPrima || (idx + 1),
-                                  nombre: d.materiaPrimaNombre || d.nombre || mp?.nombre || `Insumo #${idx + 1}`,
-                                  tipo: mp?.tipo || 'Insumo',
+                                  nombre: d.materiaPrimaNombre || d.nombre || mp?.nombre || `Materia Prima #${idx + 1}`,
+                                  tipo: mp?.tipo || 'Materia Prima',
                                   cantidadRequerida: cant,
                                   stockActual: stock,
                                   unidad: d.unidad || mp?.unidad || 'kg',
@@ -1142,7 +1142,7 @@ export const OrdenProduccionScreen = () => {
                           }}
                           sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px' }}
                         >
-                          Ver Insumos
+                          Ver Materia Prima
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -1485,11 +1485,6 @@ export const OrdenProduccionScreen = () => {
                   </Typography>
                 </Box>
               </Box>
-              <Chip
-                label={notaPedidoData.hayFaltante ? 'Con Alerta de Faltante' : 'Insumos Completos'}
-                color={notaPedidoData.hayFaltante ? 'warning' : 'success'}
-                sx={{ fontWeight: 700 }}
-              />
             </DialogTitle>
 
             <DialogContent dividers>
@@ -1557,21 +1552,19 @@ export const OrdenProduccionScreen = () => {
               {/* Alerta de faltante */}
               {notaPedidoData.hayFaltante ? (
                 <Alert severity="warning" sx={{ mb: 2, borderRadius: '10px' }}>
-                  <AlertTitle sx={{ fontWeight: 700 }}>Faltante de Insumos en Almacén</AlertTitle>
-                  Se detectaron insumos con stock insuficiente para cubrir la totalidad del lote. Al confirmar la
-                  orden se emitirá la <strong>Solicitud de Compra</strong> correspondiente para los insumos chicos/frescos
-                  a los proveedores locales sugeridos.
+                  <AlertTitle sx={{ fontWeight: 700 }}>Faltante de Materia Prima en Almacén</AlertTitle>
+                  Se detectaron materias primas con stock insuficiente para cubrir la totalidad del lote.
                 </Alert>
               ) : (
                 <Alert severity="success" sx={{ mb: 2, borderRadius: '10px' }}>
-                  ¡Stock disponible verificado! Todos los insumos e ingredientes requeridos se encuentran en almacén
+                  ¡Stock disponible verificado! Todas las materias primas requeridas se encuentran en almacén
                   para el inicio de la jornada.
                 </Alert>
               )}
 
               {/* Tabla consolidada de Materias Primas */}
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-                Detalles del Pedido de Insumos (DetalleNotaPedidoMateriaPrima)
+                Detalles del Pedido de Materia Prima (DetalleNotaPedidoMateriaPrima)
               </Typography>
               <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '10px', maxHeight: 280, overflowY: 'auto' }}>
                 <Table size="small">
@@ -1580,17 +1573,15 @@ export const OrdenProduccionScreen = () => {
                       <TableCell sx={{ fontWeight: 700, width: 80 }}>Id MP</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>Materia Prima (Nombre)</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>Tipo</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700 }}>Cantidad Requerida</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>Cantidad</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 700 }}>Stock Actual</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 700 }}>Estado</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Proveedor Local</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {(!notaPedidoData.insumos || notaPedidoData.insumos.length === 0) ? (
                       <TableRow>
-                        <TableCell colSpan={7} align="center" sx={{ py: 3, color: 'text.secondary' }}>
-                          No hay insumos requeridos registrados para esta nota de pedido.
+                        <TableCell colSpan={5} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                          No hay materia prima registrada para esta nota de pedido.
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -1600,33 +1591,12 @@ export const OrdenProduccionScreen = () => {
                             #{ins.idMateriaPrima || idx + 1}
                           </TableCell>
                           <TableCell sx={{ fontWeight: 600 }}>{ins.nombre || ins.materiaPrimaNombre}</TableCell>
-                          <TableCell sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>{ins.tipo || 'Insumo'}</TableCell>
+                          <TableCell sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>{ins.tipo || 'Materia Prima'}</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 700, color: 'primary.main' }}>
                             {ins.cantidadRequerida ?? ins.cantidad} {ins.unidad || 'kg'}
                           </TableCell>
                           <TableCell align="right" sx={{ color: ins.esFaltante ? 'error.main' : 'text.secondary', fontWeight: 600 }}>
                             {ins.stockActual ?? 0} {ins.unidad || 'kg'}
-                          </TableCell>
-                          <TableCell align="center">
-                            {ins.esFaltante ? (
-                              <Chip
-                                size="small"
-                                color="error"
-                                label={`Falta ${ins.faltante} ${ins.unidad || 'kg'}`}
-                                sx={{ fontSize: '0.7rem', height: 22, fontWeight: 700 }}
-                              />
-                            ) : (
-                              <Chip
-                                size="small"
-                                color="success"
-                                variant="outlined"
-                                label="Disponible"
-                                sx={{ fontSize: '0.7rem', height: 22, fontWeight: 600 }}
-                              />
-                            )}
-                          </TableCell>
-                          <TableCell sx={{ fontSize: '0.78rem', color: 'text.secondary' }}>
-                            {ins.proveedorSugerido || 'Proveedor Local'}
                           </TableCell>
                         </TableRow>
                       ))
@@ -1654,7 +1624,7 @@ export const OrdenProduccionScreen = () => {
                 startIcon={<CheckCircleIcon />}
                 sx={{ fontWeight: 600 }}
               >
-                Aceptar y Confirmar Insumos
+                Aceptar y Confirmar Materia Prima
               </Button>
             </DialogActions>
           </>
@@ -1677,7 +1647,7 @@ export const OrdenProduccionScreen = () => {
                   Detalle de {selectedOrden.numero}
                 </Typography>
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                  Nota de Pedido de Insumos: <strong>{selectedOrden.notaPedidoId}</strong>
+                  Nota de Pedido de Materia Prima: <strong>{selectedOrden.notaPedidoId}</strong>
                 </Typography>
               </Box>
               <Chip
@@ -1845,7 +1815,7 @@ export const OrdenProduccionScreen = () => {
                   <AlertTitle sx={{ fontWeight: 700 }}>
                     {selectedOrden.solicitudCompraGenerada
                       ? `Solicitud de Compra Emitida (${selectedOrden.ordenCompraLocalId || 'OC-LOC'})`
-                      : 'Atención: Insumos con faltante en almacén'}
+                      : 'Atención: Materia prima con faltante en almacén'}
                   </AlertTitle>
                   Proveedor local sugerido:{' '}
                   <strong>{selectedOrden.proveedorSugerido || 'Quinta Don Pedro (Local)'}</strong>
@@ -1854,7 +1824,7 @@ export const OrdenProduccionScreen = () => {
                 </Alert>
               )}
 
-              {/* Botón para ver la Nota de Pedido de Insumos */}
+              {/* Botón para ver la Nota de Pedido de Materia Prima */}
               <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 1, mb: 2 }}>
                 <Button
                   variant="outlined"

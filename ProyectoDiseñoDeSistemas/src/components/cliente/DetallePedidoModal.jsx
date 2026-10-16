@@ -25,7 +25,6 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
@@ -334,45 +333,9 @@ export const DetallePedidoModal = ({ open, onClose, pedido }) => {
           </Table>
         </TableContainer>
 
-        {/* Resumen Financiero y Comprobantes Emitidos */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-          <Box>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                borderRadius: '12px',
-                border: '1px solid',
-                borderColor: 'divider',
-                bgcolor: 'background.default',
-                height: '100%',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                <DescriptionOutlinedIcon color="primary" fontSize="small" />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                  Comprobantes Emitidos
-                </Typography>
-              </Box>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>Nro. de Remito Oficial:</strong>{' '}
-                <Box component="span" sx={{ fontFamily: 'monospace', fontWeight: 600, color: 'text.primary' }}>
-                  {pedido.nroRemito || 'Pendiente de emisión'}
-                </Box>
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>Comprobante de Venta / Factura:</strong>{' '}
-                <Box component="span" sx={{ fontFamily: 'monospace', fontWeight: 600, color: 'text.primary' }}>
-                  {pedido.nroFactura || 'En proceso de facturación'}
-                </Box>
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1 }}>
-                Los comprobantes fiscales y remitos se entregan junto con la mercadería o se envían digitalmente.
-              </Typography>
-            </Paper>
-          </Box>
-
-          <Box>
+        {/* Resumen Financiero */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ width: { xs: '100%', sm: 360 } }}>
             <Paper
               elevation={0}
               sx={{
