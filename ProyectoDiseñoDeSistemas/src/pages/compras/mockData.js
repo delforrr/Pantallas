@@ -466,7 +466,6 @@ export const INITIAL_REMITOS = [
     proveedorNombre: 'Molino Harinero del Centro S.A.',
     fechaEmision: '2026-03-10',
     fechaEntregaReal: '2026-03-10',
-    estado: 'Recibido Conforme',
     observaciones: '80 bolsas de harina 0000 y 40 bolsas de semolín ingresadas al silo y depósito.',
     documentoUrl: MOCK_DOC_REMITO,
     items: [
@@ -481,7 +480,6 @@ export const INITIAL_REMITOS = [
     proveedorNombre: 'Levaduras Calsa Argentina S.A.',
     fechaEmision: '2026-03-14',
     fechaEntregaReal: '2026-03-14',
-    estado: 'Recibido Conforme',
     observaciones: 'Temperatura de transporte 4°C, conforme a normas bromatológicas.',
     documentoUrl: MOCK_DOC_REMITO,
     items: [
@@ -496,7 +494,6 @@ export const INITIAL_REMITOS = [
     proveedorNombre: 'Lácteos & Quesos La Serenísima Regional',
     fechaEmision: '2026-03-12',
     fechaEntregaReal: '2026-03-12',
-    estado: 'Con Observaciones',
     observaciones: 'Recibidos 45kg de Ricotta (faltaron 5kg por rotura de envase en flete) y 20kg de Parmesano.',
     documentoUrl: MOCK_DOC_REMITO,
     items: [
@@ -511,7 +508,6 @@ export const INITIAL_REMITOS = [
     proveedorNombre: 'Envases & Descartables Pampeanos',
     fechaEmision: '2026-02-22',
     fechaEntregaReal: '2026-02-23',
-    estado: 'Recibido Conforme',
     observaciones: 'Bandejas y cajas recibidas sin daños de embalaje.',
     documentoUrl: MOCK_DOC_REMITO,
     items: [
@@ -525,7 +521,6 @@ export const INITIAL_REMITOS = [
     proveedorNombre: 'Quinta & Hortalizas Don Pedro',
     fechaEmision: '2026-02-18',
     fechaEntregaReal: '2026-02-18',
-    estado: 'Rechazado',
     observaciones: 'La espinaca presentaba signos de marchitamiento avanzado por pérdida de cadena de frío.',
     documentoUrl: MOCK_DOC_REMITO,
     items: [

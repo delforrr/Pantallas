@@ -74,10 +74,16 @@ const getFacturaEstadoColor = (estado) => {
   return "error";
 };
 
-const getRemitoEstadoColor = (estado) => {
-  if (estado === "Recibido Conforme") return "success";
-  if (estado === "Con Observaciones") return "warning";
-  return "error";
+const getDetailDocumentoLabel = (type) => {
+  if (type === "factura") return "Factura Adjunta del Proveedor";
+  if (type === "remito") return "Remito Firmado Adjunto";
+  return "Comprobante de Transferencia / Pago";
+};
+
+const getDetailDocumentoDefaultUrl = (type) => {
+  if (type === "factura") return MOCK_DOC_FACTURA;
+  if (type === "remito") return MOCK_DOC_REMITO;
+  return MOCK_DOC_PAGO;
 };
 
 export const FacturasRemitosScreen = () => {
@@ -124,7 +130,6 @@ export const FacturasRemitosScreen = () => {
     proveedorId: 2,
     fechaEmision: new Date().toISOString().split("T")[0],
     fechaEntregaReal: new Date().toISOString().split("T")[0],
-    estado: "Recibido Conforme",
     observaciones:
       "Control visual y de peso verificado al ingresar a depósito.",
     documentoUrl: "",
@@ -234,7 +239,6 @@ export const FacturasRemitosScreen = () => {
           materiaPrima: "Insumos verificados según orden de compra",
           cantidadRecibida: 1,
           unidad: "Lote",
-          conforme: true,
         },
       ],
     };
@@ -961,359 +965,8 @@ export const FacturasRemitosScreen = () => {
         </Box>
       )}
 
-      {/* ================= CONTENIDO PESTAÑA 1: REMITOS DE ENTREGA ================= */}
+      {/* ================= CONTENIDO PESTAÑA 1: COMPROBANTES DE PAGO ================= */}
       {currentTab === 1 && (
-        <Box>
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              mb: 3,
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                flexWrap: "wrap",
-                flex: 1,
-                minWidth: 260,
-              }}
-            >
-              <TextField
-                size="small"
-                placeholder="Buscar por Nº Remito, Proveedor o Estado..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon
-                        fontSize="small"
-                        sx={{ color: "text.secondary" }}
-                      />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  minWidth: { xs: "100%", sm: 300 },
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "background.paper",
-                    borderRadius: "10px",
-                  },
-                }}
-              />
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: { xs: "100%", sm: 220, md: 240 },
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "background.paper",
-                    borderRadius: "10px",
-                  },
-                }}
-              >
-                <InputLabel>Estado de Recepción</InputLabel>
-                <Select
-                  value={statusFilter}
-                  label="Estado de Recepción"
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <MenuItem value="TODOS">Todos los Estados</MenuItem>
-                  <MenuItem value="Recibido Conforme">
-                    Recibido Conforme
-                  </MenuItem>
-                  <MenuItem value="Con Observaciones">
-                    Con Observaciones
-                  </MenuItem>
-                  <MenuItem value="Rechazado">Rechazado</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-
-            <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
-              <ToggleButtonGroup
-                value={viewMode}
-                exclusive
-                onChange={(e, val) => val && setViewMode(val)}
-                size="small"
-                sx={{ bgcolor: "background.paper" }}
-              >
-                <ToggleButton value="table" aria-label="vista tabla">
-                  <Tooltip title="Vista Tabla">
-                    <ViewListIcon fontSize="small" />
-                  </Tooltip>
-                </ToggleButton>
-                <ToggleButton value="grid" aria-label="vista tarjetas">
-                  <Tooltip title="Vista Cuadrícula / Móvil">
-                    <ViewModuleIcon fontSize="small" />
-                  </Tooltip>
-                </ToggleButton>
-              </ToggleButtonGroup>
-
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenNewRemito(true)}
-              >
-                Registrar Remito
-              </Button>
-            </Box>
-          </Box>
-
-          {/* Vista Cuadrícula vs Tabla */}
-          {viewMode === "grid" &&
-            (filteredRemitos.length === 0 ? (
-              <Paper
-                elevation={1}
-                sx={{
-                  p: 6,
-                  textAlign: "center",
-                  borderRadius: "16px",
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <Typography variant="body1" color="text.secondary">
-                  No se encontraron remitos
-                </Typography>
-              </Paper>
-            ) : (
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    sm: "repeat(2, 1fr)",
-                    lg: "repeat(3, 1fr)",
-                  },
-                  gap: 2.5,
-                  alignItems: "stretch",
-                }}
-              >
-                {filteredRemitos.map((row) => (
-                  <Paper
-                    key={row.id}
-                    elevation={1}
-                    sx={{
-                      p: 2.5,
-                      borderRadius: "16px",
-                      border: "1px solid",
-                      borderColor: "divider",
-                      display: "flex",
-                      flexDirection: "column",
-                      height: "100%",
-                      transition: "box-shadow 0.2s",
-                      "&:hover": { boxShadow: 4 },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 1.5,
-                      }}
-                    >
-                      <Chip
-                        label={row.id}
-                        size="small"
-                        variant="outlined"
-                        color="primary"
-                        sx={{ fontWeight: 800, fontFamily: "monospace" }}
-                      />
-                      <Chip
-                        label={row.estado}
-                        size="small"
-                        color={getRemitoEstadoColor(row.estado)}
-                        sx={{ fontWeight: 700, fontSize: "0.72rem" }}
-                      />
-                    </Box>
-
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 800,
-                        fontSize: "1.05rem",
-                        lineHeight: 1.3,
-                        mb: 0.3,
-                      }}
-                    >
-                      {row.proveedorNombre}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block", mb: 1.5 }}
-                    >
-                      Orden de Compra: <strong>{row.ordenCompraId}</strong>
-                    </Typography>
-
-                    <Paper
-                      variant="outlined"
-                      sx={{
-                        p: 1.5,
-                        borderRadius: "10px",
-                        bgcolor: "action.hover",
-                        mb: 2,
-                      }}
-                    >
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ fontWeight: 700, display: "block" }}
-                      >
-                        RECEPCIÓN EN PLANTA:
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 600, mt: 0.3 }}
-                      >
-                        Fecha Ingreso: {row.fechaEntregaReal}
-                      </Typography>
-                    </Paper>
-
-                    {row.observaciones && (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ fontSize: "0.85rem", mb: 2 }}
-                      >
-                        {row.observaciones}
-                      </Typography>
-                    )}
-
-                    <Box
-                      sx={{
-                        mt: "auto",
-                        pt: 1.5,
-                        borderTop: "1px solid",
-                        borderColor: "divider",
-                        display: "flex",
-                        justifyContent: "flex-end",
-                      }}
-                    >
-                      <Tooltip title="Ver detalle de remito">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenDetail(row, "remito")}
-                          sx={{ color: "text.secondary" }}
-                        >
-                          <VisibilityOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </Paper>
-                ))}
-              </Box>
-            ))}
-
-          {viewMode === "table" && (
-            <TableContainer
-              component={Paper}
-              elevation={1}
-              sx={{
-                borderRadius: "14px",
-                border: "1px solid",
-                borderColor: "divider",
-                overflow: "hidden",
-              }}
-            >
-              <Table sx={{ minWidth: 700 }}>
-                <TableHead sx={{ bgcolor: "action.hover" }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>Nº Remito</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Proveedor</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Orden Compra</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>
-                      Fecha Recepción
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>
-                      Estado de Carga
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700 }}>
-                      Acciones
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredRemitos.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        align="center"
-                        sx={{ py: 6, color: "text.secondary" }}
-                      >
-                        <Typography variant="body2">
-                          No se encontraron remitos
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredRemitos.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        hover
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell
-                          sx={{
-                            fontWeight: 700,
-                            fontFamily: "monospace",
-                            color: "primary.main",
-                          }}
-                        >
-                          {row.id}
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>
-                          {row.proveedorNombre}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={row.ordenCompraId}
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontFamily: "monospace" }}
-                          />
-                        </TableCell>
-                        <TableCell>{row.fechaEntregaReal}</TableCell>
-                        <TableCell>
-                          <Chip
-                            label={row.estado}
-                            size="small"
-                            color={getRemitoEstadoColor(row.estado)}
-                            sx={{ fontWeight: 600, fontSize: "0.72rem" }}
-                          />
-                        </TableCell>
-                        <TableCell align="right">
-                          <Tooltip title="Ver detalle de remito y mercadería">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleOpenDetail(row, "remito")}
-                              sx={{ color: "text.secondary" }}
-                            >
-                              <VisibilityOutlinedIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </Box>
-      )}
-
-      {/* ================= CONTENIDO PESTAÑA 2: COMPROBANTES DE PAGO ================= */}
-      {currentTab === 2 && (
         <Box>
           <Box
             sx={{
@@ -1639,6 +1292,314 @@ export const FacturasRemitosScreen = () => {
                             <IconButton
                               size="small"
                               onClick={() => handleOpenDetail(row, "pago")}
+                              sx={{ color: "text.secondary" }}
+                            >
+                              <VisibilityOutlinedIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Box>
+      )}
+
+      {/* ================= CONTENIDO PESTAÑA 2: REMITOS DE ENTREGA ================= */}
+      {currentTab === 2 && (
+        <Box>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              mb: 3,
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                flexWrap: "wrap",
+                flex: 1,
+                minWidth: 260,
+              }}
+            >
+              <TextField
+                size="small"
+                placeholder="Buscar por Nº Remito, Proveedor o Estado..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon
+                        fontSize="small"
+                        sx={{ color: "text.secondary" }}
+                      />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  minWidth: { xs: "100%", sm: 300 },
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "background.paper",
+                    borderRadius: "10px",
+                  },
+                }}
+              />
+            </Box>
+
+            <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+              <ToggleButtonGroup
+                value={viewMode}
+                exclusive
+                onChange={(e, val) => val && setViewMode(val)}
+                size="small"
+                sx={{ bgcolor: "background.paper" }}
+              >
+                <ToggleButton value="table" aria-label="vista tabla">
+                  <Tooltip title="Vista Tabla">
+                    <ViewListIcon fontSize="small" />
+                  </Tooltip>
+                </ToggleButton>
+                <ToggleButton value="grid" aria-label="vista tarjetas">
+                  <Tooltip title="Vista Cuadrícula / Móvil">
+                    <ViewModuleIcon fontSize="small" />
+                  </Tooltip>
+                </ToggleButton>
+              </ToggleButtonGroup>
+
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon />}
+                onClick={() => setOpenNewRemito(true)}
+              >
+                Registrar Remito
+              </Button>
+            </Box>
+          </Box>
+
+          {/* Vista Cuadrícula vs Tabla */}
+          {viewMode === "grid" &&
+            (filteredRemitos.length === 0 ? (
+              <Paper
+                elevation={1}
+                sx={{
+                  p: 6,
+                  textAlign: "center",
+                  borderRadius: "16px",
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <Typography variant="body1" color="text.secondary">
+                  No se encontraron remitos
+                </Typography>
+              </Paper>
+            ) : (
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    sm: "repeat(2, 1fr)",
+                    lg: "repeat(3, 1fr)",
+                  },
+                  gap: 2.5,
+                  alignItems: "stretch",
+                }}
+              >
+                {filteredRemitos.map((row) => (
+                  <Paper
+                    key={row.id}
+                    elevation={1}
+                    sx={{
+                      p: 2.5,
+                      borderRadius: "16px",
+                      border: "1px solid",
+                      borderColor: "divider",
+                      display: "flex",
+                      flexDirection: "column",
+                      height: "100%",
+                      transition: "box-shadow 0.2s",
+                      "&:hover": { boxShadow: 4 },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 1.5,
+                      }}
+                    >
+                      <Chip
+                        label={row.id}
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        sx={{ fontWeight: 800, fontFamily: "monospace" }}
+                      />
+                    </Box>
+
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 800,
+                        fontSize: "1.05rem",
+                        lineHeight: 1.3,
+                        mb: 0.3,
+                      }}
+                    >
+                      {row.proveedorNombre}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block", mb: 1.5 }}
+                    >
+                      Orden de Compra: <strong>{row.ordenCompraId}</strong>
+                    </Typography>
+
+                    <Paper
+                      variant="outlined"
+                      sx={{
+                        p: 1.5,
+                        borderRadius: "10px",
+                        bgcolor: "action.hover",
+                        mb: 2,
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ fontWeight: 700, display: "block" }}
+                      >
+                        RECEPCIÓN EN PLANTA:
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 600, mt: 0.3 }}
+                      >
+                        Fecha Ingreso: {row.fechaEntregaReal}
+                      </Typography>
+                    </Paper>
+
+                    {row.observaciones && (
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontSize: "0.85rem", mb: 2 }}
+                      >
+                        {row.observaciones}
+                      </Typography>
+                    )}
+
+                    <Box
+                      sx={{
+                        mt: "auto",
+                        pt: 1.5,
+                        borderTop: "1px solid",
+                        borderColor: "divider",
+                        display: "flex",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <Tooltip title="Ver detalle de remito">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenDetail(row, "remito")}
+                          sx={{ color: "text.secondary" }}
+                        >
+                          <VisibilityOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </Paper>
+                ))}
+              </Box>
+            ))}
+
+          {viewMode === "table" && (
+            <TableContainer
+              component={Paper}
+              elevation={1}
+              sx={{
+                borderRadius: "14px",
+                border: "1px solid",
+                borderColor: "divider",
+                overflow: "hidden",
+              }}
+            >
+              <Table sx={{ minWidth: 700 }}>
+                <TableHead sx={{ bgcolor: "action.hover" }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700 }}>Nº Remito</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Proveedor</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Orden Compra</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      Fecha Recepción
+                    </TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700 }}>
+                      Acciones
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredRemitos.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={6}
+                        align="center"
+                        sx={{ py: 6, color: "text.secondary" }}
+                      >
+                        <Typography variant="body2">
+                          No se encontraron remitos
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredRemitos.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        hover
+                        sx={{
+                          "&:last-child td, &:last-child th": { border: 0 },
+                        }}
+                      >
+                        <TableCell
+                          sx={{
+                            fontWeight: 700,
+                            fontFamily: "monospace",
+                            color: "primary.main",
+                          }}
+                        >
+                          {row.id}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>
+                          {row.proveedorNombre}
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={row.ordenCompraId}
+                            size="small"
+                            variant="outlined"
+                            sx={{ fontFamily: "monospace" }}
+                          />
+                        </TableCell>
+                        <TableCell>{row.fechaEntregaReal}</TableCell>
+                        <TableCell align="right">
+                          <Tooltip title="Ver detalle de remito y mercadería">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleOpenDetail(row, "remito")}
                               sx={{ color: "text.secondary" }}
                             >
                               <VisibilityOutlinedIcon fontSize="small" />
@@ -2387,31 +2348,6 @@ export const FacturasRemitosScreen = () => {
                   required
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="remito-conf-label">
-                    Estado de Conformidad
-                  </InputLabel>
-                  <Select
-                    labelId="remito-conf-label"
-                    value={remitoForm.estado}
-                    label="Estado de Conformidad"
-                    onChange={(e) =>
-                      setRemitoForm({ ...remitoForm, estado: e.target.value })
-                    }
-                  >
-                    <MenuItem value="Recibido Conforme">
-                      Recibido Conforme (Ingresa al Stock)
-                    </MenuItem>
-                    <MenuItem value="Con Observaciones">
-                      Con Observaciones (Faltante / Envase dañado)
-                    </MenuItem>
-                    <MenuItem value="Rechazado">
-                      Rechazado (Pérdida de frío / Vencido)
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
               <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth
@@ -2830,16 +2766,15 @@ export const FacturasRemitosScreen = () => {
                 )}
 
                 {detailType === "remito" && (
-                  <>
-                    <Grid size={{ xs: 12 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        Observaciones de Entrega
-                      </Typography>
-                      <Typography variant="body2">
-                        {selectedItem.observaciones || "Recepción conforme sin observaciones."}
-                      </Typography>
-                    </Grid>
-                  </>
+                  <Grid size={{ xs: 12 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Observaciones de Entrega
+                    </Typography>
+                    <Typography variant="body2">
+                      {selectedItem.observaciones ||
+                        "Recepción conforme sin observaciones."}
+                    </Typography>
+                  </Grid>
                 )}
 
                 {detailType === "pago" && (
@@ -2877,20 +2812,10 @@ export const FacturasRemitosScreen = () => {
                 {/* Comprobante Adjunto */}
                 <Grid size={{ xs: 12 }}>
                   <DocumentoUploader
-                    label={
-                      detailType === "factura"
-                        ? "Factura Adjunta del Proveedor"
-                        : detailType === "remito"
-                          ? "Remito Firmado Adjunto"
-                          : "Comprobante de Transferencia / Pago"
-                    }
+                    label={getDetailDocumentoLabel(detailType)}
                     value={
                       selectedItem.documentoUrl ||
-                      (detailType === "factura"
-                        ? MOCK_DOC_FACTURA
-                        : detailType === "remito"
-                          ? MOCK_DOC_REMITO
-                          : MOCK_DOC_PAGO)
+                      getDetailDocumentoDefaultUrl(detailType)
                     }
                     readOnly
                   />
