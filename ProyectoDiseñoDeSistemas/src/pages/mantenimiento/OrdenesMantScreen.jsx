@@ -1761,7 +1761,7 @@ export const OrdenesMantScreen = () => {
                 </Grid>
               )}
 
-              {/* Fila 2: Fechas y Horas en una sola fila compacta y armónica (4 + 2 + 2 + 2 + 2 = 12 cols) */}
+              {/* Fila 2: Fechas y Horas */}
               <Grid size={{ xs: 6, sm: 3 }}>
                 <TextField
                   fullWidth

@@ -581,7 +581,7 @@ export const MaquinariaScreen = () => {
               {filteredMaquinarias.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={5}
                     align="center"
                     sx={{ py: 6, color: "text.secondary" }}
                   >
@@ -611,8 +611,27 @@ export const MaquinariaScreen = () => {
                         {row.nombre}
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "primary.main" }}>
-                      {row.proximoMantenimiento || "—"}
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {row.horasUso != null ? `${row.horasUso} hs` : "—"}
+                        </Typography>
+                        {row.horasUso != null && (
+                          <Chip
+                            label={getWearLevel(row.horasUso).label}
+                            size="small"
+                            color={getWearLevel(row.horasUso).color}
+                            variant="outlined"
+                            sx={{
+                              height: 20,
+                              fontSize: "0.68rem",
+                              fontWeight: 700,
+                            }}
+                          />
+                        )}
+                      </Box>
                     </TableCell>
                     <TableCell>
                       <Chip
@@ -1008,6 +1027,25 @@ export const MaquinariaScreen = () => {
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>
                   {selectedMaq.nombre}
                 </Typography>
+              </Box>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Horas de Operación:
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  {selectedMaq.horasUso != null
+                    ? `${selectedMaq.horasUso} hs`
+                    : "—"}
+                </Typography>
+                {selectedMaq.horasUso != null && (
+                  <Chip
+                    label={getWearLevel(selectedMaq.horasUso).label}
+                    size="small"
+                    color={getWearLevel(selectedMaq.horasUso).color}
+                    sx={{ height: 20, fontSize: "0.68rem", fontWeight: 700 }}
+                  />
+                )}
               </Box>
 
               <Paper
