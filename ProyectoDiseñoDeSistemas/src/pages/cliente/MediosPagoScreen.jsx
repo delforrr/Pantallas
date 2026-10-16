@@ -12,7 +12,7 @@ import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 import { useClientStore, clientStore } from './mockData';
-import { MetodoPagoItem, NuevoMetodoPagoForm, NotificacionesDrawer } from '../../components/cliente';
+import { MetodoPagoItem, NuevoMetodoPagoForm } from '../../components/cliente';
 
 export const MediosPagoScreen = () => {
   const store = useClientStore();
@@ -175,8 +175,6 @@ export const MediosPagoScreen = () => {
         action={<CheckCircleIcon sx={{ fontSize: 20, color: 'success.light', mr: 1 }} />}
       />
 
-      {/* Drawer lateral de notificaciones */}
-      <NotificacionesDrawer />
     </Box>
   );
 };

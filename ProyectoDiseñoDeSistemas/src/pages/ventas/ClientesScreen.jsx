@@ -211,14 +211,6 @@ export const ClientesScreen = () => {
         </Button>
       </Box>
 
-      {/* Alerta si hay morosos */}
-      {stats.morosos > 0 && (
-        <ClienteMorosoAlert
-          cliente={clientes.find((c) => calcularEstadoMoroso(c, INITIAL_COMPROBANTES_VENTA).esMoroso)}
-          comprobantesVenta={INITIAL_COMPROBANTES_VENTA}
-          onVerDetalle={handleOpenDetail}
-        />
-      )}
 
       {/* Métricas */}
       <Grid container spacing={2} sx={{ mb: 3 }}>

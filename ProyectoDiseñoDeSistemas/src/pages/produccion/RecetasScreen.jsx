@@ -42,7 +42,7 @@ export const RecetasScreen = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
 
-  // Modal Ver Detalle de Insumos y Pasos
+  // Modal Ver Detalle de Materia Prima y Pasos
   const [viewingReceta, setViewingReceta] = useState(null);
 
   // Modal Alta / Edición
@@ -327,7 +327,7 @@ export const RecetasScreen = () => {
               <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>Producto</TableCell>
               <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>Categoría</TableCell>
               <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>Lote Base</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>Insumos</TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>Materias Primas</TableCell>
               <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>Instrucciones / Pasos</TableCell>
               <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.85rem' }}>
                 Acciones
@@ -386,7 +386,7 @@ export const RecetasScreen = () => {
                         color: 'primary.main',
                       }}
                     >
-                      {receta.ingredientes?.length || 0} insumos
+                      {receta.ingredientes?.length || 0} materias primas
                     </Button>
                   </TableCell>
                   <TableCell>
@@ -460,7 +460,7 @@ export const RecetasScreen = () => {
         </Table>
       </TableContainer>
 
-      {/* Modal Ver Detalle de Insumos y Pasos de la Receta */}
+      {/* Modal Ver Detalle de Materia Prima y Pasos de la Receta */}
       <Dialog
         open={Boolean(viewingReceta)}
         onClose={() => setViewingReceta(null)}
@@ -492,9 +492,9 @@ export const RecetasScreen = () => {
             <Table size="small">
               <TableHead sx={{ bgcolor: 'action.hover' }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 700 }}>Materia Prima / Insumo</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Materia Prima</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700 }}>
-                    Cantidad Requerida
+                    Cantidad
                   </TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700 }}>
                     Unidad
@@ -680,10 +680,10 @@ export const RecetasScreen = () => {
             <Grid item xs={12}>
               <Divider sx={{ my: 1 }} />
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5, color: 'text.primary' }}>
-                Materias Primas e Insumos de la Receta
+                Materias Primas de la Receta
               </Typography>
 
-              {/* Selector para agregar insumo */}
+              {/* Selector para agregar materia prima */}
               <Box
                 sx={{
                   display: 'flex',
@@ -714,8 +714,8 @@ export const RecetasScreen = () => {
                     <TextField
                       {...params}
                       size="small"
-                      label="Materia Prima / Insumo"
-                      placeholder="Escribe para buscar insumo..."
+                      label="Materia Prima"
+                      placeholder="Escribe para buscar materia prima..."
                     />
                   )}
                 />
@@ -743,14 +743,14 @@ export const RecetasScreen = () => {
                   disabled={!selectedMPId || !cantidadMP || Number(cantidadMP) <= 0}
                   sx={{ textTransform: 'none', fontWeight: 600, height: 40 }}
                 >
-                  Agregar Insumo
+                  Agregar Materia Prima
                 </Button>
               </Box>
 
               {/* Lista de ingredientes agregados */}
               {formState.ingredientes.length === 0 ? (
                 <Alert severity="info" sx={{ borderRadius: '10px' }}>
-                  Aún no agregaste insumos para esta receta. Usa el selector arriba para cargarlos.
+                  Aún no agregaste materias primas para esta receta. Usa el selector arriba para cargarlos.
                 </Alert>
               ) : (
                 <Paper
@@ -853,7 +853,7 @@ export const RecetasScreen = () => {
         <DialogTitle sx={{ fontWeight: 700 }}>¿Eliminar receta?</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Esta acción eliminará la fórmula y lista de insumos de este producto. Podrás volver a darla de alta más tarde si es necesario.
+            Esta acción eliminará la fórmula y lista de materias primas de este producto. Podrás volver a darla de alta más tarde si es necesario.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
