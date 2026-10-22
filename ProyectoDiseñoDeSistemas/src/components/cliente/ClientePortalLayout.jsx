@@ -3,7 +3,6 @@ import { useApp } from '../../context/AppContext';
 import { getTheme } from '../../theme';
 import ClienteNavigation from './ClienteNavigation';
 import ingredientesPattern from './ingredientes-pattern.svg';
-import { useClientStore } from '../../pages/cliente/mockData';
 
 // A theme scoped to the customer storefront; the shared ERP theme stays frozen.
 const clienteTheme = createTheme(getTheme('light'), {
@@ -32,13 +31,11 @@ const clienteTheme = createTheme(getTheme('light'), {
 
 export default function ClientePortalLayout({ children }) {
   const { currentPage } = useApp();
-  const { catalogoModo } = useClientStore();
-  const esInicio = currentPage === 'catalogo' && catalogoModo === 'inicio';
   return (
     <ThemeProvider theme={clienteTheme}>
-    <Box sx={{ height: esInicio ? '100dvh' : 'auto', minHeight: esInicio ? '100dvh' : '100vh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
       {currentPage !== 'catalogo' && <Box sx={{ mx: { xs: 1.5, md: 5 }, mt: { xs: 1.5, md: 4 }, boxShadow: '6px 8px 22px #51482d20' }}><ClienteNavigation /></Box>}
-      <Box sx={{ flex: 1, minHeight: esInicio ? 0 : 'auto', display: esInicio ? 'flex' : 'block', mx: currentPage === 'catalogo' ? 0 : { xs: 1.5, md: 5 }, mb: esInicio ? 0 : 2, p: currentPage === 'catalogo' ? 0 : { xs: 2, md: 4 }, bgcolor: currentPage === 'catalogo' ? 'transparent' : 'background.paper', borderTop: currentPage === 'catalogo' ? 0 : '4px solid', borderColor: 'primary.main', boxShadow: currentPage === 'catalogo' ? 'none' : '6px 8px 22px #51482d20' }}>
+      <Box sx={{ flex: 1, mx: currentPage === 'catalogo' ? 0 : { xs: 1.5, md: 5 }, mb: 2, p: currentPage === 'catalogo' ? 0 : { xs: 2, md: 4 }, bgcolor: currentPage === 'catalogo' ? 'transparent' : 'background.paper', borderTop: currentPage === 'catalogo' ? 0 : '4px solid', borderColor: 'primary.main', boxShadow: currentPage === 'catalogo' ? 'none' : '6px 8px 22px #51482d20' }}>
         {currentPage !== 'catalogo' && <Box sx={{ position: 'relative', overflow: 'hidden', pb: 3, mb: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Box aria-hidden="true" sx={{ position: 'absolute', inset: 0, bgcolor: 'primary.main', maskImage: `url("${ingredientesPattern}")`, maskSize: '240px 240px', maskRepeat: 'repeat', maskPosition: 'right center', opacity: 0.3 }} />
           <Box sx={{ position: 'relative', width: 'fit-content', maxWidth: { xs: 'calc(100% - 36px)', sm: '100%' }, pr: 3, bgcolor: 'background.paper' }}>
@@ -48,9 +45,9 @@ export default function ClientePortalLayout({ children }) {
         </Box>}
         {children}
       </Box>
-      {!esInicio && <Box component="footer" sx={{ mt: 'auto', flexShrink: 0, py: 2, px: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, color: 'text.secondary' }}>
+      <Box component="footer" sx={{ mt: 'auto', py: 2, px: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, color: 'text.secondary' }}>
         <Typography variant="caption" sx={{ color: 'primary.main' }}>PastaFab · Pastas artesanales</Typography>
-      </Box>}
+      </Box>
     </Box>
     </ThemeProvider>
   );

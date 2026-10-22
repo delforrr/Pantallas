@@ -98,7 +98,7 @@ export const CatalogoScreen = () => {
   };
 
   return (
-    <Box sx={{ pb: vistaCompleta ? 3 : 0, width: '100%', height: vistaCompleta ? 'auto' : '100%' }}>
+    <Box sx={{ pb: vistaCompleta ? 3 : 0, width: '100%' }}>
       {/* ─────────────────────────────────────────────────────────────
           1. PORTADA ITALIANA
          ───────────────────────────────────────────────────────────── */}
