@@ -11,6 +11,7 @@ import {
   Snackbar,
   Alert,
   IconButton,
+  Fade,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -43,13 +44,10 @@ export const CatalogoScreen = () => {
   const store = useClientStore();
   const { navigate } = useApp();
 
-  // Control de animación fluida entre Inicio y Catálogo de Productos
-  const [transitionPhase, setTransitionPhase] = useState('entered'); // 'entered' | 'exiting'
-
   const vistaCompleta = store.catalogoModo !== 'inicio';
-  const modoMayorista = store.catalogoModo === 'mayorista';
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
+  const modoMayorista = store.catalogoModo === 'mayorista';
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -57,18 +55,6 @@ export const CatalogoScreen = () => {
     message: '',
     severity: 'success',
   });
-
-  const cambiarModoConAnimacion = (nuevoModo) => {
-    if (nuevoModo === store.catalogoModo) return;
-    setTransitionPhase('exiting');
-    setTimeout(() => {
-      if (nuevoModo === 'inicio') {
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      }
-      clientStore.setCatalogoModo(nuevoModo);
-      setTransitionPhase('entered');
-    }, 250);
-  };
 
   const cartSummary = useMemo(() => {
     const totalItems = store.cart.length + Object.keys(store.mayoristaItems).length;
@@ -112,86 +98,27 @@ export const CatalogoScreen = () => {
   };
 
   return (
-    <Box
-      sx={{
-        pb: vistaCompleta ? 3 : 0,
-        width: '100%',
-        height: !vistaCompleta ? '100%' : 'auto',
-        overflow: !vistaCompleta ? 'hidden' : 'visible',
-        display: !vistaCompleta ? 'flex' : 'block',
-        flexDirection: !vistaCompleta ? 'column' : 'initial',
-        flex: !vistaCompleta ? 1 : 'none',
-      }}
-    >
+    <Box sx={{ pb: vistaCompleta ? 3 : 0, width: '100%' }}>
       {/* ─────────────────────────────────────────────────────────────
-          1. PORTADA ITALIANA (CON ANIMACIÓN FLUIDA)
+          1. PORTADA ITALIANA
          ───────────────────────────────────────────────────────────── */}
       {!vistaCompleta ? (
-        <Box
-          key="cliente-landing-container"
-          sx={{
-            width: '100%',
-            height: '100%',
-            flex: 1,
-            overflow: 'hidden',
-            animation: transitionPhase === 'exiting'
-              ? 'landingExit 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards'
-              : 'landingEnter 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            '@keyframes landingExit': {
-              '0%': { opacity: 1, transform: 'scale(1) translateY(0)' },
-              '100%': { opacity: 0, transform: 'scale(0.96) translateY(-14px)' },
-            },
-            '@keyframes landingEnter': {
-              '0%': { opacity: 0, transform: 'scale(0.96) translateY(14px)' },
-              '100%': { opacity: 1, transform: 'scale(1) translateY(0)' },
-            },
-          }}
-        >
-          <ClienteLanding
-            cartSummary={cartSummary}
-            onCatalogo={() => cambiarModoConAnimacion('productos')}
-            onEvento={() => {
-              cambiarModoConAnimacion('mayorista');
-              handleClearFilters();
-            }}
-            onAbout={() => setAboutModalOpen(true)}
-            onContact={() => setContactModalOpen(true)}
-            onSocial={handleSocialClick}
-          />
-        </Box>
+        <ClienteLanding
+          cartSummary={cartSummary}
+          onCatalogo={() => { clientStore.setCatalogoModo('productos'); }}
+          onEvento={() => { clientStore.setCatalogoModo('mayorista'); handleClearFilters(); }}
+          onAbout={() => setAboutModalOpen(true)}
+          onContact={() => setContactModalOpen(true)}
+          onSocial={handleSocialClick}
+        />
       ) : (
         /* ─────────────────────────────────────────────────────────────
-            2. VISTA DE CATÁLOGO COMPLETO (CON ANIMACIÓN FLUIDA)
+            2. VISTA DE CATÁLOGO COMPLETO (GRILLA CSS UNIFORME 1fr)
            ───────────────────────────────────────────────────────────── */
-        <Box
-          key="cliente-catalogo-container"
-          sx={{
-            width: '100%',
-            animation: transitionPhase === 'exiting'
-              ? 'catalogExit 240ms cubic-bezier(0.4, 0, 1, 1) forwards'
-              : 'catalogEnter 360ms cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            '@keyframes catalogExit': {
-              '0%': { opacity: 1, transform: 'translateY(0)' },
-              '100%': { opacity: 0, transform: 'translateY(24px)' },
-            },
-            '@keyframes catalogEnter': {
-              '0%': { opacity: 0, transform: 'translateY(24px)' },
-              '100%': { opacity: 1, transform: 'translateY(0)' },
-            },
-          }}
-        >
+        <Fade in timeout={300}>
           <Box sx={{ p: { xs: 1.5, md: 5 }, minHeight: '100vh', bgcolor: 'primary.main' }}>
             <Box sx={{ maxWidth: 1440, mx: 'auto' }}>
-            <ClienteNavigation
-              sobreVerde
-              onInicio={() => cambiarModoConAnimacion('inicio')}
-              onProductos={() => {
-                handleClearFilters();
-                if (store.catalogoModo !== 'productos') {
-                  cambiarModoConAnimacion('productos');
-                }
-              }}
-            />
+            <ClienteNavigation sobreVerde onInicio={() => clientStore.setCatalogoModo('inicio')} onProductos={() => { handleClearFilters(); }} />
             <Box sx={{ py: 3, backgroundImage: `url("${ingredientesPattern}")`, backgroundRepeat: 'repeat', backgroundSize: { xs: '320px', md: '440px' } }}>
             <Box sx={{ bgcolor: 'transparent', px: { xs: 2, md: 4 }, pt: 2, mb: 0 }}>
             <Box sx={{ textAlign: 'center', py: 2, mb: 2, '& > .MuiTypography-root': { bgcolor: 'primary.main', width: 'fit-content', maxWidth: '100%', mx: 'auto', px: 2, py: 0.5, borderRadius: '8px' } }}>
@@ -300,7 +227,7 @@ export const CatalogoScreen = () => {
             </Box>
             </Box>
           </Box>
-        </Box>
+        </Fade>
       )}
 
       <Dialog open={aboutModalOpen} onClose={() => setAboutModalOpen(false)} fullWidth maxWidth="sm">
