@@ -69,7 +69,7 @@ const PageContent = () => {
 
   return (
     <Fade in key={currentPage} timeout={300}>
-      <Box sx={{ flex: 1, p: isCliente ? 0 : { xs: 1.5, sm: 2.5, md: 3 }, overflowY: 'auto', minWidth: 0, width: '100%', maxWidth: '100%' }}>
+      <Box sx={{ flex: 1, p: isCliente ? 0 : { xs: 1.5, sm: 2.5, md: 3 }, overflowY: 'auto', minWidth: 0, width: '100%', maxWidth: '100%', height: isCliente ? '100%' : 'auto', display: isCliente ? 'flex' : 'block', flexDirection: isCliente ? 'column' : 'initial' }}>
         {isCliente && (
           <GlobalStyles styles={{ '#notifications-btn': { display: 'none !important' } }} />
         )}

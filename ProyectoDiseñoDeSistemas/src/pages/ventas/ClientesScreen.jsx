@@ -30,6 +30,8 @@ import {
   CardContent,
   Switch,
   FormControlLabel,
+  LinearProgress,
+  Divider,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
@@ -46,6 +48,7 @@ import PlaceIcon from '@mui/icons-material/Place';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import EmailIcon from '@mui/icons-material/Email';
 
 import { INITIAL_CLIENTES, INITIAL_COMPROBANTES_VENTA, calcularEstadoMoroso } from './mockData';
 import { ClienteMorosoAlert } from '../../components/ventas';
@@ -82,7 +85,6 @@ export const ClientesScreen = () => {
     aceptaCredito: false,
     limiteCredito: 0,
     creditoUsado: 0,
-    diaEntregaHabitual: 'Lunes',
     estado: 'Activo',
   };
 
@@ -306,32 +308,26 @@ export const ClientesScreen = () => {
         </Grid>
       </Paper>
 
-      {/* Tabla Normalizada (Columnas 100% independientes con scroll horizontal) */}
+      {/* Tabla de Clientes (8 Columnas Esenciales Normalizadas) */}
       {viewMode === 'table' ? (
-        <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', overflowX: 'auto', width: '100%' }}>
-          <Table sx={{ minWidth: 1400 }}>
+        <TableContainer component={Paper} elevation={1} sx={{ borderRadius: '14px', width: '100%', overflowX: 'hidden' }}>
+          <Table sx={{ width: '100%' }}>
             <TableHead sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8f9fa' }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>ID</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Razón Social</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>CUIT</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Tipo IVA</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Responsable</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Teléfono</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Calle</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Altura</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Localidad</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Tipo Cliente</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700 }}>Límite Crédito ($)</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700 }}>Crédito Usado ($)</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Estado Morosidad</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Tipo de Cliente</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 700 }}>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredClientes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={14} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                  <TableCell colSpan={8} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                     No se encontraron clientes que coincidan con la búsqueda.
                   </TableCell>
                 </TableRow>
@@ -344,21 +340,21 @@ export const ClientesScreen = () => {
                     <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>
                       {cliente.razonSocial}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>{cliente.cuit}</TableCell>
-                    <TableCell><Chip label={cliente.tipoIva} size="small" variant="outlined" /></TableCell>
-                    <TableCell><Typography variant="body2">{cliente.responsable}</Typography></TableCell>
-                    <TableCell><Typography variant="body2">{cliente.telefono}</Typography></TableCell>
-                    <TableCell>{cliente.calle}</TableCell>
-                    <TableCell>{cliente.altura}</TableCell>
-                    <TableCell>{cliente.localidad}</TableCell>
-                    <TableCell><Chip label={cliente.tipoCliente} size="small" color="primary" variant="outlined" /></TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, color: cliente.aceptaCredito ? '#ed6c02' : 'text.secondary' }}>
-                      {cliente.aceptaCredito ? `$${cliente.limiteCredito.toLocaleString()}` : 'Contado'}
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      {cliente.cuit}
                     </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, color: cliente.creditoUsado > cliente.limiteCredito ? 'error.main' : 'text.primary' }}>
-                      {cliente.aceptaCredito ? `$${cliente.creditoUsado.toLocaleString()}` : '$0'}
+                    <TableCell>
+                      <Typography variant="body2">{cliente.responsable}</Typography>
                     </TableCell>
-                    <TableCell>{getStatusChip(cliente)}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2">{cliente.telefono}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip label={cliente.tipoCliente} size="small" color="primary" variant="outlined" sx={{ fontWeight: 500 }} />
+                    </TableCell>
+                    <TableCell>
+                      {getStatusChip(cliente)}
+                    </TableCell>
                     <TableCell align="center">
                       <Tooltip title="Ver Ficha Completa">
                         <IconButton size="small" color="info" onClick={() => handleOpenDetail(cliente)}>
@@ -434,140 +430,153 @@ export const ClientesScreen = () => {
         </Grid>
       )}
 
-      {/* Modal Formulario */}
+      {/* Modal Formulario Cliente */}
       <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
         <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {isEditing ? `Editar Cliente ID #${selectedCliente?.idCliente}` : 'Registrar Nuevo Cliente'}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PersonIcon color="primary" />
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              {isEditing ? `Editar Cliente ID #${selectedCliente?.idCliente}` : 'Registrar Nuevo Cliente'}
+            </Typography>
+          </Box>
           <IconButton onClick={() => setOpenForm(false)}><CloseIcon /></IconButton>
         </DialogTitle>
-        <DialogContent dividers sx={{ maxHeight: '75vh', overflowY: 'auto' }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Razón Social / Nombre Comercial"
-                fullWidth
-                required
-                size="small"
-                value={formData.razonSocial}
-                onChange={(e) => setFormData({ ...formData, razonSocial: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="CUIT / CUIL / DNI"
-                fullWidth
-                required
-                size="small"
-                value={formData.cuit}
-                onChange={(e) => setFormData({ ...formData, cuit: e.target.value })}
-              />
-            </Grid>
+        <DialogContent dividers sx={{ maxHeight: '75vh', overflowY: 'auto', p: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* Sección 1: Datos Identificatorios & Fiscales */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main', mb: 2, display: 'flex', alignItems: 'center', gap: 1, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <StorefrontIcon fontSize="small" /> 1. Datos Identificatorios & Fiscales
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={8}>
+                  <TextField
+                    label="Razón Social / Nombre Comercial"
+                    fullWidth
+                    required
+                    size="small"
+                    value={formData.razonSocial}
+                    onChange={(e) => setFormData({ ...formData, razonSocial: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    label="CUIT / CUIL / DNI"
+                    fullWidth
+                    required
+                    size="small"
+                    value={formData.cuit}
+                    onChange={(e) => setFormData({ ...formData, cuit: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Condición frente al IVA</InputLabel>
+                    <Select
+                      value={formData.tipoIva}
+                      label="Condición frente al IVA"
+                      onChange={(e) => setFormData({ ...formData, tipoIva: e.target.value })}
+                    >
+                      <MenuItem value="Responsable Inscripto">Responsable Inscripto</MenuItem>
+                      <MenuItem value="Monotributo">Monotributo</MenuItem>
+                      <MenuItem value="Consumidor Final">Consumidor Final</MenuItem>
+                      <MenuItem value="Exento">Exento</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Tipo de Cliente</InputLabel>
+                    <Select
+                      value={formData.tipoCliente}
+                      label="Tipo de Cliente"
+                      onChange={(e) => setFormData({ ...formData, tipoCliente: e.target.value })}
+                    >
+                      <MenuItem value="Mayorista (Restaurante / Semanal)">Mayorista (Restaurante / Semanal)</MenuItem>
+                      <MenuItem value="Mayorista (Supermercado / Fijo Semanal)">Mayorista (Supermercado / Fijo Semanal)</MenuItem>
+                      <MenuItem value="Mayorista (Hotel & Eventos)">Mayorista (Hotel & Eventos)</MenuItem>
+                      <MenuItem value="Minorista / Frecuente">Minorista / Frecuente</MenuItem>
+                      <MenuItem value="Minorista (Mostrador)">Minorista (Mostrador)</MenuItem>
+                      <MenuItem value="Institución Caritativa (Donaciones)">Institución Caritativa (Donaciones)</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </Box>
 
-            {/* Separado: Responsable y Teléfono */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Persona de Contacto / Responsable"
-                fullWidth
-                size="small"
-                value={formData.responsable}
-                onChange={(e) => setFormData({ ...formData, responsable: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Teléfono de Contacto"
-                fullWidth
-                size="small"
-                value={formData.telefono}
-                onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-              />
-            </Grid>
+            <Divider />
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Correo Electrónico"
-                fullWidth
-                type="email"
-                size="small"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </Grid>
+            {/* Sección 2: Contacto & Domicilio */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main', mb: 2, display: 'flex', alignItems: 'center', gap: 1, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <PlaceIcon fontSize="small" /> 2. Contacto & Domicilio de Entrega
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Persona de Contacto / Responsable"
+                    fullWidth
+                    size="small"
+                    value={formData.responsable}
+                    onChange={(e) => setFormData({ ...formData, responsable: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Teléfono de Contacto"
+                    fullWidth
+                    size="small"
+                    value={formData.telefono}
+                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                  <TextField
+                    label="Correo Electrónico"
+                    fullWidth
+                    type="email"
+                    size="small"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={5}>
+                  <TextField
+                    label="Calle"
+                    fullWidth
+                    size="small"
+                    value={formData.calle}
+                    onChange={(e) => setFormData({ ...formData, calle: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    label="Altura / Número"
+                    fullWidth
+                    size="small"
+                    value={formData.altura}
+                    onChange={(e) => setFormData({ ...formData, altura: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    label="Localidad"
+                    fullWidth
+                    size="small"
+                    value={formData.localidad}
+                    onChange={(e) => setFormData({ ...formData, localidad: e.target.value })}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
 
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Condición frente al IVA</InputLabel>
-                <Select
-                  value={formData.tipoIva}
-                  label="Condición frente al IVA"
-                  onChange={(e) => setFormData({ ...formData, tipoIva: e.target.value })}
-                >
-                  <MenuItem value="Responsable Inscripto">Responsable Inscripto</MenuItem>
-                  <MenuItem value="Monotributo">Monotributo</MenuItem>
-                  <MenuItem value="Consumidor Final">Consumidor Final</MenuItem>
-                  <MenuItem value="Exento">Exento</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+            <Divider />
 
-            {/* Separado: Domicilio calle, altura, localidad */}
-            <Grid item xs={12} sm={5}>
-              <TextField
-                label="Calle"
-                fullWidth
-                size="small"
-                value={formData.calle}
-                onChange={(e) => setFormData({ ...formData, calle: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <TextField
-                label="Altura / Número"
-                fullWidth
-                size="small"
-                value={formData.altura}
-                onChange={(e) => setFormData({ ...formData, altura: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                label="Localidad"
-                fullWidth
-                size="small"
-                value={formData.localidad}
-                onChange={(e) => setFormData({ ...formData, localidad: e.target.value })}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Tipo de Cliente</InputLabel>
-                <Select
-                  value={formData.tipoCliente}
-                  label="Tipo de Cliente"
-                  onChange={(e) => setFormData({ ...formData, tipoCliente: e.target.value })}
-                >
-                  <MenuItem value="Mayorista (Restaurante / Semanal)">Mayorista (Restaurante / Semanal)</MenuItem>
-                  <MenuItem value="Mayorista (Supermercado / Fijo Semanal)">Mayorista (Supermercado / Fijo Semanal)</MenuItem>
-                  <MenuItem value="Mayorista (Hotel & Eventos)">Mayorista (Hotel & Eventos)</MenuItem>
-                  <MenuItem value="Minorista / Frecuente">Minorista / Frecuente</MenuItem>
-                  <MenuItem value="Minorista (Mostrador)">Minorista (Mostrador)</MenuItem>
-                  <MenuItem value="Institución Caritativa (Donaciones)">Institución Caritativa (Donaciones)</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Día Habitual de Entrega"
-                fullWidth
-                size="small"
-                value={formData.diaEntregaHabitual}
-                onChange={(e) => setFormData({ ...formData, diaEntregaHabitual: e.target.value })}
-              />
-            </Grid>
-
-            {/* Crédito Autorizado */}
-            <Grid item xs={12}>
+            {/* Sección 3: Condición Comercial & Crédito */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main', mb: 2, display: 'flex', alignItems: 'center', gap: 1, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <CreditCardIcon fontSize="small" /> 3. Condición Comercial & Cuenta Corriente
+              </Typography>
               <Paper variant="outlined" sx={{ p: 2, borderRadius: '10px' }}>
                 <FormControlLabel
                   control={
@@ -598,80 +607,175 @@ export const ClientesScreen = () => {
                   </Grid>
                 )}
               </Paper>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setOpenForm(false)} color="inherit">Cancelar</Button>
-          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave}>
-            Guardar Cliente
+          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave} sx={{ px: 3, fontWeight: 700 }}>
+            {isEditing ? 'Guardar Cambios' : 'Guardar Cliente'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Modal Detalle Cliente */}
-      <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="sm" fullWidth>
+      {/* Modal Detalle / Ficha Completa del Cliente */}
+      <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="md" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
         <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          Ficha del Cliente ID #{selectedCliente?.idCliente}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PersonIcon color="primary" />
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              Ficha del Cliente #{selectedCliente?.idCliente}
+            </Typography>
+          </Box>
           <IconButton onClick={() => setOpenDetail(false)}><CloseIcon /></IconButton>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ p: 3 }}>
           {selectedCliente && (() => {
             const morosidad = calcularEstadoMoroso(selectedCliente, INITIAL_COMPROBANTES_VENTA);
+            const porcentajeCredito = selectedCliente.limiteCredito > 0 
+              ? Math.min(Math.round((selectedCliente.creditoUsado / selectedCliente.limiteCredito) * 100), 100) 
+              : 0;
+            
             return (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                    {selectedCliente.razonSocial}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    ID #{selectedCliente.idCliente} • CUIT: {selectedCliente.cuit} • {selectedCliente.tipoIva}
-                  </Typography>
-                </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {/* Encabezado Principal */}
+                <Paper elevation={0} sx={{ p: 2, bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8f9fa', borderRadius: '12px', border: '1px solid', borderColor: 'divider' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1 }}>
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main' }}>
+                        {selectedCliente.razonSocial}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, mt: 0.5 }}>
+                        CUIT: {selectedCliente.cuit} • Condición IVA: {selectedCliente.tipoIva}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                      <Chip label={selectedCliente.tipoCliente} color="primary" variant="outlined" sx={{ fontWeight: 600 }} />
+                      {getStatusChip(selectedCliente)}
+                    </Box>
+                  </Box>
+                </Paper>
 
+                {/* Alerta si es moroso */}
                 {morosidad.esMoroso && (
                   <ClienteMorosoAlert cliente={selectedCliente} comprobantesVenta={INITIAL_COMPROBANTES_VENTA} />
                 )}
 
-                <Grid container spacing={1.5}>
-                  <Grid item xs={6}>
-                    <Typography variant="caption" color="text.secondary" display="block">Responsable:</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedCliente.responsable}</Typography>
+                <Grid container spacing={3}>
+                  {/* Sección 1: Datos de Contacto y Domicilio */}
+                  <Grid item xs={12} md={6}>
+                    <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '12px', height: '100%' }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <PersonIcon fontSize="small" /> Datos de Contacto & Domicilio
+                      </Typography>
+                      
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <PersonIcon color="action" fontSize="small" />
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" display="block">Contacto / Responsable</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedCliente.responsable || 'No especificado'}</Typography>
+                          </Box>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <PhoneIcon color="action" fontSize="small" />
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" display="block">Teléfono</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedCliente.telefono || 'No especificado'}</Typography>
+                          </Box>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <EmailIcon color="action" fontSize="small" />
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" display="block">Correo Electrónico</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedCliente.email || 'No especificado'}</Typography>
+                          </Box>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <PlaceIcon color="action" fontSize="small" />
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" display="block">Domicilio</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {selectedCliente.calle} {selectedCliente.altura}, {selectedCliente.localidad} ({selectedCliente.provincia})
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Paper>
                   </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="caption" color="text.secondary" display="block">Teléfono:</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedCliente.telefono}</Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="caption" color="text.secondary" display="block">Domicilio:</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {selectedCliente.calle} {selectedCliente.altura}, {selectedCliente.localidad} ({selectedCliente.provincia})
-                    </Typography>
+
+                  {/* Sección 2: Información Comercial & Cuenta Corriente */}
+                  <Grid item xs={12} md={6}>
+                    <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '12px', height: '100%' }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CreditCardIcon fontSize="small" /> Cuenta Corriente & Crédito
+                      </Typography>
+
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary">Habilitado Venta Crédito:</Typography>
+                          <Chip 
+                            label={selectedCliente.aceptaCredito ? "Habilitado" : "Solo Contado"} 
+                            color={selectedCliente.aceptaCredito ? "success" : "default"} 
+                            size="small" 
+                            sx={{ fontWeight: 600 }}
+                          />
+                        </Box>
+
+                        {selectedCliente.aceptaCredito ? (
+                          <>
+                            <Box>
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                                <Typography variant="caption" color="text.secondary">Límite Autorizado:</Typography>
+                                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                  ${selectedCliente.limiteCredito.toLocaleString()}
+                                </Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                <Typography variant="caption" color="text.secondary">Crédito Consumido:</Typography>
+                                <Typography variant="body2" sx={{ fontWeight: 700, color: selectedCliente.creditoUsado > selectedCliente.limiteCredito ? 'error.main' : 'warning.main' }}>
+                                  ${selectedCliente.creditoUsado.toLocaleString()} ({porcentajeCredito}%)
+                                </Typography>
+                              </Box>
+                              <LinearProgress 
+                                variant="determinate" 
+                                value={porcentajeCredito} 
+                                color={selectedCliente.creditoUsado > selectedCliente.limiteCredito ? 'error' : porcentajeCredito > 80 ? 'warning' : 'primary'}
+                                sx={{ height: 8, borderRadius: 4 }}
+                              />
+                            </Box>
+
+                            <Divider />
+
+                            <Box>
+                              <Typography variant="caption" color="text.secondary" display="block">Estado de Morosidad:</Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 700, color: morosidad.esMoroso ? 'error.main' : 'success.main', mt: 0.5 }}>
+                                {morosidad.razon}
+                              </Typography>
+                            </Box>
+                          </>
+                        ) : (
+                          <Paper elevation={0} sx={{ p: 2, bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : '#f5f5f5', textAlign: 'center', borderRadius: '8px' }}>
+                            <Typography variant="body2" color="text.secondary">
+                              Este cliente realiza compras únicamente al contado. No posee línea de crédito abierta ni saldo de cuenta corriente.
+                            </Typography>
+                          </Paper>
+                        )}
+                      </Box>
+                    </Paper>
                   </Grid>
                 </Grid>
-
-                {selectedCliente.aceptaCredito && (
-                  <Paper variant="outlined" sx={{ p: 2, borderRadius: '10px' }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#ed6c02', mb: 1 }}>
-                      Estado de Cuenta Corriente
-                    </Typography>
-                    <Typography variant="body2">
-                      Límite Autorizado: <strong>${selectedCliente.limiteCredito.toLocaleString()}</strong>
-                    </Typography>
-                    <Typography variant="body2">
-                      Saldo Utilizado: <strong>${selectedCliente.creditoUsado.toLocaleString()}</strong>
-                    </Typography>
-                    <Typography variant="body2" color={morosidad.esMoroso ? 'error' : 'success'}>
-                      Situación: <strong>{morosidad.razon}</strong>
-                    </Typography>
-                  </Paper>
-                )}
               </Box>
             );
           })()}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDetail(false)} variant="contained">Cerrar</Button>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setOpenDetail(false)} variant="contained" color="primary" sx={{ px: 3, fontWeight: 700, borderRadius: '8px' }}>
+            Cerrar Ficha
+          </Button>
         </DialogActions>
       </Dialog>
 
