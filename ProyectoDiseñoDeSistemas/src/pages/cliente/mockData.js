@@ -9,17 +9,22 @@ import { useSyncExternalStore } from 'react';
  * - Políticas de cancelación y canje de calidad sin costo ($0).
  */
 
+export const TIPOS_PRODUCTO = [
+  'Pastas Frescas',
+  'Pastas Secas',
+  'Otros',
+];
+
 export const CATEGORIAS_PRODUCTOS = [
   'Todos',
   'Pastas Frescas',
-  'Pastas Rellenas',
-  'Pastas Gourmet',
-  'Salsas Caseras',
-  'Packs y Combos',
+  'Pastas Secas',
+  'Otros',
 ];
 
 export const PRODUCT_IMAGES = {
   100: new URL('../../components/cliente/productos/penne.webp', import.meta.url).href,
+  107: new URL('../../components/cliente/productos/penne.webp', import.meta.url).href,
   101: new URL('../../components/cliente/productos/sorrentinos.webp', import.meta.url).href,
   102: new URL('../../components/cliente/productos/ravioles.webp', import.meta.url).href,
   103: new URL('../../components/cliente/productos/tallarines.webp', import.meta.url).href,
@@ -30,12 +35,24 @@ export const PRODUCT_IMAGES = {
   202: new URL('../../components/cliente/productos/bolognesa.webp', import.meta.url).href,
   203: new URL('../../components/cliente/productos/cuatro-quesos.webp', import.meta.url).href,
   204: new URL('../../components/cliente/productos/pesto.webp', import.meta.url).href,
-  301: new URL('../../components/cliente/productos/pack-familiar.webp', import.meta.url).href,
-  302: new URL('../../components/cliente/productos/combo-eventos.webp', import.meta.url).href,
 };
 
 export const MINIMO_MAYORISTA = 10;
 export const DIAS_ENTREGA_SEMANAL = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+export const validarCantidadMayorista = (tipoMayorista, totalItems) => {
+  const minimo = MINIMO_MAYORISTA;
+  const valido = totalItems >= minimo;
+  const tipoLabel = tipoMayorista === 'semanal' ? 'Pedido Semanal' : 'Pedido de Eventos';
+  return {
+    valido,
+    minimo,
+    faltantes: Math.max(0, minimo - totalItems),
+    mensaje: valido
+      ? `La cantidad seleccionada (${totalItems} unidades) te permite realizar el ${tipoLabel}. La cantidad mínima es de ${minimo} unidades.`
+      : `La cantidad seleccionada (${totalItems} unidades) no te permite realizar el ${tipoLabel}. La cantidad mínima es de ${minimo} unidades.`,
+  };
+};
 
 export const calcularPresupuestoMayorista = (cantidades) => {
   const items = Object.entries(cantidades).map(([id, cantidad]) => {
@@ -53,7 +70,7 @@ export const CATALOGO_CLIENTE = [
   {
     idProducto: 100,
     nombre: 'Penne Rigate Tradizionale (Kg)',
-    categoria: 'Pastas Frescas',
+    categoria: 'Pastas Secas',
     variedad: 'Trefilado al bronce con 100% sémola candeal, tomates cherry confitados y finas hierbas',
     precio: 3400,
     unidad: 'Kg',
@@ -63,9 +80,21 @@ export const CATALOGO_CLIENTE = [
     maridajeSugerido: 'Tomates cherry dulces, albahaca fresca y aceite de oliva virgen extra',
   },
   {
+    idProducto: 107,
+    nombre: 'Fusilli Secos al Bronce (Kg)',
+    categoria: 'Pastas Secas',
+    variedad: '100% sémola candeal seleccionada, secado lento a baja temperatura',
+    precio: 3300,
+    unidad: 'Kg',
+    stock: 45,
+    destacado: false,
+    imagen: PRODUCT_IMAGES[107],
+    maridajeSugerido: 'Salsas espesas, pesto o salteados de verduras',
+  },
+  {
     idProducto: 101,
     nombre: 'Sorrentinos Jamón y Queso (Caja 1kg)',
-    categoria: 'Pastas Rellenas',
+    categoria: 'Pastas Frescas',
     variedad: 'Jamón cocido natural seleccionado y mozzarella de campo',
     precio: 4500,
     unidad: 'Caja 1kg',
@@ -79,7 +108,7 @@ export const CATALOGO_CLIENTE = [
   {
     idProducto: 102,
     nombre: 'Ravioles de Espinaca y Ricotta (Caja 1kg)',
-    categoria: 'Pastas Rellenas',
+    categoria: 'Pastas Frescas',
     variedad: 'Espinaca fresca de huerta local y ricotta cremosa',
     precio: 4000,
     unidad: 'Caja 1kg',
@@ -121,7 +150,7 @@ export const CATALOGO_CLIENTE = [
   {
     idProducto: 105,
     nombre: 'Panzotti de Cordero al Malbec (Caja 1kg)',
-    categoria: 'Pastas Gourmet',
+    categoria: 'Pastas Frescas',
     variedad: 'Cordero braseado 6 horas en reducción de vino Malbec',
     precio: 5800,
     unidad: 'Caja 1kg',
@@ -135,7 +164,7 @@ export const CATALOGO_CLIENTE = [
   {
     idProducto: 106,
     nombre: 'Capeletis de Pollo de Campo (Caja 1kg)',
-    categoria: 'Pastas Rellenas',
+    categoria: 'Pastas Frescas',
     variedad: 'Pechuga de pollo pastoril salteada con verdeo y especias suaves',
     precio: 4200,
     unidad: 'Caja 1kg',
@@ -149,7 +178,7 @@ export const CATALOGO_CLIENTE = [
   {
     idProducto: 201,
     nombre: 'Salsa Tuco Casero Especial (Pote 500cc)',
-    categoria: 'Salsas Caseras',
+    categoria: 'Otros',
     variedad: 'Tomates perita maduros, laurel criollo, zanahoria y orégano fresco',
     precio: 2500,
     unidad: 'Pote 500cc',
@@ -163,7 +192,7 @@ export const CATALOGO_CLIENTE = [
   {
     idProducto: 202,
     nombre: 'Salsa Bolognesa Tradicional (Pote 500cc)',
-    categoria: 'Salsas Caseras',
+    categoria: 'Otros',
     variedad: 'Carne vacuna seleccionada magra, sofrito de cebolla, apio y tomate',
     precio: 2800,
     unidad: 'Pote 500cc',
@@ -177,7 +206,7 @@ export const CATALOGO_CLIENTE = [
   {
     idProducto: 203,
     nombre: 'Salsa Cuatro Quesos Cremosa (Pote 500cc)',
-    categoria: 'Salsas Caseras',
+    categoria: 'Otros',
     variedad: 'Mozzarella, parmesano reggiano, fontina y un toque de queso azul',
     precio: 3400,
     unidad: 'Pote 500cc',
@@ -191,7 +220,7 @@ export const CATALOGO_CLIENTE = [
   {
     idProducto: 204,
     nombre: 'Salsa Pesto a la Genovesa (Pote 250cc)',
-    categoria: 'Salsas Caseras',
+    categoria: 'Otros',
     variedad: 'Albahaca fresca cosechada en el día, nueces, oliva virgen extra y parmesano',
     precio: 3100,
     unidad: 'Pote 250cc',
@@ -201,34 +230,6 @@ export const CATALOGO_CLIENTE = [
     destacado: false,
     imagen: PRODUCT_IMAGES[204],
     maridajeSugerido: 'Tallarines o fusillis al dente',
-  },
-  {
-    idProducto: 301,
-    nombre: 'Pack Familiar Pasta & Salsas (2kg + 2 Salsas)',
-    categoria: 'Packs y Combos',
-    variedad: '1kg Sorrentinos Jamón/Queso + 1kg Tallarines + 1 Tuco 500cc + 1 Cuatro Quesos 500cc',
-    precio: 12500,
-    unidad: 'Pack Promocional',
-    rinde: '5 a 6 personas',
-    tiempoCoccion: '8 - 10 min',
-    stock: 15,
-    destacado: true,
-    imagen: PRODUCT_IMAGES[301],
-    maridajeSugerido: 'Almuerzo familiar completo',
-  },
-  {
-    idProducto: 302,
-    nombre: 'Combo Degustación Eventos (5kg Surtido)',
-    categoria: 'Packs y Combos',
-    variedad: '2kg Sorrentinos + 2kg Panzotti Cordero + 1kg Ravioles + 3 Salsas artesanales a elección',
-    precio: 26000,
-    unidad: 'Caja Evento',
-    rinde: '12 a 15 personas',
-    tiempoCoccion: 'Varios',
-    stock: 10,
-    destacado: false,
-    imagen: PRODUCT_IMAGES[302],
-    maridajeSugerido: 'Cenas, celebraciones y reuniones empresariales',
   },
 ];
 
@@ -474,7 +475,7 @@ let currentStore = {
     {
       idProducto: 101,
       nombre: 'Sorrentinos Jamón y Queso (Caja 1kg)',
-      categoria: 'Pastas Rellenas',
+      categoria: 'Pastas Frescas',
       precio: 4500,
       unidad: 'Caja 1kg',
       cantidad: 2,
@@ -484,7 +485,7 @@ let currentStore = {
     {
       idProducto: 201,
       nombre: 'Salsa Tuco Casero Especial (Pote 500cc)',
-      categoria: 'Salsas Caseras',
+      categoria: 'Otros',
       precio: 2500,
       unidad: 'Pote 500cc',
       cantidad: 1,

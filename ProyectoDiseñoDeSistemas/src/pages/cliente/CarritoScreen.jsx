@@ -9,8 +9,6 @@ import {
   DialogActions,
   Chip,
   Divider,
-  Tabs,
-  Tab,
 } from '@mui/material';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
@@ -367,16 +365,12 @@ const CarritoHabitual = () => {
 };
 
 export const CarritoScreen = () => {
-  const { carritoModo, mayoristaItems, cart } = useClientStore();
-  const cantidadMayorista = Object.keys(mayoristaItems).length;
-  const cantidadHabitual = cart.length;
-  return <Box>
-    {(cantidadMayorista > 0 || carritoModo === 'mayorista') && <Tabs value={carritoModo} onChange={(_, modo) => clientStore.setCarritoModo(modo)} variant="fullWidth" sx={{ mb: 3 }} aria-label="Tipo de carrito">
-      <Tab value="habitual" label={`Compra habitual (${cantidadHabitual})`} />
-      <Tab value="mayorista" label={`Pedido mayorista (${cantidadMayorista})`} />
-    </Tabs>}
-    {carritoModo === 'mayorista' ? <CarritoMayorista /> : <CarritoHabitual />}
-  </Box>;
+  const { carritoModo } = useClientStore();
+  return (
+    <Box>
+      {carritoModo === 'mayorista' ? <CarritoMayorista /> : <CarritoHabitual />}
+    </Box>
+  );
 };
 
 export default CarritoScreen;

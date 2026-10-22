@@ -35,7 +35,7 @@ export default function ClientePortalLayout({ children }) {
     <ThemeProvider theme={clienteTheme}>
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
       {currentPage !== 'catalogo' && <Box sx={{ mx: { xs: 1.5, md: 5 }, mt: { xs: 1.5, md: 4 }, boxShadow: '6px 8px 22px #51482d20' }}><ClienteNavigation /></Box>}
-      <Box sx={{ flex: 1, mx: currentPage === 'catalogo' ? 0 : { xs: 1.5, md: 5 }, mb: 2, p: currentPage === 'catalogo' ? 0 : { xs: 2, md: 4 }, bgcolor: currentPage === 'catalogo' ? 'transparent' : 'background.paper', borderTop: currentPage === 'catalogo' ? 0 : '4px solid', borderColor: 'primary.main', boxShadow: currentPage === 'catalogo' ? 'none' : '6px 8px 22px #51482d20' }}>
+      <Box sx={{ flex: 1, mx: currentPage === 'catalogo' ? 0 : { xs: 1.5, md: 5 }, mb: currentPage === 'catalogo' ? 0 : 2, p: currentPage === 'catalogo' ? 0 : { xs: 2, md: 4 }, bgcolor: currentPage === 'catalogo' ? 'transparent' : 'background.paper', borderTop: currentPage === 'catalogo' ? 0 : '4px solid', borderColor: 'primary.main', boxShadow: currentPage === 'catalogo' ? 'none' : '6px 8px 22px #51482d20' }}>
         {currentPage !== 'catalogo' && <Box sx={{ position: 'relative', overflow: 'hidden', pb: 3, mb: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Box aria-hidden="true" sx={{ position: 'absolute', inset: 0, bgcolor: 'primary.main', maskImage: `url("${ingredientesPattern}")`, maskSize: '240px 240px', maskRepeat: 'repeat', maskPosition: 'right center', opacity: 0.3 }} />
           <Box sx={{ position: 'relative', width: 'fit-content', maxWidth: { xs: 'calc(100% - 36px)', sm: '100%' }, pr: 3, bgcolor: 'background.paper' }}>
@@ -45,9 +45,11 @@ export default function ClientePortalLayout({ children }) {
         </Box>}
         {children}
       </Box>
-      <Box component="footer" sx={{ mt: 'auto', py: 2, px: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, color: 'text.secondary' }}>
-        <Typography variant="caption" sx={{ color: 'primary.main' }}>PastaFab · Pastas artesanales</Typography>
-      </Box>
+      {currentPage !== 'catalogo' && (
+        <Box component="footer" sx={{ mt: 'auto', py: 2, px: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, color: 'text.secondary' }}>
+          <Typography variant="caption" sx={{ color: 'primary.main' }}>PastaFab · Pastas artesanales</Typography>
+        </Box>
+      )}
     </Box>
     </ThemeProvider>
   );

@@ -105,8 +105,8 @@ export const CatalogoScreen = () => {
       {!vistaCompleta ? (
         <ClienteLanding
           cartSummary={cartSummary}
-          onCatalogo={() => { clientStore.setCatalogoModo('productos'); }}
-          onEvento={() => { clientStore.setCatalogoModo('mayorista'); handleClearFilters(); }}
+          onCatalogo={() => { clientStore.setCatalogoModo('productos'); clientStore.setCarritoModo('habitual'); }}
+          onEvento={() => { clientStore.setCatalogoModo('mayorista'); clientStore.setCarritoModo('mayorista'); handleClearFilters(); }}
           onAbout={() => setAboutModalOpen(true)}
           onContact={() => setContactModalOpen(true)}
           onSocial={handleSocialClick}

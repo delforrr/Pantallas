@@ -17,7 +17,7 @@ export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAb
   const { navigate } = useApp();
   const navStyle = { color: olive, fontSize: { xs: 11, lg: 13 }, fontWeight: 700, borderRadius: 8, px: { xs: 1.2, lg: 2 }, whiteSpace: 'nowrap' };
   return (
-    <Box sx={{ bgcolor: '#ded0a8', p: { xs: 1.5, sm: 3, lg: 5 }, fontFamily: '"Montserrat", sans-serif' }}>
+    <Box sx={{ bgcolor: '#ded0a8', p: { xs: 1.5, sm: 2.5, lg: 3 }, fontFamily: '"Montserrat", sans-serif' }}>
       <Box component="section" aria-label="Bienvenidos a PastaFab" sx={{ position: 'relative', isolation: 'isolate', bgcolor: '#fff', color: olive, boxShadow: '8px 12px 22px #51482d40', minHeight: { xs: 740, sm: 820, md: 640, lg: 610 }, aspectRatio: { md: '2629 / 1527' }, overflow: 'hidden', backgroundImage: { xs: 'none', md: 'url(/assets/landing-template-card.jpg)' }, backgroundSize: '100% 100%' }}>
         {/* Preserve the illustration; replace all template text with live content. */}
         <Box aria-hidden="true" sx={{ display: { xs: 'none', md: 'block' }, position: 'absolute', zIndex: -1, left: '48.5%', right: '13%', top: '17%', bottom: 0, bgcolor: '#fff' }} />
@@ -44,12 +44,13 @@ export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAb
         </Box>
       </Box>
 
-      <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1, pt: 2.5, pb: 3, color: olive }}>
-        <Typography sx={{ fontSize: 11, letterSpacing: '0.12em', fontWeight: 700 }}>FRESCAS CADA DÍA · HECHAS A MANO</Typography>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Button onClick={onAbout} size="small" sx={{ color: olive, textTransform: 'none' }}>Nosotros</Button>
-          <Button onClick={onContact} size="small" sx={{ color: olive, textTransform: 'none' }}>Contacto</Button>
-          {[[InstagramIcon, 'Instagram'], [FacebookIcon, 'Facebook'], [WhatsAppIcon, 'WhatsApp']].map(([Icon, name]) => <IconButton key={name} size="small" aria-label={name} onClick={() => onSocial(name)} sx={{ color: olive }}><Icon fontSize="small" /></IconButton>)}
+      <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', flexWrap: 'nowrap', gap: 2, pt: 1.5, pb: 1, color: olive, width: '100%' }}>
+        <Typography sx={{ fontSize: 11, letterSpacing: '0.12em', fontWeight: 700, whiteSpace: 'nowrap' }}>FRESCAS CADA DÍA · HECHAS A MANO</Typography>
+        <Typography variant="caption" sx={{ color: olive, fontWeight: 600, whiteSpace: 'nowrap', textAlign: 'center' }}>PastaFab · Pastas artesanales</Typography>
+        <Stack direction="row" alignItems="center" gap={1} sx={{ flexWrap: 'nowrap' }}>
+          <Button onClick={onAbout} size="small" sx={{ color: olive, textTransform: 'none', minWidth: 'auto', px: 1 }}>Nosotros</Button>
+          <Button onClick={onContact} size="small" sx={{ color: olive, textTransform: 'none', minWidth: 'auto', px: 1 }}>Contacto</Button>
+          {[[InstagramIcon, 'Instagram'], [FacebookIcon, 'Facebook'], [WhatsAppIcon, 'WhatsApp']].map(([Icon, name]) => <IconButton key={name} size="small" aria-label={name} onClick={() => onSocial(name)} sx={{ color: olive, p: 0.5 }}><Icon fontSize="small" /></IconButton>)}
         </Stack>
       </Stack>
 

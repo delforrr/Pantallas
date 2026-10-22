@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CATALOGO_CLIENTE, MINIMO_MAYORISTA, calcularPresupuestoMayorista, clientStore } from './mockData.js';
+import { CATALOGO_CLIENTE, MINIMO_MAYORISTA, calcularPresupuestoMayorista, clientStore, validarCantidadMayorista } from './mockData.js';
 
 test('el presupuesto mayorista exige enteros, mínimo por producto y stock disponible', () => {
   const producto = CATALOGO_CLIENTE[0];
@@ -89,3 +89,33 @@ test('el mayorista para evento no guarda día semanal ni retiene una seña no ab
   clientStore.cancelOrder(pedido.nroPedido);
   assert.notEqual(clientStore.getState().pedidos.find((p) => p.nroPedido === pedido.nroPedido).estadoPago, 'Seña Retenida (50%)');
 });
+
+test('validarCantidadMayorista exige minimo de 10 unidades para semanal y eventos', () => {
+  // Para semanal
+  assert.equal(validarCantidadMayorista('semanal', 9).valido, false);
+  assert.equal(validarCantidadMayorista('semanal', 9).faltantes, 1);
+  assert.equal(validarCantidadMayorista('semanal', 10).valido, true);
+  assert.equal(validarCantidadMayorista('semanal', 10).faltantes, 0);
+
+  // Para evento
+  assert.equal(validarCantidadMayorista('evento', 9).valido, false);
+  assert.equal(validarCantidadMayorista('evento', 9).faltantes, 1);
+  assert.equal(validarCantidadMayorista('evento', 10).valido, true);
+  assert.equal(validarCantidadMayorista('evento', 10).faltantes, 0);
+});
+
+test('los tipos de productos son exactamente 3: Pastas Frescas, Pastas Secas y Otros', async () => {
+  const { TIPOS_PRODUCTO, CATEGORIAS_PRODUCTOS, CATALOGO_CLIENTE } = await import('./mockData.js');
+  assert.deepEqual(TIPOS_PRODUCTO, ['Pastas Frescas', 'Pastas Secas', 'Otros']);
+  assert.equal(TIPOS_PRODUCTO.length, 3);
+  assert.deepEqual(CATEGORIAS_PRODUCTOS, ['Todos', 'Pastas Frescas', 'Pastas Secas', 'Otros']);
+
+  // Cada producto del catálogo debe pertenecer estrictamente a uno de los 3 tipos
+  for (const producto of CATALOGO_CLIENTE) {
+    assert.ok(
+      TIPOS_PRODUCTO.includes(producto.categoria),
+      `El producto ${producto.nombre} tiene una categoría no válida: ${producto.categoria}`
+    );
+  }
+});
+

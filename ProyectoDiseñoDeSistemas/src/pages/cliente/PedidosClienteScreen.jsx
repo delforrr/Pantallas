@@ -18,9 +18,6 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
-import PrecisionManufacturingOutlinedIcon from '@mui/icons-material/PrecisionManufacturingOutlined';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import ChangeCircleOutlinedIcon from '@mui/icons-material/ChangeCircleOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
@@ -61,18 +58,6 @@ export const PedidosClienteScreen = () => {
   // Snackbars de notificación
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState('');
-
-  // Cálculo de KPIs
-  const kpis = useMemo(() => {
-    const total = pedidos.length;
-    const enProduccion = pedidos.filter((p) => p.estadoPedido === 'En Producción').length;
-    const entregados = pedidos.filter((p) => p.estadoPedido === 'Entregado').length;
-    const reclamosCanjes = pedidos.filter(
-      (p) => p.tipoPedido?.includes('Canje') || p.nroPedido?.startsWith('CANJE')
-    ).length;
-
-    return { total, enProduccion, entregados, reclamosCanjes };
-  }, [pedidos]);
 
   // Filtrado y búsqueda
   const pedidosFiltrados = useMemo(() => {
@@ -153,152 +138,6 @@ export const PedidosClienteScreen = () => {
         </Typography>
       </Box>
 
-      {/* Barra de Métricas (KPIs) */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' }, gap: 2, mb: 3.5 }}>
-        <Paper
-          elevation={1}
-          sx={{
-            p: 2,
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-          }}
-        >
-          <Box
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: '10px',
-              bgcolor: 'action.hover',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'text.primary',
-            }}
-          >
-            <ShoppingBagOutlinedIcon />
-          </Box>
-          <Box>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-              Total Pedidos
-            </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 800 }}>
-              {kpis.total}
-            </Typography>
-          </Box>
-        </Paper>
-
-        <Paper
-          elevation={1}
-          sx={{
-            p: 2,
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-          }}
-        >
-          <Box
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: '10px',
-              bgcolor: 'info.light',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'info.main',
-            }}
-          >
-            <PrecisionManufacturingOutlinedIcon />
-          </Box>
-          <Box>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-              En Producción
-            </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 800, color: 'info.main' }}>
-              {kpis.enProduccion}
-            </Typography>
-          </Box>
-        </Paper>
-
-        <Paper
-          elevation={1}
-          sx={{
-            p: 2,
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-          }}
-        >
-          <Box
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: '10px',
-              bgcolor: 'success.light',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'success.main',
-            }}
-          >
-            <CheckCircleOutlineOutlinedIcon />
-          </Box>
-          <Box>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-              Entregados
-            </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 800, color: 'success.main' }}>
-              {kpis.entregados}
-            </Typography>
-          </Box>
-        </Paper>
-
-        <Paper
-          elevation={1}
-          sx={{
-            p: 2,
-            borderRadius: '14px',
-            border: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-          }}
-        >
-          <Box
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: '10px',
-              bgcolor: 'secondary.light',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'secondary.main',
-            }}
-          >
-            <ChangeCircleOutlinedIcon />
-          </Box>
-          <Box>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-              Reclamos / Canjes
-            </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 800, color: 'secondary.main' }}>
-              {kpis.reclamosCanjes}
-            </Typography>
-          </Box>
-        </Paper>
-      </Box>
 
       {/* Barra de Búsqueda y Filtros de Estado */}
       <Box
