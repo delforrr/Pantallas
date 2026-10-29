@@ -15,7 +15,7 @@ export default function ClienteCatalogoHeader({ cartSummary, onInicio, onProduct
           PastaFab
         </Button>
       )}
-    <Box role="navigation" aria-label="Navegación del cliente" sx={{ position: 'relative', zIndex: 3, ml: { md: '34%' }, mr: { md: '21%' }, bgcolor: 'transparent', minHeight: { xs: 56, md: 66, lg: 76 }, px: { xs: 1.5, sm: 2, md: 0 }, py: { xs: 0.8, md: 1 }, display: { xs: 'grid', md: 'flex' }, gridTemplateColumns: { xs: 'minmax(0, 1fr) minmax(0, 1.3fr) 44px 44px', md: 'none' }, justifyItems: 'center', alignItems: 'center', justifyContent: { xs: 'space-between', sm: 'space-evenly', md: 'space-between' }, flexWrap: { xs: 'nowrap', md: 'wrap' }, gap: { xs: 0.5, sm: 1 } }}>
+    <Box role="navigation" aria-label="Navegación del cliente" sx={{ position: 'relative', zIndex: 3, ml: { md: '34%' }, mr: { md: '21%' }, bgcolor: 'transparent', minHeight: { xs: 56, md: 66, lg: 76 }, px: { xs: 1.5, sm: 2, md: 0 }, py: { xs: 0.8, md: 1 }, display: 'flex', alignItems: 'center', justifyContent: { xs: 'space-between', sm: 'space-evenly', md: 'space-between' }, flexWrap: { xs: 'nowrap', md: 'wrap' }, gap: { xs: 0.5, sm: 1 } }}>
       <Button aria-current={!productosActivo ? 'page' : undefined} sx={{ ...navStyle, ...(!productosActivo && activeStyle) }} onClick={onInicio}>Inicio</Button>
       <Button aria-current={productosActivo ? 'page' : undefined} sx={{ ...navStyle, ...(productosActivo && activeStyle) }} onClick={onProductos}>Productos</Button>
       <Tooltip title={`Ver carrito · $${cartSummary.totalPrice.toLocaleString('es-AR')}`}>
