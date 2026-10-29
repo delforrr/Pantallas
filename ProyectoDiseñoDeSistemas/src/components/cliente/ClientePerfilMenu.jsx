@@ -1,10 +1,11 @@
 import { useId, useState } from 'react';
-import { IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText, Divider, Typography } from '@mui/material';
+import { Button, IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText, Divider, Typography } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useApp } from '../../context/AppContext';
+import { cerrarSesionCliente } from '../../pages/cliente/mockData';
 
 export default function ClientePerfilMenu({ sobreVerde = false }) {
   const { user, navigate, logout } = useApp();
@@ -13,6 +14,8 @@ export default function ClientePerfilMenu({ sobreVerde = false }) {
   const open = Boolean(anchorEl);
   const close = () => setAnchorEl(null);
   const goTo = (page) => { close(); navigate(page); };
+
+  if (!user) return <Button onClick={() => navigate('ingresar')} sx={{ color: sobreVerde ? 'primary.contrastText' : 'primary.main', fontSize: { xs: 11, lg: 12 }, whiteSpace: 'nowrap', minWidth: 0 }}>Ingresar</Button>;
 
   return (
     <>
@@ -27,7 +30,7 @@ export default function ClientePerfilMenu({ sobreVerde = false }) {
         <MenuItem onClick={() => goTo('pedidos_cliente')}><ListItemIcon><ShoppingBagOutlinedIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Mis pedidos</ListItemText></MenuItem>
         <MenuItem onClick={() => goTo('medios_pago')}><ListItemIcon><PaymentsOutlinedIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Medios de pago</ListItemText></MenuItem>
         <Divider />
-        <MenuItem onClick={() => { close(); logout(); }} sx={{ color: 'secondary.main' }}><ListItemIcon><LogoutIcon fontSize="small" color="secondary" /></ListItemIcon><ListItemText>Cerrar sesión</ListItemText></MenuItem>
+        <MenuItem onClick={() => { close(); cerrarSesionCliente(); logout(); }} sx={{ color: 'secondary.main' }}><ListItemIcon><LogoutIcon fontSize="small" color="secondary" /></ListItemIcon><ListItemText>Cerrar sesión</ListItemText></MenuItem>
       </Menu>
     </>
   );

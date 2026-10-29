@@ -6,6 +6,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import LoginPage from './pages/LoginPage';
 import { AppLayout } from './components/layout';
 import ClientePortalLayout from './components/cliente/ClientePortalLayout';
+import ClienteAccesoScreen from './pages/cliente/ClienteAccesoScreen';
 import MayoristasTienda from './components/cliente/MayoristasTienda';
 
 // ── All screen imports ──────────────────────────────────────
@@ -63,9 +64,10 @@ const SCREEN_MAP = {
 // ── Page wrapper with fade animation ───────────────────────
 const PageContent = () => {
   const { currentPage, user } = useApp();
-  const Screen = SCREEN_MAP[currentPage];
+  const paginaCliente = ['catalogo', 'carrito', 'pedidos_cliente', 'medios_pago'].includes(currentPage);
+  const Screen = !user || (user.role === 'cliente' && !paginaCliente) ? CatalogoScreen : SCREEN_MAP[currentPage || 'catalogo'];
   const label = PAGE_LABELS[currentPage] || 'Dashboard';
-  const isCliente = user?.role === 'cliente' || ['catalogo', 'carrito', 'pedidos_cliente', 'medios_pago'].includes(currentPage);
+  const isCliente = !user || user?.role === 'cliente' || ['catalogo', 'carrito', 'pedidos_cliente', 'medios_pago'].includes(currentPage);
 
   return (
     <Fade in key={currentPage} timeout={300}>
@@ -92,14 +94,16 @@ const PageContent = () => {
 
 // ── Root: switches between login and layout ─────────────────
 const AppRoot = () => {
-  const { user, themeMode, sidebarOpen, toggleSidebar } = useApp();
+  const { user, currentPage, themeMode, sidebarOpen, toggleSidebar } = useApp();
+  const portalPublico = !user && currentPage !== 'admin_login';
+  const accesoCliente = !user && ['carrito', 'pedidos_cliente', 'medios_pago', 'ingresar', 'registrarse'].includes(currentPage);
   const theme = React.useMemo(() => getTheme(user?.role === 'cliente' ? 'light' : themeMode), [themeMode, user?.role]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {user ? user.role === 'cliente' ? (
-        <ClientePortalLayout><PageContent /></ClientePortalLayout>
+      {user || portalPublico ? !user || user.role === 'cliente' ? (
+        <ClientePortalLayout acceso={accesoCliente}>{accesoCliente ? <ClienteAccesoScreen key={currentPage} /> : <PageContent />}</ClientePortalLayout>
       ) : (
         <>
           {sidebarOpen && (

@@ -1,5 +1,39 @@
 import { useSyncExternalStore } from 'react';
 
+// Cuentas de demostración: viven únicamente mientras la página está abierta.
+const cuentasCliente = [{ name: 'María García', email: 'cliente@mail.com', password: '1234' }];
+
+export const autenticarCliente = (email, password) => {
+  const cuenta = cuentasCliente.find((item) => item.email === email.trim().toLowerCase() && item.password === password);
+  if (!cuenta) return { error: 'El correo o la contraseña son incorrectos.' };
+  guardarSesionCliente();
+  currentStore = sesionesCliente.get(cuenta.email) || {
+    ...currentStore,
+    pedidos: [],
+    mediosPago: [],
+    cliente: { ...INITIAL_CLIENT_PROFILE, razonSocial: cuenta.name, responsable: cuenta.name, email: cuenta.email, cuit: '', telefono: '', direccion: '', localidad: '', provincia: '', tipoCliente: 'Minorista', aceptaCredito: false },
+  };
+  cuentaActiva = cuenta.email;
+  emitChange();
+  return { profile: { name: cuenta.name, email: cuenta.email, avatar: cuenta.name.split(/\s+/).map((parte) => parte[0]).slice(0, 2).join('').toUpperCase() } };
+};
+
+export const cerrarSesionCliente = () => {
+  guardarSesionCliente();
+  cuentaActiva = null;
+  currentStore = { ...currentStore, cart: [], mayoristaItems: {}, pedidos: [], mediosPago: [], catalogoModo: 'inicio' };
+  emitChange();
+};
+
+export const registrarCliente = ({ name, email, password }) => {
+  const correo = email.trim().toLowerCase();
+  if (!name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) return { error: 'Completá tu nombre y un correo electrónico válido.' };
+  if (password.length < 6) return { error: 'La contraseña debe tener al menos 6 caracteres.' };
+  if (cuentasCliente.some((cuenta) => cuenta.email === correo)) return { error: 'Ya existe una cuenta con ese correo. Iniciá sesión.' };
+  cuentasCliente.push({ name, email: correo, password });
+  return autenticarCliente(correo, password);
+};
+
 /**
  * mockData.js - Portal Cliente (PastaFab ERP)
  * Gestión de datos en memoria para el autoservicio de clientes:
@@ -497,6 +531,12 @@ let currentStore = {
   mediosPago: INITIAL_MEDIOS_PAGO,
   cliente: INITIAL_CLIENT_PROFILE,
 };
+
+const sesionesCliente = new Map([['cliente@mail.com', currentStore]]);
+let cuentaActiva = null;
+function guardarSesionCliente() {
+  if (cuentaActiva) sesionesCliente.set(cuentaActiva, currentStore);
+}
 
 const listeners = new Set();
 

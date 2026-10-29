@@ -55,12 +55,12 @@ export const AppProvider = ({ children }) => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [user]);
 
-  const login = (role) => {
+  const login = (role, profile, destination) => {
     const newUser =
       role === 'cliente'
-        ? { name: 'María García', role: 'cliente', avatar: 'MG', email: 'maria.garcia@mail.com' }
+        ? { name: 'María García', role: 'cliente', avatar: 'MG', email: 'maria.garcia@mail.com', ...profile }
         : { name: 'Carlos Rodríguez', role: 'admin', avatar: 'CR', email: 'c.rodriguez@pastafab.com' };
-    const defaultPage = role === 'cliente' ? 'catalogo' : 'clientes';
+    const defaultPage = role === 'cliente' ? (destination || 'catalogo') : 'clientes';
 
     setUser(newUser);
     setCurrentPage(defaultPage);
