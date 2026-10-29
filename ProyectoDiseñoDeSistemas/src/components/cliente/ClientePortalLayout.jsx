@@ -33,6 +33,14 @@ export default function ClientePortalLayout({ children }) {
   const { currentPage: page, user } = useApp();
   const currentPage = page || 'catalogo';
   const acceso = !user && ['ingresar', 'registrarse', 'carrito', 'pedidos_cliente', 'medios_pago'].includes(currentPage);
+  if (acceso) return (
+    <ThemeProvider theme={clienteTheme}>
+      <Box sx={{ minHeight: '100dvh', bgcolor: 'background.paper', display: 'flex', flexDirection: 'column' }}>
+        <ClienteNavigation />
+        <Box sx={{ flex: 1, display: 'flex', minWidth: 0 }}>{children}</Box>
+      </Box>
+    </ThemeProvider>
+  );
   return (
     <ThemeProvider theme={clienteTheme}>
     <Box sx={{ minHeight: '100dvh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
