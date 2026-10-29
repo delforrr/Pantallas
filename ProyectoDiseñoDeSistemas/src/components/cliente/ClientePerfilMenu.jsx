@@ -1,9 +1,11 @@
 import { useId, useState } from 'react';
-import { Button, IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText, Divider, Typography } from '@mui/material';
+import { IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText, Divider, Typography } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
 import { useApp } from '../../context/AppContext';
 import { cerrarSesionCliente } from '../../pages/cliente/mockData';
 
@@ -15,8 +17,6 @@ export default function ClientePerfilMenu({ sobreVerde = false }) {
   const close = () => setAnchorEl(null);
   const goTo = (page) => { close(); navigate(page); };
 
-  if (!user) return <Button onClick={() => navigate('ingresar')} sx={{ color: sobreVerde ? 'primary.contrastText' : 'primary.main', fontSize: { xs: 11, lg: 12 }, whiteSpace: 'nowrap', minWidth: 0 }}>Ingresar</Button>;
-
   return (
     <>
       <Tooltip title="Mi cuenta">
@@ -25,12 +25,14 @@ export default function ClientePerfilMenu({ sobreVerde = false }) {
         </IconButton>
       </Tooltip>
       <Menu id={`${id}-menu`} anchorEl={anchorEl} open={open} onClose={close} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }} slotProps={{ list: { 'aria-labelledby': `${id}-button` }, paper: { sx: { mt: 1, minWidth: 230, borderRadius: '14px', border: '1px solid', borderColor: 'divider', boxShadow: '0 8px 28px #51482d26' } } }}>
-        <Typography component="li" variant="body2" sx={{ px: 2, py: 1, fontWeight: 700, color: 'primary.main', listStyle: 'none' }}>{user?.name}</Typography>
-        <Divider />
-        <MenuItem onClick={() => goTo('pedidos_cliente')}><ListItemIcon><ShoppingBagOutlinedIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Mis pedidos</ListItemText></MenuItem>
-        <MenuItem onClick={() => goTo('medios_pago')}><ListItemIcon><PaymentsOutlinedIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Medios de pago</ListItemText></MenuItem>
-        <Divider />
-        <MenuItem onClick={() => { close(); cerrarSesionCliente(); logout(); }} sx={{ color: 'secondary.main' }}><ListItemIcon><LogoutIcon fontSize="small" color="secondary" /></ListItemIcon><ListItemText>Cerrar sesión</ListItemText></MenuItem>
+        {!user && <MenuItem onClick={() => goTo('ingresar')}><ListItemIcon><LoginIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Iniciar sesión</ListItemText></MenuItem>}
+        {!user && <MenuItem onClick={() => goTo('registrarse')}><ListItemIcon><PersonAddOutlinedIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Registrarme</ListItemText></MenuItem>}
+        {user && <Typography component="li" variant="body2" sx={{ px: 2, py: 1, fontWeight: 700, color: 'primary.main', listStyle: 'none' }}>{user.name}</Typography>}
+        {user && <Divider />}
+        {user && <MenuItem onClick={() => goTo('pedidos_cliente')}><ListItemIcon><ShoppingBagOutlinedIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Mis pedidos</ListItemText></MenuItem>}
+        {user && <MenuItem onClick={() => goTo('medios_pago')}><ListItemIcon><PaymentsOutlinedIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Medios de pago</ListItemText></MenuItem>}
+        {user && <Divider />}
+        {user && <MenuItem onClick={() => { close(); cerrarSesionCliente(); logout(); }} sx={{ color: 'secondary.main' }}><ListItemIcon><LogoutIcon fontSize="small" color="secondary" /></ListItemIcon><ListItemText>Cerrar sesión</ListItemText></MenuItem>}
       </Menu>
     </>
   );

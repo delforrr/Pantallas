@@ -53,7 +53,6 @@ export default function ClienteAccesoScreen() {
           <Alert severity="info" icon={false} sx={{ mt: 2, fontSize: 12 }}>Demo en memoria. {registro ? 'La cuenta creada estará disponible hasta recargar la página.' : 'Probá con cliente@mail.com / 1234.'}</Alert>
           <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('catalogo')} sx={{ mt: 2 }}>Volver al catálogo</Button>
         </Paper>
-        <Box sx={{ textAlign: 'center', mt: 2 }}><Button size="small" onClick={() => navigate('admin_login')} sx={{ color: 'text.secondary', bgcolor: 'background.paper' }}>Acceso administración</Button></Box>
     </Box>
   );
 }

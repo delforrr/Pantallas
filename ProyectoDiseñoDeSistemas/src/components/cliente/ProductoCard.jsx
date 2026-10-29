@@ -5,8 +5,10 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import { clientStore, MINIMO_MAYORISTA, PRODUCT_IMAGES } from '../../pages/cliente/mockData';
+import { useApp } from '../../context/AppContext';
 
 export const ProductoCard = ({ producto, onAddToCartFeedback, modoMayorista = false, cantidadMayorista = 0, onAgregarMayorista }) => {
+  const { user, navigate } = useApp();
   const [cantidadMinorista, setCantidad] = useState(1);
   const [cantidadParaMayorista, setCantidadParaMayorista] = useState(MINIMO_MAYORISTA);
   const cantidad = modoMayorista ? cantidadParaMayorista : cantidadMinorista;
@@ -21,6 +23,10 @@ export const ProductoCard = ({ producto, onAddToCartFeedback, modoMayorista = fa
 
   const handleAddToCart = () => {
     if (sinStock || agregadoAnim) return;
+    if (!user) {
+      navigate('carrito');
+      return;
+    }
     if (modoMayorista) {
       onAgregarMayorista(producto, cantidad);
       return;
