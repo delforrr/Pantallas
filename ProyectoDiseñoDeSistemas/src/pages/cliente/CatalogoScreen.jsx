@@ -120,7 +120,7 @@ export const CatalogoScreen = () => {
             <ClienteCatalogoHeader cartSummary={cartSummary} productosActivo sobreVerde onInicio={() => clientStore.setCatalogoModo('inicio')} onProductos={handleClearFilters} />
             <Box sx={{ maxWidth: 1520, mx: 'auto', p: { xs: 1.5, md: 5 } }}>
             <Box sx={{ py: 3, backgroundImage: `url("${ingredientesPattern}")`, backgroundRepeat: 'repeat', backgroundSize: { xs: '320px', md: '440px' } }}>
-            <Box sx={{ bgcolor: 'transparent', px: { xs: 2, md: 4 }, pt: 2, mb: 0 }}>
+            <Box sx={{ bgcolor: 'transparent', px: { xs: 0, sm: 2, md: 4 }, pt: 2, mb: 0 }}>
             <Box sx={{ textAlign: 'center', py: 2, mb: 2, '& > .MuiTypography-root': { bgcolor: 'primary.main', width: 'fit-content', maxWidth: '100%', mx: 'auto', px: 2, py: 0.5, borderRadius: '8px' } }}>
               <Typography sx={{ color: '#fff', fontSize: 10, letterSpacing: '0.2em', fontWeight: 700 }}>DE NUESTRA COCINA A TU MESA</Typography>
               <Typography component="h1" sx={{ fontFamily: 'Kristi, cursive', color: '#fff', fontSize: { xs: 58, md: 76 }, lineHeight: 1.2 }}>{modoMayorista ? 'Pedidos mayoristas' : 'Nuestra carta'}</Typography>
@@ -206,7 +206,8 @@ export const CatalogoScreen = () => {
                 sx={{
                   display: 'grid',
                   gridTemplateColumns: {
-                    xs: 'repeat(2, minmax(0, 1fr))',
+                    xs: 'minmax(0, 1fr)',
+                    sm: 'repeat(2, minmax(0, 1fr))',
                     md: 'repeat(4, minmax(0, 1fr))',
                   },
                   gap: { xs: 1.5, sm: 3 },
