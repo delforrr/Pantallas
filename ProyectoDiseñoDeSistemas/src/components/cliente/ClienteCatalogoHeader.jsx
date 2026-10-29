@@ -11,7 +11,7 @@ export default function ClienteCatalogoHeader({ cartSummary, onInicio, onProduct
   return (
     <Box component="header" sx={{ position: 'relative' }}>
       {sobreVerde && (
-        <Button aria-label="PastaFab, ir al inicio" onClick={onInicio} sx={{ position: { xs: 'relative', md: 'absolute' }, left: { xs: 12, sm: 16, md: '21%' }, top: { md: '50%' }, transform: { md: 'translateY(-50%)' }, color: 'primary.contrastText', fontFamily: 'Kristi, cursive', fontSize: 46, fontWeight: 400, lineHeight: 1, textTransform: 'none', px: 0, py: 0.5, '&:hover': { bgcolor: 'primary.dark' } }}>
+        <Button aria-label="PastaFab, ir al inicio" onClick={onInicio} sx={{ position: { xs: 'relative', md: 'absolute' }, left: { xs: 12, sm: 16, md: '17%' }, top: { md: '50%' }, transform: { md: 'translateY(-50%)' }, color: 'primary.contrastText', fontFamily: 'Kristi, cursive', fontSize: 46, fontWeight: 400, lineHeight: 1, textTransform: 'none', px: 0, py: 0.5, '&:hover': { bgcolor: 'primary.dark' } }}>
           PastaFab
         </Button>
       )}
