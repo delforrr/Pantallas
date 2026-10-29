@@ -9,6 +9,12 @@ export default function ClienteCatalogoHeader({ cartSummary, onInicio, onProduct
   const activeStyle = { bgcolor: sobreVerde ? 'primary.contrastText' : 'primary.main', color: sobreVerde ? 'primary.main' : 'primary.contrastText', '&:hover': { bgcolor: sobreVerde ? 'background.paper' : 'primary.dark' } };
 
   return (
+    <Box component="header" sx={{ position: 'relative' }}>
+      {sobreVerde && (
+        <Button aria-label="PastaFab, ir al inicio" onClick={onInicio} sx={{ position: { xs: 'relative', md: 'absolute' }, left: { xs: 12, md: 40 }, top: { md: '50%' }, transform: { md: 'translateY(-50%)' }, color: 'primary.contrastText', fontFamily: 'Kristi, cursive', fontSize: 46, fontWeight: 400, lineHeight: 1, textTransform: 'none', px: 1, py: 0.5, '&:hover': { bgcolor: 'primary.dark' } }}>
+          PastaFab
+        </Button>
+      )}
     <Box role="navigation" aria-label="Navegación del cliente" sx={{ position: 'relative', zIndex: 3, ml: { md: '40%' }, mr: { md: '13%' }, bgcolor: 'transparent', minHeight: { xs: 56, md: 66, lg: 76 }, px: { xs: 1.5, sm: 2, lg: 2.5 }, py: { xs: 0.8, md: 1 }, display: 'flex', alignItems: 'center', justifyContent: { xs: 'space-between', sm: 'space-evenly' }, flexWrap: 'wrap', gap: 1 }}>
       <Button aria-current={!productosActivo ? 'page' : undefined} sx={{ ...navStyle, ...(!productosActivo && activeStyle) }} onClick={onInicio}>Inicio</Button>
       <Button aria-current={productosActivo ? 'page' : undefined} sx={{ ...navStyle, ...(productosActivo && activeStyle) }} onClick={onProductos}>Productos</Button>
@@ -18,6 +24,7 @@ export default function ClienteCatalogoHeader({ cartSummary, onInicio, onProduct
         </IconButton>
       </Tooltip>
       <ClientePerfilMenu sobreVerde={sobreVerde} />
+    </Box>
     </Box>
   );
 }
