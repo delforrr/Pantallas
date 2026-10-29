@@ -11,11 +11,11 @@ export default function ClienteCatalogoHeader({ cartSummary, onInicio, onProduct
   return (
     <Box component="header" sx={{ position: 'relative', width: '100%', minWidth: 0 }}>
       {sobreVerde && (
-        <Button aria-label="PastaFab, ir al inicio" onClick={onInicio} sx={{ display: 'block', mx: { xs: 'auto', md: 0 }, position: { xs: 'relative', md: 'absolute' }, left: { md: '17%' }, top: { md: '50%' }, transform: { md: 'translateY(-50%)' }, color: 'primary.contrastText', fontFamily: 'Kristi, cursive', fontSize: 46, fontWeight: 400, lineHeight: 1, textTransform: 'none', px: 0, py: 0.5, '&:hover': { bgcolor: 'primary.dark' } }}>
+        <Button aria-label="PastaFab, ir al inicio" onClick={onInicio} sx={{ display: { xs: 'none', md: 'block' }, mx: { xs: 'auto', md: 0 }, position: { xs: 'relative', md: 'absolute' }, left: { md: '17%' }, top: { md: '50%' }, transform: { md: 'translateY(-50%)' }, color: 'primary.contrastText', fontFamily: 'Kristi, cursive', fontSize: 46, fontWeight: 400, lineHeight: 1, textTransform: 'none', px: 0, py: 0.5, '&:hover': { bgcolor: 'primary.dark' } }}>
           PastaFab
         </Button>
       )}
-    <Box role="navigation" aria-label="Navegación del cliente" sx={{ position: 'relative', zIndex: 3, ml: { md: '34%' }, mr: { md: '21%' }, bgcolor: 'transparent', minHeight: { xs: 56, md: 66, lg: 76 }, px: { xs: 1.5, sm: 2, md: 0 }, py: { xs: 0.8, md: 1 }, display: 'flex', alignItems: 'center', justifyContent: { xs: 'space-between', sm: 'space-evenly', md: 'space-between' }, flexWrap: { xs: 'nowrap', md: 'wrap' }, gap: { xs: 0.5, sm: 1 } }}>
+    <Box role="navigation" aria-label="Navegación del cliente" sx={{ position: 'relative', zIndex: 3, ml: { md: '34%' }, mr: { md: '21%' }, bgcolor: 'transparent', minHeight: { xs: 56, md: 66, lg: 76 }, px: { xs: 1.5, sm: 2, md: 0 }, pt: { xs: 2, md: 1 }, pb: { xs: 0.8, md: 1 }, display: 'flex', alignItems: 'center', justifyContent: { xs: 'space-between', sm: 'space-evenly', md: 'space-between' }, flexWrap: { xs: 'nowrap', md: 'wrap' }, gap: { xs: 0.5, sm: 1 } }}>
       <Button aria-current={!productosActivo ? 'page' : undefined} sx={{ ...navStyle, ...(!productosActivo && activeStyle) }} onClick={onInicio}>Inicio</Button>
       <Button aria-current={productosActivo ? 'page' : undefined} sx={{ ...navStyle, ...(productosActivo && activeStyle) }} onClick={onProductos}>Productos</Button>
       <Tooltip title={`Ver carrito · $${cartSummary.totalPrice.toLocaleString('es-AR')}`}>
