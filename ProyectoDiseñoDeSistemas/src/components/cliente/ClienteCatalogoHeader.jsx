@@ -9,7 +9,7 @@ export default function ClienteCatalogoHeader({ cartSummary, onInicio, onProduct
   const activeStyle = { bgcolor: sobreVerde ? 'primary.contrastText' : 'primary.main', color: sobreVerde ? 'primary.main' : 'primary.contrastText', '&:hover': { bgcolor: sobreVerde ? 'background.paper' : 'primary.dark' } };
 
   return (
-    <Box role="navigation" aria-label="Navegación del cliente" sx={{ position: 'relative', zIndex: 3, ml: { md: '34%' }, mr: { md: '19%' }, bgcolor: 'transparent', minHeight: { xs: 56, md: 66, lg: 76 }, px: { xs: 1.5, sm: 2, lg: 2.5 }, py: { xs: 0.8, md: 1 }, display: 'flex', alignItems: 'center', justifyContent: { xs: 'space-between', sm: 'space-evenly' }, flexWrap: 'wrap', gap: 1 }}>
+    <Box role="navigation" aria-label="Navegación del cliente" sx={{ position: 'relative', zIndex: 3, ml: { md: '40%' }, mr: { md: '13%' }, bgcolor: 'transparent', minHeight: { xs: 56, md: 66, lg: 76 }, px: { xs: 1.5, sm: 2, lg: 2.5 }, py: { xs: 0.8, md: 1 }, display: 'flex', alignItems: 'center', justifyContent: { xs: 'space-between', sm: 'space-evenly' }, flexWrap: 'wrap', gap: 1 }}>
       <Button aria-current={!productosActivo ? 'page' : undefined} sx={{ ...navStyle, ...(!productosActivo && activeStyle) }} onClick={onInicio}>Inicio</Button>
       <Button aria-current={productosActivo ? 'page' : undefined} sx={{ ...navStyle, ...(productosActivo && activeStyle) }} onClick={onProductos}>Productos</Button>
       <Tooltip title={`Ver carrito · $${cartSummary.totalPrice.toLocaleString('es-AR')}`}>
