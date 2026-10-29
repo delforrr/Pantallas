@@ -31,7 +31,7 @@ import {
   CATALOGO_CLIENTE,
 } from './mockData';
 import ClienteLanding from '../../components/cliente/ClienteLanding';
-import ClienteNavigation from '../../components/cliente/ClienteNavigation';
+import ClienteCatalogoHeader from '../../components/cliente/ClienteCatalogoHeader';
 import ingredientesPattern from '../../components/cliente/ingredientes-pattern.svg';
 import { ProductoCard } from '../../components/cliente';
 
@@ -116,9 +116,9 @@ export const CatalogoScreen = () => {
             2. VISTA DE CATÁLOGO COMPLETO (GRILLA CSS UNIFORME 1fr)
            ───────────────────────────────────────────────────────────── */
         <Fade in timeout={300}>
-          <Box sx={{ p: { xs: 1.5, md: 5 }, minHeight: '100vh', bgcolor: 'primary.main' }}>
-            <Box sx={{ maxWidth: 1440, mx: 'auto' }}>
-            <ClienteNavigation sobreVerde onInicio={() => clientStore.setCatalogoModo('inicio')} onProductos={() => { handleClearFilters(); }} />
+          <Box sx={{ minHeight: '100vh', bgcolor: 'primary.main' }}>
+            <ClienteCatalogoHeader cartSummary={cartSummary} productosActivo onInicio={() => clientStore.setCatalogoModo('inicio')} onProductos={handleClearFilters} />
+            <Box sx={{ maxWidth: 1520, mx: 'auto', p: { xs: 1.5, md: 5 } }}>
             <Box sx={{ py: 3, backgroundImage: `url("${ingredientesPattern}")`, backgroundRepeat: 'repeat', backgroundSize: { xs: '320px', md: '440px' } }}>
             <Box sx={{ bgcolor: 'transparent', px: { xs: 2, md: 4 }, pt: 2, mb: 0 }}>
             <Box sx={{ textAlign: 'center', py: 2, mb: 2, '& > .MuiTypography-root': { bgcolor: 'primary.main', width: 'fit-content', maxWidth: '100%', mx: 'auto', px: 2, py: 0.5, borderRadius: '8px' } }}>
