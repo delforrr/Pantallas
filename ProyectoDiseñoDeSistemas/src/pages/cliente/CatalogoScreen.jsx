@@ -117,7 +117,7 @@ export const CatalogoScreen = () => {
            ───────────────────────────────────────────────────────────── */
         <Fade in timeout={300}>
           <Box sx={{ minHeight: '100vh', bgcolor: 'primary.main' }}>
-            <ClienteCatalogoHeader cartSummary={cartSummary} productosActivo onInicio={() => clientStore.setCatalogoModo('inicio')} onProductos={handleClearFilters} />
+            <ClienteCatalogoHeader cartSummary={cartSummary} productosActivo sobreVerde onInicio={() => clientStore.setCatalogoModo('inicio')} onProductos={handleClearFilters} />
             <Box sx={{ maxWidth: 1520, mx: 'auto', p: { xs: 1.5, md: 5 } }}>
             <Box sx={{ py: 3, backgroundImage: `url("${ingredientesPattern}")`, backgroundRepeat: 'repeat', backgroundSize: { xs: '320px', md: '440px' } }}>
             <Box sx={{ bgcolor: 'transparent', px: { xs: 2, md: 4 }, pt: 2, mb: 0 }}>
