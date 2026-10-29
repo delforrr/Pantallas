@@ -29,9 +29,9 @@ const clienteTheme = createTheme(getTheme('light'), {
   },
 });
 
-export default function ClientePortalLayout({ children, acceso = false }) {
+export default function ClientePortalLayout({ children }) {
   const { currentPage: page } = useApp();
-  const currentPage = acceso || !page ? 'catalogo' : page;
+  const currentPage = page || 'catalogo';
   return (
     <ThemeProvider theme={clienteTheme}>
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>

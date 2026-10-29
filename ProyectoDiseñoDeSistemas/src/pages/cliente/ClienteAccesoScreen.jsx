@@ -6,8 +6,6 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import { useApp } from '../../context/AppContext';
 import { autenticarCliente, registrarCliente } from './mockData';
-import pastaPrincipal from '../../components/cliente/pasta-principal.png';
-import ingredientesPattern from '../../components/cliente/ingredientes-pattern.svg';
 import ingredientesPatternRed from '../../components/cliente/ingredientes-pattern-red.svg';
 
 export default function ClienteAccesoScreen() {
@@ -35,19 +33,8 @@ export default function ClienteAccesoScreen() {
   const cambiarModo = () => { setRegistro((value) => !value); setError(''); setPassword(''); setConfirmacion(''); };
 
   return (
-    <Box component="main" sx={{ minHeight: '100dvh', bgcolor: '#fff', display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) minmax(0, 1fr)' } }}>
-      <Box component="section" aria-label="PastaFab, pastas hechas con tradición" sx={{ position: 'relative', overflow: 'hidden', bgcolor: 'primary.main', color: 'primary.contrastText', p: { xs: 3, md: 6 }, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, backgroundImage: `url("${ingredientesPattern}")`, backgroundSize: { xs: 280, md: 400 } }}>
-        <Typography sx={{ fontFamily: 'Kristi, cursive', fontSize: { xs: 54, md: 76 }, lineHeight: 1, bgcolor: 'primary.main', px: 2 }}>PastaFab</Typography>
-        <Box component="img" src={pastaPrincipal} alt="Pastas artesanales con vegetales y salsa cremosa" sx={{ display: { xs: 'none', md: 'block' }, width: 'min(80%, 420px)', aspectRatio: '1', objectFit: 'cover', borderRadius: '50%', border: '5px solid', borderColor: 'secondary.main', my: 2, boxShadow: '0 16px 40px #0003' }} />
-        <Box sx={{ textAlign: 'center', bgcolor: 'primary.main', p: 1.5, borderRadius: 3 }}>
-          <Typography sx={{ fontSize: 10, letterSpacing: '0.2em', fontWeight: 700 }}>DE NUESTRA COCINA A TU MESA</Typography>
-          <Typography sx={{ fontFamily: 'Kristi, cursive', fontSize: { xs: 34, md: 48 }, lineHeight: 1.3, mt: 1 }}>Los buenos momentos se comparten.</Typography>
-        </Box>
-      </Box>
-
-      <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', p: { xs: 2.5, sm: 4, md: 5 }, backgroundImage: `url("${ingredientesPatternRed}")`, backgroundSize: 340 }}>
-        <Box sx={{ alignSelf: 'flex-start', bgcolor: '#fff', borderRadius: 8 }}><Button startIcon={<ArrowBackIcon />} onClick={() => navigate('catalogo')}>Volver al catálogo</Button></Box>
-        <Paper elevation={0} sx={{ width: '100%', maxWidth: 440, mx: 'auto', my: 'auto', p: { xs: 2, sm: 4 }, borderRadius: 5, bgcolor: '#fff', boxSizing: 'border-box' }}>
+    <Box component="main" sx={{ py: { xs: 2, md: 4 }, px: { xs: 0, sm: 2 }, backgroundImage: `url("${ingredientesPatternRed}")`, backgroundSize: 340 }}>
+        <Paper elevation={0} sx={{ width: '100%', maxWidth: 480, mx: 'auto', p: { xs: 2, sm: 4 }, border: '1px solid', borderColor: 'divider', borderRadius: 5, bgcolor: 'background.paper', boxSizing: 'border-box' }}>
           <Typography sx={{ color: 'secondary.main', fontSize: 10, letterSpacing: '0.2em', fontWeight: 800, mb: 1 }}>TU LUGAR EN NUESTRA MESA</Typography>
           <Typography component="h1" sx={{ fontFamily: 'Kristi, cursive', fontSize: { xs: 54, sm: 64 }, color: 'primary.main', lineHeight: 1.15 }}>{registro ? 'Sumate a la familia' : 'Qué bueno verte'}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, mb: 3, lineHeight: 1.7 }}>{registro ? 'Creá tu cuenta para armar tu carrito y seguir tus pedidos.' : motivo}</Typography>
@@ -64,9 +51,9 @@ export default function ClienteAccesoScreen() {
             <Button onClick={cambiarModo}>{registro ? 'Iniciar sesión' : 'Registrarme'}</Button>
           </Box>
           <Alert severity="info" icon={false} sx={{ mt: 2, fontSize: 12 }}>Demo en memoria. {registro ? 'La cuenta creada estará disponible hasta recargar la página.' : 'Probá con cliente@mail.com / 1234.'}</Alert>
+          <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('catalogo')} sx={{ mt: 2 }}>Volver al catálogo</Button>
         </Paper>
-        <Box sx={{ textAlign: 'center', mt: 2, bgcolor: '#fff', borderRadius: 3, alignSelf: 'center', px: 2 }}><Button size="small" onClick={() => navigate('admin_login')} sx={{ color: 'text.secondary' }}>Acceso administración</Button></Box>
-      </Box>
+        <Box sx={{ textAlign: 'center', mt: 2 }}><Button size="small" onClick={() => navigate('admin_login')} sx={{ color: 'text.secondary', bgcolor: 'background.paper' }}>Acceso administración</Button></Box>
     </Box>
   );
 }

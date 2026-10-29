@@ -103,7 +103,7 @@ const AppRoot = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       {user || portalPublico ? !user || user.role === 'cliente' ? (
-        <ClientePortalLayout acceso={accesoCliente}>{accesoCliente ? <ClienteAccesoScreen key={currentPage} /> : <PageContent />}</ClientePortalLayout>
+        <ClientePortalLayout>{accesoCliente ? <ClienteAccesoScreen key={currentPage} /> : <PageContent />}</ClientePortalLayout>
       ) : (
         <>
           {sidebarOpen && (
