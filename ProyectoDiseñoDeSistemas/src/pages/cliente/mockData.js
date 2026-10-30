@@ -1,11 +1,12 @@
 import { useSyncExternalStore } from 'react';
 
 // Cuentas de demostración: viven únicamente mientras la página está abierta.
-const cuentasCliente = [{ name: 'María García', email: 'cliente@mail.com', password: '1234' }];
+const cuentasCliente = [{ name: 'María García', username: 'cliente', email: 'cliente@mail.com', password: 'cliente' }];
 
 export const autenticarCliente = (email, password) => {
-  const cuenta = cuentasCliente.find((item) => item.email === email.trim().toLowerCase() && item.password === password);
-  if (!cuenta) return { error: 'El correo o la contraseña son incorrectos.' };
+  const usuario = email.trim().toLowerCase();
+  const cuenta = cuentasCliente.find((item) => (item.email === usuario || item.username === usuario) && item.password === password);
+  if (!cuenta) return { error: 'El usuario o la contraseña son incorrectos.' };
   guardarSesionCliente();
   currentStore = sesionesCliente.get(cuenta.email) || {
     ...currentStore,

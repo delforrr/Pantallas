@@ -17,8 +17,8 @@ export default function AdminLoginPage() {
   const ingresar = (event) => {
     event.preventDefault();
     setError('');
-    if (email.trim().toLowerCase() !== 'admin@pastafab.com' || password !== 'admin') {
-      setError('El correo o la contraseña de administración son incorrectos.');
+    if (email.trim().toLowerCase() !== 'admin' || password !== 'admin') {
+      setError('El usuario o la contraseña de administración son incorrectos.');
       return;
     }
     login('admin');
@@ -35,12 +35,12 @@ export default function AdminLoginPage() {
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Ingresá con tu cuenta de administrador.</Typography>
         </Box>
         <Box component="form" onSubmit={ingresar} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField required fullWidth type="email" label="Correo de administración" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} slotProps={{ input: { startAdornment: <InputAdornment position="start"><PersonIcon fontSize="small" /></InputAdornment> } }} />
+          <TextField required fullWidth label="Usuario de administración" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} slotProps={{ input: { startAdornment: <InputAdornment position="start"><PersonIcon fontSize="small" /></InputAdornment> } }} />
           <TextField required fullWidth label="Contraseña" type={showPass ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} slotProps={{ input: { startAdornment: <InputAdornment position="start"><LockIcon fontSize="small" /></InputAdornment>, endAdornment: <InputAdornment position="end"><IconButton aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'} onClick={() => setShowPass((value) => !value)} edge="end">{showPass ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> } }} />
           {error && <Alert severity="error">{error}</Alert>}
           <Button fullWidth variant="contained" type="submit" startIcon={<AdminPanelSettingsIcon />} sx={{ py: 1.4 }}>Ingresar al panel</Button>
         </Box>
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 3 }}>Demo: admin@pastafab.com / admin</Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 3 }}>Demo: admin / admin</Typography>
       </Box>
     </Box>
   );

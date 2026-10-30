@@ -42,3 +42,11 @@ test('una cuenta nueva no recibe los datos personales ni los pedidos de otra cue
   assert.equal(cliente.dni, '');
   assert.deepEqual(pedidos, []);
 });
+
+test('el cliente predeterminado ingresa con cliente/cliente y conserva el correo de su perfil', () => {
+  const resultado = autenticarCliente('cliente', 'cliente');
+  assert.equal(resultado.profile.email, 'cliente@mail.com');
+  assert.equal(clientStore.getState().cliente.email, 'cliente@mail.com');
+  assert.ok(autenticarCliente('cliente', '1234').error);
+  assert.ok(autenticarCliente('admin', 'admin').error);
+});

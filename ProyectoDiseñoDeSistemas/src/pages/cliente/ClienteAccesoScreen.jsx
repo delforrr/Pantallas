@@ -58,7 +58,7 @@ export default function ClienteAccesoScreen() {
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, mb: registro ? 2 : 3, lineHeight: 1.6 }}>{registro ? 'Creá tu cuenta para armar tu carrito y seguir tus pedidos.' : motivo}</Typography>
           <Stack component="form" onSubmit={enviar} spacing={1.5} sx={{ '& .MuiInputBase-root': { fontSize: 14 } }}>
             {registro && <TextField size="small" required fullWidth label="Nombre y apellido" autoComplete="name" value={nombre} onChange={(event) => setNombre(event.target.value)} slotProps={{ htmlInput: { maxLength: 100 } }} />}
-            <TextField size="small" required fullWidth label="Correo electrónico" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+            <TextField size="small" required fullWidth label={registro ? 'Correo electrónico' : 'Usuario o correo electrónico'} type={registro ? 'email' : 'text'} autoComplete={registro ? 'email' : 'username'} value={email} onChange={(event) => setEmail(event.target.value)} />
             <TextField size="small" required fullWidth label="Contraseña" type={visible ? 'text' : 'password'} autoComplete={registro ? 'new-password' : 'current-password'} value={password} onChange={(event) => setPassword(event.target.value)} helperText={registro ? 'Usá al menos 6 caracteres.' : undefined} slotProps={{ htmlInput: { minLength: registro ? 6 : 1 }, input: { endAdornment: <InputAdornment position="end"><IconButton aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'} onClick={() => setVisible((value) => !value)} edge="end">{visible ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}</IconButton></InputAdornment> } }} />
             {registro && <TextField size="small" required fullWidth label="Confirmar contraseña" type={visible ? 'text' : 'password'} autoComplete="new-password" value={confirmacion} onChange={(event) => setConfirmacion(event.target.value)} />}
             {error && <Alert severity="error">{error}</Alert>}
@@ -68,7 +68,7 @@ export default function ClienteAccesoScreen() {
             <Typography variant="caption" color="text.secondary">{registro ? '¿Ya tenés cuenta?' : '¿No tenés cuenta?'}</Typography>
             <Button onClick={cambiarModo}>{registro ? 'Iniciar sesión' : 'Registrarme'}</Button>
           </Box>
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block', textAlign: 'center', fontSize: 11 }}>Demo en memoria. {registro ? 'La cuenta estará disponible hasta recargar la página.' : 'cliente@mail.com / 1234.'}</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block', textAlign: 'center', fontSize: 11 }}>Demo en memoria. {registro ? 'La cuenta estará disponible hasta recargar la página.' : 'cliente / cliente.'}</Typography>
         </Paper>
         <Typography variant="caption" sx={{ position: 'relative', mt: { xs: 3, md: 4 }, color: 'primary.main', fontSize: 10, letterSpacing: '0.08em' }}>PASTAFAB · PASTAS HECHAS CON TRADICIÓN</Typography>
       </Box>
