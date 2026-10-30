@@ -86,13 +86,15 @@ export const AppProvider = ({ children }) => {
   };
 
   const logout = () => {
+    const loginPage = user?.role === 'admin' ? 'admin_login' : null;
     setUser(null);
-    setCurrentPage(null);
+    setCurrentPage(loginPage);
+    setSidebarOpen(false);
     try {
       sessionStorage.removeItem('pastafab_user');
       sessionStorage.removeItem('pastafab_page');
       if (typeof window !== 'undefined') {
-        window.history.pushState(null, '', window.location.pathname);
+        window.history.pushState(loginPage ? { page: loginPage } : null, '', loginPage ? '#' + loginPage : window.location.pathname);
       }
     } catch {
       // ignore
