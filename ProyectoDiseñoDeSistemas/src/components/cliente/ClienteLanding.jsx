@@ -1,11 +1,9 @@
-import { Box, Typography, Button, IconButton, Badge, Stack, Tooltip } from '@mui/material';
-import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
+import { Box, Typography, Button, IconButton, Stack } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import { useApp } from '../../context/AppContext';
-import ClientePerfilMenu from './ClientePerfilMenu';
+import ClienteCatalogoHeader from './ClienteCatalogoHeader';
 import pastaPrincipal from './pasta-principal.png';
 import ingredientesPattern from './ingredientes-pattern.svg';
 import ingredientesPatternRed from './ingredientes-pattern-red.svg';
@@ -16,8 +14,6 @@ const tomato = '#c93600';
 const script = '"Kristi", "Brush Script MT", cursive';
 
 export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAbout, onContact, onSocial }) {
-  const { navigate } = useApp();
-  const navStyle = { color: olive, fontSize: { xs: 11, lg: 12 }, fontWeight: 700, borderRadius: 8, px: { xs: 1.2, lg: 1.8 }, whiteSpace: 'nowrap' };
   return (
     <Box sx={{ bgcolor: '#fff', minHeight: '100vh', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', fontFamily: '"Montserrat", sans-serif', position: 'relative', overflowX: 'hidden' }}>
       <Box component="section" aria-label="Bienvenidos a PastaFab" sx={{ position: 'relative', bgcolor: '#fff', color: olive, width: '100%', height: { xs: 'auto', md: '100vh' }, minHeight: { xs: '100vh', md: '100vh' }, overflowY: { xs: 'auto', md: 'hidden' }, overflowX: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: { xs: 'space-between', md: 'initial' } }}>
@@ -80,32 +76,7 @@ export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAb
         />
 
         {/* Navegación superior */}
-        <Box
-          role="navigation"
-          aria-label="Navegación del cliente"
-          sx={{
-            position: 'relative',
-            zIndex: 3,
-            ml: { md: '34%' },
-            mr: { md: '19%' },
-            bgcolor: 'transparent',
-            minHeight: { xs: 56, md: 66, lg: 76 },
-            px: { xs: 1.5, sm: 2, lg: 2.5 },
-            py: { xs: 0.8, md: 1 },
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: { xs: 'space-between', sm: 'space-evenly' },
-            flexWrap: 'wrap',
-            gap: 1,
-          }}
-        >
-          <Button sx={{ ...navStyle, bgcolor: olive, color: '#fff', '&:hover': { bgcolor: '#325018' } }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Inicio</Button>
-          <Button sx={navStyle} onClick={onCatalogo}>Productos</Button>
-          <Tooltip title={`Ver carrito · $${cartSummary.totalPrice.toLocaleString('es-AR')}`}>
-            <IconButton aria-label={`Carrito, ${cartSummary.totalItems} ítems`} onClick={() => navigate('carrito')} sx={{ color: olive }}><Badge badgeContent={cartSummary.totalItems} showZero sx={{ '& .MuiBadge-badge': { bgcolor: 'background.default', color: 'primary.main' } }}><ShoppingBagOutlinedIcon fontSize="small" /></Badge></IconButton>
-          </Tooltip>
-          <ClientePerfilMenu />
-        </Box>
+        <ClienteCatalogoHeader cartSummary={cartSummary} onInicio={() => window.scrollTo({ top: 0, behavior: 'smooth' })} onProductos={onCatalogo} />
 
         {/* Versión móvil del plato destacado con fondo dividido verde (izq) y blanco/rojo (der) */}
         <Box

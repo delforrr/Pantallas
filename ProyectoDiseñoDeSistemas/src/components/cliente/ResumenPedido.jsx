@@ -11,19 +11,22 @@ import {
   MenuItem,
   TextField,
   Chip,
+  Alert,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import { useClientStore, clientStore } from "../../pages/cliente/mockData";
+import { useApp } from "../../context/AppContext";
 
 export const ResumenPedido = ({ onOrderSuccess }) => {
   const { cart, cliente } = useClientStore();
+  const { navigate } = useApp();
 
   const [modalidadEntrega, setModalidadEntrega] = useState("Retiro en Fábrica");
   const [medioPago, setMedioPago] = useState("Efectivo en Mostrador");
   const [direccionEntrega, setDireccionEntrega] = useState(
-    cliente?.direccion || "Av. Villegas 450",
+    cliente?.direccion || "",
   );
   const [observaciones, setObservaciones] = useState("");
 
@@ -37,9 +40,10 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
   // Costos de envío según modalidad
   const costoEnvio = modalidadEntrega === "Delivery" ? 1800 : 0;
   const total = Math.max(0, subtotal + costoEnvio);
+  const faltanDatosEntrega = modalidadEntrega === "Delivery" && (!direccionEntrega.trim() || !cliente?.telefono?.trim());
 
   const handleConfirmOrder = () => {
-    if (cart.length === 0) return;
+    if (cart.length === 0 || faltanDatosEntrega) return;
 
     const orderData = {
       tipoPedido: "Venta Mostrador",
@@ -47,8 +51,8 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
       domicilioEntrega:
         modalidadEntrega === "Retiro en Fábrica"
           ? "Retiro en Fábrica"
-          : direccionEntrega || cliente?.direccion || "Av. Villegas 450",
-      telefonoContacto: cliente?.telefono || "(02392) 43-9901",
+          : direccionEntrega.trim(),
+      telefonoContacto: cliente?.telefono || "",
       medioPago,
       observaciones: observaciones.trim() || undefined,
       estadoPago: "Pagado",
@@ -269,12 +273,13 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
       </Box>
 
       {/* Botón de Acción Confirmar Pedido */}
+      {faltanDatosEntrega && <Alert severity="info" sx={{ mb: 2 }}>Completá tu dirección de entrega y tu teléfono para recibir el pedido.<Button size="small" onClick={() => navigate('mi_perfil')}>Completar mi perfil</Button></Alert>}
       <Button
         variant="contained"
         color="primary"
         fullWidth
         size="large"
-        disabled={cart.length === 0}
+        disabled={cart.length === 0 || faltanDatosEntrega}
         onClick={handleConfirmOrder}
         startIcon={<CheckCircleIcon />}
         sx={{

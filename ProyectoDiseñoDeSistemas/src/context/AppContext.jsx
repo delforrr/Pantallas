@@ -55,12 +55,12 @@ export const AppProvider = ({ children }) => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [user]);
 
-  const login = (role) => {
+  const login = (role, profile, destination) => {
     const newUser =
       role === 'cliente'
-        ? { name: 'María García', role: 'cliente', avatar: 'MG', email: 'maria.garcia@mail.com' }
+        ? { name: 'María García', role: 'cliente', avatar: 'MG', email: 'maria.garcia@mail.com', ...profile }
         : { name: 'Carlos Rodríguez', role: 'admin', avatar: 'CR', email: 'c.rodriguez@pastafab.com' };
-    const defaultPage = role === 'cliente' ? 'catalogo' : 'clientes';
+    const defaultPage = role === 'cliente' ? (destination || 'catalogo') : 'clientes';
 
     setUser(newUser);
     setCurrentPage(defaultPage);
@@ -74,6 +74,15 @@ export const AppProvider = ({ children }) => {
     } catch {
       // ignore
     }
+  };
+
+  const updateProfile = ({ name, avatar }) => {
+    setUser((current) => {
+      if (!current) return current;
+      const updated = { ...current, name, avatar };
+      try { sessionStorage.setItem('pastafab_user', JSON.stringify(updated)); } catch { /* Storage may be unavailable. */ }
+      return updated;
+    });
   };
 
   const logout = () => {
@@ -114,7 +123,7 @@ export const AppProvider = ({ children }) => {
   };
 
   return (
-    <AppContext.Provider value={{ user, currentPage, sidebarOpen, themeMode, login, logout, navigate, toggleSidebar, toggleTheme }}>
+    <AppContext.Provider value={{ user, currentPage, sidebarOpen, themeMode, login, logout, updateProfile, navigate, toggleSidebar, toggleTheme }}>
       {children}
     </AppContext.Provider>
   );
