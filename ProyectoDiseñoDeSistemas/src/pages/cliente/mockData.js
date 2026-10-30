@@ -9,10 +9,13 @@ export const autenticarCliente = (email, password) => {
   guardarSesionCliente();
   currentStore = sesionesCliente.get(cuenta.email) || {
     ...currentStore,
+    cart: [],
+    mayoristaItems: {},
     pedidos: [],
     mediosPago: [],
-    cliente: { ...INITIAL_CLIENT_PROFILE, razonSocial: cuenta.name, responsable: cuenta.name, email: cuenta.email, cuit: '', telefono: '', direccion: '', localidad: '', provincia: '', tipoCliente: 'Minorista', aceptaCredito: false },
+    cliente: { ...INITIAL_CLIENT_PROFILE, nombre: cuenta.name, razonSocial: cuenta.name, responsable: cuenta.name, email: cuenta.email, cuit: '', dni: '', telefono: '', direccion: '', localidad: '', provincia: '', codigoPostal: '', referencias: '', tipoCliente: 'Minorista', aceptaCredito: false },
   };
+  currentStore = { ...currentStore, cliente: { ...currentStore.cliente, nombre: cuenta.name, email: cuenta.email } };
   cuentaActiva = cuenta.email;
   emitChange();
   return { profile: { name: cuenta.name, email: cuenta.email, avatar: cuenta.name.split(/\s+/).map((parte) => parte[0]).slice(0, 2).join('').toUpperCase() } };
@@ -547,6 +550,39 @@ function emitChange() {
 }
 
 export const clientStore = {
+  restaurarSesionCliente(user) {
+    if (!user || user.role !== 'cliente' || cuentaActiva === user.email) return;
+    guardarSesionCliente();
+    currentStore = sesionesCliente.get(user.email) || {
+      ...currentStore, cart: [], mayoristaItems: {}, pedidos: [], mediosPago: [],
+      cliente: { nombre: user.name, responsable: user.name, razonSocial: user.name, email: user.email, cuit: '', dni: '', telefono: '', direccion: '', localidad: '', provincia: '', codigoPostal: '', referencias: '', aceptaCredito: false, tipoCliente: 'Minorista' },
+    };
+    currentStore = { ...currentStore, cliente: { ...currentStore.cliente, nombre: user.name, email: user.email } };
+    cuentaActiva = user.email;
+    emitChange();
+  },
+
+  actualizarPerfilCliente(datos) {
+    const campos = ['nombre', 'documentoTipo', 'documentoNumero', 'telefono', 'direccion', 'localidad', 'provincia', 'codigoPostal', 'referencias'];
+    const perfil = Object.fromEntries(campos.map((campo) => [campo, String(datos[campo] || '').trim()]));
+    const errores = {};
+    if (!perfil.nombre) errores.nombre = 'Ingresá tu nombre y apellido.';
+    const documento = perfil.documentoNumero.replace(/[.\s-]/g, '');
+    if (!['DNI', 'CUIT'].includes(perfil.documentoTipo)) errores.documentoTipo = 'Elegí DNI o CUIT.';
+    if (documento && !(perfil.documentoTipo === 'DNI' ? /^\d{7,8}$/ : /^\d{11}$/).test(documento)) errores.documentoNumero = perfil.documentoTipo === 'DNI' ? 'El DNI debe tener 7 u 8 dígitos.' : 'El CUIT debe tener 11 dígitos.';
+    if (perfil.telefono && (!/^[+\d\s()-]+$/.test(perfil.telefono) || !/^\d{8,15}$/.test(perfil.telefono.replace(/\D/g, '')))) errores.telefono = 'Ingresá un teléfono válido de 8 a 15 dígitos.';
+    if (perfil.codigoPostal && !/^(\d{4}|[a-z]\d{4}[a-z]{3})$/i.test(perfil.codigoPostal)) errores.codigoPostal = 'Usá 4 dígitos o un código postal como B6400ABC.';
+    if (Object.keys(errores).length) return { errores };
+    const email = cuentaActiva || datos.email;
+    const cuenta = cuentasCliente.find((item) => item.email === email);
+    if (cuenta) cuenta.name = perfil.nombre;
+    const cliente = { ...currentStore.cliente, ...perfil, email, responsable: perfil.nombre, documentoNumero: documento, cuit: perfil.documentoTipo === 'CUIT' ? documento : '', dni: perfil.documentoTipo === 'DNI' ? documento : '' };
+    currentStore = { ...currentStore, cliente };
+    sesionesCliente.set(email, currentStore);
+    emitChange();
+    return { profile: { name: perfil.nombre, email, avatar: perfil.nombre.split(/\s+/).map((parte) => parte[0]).slice(0, 2).join('').toUpperCase() } };
+  },
+
   setWholesaleDelivery({ tipo, dia = '' }) {
     if (!['evento', 'semanal'].includes(tipo) || (dia && !DIAS_ENTREGA_SEMANAL.includes(dia))) return;
     currentStore = { ...currentStore, mayoristaEntrega: { tipo, dia: tipo === 'semanal' ? dia : '' } };

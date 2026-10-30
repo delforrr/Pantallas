@@ -17,7 +17,7 @@ export default function ClienteAccesoScreen() {
   const [confirmacion, setConfirmacion] = useState('');
   const [visible, setVisible] = useState(false);
   const [error, setError] = useState('');
-  const destino = ['carrito', 'pedidos_cliente', 'medios_pago'].includes(currentPage) ? currentPage : 'catalogo';
+  const destino = ['carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'].includes(currentPage) ? currentPage : 'catalogo';
   const motivo = destino === 'carrito' ? 'Ingresá para ver tu carrito y continuar con tu compra.' : destino === 'pedidos_cliente' ? 'Ingresá para consultar y seguir tus pedidos.' : 'Ingresá para comprar y compartir tus sabores favoritos.';
 
   const enviar = (event) => {

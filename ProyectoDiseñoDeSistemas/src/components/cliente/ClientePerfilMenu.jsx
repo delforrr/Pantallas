@@ -6,6 +6,7 @@ import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import { useApp } from '../../context/AppContext';
 import { cerrarSesionCliente } from '../../pages/cliente/mockData';
 
@@ -29,6 +30,7 @@ export default function ClientePerfilMenu({ sobreVerde = false }) {
         {!user && <MenuItem onClick={() => goTo('registrarse')}><ListItemIcon><PersonAddOutlinedIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Registrarme</ListItemText></MenuItem>}
         {user && <Typography component="li" variant="body2" sx={{ px: 2, py: 1, fontWeight: 700, color: 'primary.main', listStyle: 'none' }}>{user.name}</Typography>}
         {user && <Divider />}
+        {user && <MenuItem onClick={() => goTo('mi_perfil')}><ListItemIcon><PersonOutlineIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Mi perfil</ListItemText></MenuItem>}
         {user && <MenuItem onClick={() => goTo('pedidos_cliente')}><ListItemIcon><ShoppingBagOutlinedIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Mis pedidos</ListItemText></MenuItem>}
         {user && <MenuItem onClick={() => goTo('medios_pago')}><ListItemIcon><PaymentsOutlinedIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Medios de pago</ListItemText></MenuItem>}
         {user && <Divider />}

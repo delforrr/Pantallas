@@ -76,6 +76,15 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = ({ name, avatar }) => {
+    setUser((current) => {
+      if (!current) return current;
+      const updated = { ...current, name, avatar };
+      try { sessionStorage.setItem('pastafab_user', JSON.stringify(updated)); } catch { /* Storage may be unavailable. */ }
+      return updated;
+    });
+  };
+
   const logout = () => {
     setUser(null);
     setCurrentPage(null);
@@ -114,7 +123,7 @@ export const AppProvider = ({ children }) => {
   };
 
   return (
-    <AppContext.Provider value={{ user, currentPage, sidebarOpen, themeMode, login, logout, navigate, toggleSidebar, toggleTheme }}>
+    <AppContext.Provider value={{ user, currentPage, sidebarOpen, themeMode, login, logout, updateProfile, navigate, toggleSidebar, toggleTheme }}>
       {children}
     </AppContext.Provider>
   );
