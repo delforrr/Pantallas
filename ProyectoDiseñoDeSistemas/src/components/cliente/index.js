@@ -3,3 +3,6 @@ export { default as ResumenPedido } from './ResumenPedido';
 export { default as MetodoPagoItem } from './MetodoPagoItem';
 export { default as NuevoMetodoPagoForm } from './NuevoMetodoPagoForm';
 export { default as PedidoClienteItem } from './PedidoClienteItem';
+export { default as ProductoCard } from './ProductoCard';
+export { default as DetallePedidoModal } from './DetallePedidoModal';
+export { default as ReclamoCanjeModal } from './ReclamoCanjeModal';

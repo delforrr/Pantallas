@@ -1,16 +1,20 @@
 import React from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
-import { Box, Typography, Fade } from '@mui/material';
+import { Box, Typography, Fade, GlobalStyles } from '@mui/material';
 import { getTheme } from './theme';
 import { AppProvider, useApp } from './context/AppContext';
-import LoginPage from './pages/LoginPage';
+import AdminLoginPage from './pages/LoginPage';
 import { AppLayout } from './components/layout';
+import ClientePortalLayout from './components/cliente/ClientePortalLayout';
+import ClienteAccesoScreen from './pages/cliente/ClienteAccesoScreen';
+import MayoristasTienda from './components/cliente/MayoristasTienda';
 
 // ── All screen imports ──────────────────────────────────────
 import CatalogoScreen from './pages/cliente/CatalogoScreen';
 import CarritoScreen from './pages/cliente/CarritoScreen';
 import PedidosClienteScreen from './pages/cliente/PedidosClienteScreen';
 import MediosPagoScreen from './pages/cliente/MediosPagoScreen';
+import PerfilClienteScreen from './pages/cliente/PerfilClienteScreen';
 
 import ClientesScreen from './pages/ventas/ClientesScreen';
 import PedidosScreen from './pages/ventas/PedidosScreen';
@@ -23,7 +27,6 @@ import OrdenProduccionScreen from './pages/produccion/OrdenProduccionScreen';
 import RecetasScreen from './pages/produccion/RecetasScreen';
 import ProductosCompuestosScreen from './pages/produccion/ProductosCompuestosScreen';
 import MateriaPrimaScreen from './pages/produccion/MateriaPrimaScreen';
-import StockScreen from './pages/produccion/StockScreen';
 
 import ProveedoresScreen from './pages/compras/ProveedoresScreen';
 import OrdenCompraScreen from './pages/compras/OrdenCompraScreen';
@@ -34,13 +37,16 @@ import MaquinariaScreen from './pages/mantenimiento/MaquinariaScreen';
 import OrdenesMantScreen from './pages/mantenimiento/OrdenesMantScreen';
 import { PAGE_LABELS } from './config/navigation';
 
+const PedidosTienda = () => <><MayoristasTienda /><PedidosScreen /></>;
+
 const SCREEN_MAP = {
   catalogo: CatalogoScreen,
   carrito: CarritoScreen,
   pedidos_cliente: PedidosClienteScreen,
   medios_pago: MediosPagoScreen,
+  mi_perfil: PerfilClienteScreen,
   clientes: ClientesScreen,
-  pedidos: PedidosScreen,
+  pedidos: PedidosTienda,
   presupuestos: PresupuestosScreen,
   comprobantes_venta: ComprobantesVentaScreen,
   comprobantes_pago: ComprobantesPagoScreen,
@@ -49,7 +55,6 @@ const SCREEN_MAP = {
   recetas: RecetasScreen,
   productos_compuestos: ProductosCompuestosScreen,
   materia_prima: MateriaPrimaScreen,
-  stock: StockScreen,
   proveedores: ProveedoresScreen,
   orden_compra: OrdenCompraScreen,
   presupuesto_proveedor: PresupuestoProveedorScreen,
@@ -60,20 +65,25 @@ const SCREEN_MAP = {
 
 // ── Page wrapper with fade animation ───────────────────────
 const PageContent = () => {
-  const { currentPage } = useApp();
-  const Screen = SCREEN_MAP[currentPage];
+  const { currentPage, user } = useApp();
+  const paginaCliente = ['catalogo', 'carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'].includes(currentPage);
+  const Screen = !user || (user.role === 'cliente' && !paginaCliente) ? CatalogoScreen : SCREEN_MAP[currentPage || 'catalogo'];
   const label = PAGE_LABELS[currentPage] || 'Dashboard';
+  const isCliente = !user || user?.role === 'cliente' || ['catalogo', 'carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'].includes(currentPage);
 
   return (
     <Fade in key={currentPage} timeout={300}>
-      <Box sx={{ flex: 1, p: { xs: 2, sm: 3 }, overflowY: 'auto' }}>
+      <Box sx={{ flex: 1, p: isCliente ? 0 : { xs: 1.5, sm: 2.5, md: 3 }, overflowY: 'auto', minWidth: 0, width: '100%', maxWidth: '100%', height: isCliente ? '100%' : 'auto', display: isCliente ? 'flex' : 'block', flexDirection: isCliente ? 'column' : 'initial' }}>
+        {isCliente && (
+          <GlobalStyles styles={{ '#notifications-btn': { display: 'none !important' } }} />
+        )}
         {/* Page header */}
-        <Box sx={{ mb: 3 }}>
+        {!isCliente && <Box sx={{ mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', letterSpacing: '-0.01em' }}>
             {label}
           </Typography>
           <Box sx={{ width: 40, height: 3, background: (theme) => `linear-gradient(90deg, ${theme.palette.primary.main}, transparent)`, borderRadius: 2, mt: 0.8 }} />
-        </Box>
+        </Box>}
         {Screen ? <Screen /> : (
           <Box sx={{ color: 'text.disabled', mt: 6, textAlign: 'center' }}>
             <Typography variant="h6">Seleccioná una sección del menú</Typography>
@@ -86,13 +96,18 @@ const PageContent = () => {
 
 // ── Root: switches between login and layout ─────────────────
 const AppRoot = () => {
-  const { user, themeMode, sidebarOpen, toggleSidebar } = useApp();
-  const theme = React.useMemo(() => getTheme(themeMode), [themeMode]);
+  const { user, currentPage, themeMode, sidebarOpen, toggleSidebar } = useApp();
+  const accesoAdmin = currentPage === 'admin_login' || (user?.role !== 'admin' && Boolean(currentPage) && !['catalogo', 'carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil', 'ingresar', 'registrarse'].includes(currentPage));
+  const paginaPortalCliente = ['catalogo', 'carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'].includes(currentPage);
+  const accesoCliente = ['ingresar', 'registrarse'].includes(currentPage) || (user?.role !== 'cliente' && ['carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'].includes(currentPage));
+  const theme = React.useMemo(() => getTheme(user?.role === 'cliente' ? 'light' : themeMode), [themeMode, user?.role]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {user ? (
+      {accesoAdmin ? <AdminLoginPage /> : !user || user.role === 'cliente' || accesoCliente || paginaPortalCliente ? (
+        <ClientePortalLayout>{accesoCliente ? <ClienteAccesoScreen key={currentPage} /> : <PageContent />}</ClientePortalLayout>
+      ) : (
         <>
           {sidebarOpen && (
             <Box
@@ -112,8 +127,6 @@ const AppRoot = () => {
             <PageContent />
           </AppLayout>
         </>
-      ) : (
-        <LoginPage />
       )}
     </ThemeProvider>
   );
