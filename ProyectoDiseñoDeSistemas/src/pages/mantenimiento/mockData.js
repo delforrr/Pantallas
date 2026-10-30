@@ -1,13 +1,5 @@
-/**
- * mockData.js - Módulo de Mantenimiento (PastaFab ERP)
- * Autocontenido y fiel a los diagramas del dominio del sistema.
- *
- * Clases del dominio reflejadas:
- * - Maquinaria (IDMaquinaria, Descripcion, Estado, Linea, HorasUso, etc.)
- * - OrdenDeMantenimiento (IDOrdenDeMantenimiento, FechaEmision, FechaInicio, FechaFin, IDEmpleado, DetalleOrdenDeMantenimiento)
- * - DetalleOrdenDeMantenimiento (Descripcion, Repuesto, Observaciones, IDTipoDeMantenimiento, IDMaquinaria)
- * - TipoDeMantenimiento (IDTipoDeMantenimiento, Tipo: Preventivo / Correctivo)
- * - Empleado (Técnico / Encargado de mantenimiento)
+/** Datos simulados del módulo: una máquina y un técnico por orden.
+ * Los repuestos se describen en texto libre, sin gestión de inventario.
  */
 
 export const INITIAL_MAQUINARIAS = [
@@ -53,7 +45,7 @@ export const INITIAL_MAQUINARIAS = [
     estado: "En Reparación",
     horasUso: 680,
     observaciones:
-      "Falla en la electroválvula de vacío principal. Lleva 28 hs parada. Si supera 48 hs requiere frenado de despachos o alquiler de equipo sustituto según protocolo de dominio.",
+      "Falla en la electroválvula de vacío principal. Requiere revisión técnica.",
   },
   {
     id: 6,
@@ -114,14 +106,13 @@ export const INITIAL_ORDENES_MANTENIMIENTO = [
     maquinariaCodigo: "MAQ-001",
     maquinariaNombre: "Amasadora Espiral Industrial 50kg",
     tipo: "Preventivo",
-    prioridad: "Media",
     empleadoId: 1,
     tecnicoNombre: "Carlos Vignolo",
     fechaEmision: "2026-03-10",
     fechaInicio: "2026-03-10 18:30",
     fechaFin: "2026-03-10 20:15",
     estado: "Finalizada",
-    tareaRealizada:
+    descripcion:
       "Limpieza y lubricación de fin de jornada. Ajuste de tensión en correa trapezoidal motora y engrase de rodamientos de la bacha espiral con grasa de grado alimenticio NSF-H1.",
   },
   {
@@ -130,14 +121,13 @@ export const INITIAL_ORDENES_MANTENIMIENTO = [
     maquinariaCodigo: "MAQ-002",
     maquinariaNombre: "Laminadora Calibradora de Masa Continua",
     tipo: "Preventivo",
-    prioridad: "Baja",
     empleadoId: 3,
     tecnicoNombre: "Hernán Aguirre",
     fechaEmision: "2026-03-08",
     fechaInicio: "2026-03-08 19:00",
     fechaFin: "2026-03-08 21:00",
     estado: "Finalizada",
-    tareaRealizada:
+    descripcion:
       "Calibración milimétrica de rodillos con galga de espesores. Desarme de rascadores de teflón para limpieza de restos de masa deshidratada.",
   },
   {
@@ -146,14 +136,13 @@ export const INITIAL_ORDENES_MANTENIMIENTO = [
     maquinariaCodigo: "MAQ-003",
     maquinariaNombre: "Rellenadora Automática de Ravioles & Sorrentinos",
     tipo: "Correctivo",
-    prioridad: "Alta",
     empleadoId: 2,
     tecnicoNombre: "Marcelo Rossi",
     fechaEmision: "2026-03-12",
     fechaInicio: "2026-03-12 14:00",
     fechaFin: null,
     estado: "En Proceso",
-    tareaRealizada:
+    descripcion:
       "Desarme del dosificador de émbolo por pérdida de sellado en el cilindro neumático. Se detectó oring de silicona roto por fricción.",
   },
   {
@@ -162,14 +151,13 @@ export const INITIAL_ORDENES_MANTENIMIENTO = [
     maquinariaCodigo: "MAQ-005",
     maquinariaNombre: "Envasadora al Vacío Doble Campana",
     tipo: "Correctivo",
-    prioridad: "Alta",
     empleadoId: 2,
     tecnicoNombre: "Marcelo Rossi",
     fechaEmision: "2026-03-13",
     fechaInicio: "2026-03-13 08:30",
     fechaFin: null,
     estado: "En Proceso",
-    tareaRealizada:
+    descripcion:
       "Revisión por falla de vacío en campana derecha. Se verifica bobina quemada en válvula solenoide de descompresión rápida. Equipo con 28 hs de indisponibilidad.",
   },
   {
@@ -178,14 +166,13 @@ export const INITIAL_ORDENES_MANTENIMIENTO = [
     maquinariaCodigo: "MAQ-007",
     maquinariaNombre: "Paila Volcable Cocinadora de Salsas 100L",
     tipo: "Preventivo",
-    prioridad: "Media",
     empleadoId: 1,
     tecnicoNombre: "Carlos Vignolo",
     fechaEmision: "2026-03-14",
     fechaInicio: null,
     fechaFin: null,
     estado: "Pendiente",
-    tareaRealizada:
+    descripcion:
       "Programado: Desarmar válvula esférica de desagote inferior, verificar estanqueidad de junta térmica y lubricar mecanismo basculante de descarga de salsa.",
   },
   {
@@ -194,14 +181,13 @@ export const INITIAL_ORDENES_MANTENIMIENTO = [
     maquinariaCodigo: "MAQ-004",
     maquinariaNombre: "Cortadora Rotativa de Tallarines y Cintas",
     tipo: "Preventivo",
-    prioridad: "Baja",
     empleadoId: 3,
     tecnicoNombre: "Hernán Aguirre",
     fechaEmision: "2026-03-02",
     fechaInicio: "2026-03-02 18:00",
     fechaFin: "2026-03-02 19:30",
     estado: "Finalizada",
-    tareaRealizada:
+    descripcion:
       "Desinfección integral y afilado de peine separador. Revisión de sensor inductivo de seguridad de tapa.",
   },
   {
@@ -210,14 +196,17 @@ export const INITIAL_ORDENES_MANTENIMIENTO = [
     maquinariaCodigo: "MAQ-008",
     maquinariaNombre: "Formadora de Ñoquis Rotativa con Ranurado",
     tipo: "Correctivo",
-    prioridad: "Baja",
     empleadoId: 1,
     tecnicoNombre: "Carlos Vignolo",
     fechaEmision: "2026-02-15",
     fechaInicio: null,
     fechaFin: null,
     estado: "Cancelada",
-    tareaRealizada:
+    descripcion:
       "Se canceló la intervención inmediata debido a que la producción de ñoquis se resolvió con máquina manual en el turno nocturno.",
   },
 ];
+
+INITIAL_ORDENES_MANTENIMIENTO.forEach(order => {
+  order.tareaRealizada = order.estado === 'Finalizada' ? order.descripcion : '';
+});
