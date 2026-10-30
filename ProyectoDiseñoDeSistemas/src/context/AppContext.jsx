@@ -2,6 +2,19 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const AppContext = createContext(null);
 
+const CLIENT_PAGES = ['catalogo', 'ingresar', 'registrarse', 'carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'];
+const pageFromLocation = () => {
+  const hash = window.location.hash.slice(1);
+  if (hash) return hash;
+  const path = window.location.pathname.replace(/\/+$/, '');
+  return path === '/admin' ? 'admin_login' : path === '/cliente' ? 'catalogo' : null;
+};
+const pageUrl = (page) => {
+  if (page === 'admin_login') return '/admin';
+  if (page === 'catalogo') return '/cliente';
+  return `${CLIENT_PAGES.includes(page) ? '/cliente' : '/admin'}#${page}`;
+};
+
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
@@ -14,8 +27,8 @@ export const AppProvider = ({ children }) => {
 
   const [currentPage, setCurrentPage] = useState(() => {
     try {
-      const hash = window.location.hash.replace('#', '');
-      if (hash) return hash;
+      const entryPage = pageFromLocation();
+      if (entryPage) return entryPage;
       const saved = sessionStorage.getItem('pastafab_page');
       return saved || null;
     } catch {
@@ -36,8 +49,7 @@ export const AppProvider = ({ children }) => {
   // Soporte para botones de atras/adelante del navegador sin cerrar sesion
   useEffect(() => {
     const handlePopState = (event) => {
-      const hash = window.location.hash.replace('#', '');
-      const targetPage = event.state?.page || (hash ? hash : null);
+      const targetPage = event.state?.page || pageFromLocation() || (user?.role === 'admin' ? 'clientes' : 'catalogo');
       if (targetPage) {
         setCurrentPage(targetPage);
         try {
@@ -69,7 +81,7 @@ export const AppProvider = ({ children }) => {
       sessionStorage.setItem('pastafab_user', JSON.stringify(newUser));
       sessionStorage.setItem('pastafab_page', defaultPage);
       if (typeof window !== 'undefined') {
-        window.history.replaceState({ page: defaultPage }, '', '#' + defaultPage);
+        window.history.replaceState({ page: defaultPage }, '', pageUrl(defaultPage));
       }
     } catch {
       // ignore
@@ -86,7 +98,7 @@ export const AppProvider = ({ children }) => {
   };
 
   const logout = () => {
-    const loginPage = user?.role === 'admin' ? 'admin_login' : null;
+    const loginPage = user?.role === 'admin' ? 'admin_login' : 'catalogo';
     setUser(null);
     setCurrentPage(loginPage);
     setSidebarOpen(false);
@@ -94,7 +106,7 @@ export const AppProvider = ({ children }) => {
       sessionStorage.removeItem('pastafab_user');
       sessionStorage.removeItem('pastafab_page');
       if (typeof window !== 'undefined') {
-        window.history.pushState(loginPage ? { page: loginPage } : null, '', loginPage ? '#' + loginPage : window.location.pathname);
+        window.history.pushState({ page: loginPage }, '', pageUrl(loginPage));
       }
     } catch {
       // ignore
@@ -107,7 +119,7 @@ export const AppProvider = ({ children }) => {
     try {
       sessionStorage.setItem('pastafab_page', page);
       if (typeof window !== 'undefined') {
-        window.history.pushState({ page }, '', '#' + page);
+        window.history.pushState({ page }, '', pageUrl(page));
       }
     } catch {
       // ignore

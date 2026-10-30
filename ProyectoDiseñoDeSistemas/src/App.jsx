@@ -97,14 +97,15 @@ const PageContent = () => {
 // ── Root: switches between login and layout ─────────────────
 const AppRoot = () => {
   const { user, currentPage, themeMode, sidebarOpen, toggleSidebar } = useApp();
-  const accesoAdmin = currentPage === 'admin_login';
-  const accesoCliente = ['ingresar', 'registrarse'].includes(currentPage) || (!user && ['carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'].includes(currentPage));
+  const accesoAdmin = currentPage === 'admin_login' || (user?.role !== 'admin' && Boolean(currentPage) && !['catalogo', 'carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil', 'ingresar', 'registrarse'].includes(currentPage));
+  const paginaPortalCliente = ['catalogo', 'carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'].includes(currentPage);
+  const accesoCliente = ['ingresar', 'registrarse'].includes(currentPage) || (user?.role !== 'cliente' && ['carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'].includes(currentPage));
   const theme = React.useMemo(() => getTheme(user?.role === 'cliente' ? 'light' : themeMode), [themeMode, user?.role]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {accesoAdmin ? <AdminLoginPage /> : !user || user.role === 'cliente' || accesoCliente ? (
+      {accesoAdmin ? <AdminLoginPage /> : !user || user.role === 'cliente' || accesoCliente || paginaPortalCliente ? (
         <ClientePortalLayout>{accesoCliente ? <ClienteAccesoScreen key={currentPage} /> : <PageContent />}</ClientePortalLayout>
       ) : (
         <>

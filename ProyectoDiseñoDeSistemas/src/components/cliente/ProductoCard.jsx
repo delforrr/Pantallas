@@ -23,7 +23,7 @@ export const ProductoCard = ({ producto, onAddToCartFeedback, modoMayorista = fa
 
   const handleAddToCart = () => {
     if (sinStock || agregadoAnim) return;
-    if (!user) {
+    if (user?.role !== 'cliente') {
       navigate('carrito');
       return;
     }

@@ -4,7 +4,8 @@ import { useApp } from '../../context/AppContext';
 import ClientePerfilMenu from './ClientePerfilMenu';
 
 export default function ClienteCatalogoHeader({ cartSummary, onInicio, onProductos, productosActivo = false, sobreVerde = false }) {
-  const { user, navigate } = useApp();
+  const { user: sessionUser, navigate } = useApp();
+  const user = sessionUser?.role === 'cliente' ? sessionUser : null;
   const navStyle = { color: sobreVerde ? 'primary.contrastText' : 'primary.main', fontSize: { xs: 11, lg: 12 }, fontWeight: 700, borderRadius: 8, minWidth: 0, minHeight: 44, px: { xs: 1.2, lg: 1.8 }, whiteSpace: 'nowrap', '&:hover': { bgcolor: sobreVerde ? 'primary.dark' : 'action.hover' } };
   const activeStyle = { bgcolor: sobreVerde ? 'primary.contrastText' : 'primary.main', color: sobreVerde ? 'primary.main' : 'primary.contrastText', '&:hover': { bgcolor: sobreVerde ? 'background.paper' : 'primary.dark' } };
 

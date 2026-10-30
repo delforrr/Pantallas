@@ -4,9 +4,9 @@ import ClientePerfilMenu from './ClientePerfilMenu';
 import { clientStore, useClientStore } from '../../pages/cliente/mockData';
 
 export default function ClienteNavigation({ onInicio, onProductos, sobreVerde = false }) {
-  const { currentPage, navigate } = useApp();
+  const { currentPage, navigate, user } = useApp();
   const { cart, mayoristaItems } = useClientStore();
-  const cantidadItems = cart.length + Object.keys(mayoristaItems).length;
+  const cantidadItems = user?.role === 'cliente' ? cart.length + Object.keys(mayoristaItems).length : 0;
   const irAlInicio = () => {
     clientStore.setCatalogoModo('inicio');
     navigate('catalogo');

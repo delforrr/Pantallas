@@ -62,7 +62,7 @@ export default function ClientePortalLayout({ children }) {
   const { currentPage: page, user } = useApp();
   useEffect(() => { clientStore.restaurarSesionCliente(user); }, [user]);
   const currentPage = page || 'catalogo';
-  const acceso = ['ingresar', 'registrarse'].includes(currentPage) || (!user && ['carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'].includes(currentPage));
+  const acceso = ['ingresar', 'registrarse'].includes(currentPage) || (user?.role !== 'cliente' && ['carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'].includes(currentPage));
   if (acceso) return (
     <ThemeProvider theme={clienteTheme}>
       <Box sx={{ ...portalMotion, minHeight: '100dvh', bgcolor: 'background.paper', display: 'flex', flexDirection: 'column' }}>

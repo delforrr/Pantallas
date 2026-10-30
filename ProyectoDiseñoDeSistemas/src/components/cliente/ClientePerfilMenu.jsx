@@ -11,7 +11,8 @@ import { useApp } from '../../context/AppContext';
 import { cerrarSesionCliente } from '../../pages/cliente/mockData';
 
 export default function ClientePerfilMenu({ sobreVerde = false }) {
-  const { user, navigate, logout } = useApp();
+  const { user: sessionUser, navigate, logout } = useApp();
+  const user = sessionUser?.role === 'cliente' ? sessionUser : null;
   const [anchorEl, setAnchorEl] = useState(null);
   const id = useId();
   const open = Boolean(anchorEl);
