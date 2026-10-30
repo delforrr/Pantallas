@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
   return (
     <Box component="main" sx={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default', p: 2, position: 'relative', overflow: 'hidden' }}>
       <Box aria-hidden="true" sx={{ position: 'absolute', top: '-15%', right: '-10%', width: 500, height: 500, borderRadius: '50%', background: (theme) => `radial-gradient(circle, ${theme.palette.primary.main}20 0%, transparent 70%)`, pointerEvents: 'none' }} />
-      <Box component="section" aria-label="Acceso de administración" sx={{ width: '100%', maxWidth: 440, p: { xs: 3, sm: 5 }, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '24px', boxShadow: 12, position: 'relative' }}>
+      <Box component="section" aria-label="Acceso de administración" sx={{ width: '100%', maxWidth: 440, p: { xs: 3, sm: 5 }, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '24px', boxShadow: 12, position: 'relative', '@keyframes adminEntrada': { from: { opacity: 0, transform: 'translateY(12px)' }, to: { opacity: 1, transform: 'translateY(0)' } }, animation: 'adminEntrada 450ms ease-out both', '@media (prefers-reduced-motion: reduce)': { animation: 'none' } }}>
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: '18px', bgcolor: 'primary.main', color: 'primary.contrastText', mb: 2 }}><AdminPanelSettingsIcon sx={{ fontSize: 32 }} /></Box>
           <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>PastaFab</Typography>
