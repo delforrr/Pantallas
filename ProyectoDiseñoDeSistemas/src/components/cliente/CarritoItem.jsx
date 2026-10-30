@@ -14,8 +14,6 @@ export const CarritoItem = ({ item }) => {
   const handleDecrement = () => {
     if (item.cantidad > 1) {
       clientStore.updateCartQuantity(item.idProducto, item.cantidad - 1);
-    } else {
-      clientStore.removeFromCart(item.idProducto);
     }
   };
 
@@ -118,20 +116,20 @@ export const CarritoItem = ({ item }) => {
             p: 0.25,
           }}
         >
-          <Tooltip title={item.cantidad <= 1 ? 'Eliminar ítem' : 'Disminuir cantidad'}>
+          {item.cantidad > 1 && <Tooltip title="Disminuir cantidad">
             <IconButton
               size="small"
               onClick={handleDecrement}
               sx={{
                 p: 0.5,
-                color: item.cantidad <= 1 ? 'error.main' : 'text.primary',
+                color: 'text.primary',
                 '&:hover': { bgcolor: 'action.hover' },
               }}
               aria-label="Disminuir cantidad"
             >
-              {item.cantidad <= 1 ? <DeleteOutlineIcon fontSize="small" /> : <RemoveIcon fontSize="small" />}
+              <RemoveIcon fontSize="small" />
             </IconButton>
-          </Tooltip>
+          </Tooltip>}
 
           <Typography
             sx={{
