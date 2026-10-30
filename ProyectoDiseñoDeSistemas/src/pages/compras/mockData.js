@@ -1,3 +1,4 @@
+import { pendingItems } from './logic';
 /**
  * mockData.js - Módulo de Compras (PastaFab ERP)
  * Autocontenido y fiel a los diagramas del dominio del sistema.
@@ -224,7 +225,7 @@ export const INITIAL_PRESUPUESTOS = [
     proveedorNombre: 'Levaduras Calsa Argentina S.A.',
     cuit: '30-61245899-3',
     fechaEmision: '2026-03-04',
-    validezHasta: '2026-03-25',
+    validezHasta: '2026-12-31',
     tipoCompra: 'Semestral (Marzo - Temporada Baja)',
     estado: 'Aprobado',
     items: [
@@ -240,7 +241,7 @@ export const INITIAL_PRESUPUESTOS = [
     proveedorNombre: 'Molino Harinero San Blas (Alternativo)',
     cuit: '30-55123984-7',
     fechaEmision: '2026-03-01',
-    validezHasta: '2026-03-20',
+    validezHasta: '2026-12-31',
     tipoCompra: 'Semestral (Marzo - Temporada Baja)',
     estado: 'Rechazado',
     items: [
@@ -271,7 +272,7 @@ export const INITIAL_PRESUPUESTOS = [
     proveedorNombre: 'Envases & Descartables Pampeanos',
     cuit: '30-71445982-6',
     fechaEmision: '2026-03-08',
-    validezHasta: '2026-03-28',
+    validezHasta: '2026-12-31',
     tipoCompra: 'Semestral (Marzo - Temporada Baja)',
     estado: 'Pendiente',
     items: [
@@ -469,8 +470,8 @@ export const INITIAL_REMITOS = [
     observaciones: '80 bolsas de harina 0000 y 40 bolsas de semolín ingresadas al silo y depósito.',
     documentoUrl: MOCK_DOC_REMITO,
     items: [
-      { materiaPrima: 'Harina 0000 Especial Pastas (50kg)', cantidadRecibida: 80, unidad: 'Bolsas', conforme: true },
-      { materiaPrima: 'Semolín de Trigo Candeal (25kg)', cantidadRecibida: 40, unidad: 'Bolsas', conforme: true },
+      { materiaPrima: 'Harina 0000 Especial Pastas (bolsa 50kg)', cantidadRecibida: 80, unidad: 'Bolsas', conforme: true },
+      { materiaPrima: 'Semolín de Trigo Candeal (bolsa 25kg)', cantidadRecibida: 40, unidad: 'Bolsas', conforme: true },
     ],
   },
   {
@@ -587,3 +588,14 @@ export const INITIAL_COMPROBANTES_PAGO = [
     documentoUrl: MOCK_DOC_PAGO,
   },
 ];
+
+// Cada pantalla obtiene su propia simulación; no se comparte estado entre módulos ni pantallas.
+export function initialReceptionState() {
+  const stock = {};
+  INITIAL_REMITOS.forEach(r => r.items.forEach(i => {
+    const key = `${i.materiaPrima}|${i.unidad}`;
+    stock[key] = (stock[key] || 0) + i.cantidadRecibida;
+  }));
+  const ordenes = INITIAL_ORDENES_COMPRA.map(o => INITIAL_REMITOS.some(r => r.ordenCompraId === o.id) ? { ...o, estado: pendingItems(o, INITIAL_REMITOS).every(i => i.pendiente === 0) ? 'Cumplida' : 'Recibida Parcial' } : o);
+  return { ordenes, remitos: INITIAL_REMITOS, stock };
+}
