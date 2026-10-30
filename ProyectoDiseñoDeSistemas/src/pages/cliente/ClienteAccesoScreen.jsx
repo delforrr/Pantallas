@@ -33,18 +33,26 @@ export default function ClienteAccesoScreen() {
   const cambiarModo = () => { setRegistro((value) => !value); setError(''); setPassword(''); setConfirmacion(''); };
 
   return (
-    <Box component="main" sx={{ flex: 1, display: 'grid', gridTemplateColumns: { xs: '1fr', md: '48% 52%' }, minWidth: 0 }}>
+    <Box component="main" sx={{
+      flex: 1, display: 'grid', gridTemplateColumns: { xs: '1fr', md: '48% 52%' }, minWidth: 0,
+      '@keyframes accesoEntrada': { from: { opacity: 0, transform: 'translateY(12px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+      '@keyframes accesoFondo': { from: { transform: 'scale(1.04) translate(0, 0)' }, to: { transform: 'scale(1.04) translate(-8px, -6px)' } },
+      '& .MuiButton-root': { transition: 'transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease', '&:hover': { transform: 'translateY(-2px)' }, '&:active': { transform: 'translateY(0)' } },
+      '& .MuiButton-contained': { '&:hover': { boxShadow: '0 6px 18px rgba(201,54,0,0.18)' } },
+      '& .MuiOutlinedInput-root': { transition: 'background-color 180ms ease, box-shadow 180ms ease', '&.Mui-focused': { bgcolor: 'action.hover', boxShadow: '0 0 0 3px rgba(65,101,34,0.08)' } },
+      '@media (prefers-reduced-motion: reduce)': { '&, & *': { animation: 'none !important', transition: 'none !important', transform: 'none !important' } },
+    }}>
       <Box component="section" aria-label="Pastas frescas artesanales" sx={{ display: { xs: 'none', md: 'block' }, position: 'relative', minHeight: 0, overflow: 'hidden', bgcolor: 'primary.main' }}>
-        <Box aria-hidden="true" sx={{ position: 'absolute', inset: 0, opacity: 0.25, backgroundImage: `url("${ingredientesPattern}")`, backgroundSize: 380 }} />
-        <Box sx={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', left: { md: 36, lg: 48 }, right: 32, color: '#fff' }}>
+        <Box aria-hidden="true" sx={{ position: 'absolute', inset: 0, opacity: 0.25, backgroundImage: `url("${ingredientesPattern}")`, backgroundSize: 380, animation: 'accesoFondo 18s ease-in-out infinite alternate' }} />
+        <Box sx={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', px: { md: 4.5, lg: 6 }, color: '#fff', animation: 'accesoEntrada 700ms ease-out both' }}>
           <Typography sx={{ fontSize: 10, letterSpacing: '0.22em', fontWeight: 700, mb: 1.5 }}>INGREDIENTES SIMPLES. SABORES DE SIEMPRE.</Typography>
           <Typography sx={{ fontFamily: 'Kristi, cursive', fontSize: { md: 56, lg: 68 }, lineHeight: 1.05 }}>Hechas con tiempo.<br />Disfrutadas en familia.</Typography>
           <Box sx={{ width: 44, height: 3, bgcolor: 'secondary.main', mt: 3 }} />
         </Box>
       </Box>
       <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', px: { xs: 2.5, sm: 5, lg: 8 }, py: { xs: 2, md: 3 }, overflow: 'hidden' }}>
-        <Box aria-hidden="true" sx={{ position: 'absolute', right: -70, top: 0, bottom: 0, width: 160, opacity: 0.32, backgroundImage: `url("${ingredientesPatternRed}")`, backgroundSize: 300, pointerEvents: 'none' }} />
-        <Paper elevation={0} sx={{ position: 'relative', width: '100%', maxWidth: 400, bgcolor: 'background.paper', borderRadius: 0 }}>
+        <Box aria-hidden="true" sx={{ position: 'absolute', right: -70, top: 0, bottom: 0, width: 160, opacity: 0.32, backgroundImage: `url("${ingredientesPatternRed}")`, backgroundSize: 300, pointerEvents: 'none', animation: 'accesoFondo 22s ease-in-out infinite alternate-reverse' }} />
+        <Paper elevation={0} sx={{ position: 'relative', width: '100%', maxWidth: 400, bgcolor: 'background.paper', borderRadius: 0, animation: 'accesoEntrada 550ms 120ms ease-out both' }}>
           <Typography sx={{ color: 'secondary.main', fontSize: 10, letterSpacing: '0.18em', fontWeight: 800, mb: 1.5 }}>TU LUGAR EN NUESTRA MESA</Typography>
           <Typography component="h1" sx={{ fontFamily: 'Kristi, cursive', fontSize: { xs: 48, md: registro ? 54 : 66 }, color: 'primary.main', lineHeight: 1.05 }}>{registro ? 'Sumate a la familia' : 'Qué bueno verte'}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, mb: registro ? 2 : 3, lineHeight: 1.6 }}>{registro ? 'Creá tu cuenta para armar tu carrito y seguir tus pedidos.' : motivo}</Typography>

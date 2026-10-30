@@ -4,6 +4,33 @@ import { getTheme } from '../../theme';
 import ClienteNavigation from './ClienteNavigation';
 import ingredientesPattern from './ingredientes-pattern.svg';
 
+const portalMotion = {
+  '@keyframes portalEntrada': { from: { opacity: 0, translate: '0 10px' }, to: { opacity: 1, translate: '0 0' } },
+  '@keyframes portalImagen': { from: { opacity: 0 }, to: { opacity: 1 } },
+  '& h1, & h2, & h5': { animation: 'portalEntrada 550ms ease-out both' },
+  '& img': { animation: 'portalImagen 650ms ease-out both' },
+  '& .MuiCard-root': {
+    animation: 'portalEntrada 550ms ease-out both',
+    '&:nth-of-type(2n)': { animationDelay: '60ms' },
+    '&:nth-of-type(3n)': { animationDelay: '120ms' },
+  },
+  '& .MuiButton-root, & .MuiIconButton-root': {
+    transition: 'translate 180ms ease, background-color 180ms ease, box-shadow 180ms ease, color 180ms ease',
+    '&:hover': { translate: '0 -2px' },
+    '&:active': { translate: '0 0' },
+  },
+  '& .MuiButton-contained:hover': { boxShadow: '0 5px 16px rgba(65,101,34,0.16)' },
+  '& .MuiOutlinedInput-root': {
+    transition: 'background-color 200ms ease, box-shadow 200ms ease',
+    '&.Mui-focused': { boxShadow: '0 0 0 3px rgba(65,101,34,0.08)' },
+  },
+  '& .MuiTab-root, & .MuiChip-root, & .MuiTableRow-root': { transition: 'background-color 200ms ease, color 200ms ease, box-shadow 200ms ease' },
+  '@media (prefers-reduced-motion: reduce)': {
+    '&, & *, & *::before, & *::after': { animation: 'none !important', transition: 'none !important', scrollBehavior: 'auto !important' },
+    '& .MuiButton-root:hover, & .MuiIconButton-root:hover': { translate: 'none' },
+  },
+};
+
 // A theme scoped to the customer storefront; the shared ERP theme stays frozen.
 const clienteTheme = createTheme(getTheme('light'), {
   palette: {
@@ -35,7 +62,7 @@ export default function ClientePortalLayout({ children }) {
   const acceso = !user && ['ingresar', 'registrarse', 'carrito', 'pedidos_cliente', 'medios_pago'].includes(currentPage);
   if (acceso) return (
     <ThemeProvider theme={clienteTheme}>
-      <Box sx={{ minHeight: '100dvh', bgcolor: 'background.paper', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ ...portalMotion, minHeight: '100dvh', bgcolor: 'background.paper', display: 'flex', flexDirection: 'column' }}>
         <ClienteNavigation />
         <Box sx={{ flex: 1, display: 'flex', minWidth: 0 }}>{children}</Box>
       </Box>
@@ -43,7 +70,7 @@ export default function ClientePortalLayout({ children }) {
   );
   return (
     <ThemeProvider theme={clienteTheme}>
-    <Box sx={{ minHeight: '100dvh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ ...portalMotion, minHeight: '100dvh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
       {currentPage !== 'catalogo' && <Box sx={{ mx: { xs: 1.5, md: 5 }, mt: { xs: 1.5, md: 4 }, boxShadow: '6px 8px 22px #51482d20' }}><ClienteNavigation /></Box>}
       <Box sx={{ flex: 1, mx: currentPage === 'catalogo' ? 0 : { xs: 1.5, md: 5 }, mb: currentPage === 'catalogo' || acceso ? 0 : 2, p: currentPage === 'catalogo' ? 0 : acceso ? { xs: 1, md: 2 } : { xs: 2, md: 4 }, bgcolor: currentPage === 'catalogo' ? 'transparent' : 'background.paper', borderTop: currentPage === 'catalogo' ? 0 : '4px solid', borderColor: 'primary.main', boxShadow: currentPage === 'catalogo' ? 'none' : '6px 8px 22px #51482d20', ...(acceso && { display: 'flex', flexDirection: 'column', justifyContent: 'center' }) }}>
         {currentPage !== 'catalogo' && !acceso && <Box sx={{ position: 'relative', overflow: 'hidden', pb: 3, mb: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
