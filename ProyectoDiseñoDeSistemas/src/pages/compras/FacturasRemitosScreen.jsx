@@ -1,60 +1,17 @@
+import { money, pendingItems } from './logic';
+import StockRecibido from '../../components/compras/StockRecibido';
+import ComprobanteDetalle from '../../components/compras/ComprobanteDetalle';
+import { ModuleDialog as Dialog, ModuleSurface, FormSection, FormDialog, SummaryCards, ListToolbar, RecordsView, RecordIcon, StatusChip } from '../../components/compras/ModuleUI';
+import RecepcionForm from '../../components/compras/RecepcionForm';
+import { initialReceptionState } from './mockData';
 import { useState, useMemo } from "react";
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  TextField,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  Tabs,
-  Tab,
-  ToggleButtonGroup,
-  ToggleButton,
-} from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import AddIcon from "@mui/icons-material/Add";
+import { Box, Paper, Typography, Button, TextField, InputAdornment, FormControl, InputLabel, Select, MenuItem, IconButton, Stack, Alert, DialogTitle, DialogContent, DialogActions, Grid, Tabs, Tab } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import PaymentIcon from "@mui/icons-material/Payment";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import ViewListIcon from "@mui/icons-material/ViewList";
-import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import CloseIcon from "@mui/icons-material/Close";
-import BusinessIcon from "@mui/icons-material/Business";
-import EventNoteIcon from "@mui/icons-material/EventNote";
-import PriceCheckIcon from "@mui/icons-material/PriceCheck";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-
-import {
-  INITIAL_FACTURAS,
-  INITIAL_REMITOS,
-  INITIAL_COMPROBANTES_PAGO,
-  INITIAL_PROVEEDORES,
-  INITIAL_ORDENES_COMPRA,
-  MOCK_DOC_FACTURA,
-  MOCK_DOC_REMITO,
-  MOCK_DOC_PAGO,
-} from "./mockData";
+import { INITIAL_FACTURAS, INITIAL_COMPROBANTES_PAGO, INITIAL_PROVEEDORES, INITIAL_ORDENES_COMPRA } from "./mockData";
 import { DocumentoUploader } from "../../components/compras";
 
 // Generador seguro de sufijo aleatorio para evitar alertas de PRNG inseguro (S2245)
@@ -62,37 +19,27 @@ const getSecureRandomSuffix = () => {
   if (typeof window !== "undefined" && window.crypto?.getRandomValues) {
     const array = new Uint32Array(1);
     window.crypto.getRandomValues(array);
-    return 1000 + (array[0] % 9000);
+    return 1000 + array[0] % 9000;
   }
-  return 1000 + (Date.now() % 9000);
+  return 1000 + Date.now() % 9000;
 };
 
 // Funciones independientes para resolución de colores de estado (evita ternarios anidados S3358)
-const getFacturaEstadoColor = (estado) => {
-  if (estado === "Pagada") return "success";
-  if (estado === "Pendiente de Pago") return "warning";
-  return "error";
-};
 
-const getDetailDocumentoLabel = (type) => {
+const getDetailDocumentoLabel = type => {
   if (type === "factura") return "Factura Adjunta del Proveedor";
   if (type === "remito") return "Remito Firmado Adjunto";
   return "Comprobante de Transferencia / Pago";
 };
-
-const getDetailDocumentoDefaultUrl = (type) => {
-  if (type === "factura") return MOCK_DOC_FACTURA;
-  if (type === "remito") return MOCK_DOC_REMITO;
-  return MOCK_DOC_PAGO;
-};
-
 export const FacturasRemitosScreen = () => {
   const [currentTab, setCurrentTab] = useState(0);
-  const [viewMode, setViewMode] = useState("table");
-
   // Estados de datos en memoria
   const [facturas, setFacturas] = useState(INITIAL_FACTURAS);
-  const [remitos, setRemitos] = useState(INITIAL_REMITOS);
+  const [receptionData, setReceptionData] = useState(initialReceptionState);
+  const {
+    remitos
+  } = receptionData;
+  const [receptionNotice, setReceptionNotice] = useState('');
   const [pagos, setPagos] = useState(INITIAL_COMPROBANTES_PAGO);
 
   // Filtros
@@ -109,44 +56,34 @@ export const FacturasRemitosScreen = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [detailType, setDetailType] = useState("factura"); // 'factura', 'remito', 'pago'
 
+  const receiptOrder = detailType === 'remito' && selectedItem ? receptionData.ordenes.find(order => order.id === selectedItem.ordenCompraId) : null;
+  const receiptBalance = receiptOrder ? pendingItems(receiptOrder, remitos) : [];
+
   // Forms
   const [facturaForm, setFacturaForm] = useState({
     id: "",
     ordenCompraId: "OC-2026-0102",
     proveedorId: 2,
-    fechaEmision: new Date().toISOString().split("T")[0],
+    fechaEmision: new Date().toLocaleDateString('en-CA', {
+      timeZone: 'America/Argentina/Buenos_Aires'
+    }),
     fechaVencimiento: "",
     condicionPago: "Contado Contra Entrega",
     netoGravado: 809917,
     iva21: 170083,
     total: 980000,
     estado: "Pendiente de Pago",
-    documentoUrl: "",
+    documentoUrl: ""
   });
-
-  const [remitoForm, setRemitoForm] = useState({
-    id: "",
-    ordenCompraId: "OC-2026-0102",
-    proveedorId: 2,
-    fechaEmision: new Date().toISOString().split("T")[0],
-    fechaEntregaReal: new Date().toISOString().split("T")[0],
-    observaciones:
-      "Control visual y de peso verificado al ingresar a depósito.",
-    documentoUrl: "",
-  });
-
   const [pagoForm, setPagoForm] = useState({
     medioPago: "Transferencia Bancaria",
-    documentoUrl: "",
+    documentoUrl: ""
   });
 
   // Filtrado de Facturas
   const filteredFacturas = useMemo(() => {
-    return facturas.filter((f) => {
-      const match =
-        f.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.proveedorNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.ordenCompraId.toLowerCase().includes(searchTerm.toLowerCase());
+    return facturas.filter(f => {
+      const match = f.id.toLowerCase().includes(searchTerm.toLowerCase()) || f.proveedorNombre.toLowerCase().includes(searchTerm.toLowerCase()) || f.ordenCompraId.toLowerCase().includes(searchTerm.toLowerCase());
       const matchStatus = statusFilter === "TODOS" || f.estado === statusFilter;
       return match && matchStatus;
     });
@@ -154,11 +91,8 @@ export const FacturasRemitosScreen = () => {
 
   // Filtrado de Remitos
   const filteredRemitos = useMemo(() => {
-    return remitos.filter((r) => {
-      const match =
-        r.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.proveedorNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.ordenCompraId.toLowerCase().includes(searchTerm.toLowerCase());
+    return remitos.filter(r => {
+      const match = r.id.toLowerCase().includes(searchTerm.toLowerCase()) || r.proveedorNombre.toLowerCase().includes(searchTerm.toLowerCase()) || r.ordenCompraId.toLowerCase().includes(searchTerm.toLowerCase());
       const matchStatus = statusFilter === "TODOS" || r.estado === statusFilter;
       return match && matchStatus;
     });
@@ -166,11 +100,8 @@ export const FacturasRemitosScreen = () => {
 
   // Filtrado de Pagos
   const filteredPagos = useMemo(() => {
-    return pagos.filter((p) => {
-      const match =
-        p.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.proveedorNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.facturaId.toLowerCase().includes(searchTerm.toLowerCase());
+    return pagos.filter(p => {
+      const match = p.id.toLowerCase().includes(searchTerm.toLowerCase()) || p.proveedorNombre.toLowerCase().includes(searchTerm.toLowerCase()) || p.facturaId.toLowerCase().includes(searchTerm.toLowerCase());
       const matchStatus = statusFilter === "TODOS" || p.estado === statusFilter;
       return match && matchStatus;
     });
@@ -184,19 +115,14 @@ export const FacturasRemitosScreen = () => {
   };
 
   // Crear Factura
-  const handleSaveFactura = (e) => {
+  const handleSaveFactura = e => {
     e.preventDefault();
-    const prov = INITIAL_PROVEEDORES.find(
-      (p) => p.id === Number(facturaForm.proveedorId),
-    );
+    const prov = INITIAL_PROVEEDORES.find(p => p.id === Number(facturaForm.proveedorId));
     const neto = Number(facturaForm.netoGravado);
     const iva = Math.round(neto * 0.21);
     const total = neto + iva;
-
     const newFactura = {
-      id:
-        facturaForm.id ||
-        `FC-A-000${facturas.length + 1}-0000${getSecureRandomSuffix()}`,
+      id: facturaForm.id || `FC-A-000${facturas.length + 1}-0000${getSecureRandomSuffix()}`,
       ordenCompraId: facturaForm.ordenCompraId,
       proveedorId: prov?.id || 1,
       proveedorNombre: prov?.razonSocial || "Proveedor S.A.",
@@ -209,1479 +135,208 @@ export const FacturasRemitosScreen = () => {
       total,
       estado: facturaForm.estado,
       comprobantePagoId: null,
-      documentoUrl: facturaForm.documentoUrl || MOCK_DOC_FACTURA,
+      documentoUrl: facturaForm.documentoUrl
     };
-
-    setFacturas((prev) => [newFactura, ...prev]);
+    setFacturas(prev => [newFactura, ...prev]);
     setOpenNewFactura(false);
   };
 
-  // Crear Remito
-  const handleSaveRemito = (e) => {
-    e.preventDefault();
-    const prov = INITIAL_PROVEEDORES.find(
-      (p) => p.id === Number(remitoForm.proveedorId),
-    );
-    const newRemito = {
-      id:
-        remitoForm.id ||
-        `REM-000${remitos.length + 1}-0000${getSecureRandomSuffix()}`,
-      ordenCompraId: remitoForm.ordenCompraId,
-      proveedorId: prov?.id || 1,
-      proveedorNombre: prov?.razonSocial || "Proveedor S.A.",
-      fechaEmision: remitoForm.fechaEmision,
-      fechaEntregaReal: remitoForm.fechaEntregaReal,
-      estado: remitoForm.estado,
-      observaciones: remitoForm.observaciones,
-      documentoUrl: remitoForm.documentoUrl || MOCK_DOC_REMITO,
-      items: [
-        {
-          materiaPrima: "Insumos verificados según orden de compra",
-          cantidadRecibida: 1,
-          unidad: "Lote",
-        },
-      ],
-    };
-
-    setRemitos((prev) => [newRemito, ...prev]);
-    setOpenNewRemito(false);
-  };
-
   // Registrar Pago a Factura
-  const handleOpenPagar = (factura) => {
+  const handleOpenPagar = factura => {
     setSelectedItem(factura);
     setPagoForm({
       medioPago: "Transferencia Bancaria",
-      documentoUrl: "",
+      documentoUrl: ""
     });
     setOpenPagarFactura(true);
   };
-
   const handleConfirmarPago = () => {
     if (!selectedItem) return;
-
     const nextPagoId = `OP-2026-00${pagos.length + 50}`;
     const newPago = {
       id: nextPagoId,
       facturaId: selectedItem.id,
       proveedorId: selectedItem.proveedorId,
       proveedorNombre: selectedItem.proveedorNombre,
-      fechaEmision: new Date().toISOString().split("T")[0],
+      fechaEmision: new Date().toLocaleDateString('en-CA', {
+        timeZone: 'America/Argentina/Buenos_Aires'
+      }),
       medioPago: pagoForm.medioPago,
       nroTransaccion: `TRX-${Date.now().toString().slice(-6)}`,
-      banco:
-        pagoForm.medioPago === "Efectivo"
-          ? "Caja Principal Planta"
-          : "Banco de la Provincia de Buenos Aires",
+      banco: pagoForm.medioPago === "Efectivo" ? "Caja Principal Planta" : "Banco de la Provincia de Buenos Aires",
       total: selectedItem.total,
       estado: "Conciliado",
       observaciones: "Pago liquidado con comprobante adjunto.",
-      documentoUrl: pagoForm.documentoUrl || MOCK_DOC_PAGO,
+      documentoUrl: pagoForm.documentoUrl
     };
 
     // Actualizar factura a Pagada
-    setFacturas((prev) =>
-      prev.map((f) =>
-        f.id === selectedItem.id
-          ? { ...f, estado: "Pagada", comprobantePagoId: nextPagoId }
-          : f,
-      ),
-    );
+    setFacturas(prev => prev.map(f => f.id === selectedItem.id ? {
+      ...f,
+      estado: "Pagada",
+      comprobantePagoId: nextPagoId
+    } : f));
 
     // Agregar comprobante de pago
-    setPagos((prev) => [newPago, ...prev]);
+    setPagos(prev => [newPago, ...prev]);
     setOpenPagarFactura(false);
   };
+  return <ModuleSurface>
+      {receptionNotice && <Alert severity="success" onClose={() => setReceptionNotice('')}>{receptionNotice}</Alert>}
 
-  return (
-    <Box>
       {/* Pestañas Superiores */}
-      <Paper
-        elevation={0}
-        sx={{
-          borderBottom: "1px solid",
-          borderColor: "divider",
-          mb: 3,
-          bgcolor: "transparent",
-        }}
-      >
-        <Tabs
-          value={currentTab}
-          onChange={(e, val) => {
-            setCurrentTab(val);
-            setStatusFilter("TODOS");
-            setSearchTerm("");
-          }}
-          textColor="primary"
-          indicatorColor="primary"
-          sx={{
-            "& .MuiTab-root": {
-              fontWeight: 600,
-              fontSize: "0.9rem",
-              textTransform: "none",
-              minHeight: 48,
-            },
-          }}
-        >
-          <Tab
-            icon={<ReceiptLongIcon />}
-            iconPosition="start"
-            label={`Facturas Proveedores (${facturas.length})`}
-          />
-          <Tab
-            icon={<PaymentIcon />}
-            iconPosition="start"
-            label={`Comprobantes de Pago (${pagos.length})`}
-          />
-          <Tab
-            icon={<LocalShippingIcon />}
-            iconPosition="start"
-            label={`Remitos de Entrega (${remitos.length})`}
-          />
+      <Paper elevation={0} sx={{
+      borderBottom: "1px solid",
+      borderColor: "divider",
+      mb: 3,
+      bgcolor: "transparent"
+    }}>
+        <Tabs variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile value={currentTab} onChange={(e, val) => {
+        setCurrentTab(val);
+        setStatusFilter("TODOS");
+        setSearchTerm("");
+      }} textColor="primary" indicatorColor="primary" sx={{
+        "& .MuiTab-root": {
+          fontWeight: 600,
+          fontSize: "0.9rem",
+          textTransform: "none",
+          minHeight: 48
+        }
+      }}>
+          <Tab icon={<ReceiptLongIcon />} iconPosition="start" label={`Facturas Proveedores (${facturas.length})`} />
+          <Tab icon={<PaymentIcon />} iconPosition="start" label={`Comprobantes de Pago (${pagos.length})`} />
+          <Tab icon={<LocalShippingIcon />} iconPosition="start" label={`Remitos de Entrega (${remitos.length})`} />
         </Tabs>
       </Paper>
 
-      {/* ================= CONTENIDO PESTAÑA 0: FACTURAS ================= */}
-      {currentTab === 0 && (
-        <Box>
-          {/* Métricas de Facturación - Responsivas con igual ancho */}
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(3, 1fr)",
-              },
-              gap: 2,
-              mb: 3,
-            }}
-          >
-            <Paper
-              elevation={1}
-              sx={{
-                p: 2,
-                borderRadius: "14px",
-                border: "1px solid",
-                borderColor: "divider",
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              <Box
-                sx={{
-                  p: 1,
-                  borderRadius: "10px",
-                  bgcolor: "primary.main",
-                  color: "white",
-                  display: "flex",
-                  flexShrink: 0,
-                }}
-              >
-                <ReceiptLongIcon />
-              </Box>
-              <Box sx={{ minWidth: 0 }}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ fontWeight: 600, display: "block" }}
-                >
-                  Total Facturado
-                </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                  $
-                  {facturas
-                    .reduce(
-                      (a, b) => a + (b.estado !== "Anulada" ? b.total : 0),
-                      0,
-                    )
-                    .toLocaleString("es-AR")}
-                </Typography>
-              </Box>
-            </Paper>
 
-            <Paper
-              elevation={1}
-              sx={{
-                p: 2,
-                borderRadius: "14px",
-                border: "1px solid",
-                borderColor: "divider",
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              <Box
-                sx={{
-                  p: 1,
-                  borderRadius: "10px",
-                  bgcolor: "warning.main",
-                  color: "white",
-                  display: "flex",
-                  flexShrink: 0,
-                }}
-              >
-                <PriceCheckIcon />
-              </Box>
-              <Box sx={{ minWidth: 0 }}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ fontWeight: 600, display: "block" }}
-                >
-                  Pendiente de Pago
-                </Typography>
-                <Typography
-                  variant="h5"
-                  sx={{ fontWeight: 700, color: "warning.main" }}
-                >
-                  $
-                  {facturas
-                    .filter((f) => f.estado === "Pendiente de Pago")
-                    .reduce((a, b) => a + b.total, 0)
-                    .toLocaleString("es-AR")}
-                </Typography>
-              </Box>
-            </Paper>
 
-            <Paper
-              elevation={1}
-              sx={{
-                p: 2,
-                borderRadius: "14px",
-                border: "1px solid",
-                borderColor: "divider",
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              <Box
-                sx={{
-                  p: 1,
-                  borderRadius: "10px",
-                  bgcolor: "success.main",
-                  color: "white",
-                  display: "flex",
-                  flexShrink: 0,
-                }}
-              >
-                <PaymentIcon />
-              </Box>
-              <Box sx={{ minWidth: 0 }}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ fontWeight: 600, display: "block" }}
-                >
-                  Facturas Canceladas
-                </Typography>
-                <Typography
-                  variant="h5"
-                  sx={{ fontWeight: 700, color: "success.main" }}
-                >
-                  {facturas.filter((f) => f.estado === "Pagada").length} de{" "}
-                  {facturas.length}
-                </Typography>
-              </Box>
-            </Paper>
-          </Box>
+      <SummaryCards items={currentTab === 0 ? [{
+      label: 'Facturas',
+      value: facturas.length
+    }, {
+      label: 'Total facturado',
+      value: facturas.filter(f => f.estado !== 'Anulada').reduce((sum, f) => sum + f.total, 0).toLocaleString('es-AR', {
+        style: 'currency',
+        currency: 'ARS'
+      })
+    }, {
+      label: 'Pendiente de pago',
+      value: facturas.filter(f => f.estado === 'Pendiente de Pago').reduce((sum, f) => sum + f.total, 0).toLocaleString('es-AR', {
+        style: 'currency',
+        currency: 'ARS'
+      }),
+      color: 'warning.main'
+    }, {
+      label: 'Pagadas',
+      value: facturas.filter(f => f.estado === 'Pagada').length,
+      color: 'success.main'
+    }] : currentTab === 1 ? [{
+      label: 'Comprobantes de pago',
+      value: pagos.length
+    }, {
+      label: 'Total abonado',
+      value: pagos.reduce((sum, p) => sum + p.total, 0).toLocaleString('es-AR', {
+        style: 'currency',
+        currency: 'ARS'
+      }),
+      color: 'success.main'
+    }] : [{
+      label: 'Remitos registrados',
+      value: remitos.length
+    }, {
+      label: 'Órdenes con saldo pendiente',
+      value: receptionData.ordenes.filter(o => ['Enviada', 'Recibida Parcial'].includes(o.estado)).length,
+      color: 'warning.main'
+    }]} />
+      <RecordsView toolbar={<ListToolbar search={searchTerm} onSearch={setSearchTerm} status={statusFilter} onStatus={setStatusFilter} statuses={['Pendiente de Pago', 'Pagada', 'Anulada']} showStatus={currentTab === 0} onCreate={currentTab === 0 ? () => setOpenNewFactura(true) : currentTab === 2 ? () => setOpenNewRemito(true) : undefined} createLabel={currentTab === 0 ? 'Registrar factura' : 'Registrar remito'} />} rows={currentTab === 0 ? filteredFacturas : currentTab === 1 ? filteredPagos : filteredRemitos} cardTitle={row => row.id} empty={searchTerm || statusFilter !== 'TODOS' ? 'No hay resultados para estos filtros.' : 'Todavía no hay documentos registrados.'} onClear={searchTerm || statusFilter !== 'TODOS' ? () => {
+      setSearchTerm('');
+      setStatusFilter('TODOS');
+    } : undefined} columns={[{
+      label: 'Documento',
+      render: row => row.id
+    }, {
+      label: 'Proveedor',
+      render: row => row.proveedorNombre
+    }, {
+      label: currentTab === 1 ? 'Factura vinculada' : 'Orden de compra',
+      render: row => row.facturaId || row.ordenCompraId
+    }, {
+      label: 'Fecha de emisión',
+      render: row => row.fechaEmision
+    }, ...(currentTab === 0 ? [{
+      label: 'Vencimiento',
+      render: row => row.fechaVencimiento
+    }] : []), ...(currentTab !== 2 ? [{
+      label: 'Total',
+      numeric: true,
+      render: row => row.total.toLocaleString('es-AR', {
+        style: 'currency',
+        currency: 'ARS'
+      })
+    }, {
+      label: 'Estado',
+      render: row => <StatusChip value={row.estado} />
+    }] : [{
+      label: 'Fecha de recepción',
+      render: row => row.fechaEntregaReal
+    }])]} actions={row => <><RecordIcon label="Ver detalle" onClick={() => handleOpenDetail(row, currentTab === 0 ? 'factura' : currentTab === 1 ? 'pago' : 'remito')}><VisibilityOutlinedIcon /></RecordIcon>{currentTab === 0 && row.estado === 'Pendiente de Pago' && <RecordIcon label="Registrar pago" color="primary" onClick={() => handleOpenPagar(row)}><PaymentIcon /></RecordIcon>}</>} />
 
-          {/* Filtros y Acción */}
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              mb: 3,
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                flexWrap: "wrap",
-                flex: 1,
-                minWidth: 260,
-              }}
-            >
-              <TextField
-                size="small"
-                placeholder="Buscar por Nº Factura, Proveedor o OC..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon
-                        fontSize="small"
-                        sx={{ color: "text.secondary" }}
-                      />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  minWidth: { xs: "100%", sm: 300 },
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "background.paper",
-                    borderRadius: "10px",
-                  },
-                }}
-              />
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: { xs: "100%", sm: 220, md: 240 },
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "background.paper",
-                    borderRadius: "10px",
-                  },
-                }}
-              >
-                <InputLabel>Estado de Pago</InputLabel>
-                <Select
-                  value={statusFilter}
-                  label="Estado de Pago"
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <MenuItem value="TODOS">Todos los Estados</MenuItem>
-                  <MenuItem value="Pendiente de Pago">
-                    Pendiente de Pago
-                  </MenuItem>
-                  <MenuItem value="Pagada">Pagada</MenuItem>
-                  <MenuItem value="Anulada">Anulada</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-
-            <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
-              <ToggleButtonGroup
-                value={viewMode}
-                exclusive
-                onChange={(e, val) => val && setViewMode(val)}
-                size="small"
-                sx={{ bgcolor: "background.paper" }}
-              >
-                <ToggleButton value="table" aria-label="vista tabla">
-                  <Tooltip title="Vista Tabla">
-                    <ViewListIcon fontSize="small" />
-                  </Tooltip>
-                </ToggleButton>
-                <ToggleButton value="grid" aria-label="vista tarjetas">
-                  <Tooltip title="Vista Cuadrícula / Móvil">
-                    <ViewModuleIcon fontSize="small" />
-                  </Tooltip>
-                </ToggleButton>
-              </ToggleButtonGroup>
-
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenNewFactura(true)}
-              >
-                Registrar Factura
-              </Button>
-            </Box>
-          </Box>
-
-          {/* Vista Cuadrícula vs Tabla */}
-          {viewMode === "grid" &&
-            (filteredFacturas.length === 0 ? (
-              <Paper
-                elevation={1}
-                sx={{
-                  p: 6,
-                  textAlign: "center",
-                  borderRadius: "16px",
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <Typography variant="body1" color="text.secondary">
-                  No se encontraron facturas
-                </Typography>
-              </Paper>
-            ) : (
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    sm: "repeat(2, 1fr)",
-                    lg: "repeat(3, 1fr)",
-                  },
-                  gap: 2.5,
-                  alignItems: "stretch",
-                }}
-              >
-                {filteredFacturas.map((row) => (
-                  <Paper
-                    key={row.id}
-                    elevation={1}
-                    sx={{
-                      p: 2.5,
-                      borderRadius: "16px",
-                      border: "1px solid",
-                      borderColor: "divider",
-                      display: "flex",
-                      flexDirection: "column",
-                      height: "100%",
-                      transition: "box-shadow 0.2s",
-                      "&:hover": { boxShadow: 4 },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 1.5,
-                      }}
-                    >
-                      <Chip
-                        label={row.id}
-                        size="small"
-                        variant="outlined"
-                        color="primary"
-                        sx={{ fontWeight: 800, fontFamily: "monospace" }}
-                      />
-                      <Chip
-                        label={row.estado}
-                        size="small"
-                        color={getFacturaEstadoColor(row.estado)}
-                        sx={{ fontWeight: 700, fontSize: "0.72rem" }}
-                      />
-                    </Box>
-
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 800,
-                        fontSize: "1.05rem",
-                        lineHeight: 1.3,
-                        mb: 0.3,
-                      }}
-                    >
-                      {row.proveedorNombre}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block", mb: 1.5 }}
-                    >
-                      CUIT: {row.cuit} · OC:{" "}
-                      <strong>{row.ordenCompraId}</strong>
-                    </Typography>
-
-                    {/* Desglose de Importes */}
-                    <Box
-                      sx={{
-                        p: 1.5,
-                        borderRadius: "10px",
-                        bgcolor: "primary.50",
-                        border: "1px dashed",
-                        borderColor: "primary.200",
-                        mb: 2,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          mb: 0.5,
-                        }}
-                      >
-                        <Typography variant="caption" color="text.secondary">
-                          Neto Gravado:
-                        </Typography>
-                        <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                          ${row.netoGravado.toLocaleString("es-AR")}
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          mb: 0.5,
-                        }}
-                      >
-                        <Typography variant="caption" color="text.secondary">
-                          IVA (21%):
-                        </Typography>
-                        <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                          ${row.iva21.toLocaleString("es-AR")}
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          pt: 0.5,
-                          borderTop: "1px solid",
-                          borderColor: "divider",
-                        }}
-                      >
-                        <Typography
-                          variant="caption"
-                          sx={{ fontWeight: 700, color: "text.secondary" }}
-                        >
-                          TOTAL FACTURA:
-                        </Typography>
-                        <Typography
-                          variant="h6"
-                          sx={{ fontWeight: 800, color: "primary.main" }}
-                        >
-                          ${row.total.toLocaleString("es-AR")}
-                        </Typography>
-                      </Box>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 0.5,
-                        mb: 2,
-                      }}
-                    >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 0.8 }}
-                      >
-                        <CalendarMonthOutlinedIcon
-                          sx={{ fontSize: 16, color: "text.secondary" }}
-                        />
-                        <Typography variant="caption" color="text.secondary">
-                          Emisión: {row.fechaEmision} · Vence:{" "}
-                          <strong>{row.fechaVencimiento}</strong>
-                        </Typography>
-                      </Box>
-                      <Typography variant="caption" color="text.secondary">
-                        Condición: <strong>{row.condicionPago}</strong>
-                      </Typography>
-                    </Box>
-
-                    {/* Footer con Acciones */}
-                    <Box
-                      sx={{
-                        mt: "auto",
-                        pt: 1.5,
-                        borderTop: "1px solid",
-                        borderColor: "divider",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      {row.estado === "Pendiente de Pago" ? (
-                        <Button
-                          size="small"
-                          variant="contained"
-                          color="success"
-                          startIcon={<PaymentIcon />}
-                          onClick={() => handleOpenPagar(row)}
-                          sx={{ textTransform: "none", fontWeight: 700 }}
-                        >
-                          Pagar Factura
-                        </Button>
-                      ) : (
-                        <Typography
-                          variant="caption"
-                          color="success.main"
-                          sx={{ fontWeight: 700 }}
-                        >
-                          ✓ Pagada #{row.comprobantePagoId || ""}
-                        </Typography>
-                      )}
-
-                      <Tooltip title="Ver factura completa">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenDetail(row, "factura")}
-                          sx={{ color: "text.secondary" }}
-                        >
-                          <VisibilityOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </Paper>
-                ))}
-              </Box>
-            ))}
-
-          {viewMode === "table" && (
-            <TableContainer
-              component={Paper}
-              elevation={1}
-              sx={{
-                borderRadius: "14px",
-                border: "1px solid",
-                borderColor: "divider",
-                overflow: "hidden",
-              }}
-            >
-              <Table sx={{ minWidth: 750 }}>
-                <TableHead sx={{ bgcolor: "action.hover" }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>
-                      Nº Comprobante
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>
-                      Proveedor & CUIT
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Orden Compra</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>
-                      Emisión / Vto
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Neto / IVA</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Total</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700 }}>
-                      Acciones
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredFacturas.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={8}
-                        align="center"
-                        sx={{ py: 6, color: "text.secondary" }}
-                      >
-                        <Typography variant="body2">
-                          No se encontraron facturas
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredFacturas.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        hover
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell
-                          sx={{
-                            fontWeight: 700,
-                            fontFamily: "monospace",
-                            color: "primary.main",
-                          }}
-                        >
-                          {row.id}
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                            {row.proveedorNombre}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            CUIT: {row.cuit}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={row.ordenCompraId}
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontFamily: "monospace" }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="caption"
-                            sx={{ display: "block", fontWeight: 600 }}
-                          >
-                            Emisión: {row.fechaEmision}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Vence: {row.fechaVencimiento}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="caption"
-                            sx={{ display: "block" }}
-                          >
-                            Neto: ${row.netoGravado.toLocaleString("es-AR")}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            IVA (21%): ${row.iva21.toLocaleString("es-AR")}
-                          </Typography>
-                        </TableCell>
-                        <TableCell
-                          sx={{ fontWeight: 800, color: "text.primary" }}
-                        >
-                          ${row.total.toLocaleString("es-AR")}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={row.estado}
-                            size="small"
-                            color={getFacturaEstadoColor(row.estado)}
-                            sx={{ fontWeight: 600, fontSize: "0.72rem" }}
-                          />
-                        </TableCell>
-                        <TableCell align="right">
-                          <Tooltip title="Ver factura completa">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleOpenDetail(row, "factura")}
-                              sx={{ color: "text.secondary" }}
-                            >
-                              <VisibilityOutlinedIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          {row.estado === "Pendiente de Pago" && (
-                            <Tooltip title="Registrar pago al proveedor">
-                              <IconButton
-                                size="small"
-                                onClick={() => handleOpenPagar(row)}
-                                sx={{ color: "success.main" }}
-                              >
-                                <PaymentIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </Box>
-      )}
-
-      {/* ================= CONTENIDO PESTAÑA 1: COMPROBANTES DE PAGO ================= */}
-      {currentTab === 1 && (
-        <Box>
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              mb: 3,
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                flexWrap: "wrap",
-                flex: 1,
-                minWidth: 260,
-              }}
-            >
-              <TextField
-                size="small"
-                placeholder="Buscar por Nº Pago, Proveedor o Factura..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon
-                        fontSize="small"
-                        sx={{ color: "text.secondary" }}
-                      />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  minWidth: { xs: "100%", sm: 300 },
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "background.paper",
-                    borderRadius: "10px",
-                  },
-                }}
-              />
-            </Box>
-
-            <ToggleButtonGroup
-              value={viewMode}
-              exclusive
-              onChange={(e, val) => val && setViewMode(val)}
-              size="small"
-              sx={{ bgcolor: "background.paper" }}
-            >
-              <ToggleButton value="table" aria-label="vista tabla">
-                <Tooltip title="Vista Tabla">
-                  <ViewListIcon fontSize="small" />
-                </Tooltip>
-              </ToggleButton>
-              <ToggleButton value="grid" aria-label="vista tarjetas">
-                <Tooltip title="Vista Cuadrícula / Móvil">
-                  <ViewModuleIcon fontSize="small" />
-                </Tooltip>
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
-
-          {/* Vista Cuadrícula vs Tabla */}
-          {viewMode === "grid" &&
-            (filteredPagos.length === 0 ? (
-              <Paper
-                elevation={1}
-                sx={{
-                  p: 6,
-                  textAlign: "center",
-                  borderRadius: "16px",
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <Typography variant="body1" color="text.secondary">
-                  No se encontraron comprobantes de pago
-                </Typography>
-              </Paper>
-            ) : (
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    sm: "repeat(2, 1fr)",
-                    lg: "repeat(3, 1fr)",
-                  },
-                  gap: 2.5,
-                  alignItems: "stretch",
-                }}
-              >
-                {filteredPagos.map((row) => (
-                  <Paper
-                    key={row.id}
-                    elevation={1}
-                    sx={{
-                      p: 2.5,
-                      borderRadius: "16px",
-                      border: "1px solid",
-                      borderColor: "divider",
-                      display: "flex",
-                      flexDirection: "column",
-                      height: "100%",
-                      transition: "box-shadow 0.2s",
-                      "&:hover": { boxShadow: 4 },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 1.5,
-                      }}
-                    >
-                      <Chip
-                        label={row.id}
-                        size="small"
-                        variant="outlined"
-                        color="success"
-                        sx={{ fontWeight: 800, fontFamily: "monospace" }}
-                      />
-                      <Chip
-                        label={row.estado}
-                        size="small"
-                        color="success"
-                        sx={{ fontWeight: 700, fontSize: "0.72rem" }}
-                      />
-                    </Box>
-
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 800,
-                        fontSize: "1.05rem",
-                        lineHeight: 1.3,
-                        mb: 0.3,
-                      }}
-                    >
-                      {row.proveedorNombre}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block", mb: 1.5 }}
-                    >
-                      Factura Cancelada: <strong>{row.facturaId}</strong>
-                    </Typography>
-
-                    <Box
-                      sx={{
-                        p: 1.5,
-                        borderRadius: "10px",
-                        bgcolor: "success.50",
-                        border: "1px dashed",
-                        borderColor: "success.200",
-                        mb: 2,
-                      }}
-                    >
-                      <Typography
-                        variant="caption"
-                        sx={{ fontWeight: 700, color: "text.secondary" }}
-                      >
-                        MONTO TOTAL ABONADO:
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 800, color: "success.main" }}
-                      >
-                        ${row.total.toLocaleString("es-AR")}
-                      </Typography>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 0.5,
-                        mb: 2,
-                      }}
-                    >
-                      <Typography variant="caption" color="text.secondary">
-                        Medio: <strong>{row.medioPago}</strong>
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Transacción: <strong>{row.nroTransaccion}</strong> (
-                        {row.banco})
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Fecha: <strong>{row.fechaEmision}</strong>
-                      </Typography>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        mt: "auto",
-                        pt: 1.5,
-                        borderTop: "1px solid",
-                        borderColor: "divider",
-                        display: "flex",
-                        justifyContent: "flex-end",
-                      }}
-                    >
-                      <Tooltip title="Ver recibo de pago">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenDetail(row, "pago")}
-                          sx={{ color: "text.secondary" }}
-                        >
-                          <VisibilityOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </Paper>
-                ))}
-              </Box>
-            ))}
-
-          {viewMode === "table" && (
-            <TableContainer
-              component={Paper}
-              elevation={1}
-              sx={{
-                borderRadius: "14px",
-                border: "1px solid",
-                borderColor: "divider",
-                overflow: "hidden",
-              }}
-            >
-              <Table sx={{ minWidth: 700 }}>
-                <TableHead sx={{ bgcolor: "action.hover" }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>
-                      Nº Orden de Pago
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Proveedor</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>
-                      Factura Cancelada
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Fecha Pago</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>
-                      Medio de Pago
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>
-                      Total Abonado
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700 }}>
-                      Acciones
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredPagos.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={8}
-                        align="center"
-                        sx={{ py: 6, color: "text.secondary" }}
-                      >
-                        <Typography variant="body2">
-                          No se encontraron comprobantes de pago
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredPagos.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        hover
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell
-                          sx={{
-                            fontWeight: 700,
-                            fontFamily: "monospace",
-                            color: "primary.main",
-                          }}
-                        >
-                          {row.id}
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>
-                          {row.proveedorNombre}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={row.facturaId}
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontFamily: "monospace" }}
-                          />
-                        </TableCell>
-                        <TableCell>{row.fechaEmision}</TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {row.medioPago}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {row.nroTransaccion}
-                          </Typography>
-                        </TableCell>
-                        <TableCell
-                          sx={{ fontWeight: 800, color: "success.main" }}
-                        >
-                          ${row.total.toLocaleString("es-AR")}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={row.estado}
-                            size="small"
-                            color="success"
-                            sx={{ fontWeight: 600, fontSize: "0.72rem" }}
-                          />
-                        </TableCell>
-                        <TableCell align="right">
-                          <Tooltip title="Ver recibo de pago">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleOpenDetail(row, "pago")}
-                              sx={{ color: "text.secondary" }}
-                            >
-                              <VisibilityOutlinedIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </Box>
-      )}
-
-      {/* ================= CONTENIDO PESTAÑA 2: REMITOS DE ENTREGA ================= */}
-      {currentTab === 2 && (
-        <Box>
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              mb: 3,
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                flexWrap: "wrap",
-                flex: 1,
-                minWidth: 260,
-              }}
-            >
-              <TextField
-                size="small"
-                placeholder="Buscar por Nº Remito, Proveedor o Estado..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon
-                        fontSize="small"
-                        sx={{ color: "text.secondary" }}
-                      />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  minWidth: { xs: "100%", sm: 300 },
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "background.paper",
-                    borderRadius: "10px",
-                  },
-                }}
-              />
-            </Box>
-
-            <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
-              <ToggleButtonGroup
-                value={viewMode}
-                exclusive
-                onChange={(e, val) => val && setViewMode(val)}
-                size="small"
-                sx={{ bgcolor: "background.paper" }}
-              >
-                <ToggleButton value="table" aria-label="vista tabla">
-                  <Tooltip title="Vista Tabla">
-                    <ViewListIcon fontSize="small" />
-                  </Tooltip>
-                </ToggleButton>
-                <ToggleButton value="grid" aria-label="vista tarjetas">
-                  <Tooltip title="Vista Cuadrícula / Móvil">
-                    <ViewModuleIcon fontSize="small" />
-                  </Tooltip>
-                </ToggleButton>
-              </ToggleButtonGroup>
-
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenNewRemito(true)}
-              >
-                Registrar Remito
-              </Button>
-            </Box>
-          </Box>
-
-          {/* Vista Cuadrícula vs Tabla */}
-          {viewMode === "grid" &&
-            (filteredRemitos.length === 0 ? (
-              <Paper
-                elevation={1}
-                sx={{
-                  p: 6,
-                  textAlign: "center",
-                  borderRadius: "16px",
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <Typography variant="body1" color="text.secondary">
-                  No se encontraron remitos
-                </Typography>
-              </Paper>
-            ) : (
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    sm: "repeat(2, 1fr)",
-                    lg: "repeat(3, 1fr)",
-                  },
-                  gap: 2.5,
-                  alignItems: "stretch",
-                }}
-              >
-                {filteredRemitos.map((row) => (
-                  <Paper
-                    key={row.id}
-                    elevation={1}
-                    sx={{
-                      p: 2.5,
-                      borderRadius: "16px",
-                      border: "1px solid",
-                      borderColor: "divider",
-                      display: "flex",
-                      flexDirection: "column",
-                      height: "100%",
-                      transition: "box-shadow 0.2s",
-                      "&:hover": { boxShadow: 4 },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 1.5,
-                      }}
-                    >
-                      <Chip
-                        label={row.id}
-                        size="small"
-                        variant="outlined"
-                        color="primary"
-                        sx={{ fontWeight: 800, fontFamily: "monospace" }}
-                      />
-                    </Box>
-
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 800,
-                        fontSize: "1.05rem",
-                        lineHeight: 1.3,
-                        mb: 0.3,
-                      }}
-                    >
-                      {row.proveedorNombre}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block", mb: 1.5 }}
-                    >
-                      Orden de Compra: <strong>{row.ordenCompraId}</strong>
-                    </Typography>
-
-                    <Paper
-                      variant="outlined"
-                      sx={{
-                        p: 1.5,
-                        borderRadius: "10px",
-                        bgcolor: "action.hover",
-                        mb: 2,
-                      }}
-                    >
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ fontWeight: 700, display: "block" }}
-                      >
-                        RECEPCIÓN EN PLANTA:
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 600, mt: 0.3 }}
-                      >
-                        Fecha Ingreso: {row.fechaEntregaReal}
-                      </Typography>
-                    </Paper>
-
-                    {row.observaciones && (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ fontSize: "0.85rem", mb: 2 }}
-                      >
-                        {row.observaciones}
-                      </Typography>
-                    )}
-
-                    <Box
-                      sx={{
-                        mt: "auto",
-                        pt: 1.5,
-                        borderTop: "1px solid",
-                        borderColor: "divider",
-                        display: "flex",
-                        justifyContent: "flex-end",
-                      }}
-                    >
-                      <Tooltip title="Ver detalle de remito">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenDetail(row, "remito")}
-                          sx={{ color: "text.secondary" }}
-                        >
-                          <VisibilityOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </Paper>
-                ))}
-              </Box>
-            ))}
-
-          {viewMode === "table" && (
-            <TableContainer
-              component={Paper}
-              elevation={1}
-              sx={{
-                borderRadius: "14px",
-                border: "1px solid",
-                borderColor: "divider",
-                overflow: "hidden",
-              }}
-            >
-              <Table sx={{ minWidth: 700 }}>
-                <TableHead sx={{ bgcolor: "action.hover" }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>Nº Remito</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Proveedor</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Orden Compra</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>
-                      Fecha Recepción
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700 }}>
-                      Acciones
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredRemitos.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        align="center"
-                        sx={{ py: 6, color: "text.secondary" }}
-                      >
-                        <Typography variant="body2">
-                          No se encontraron remitos
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredRemitos.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        hover
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell
-                          sx={{
-                            fontWeight: 700,
-                            fontFamily: "monospace",
-                            color: "primary.main",
-                          }}
-                        >
-                          {row.id}
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>
-                          {row.proveedorNombre}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={row.ordenCompraId}
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontFamily: "monospace" }}
-                          />
-                        </TableCell>
-                        <TableCell>{row.fechaEntregaReal}</TableCell>
-                        <TableCell align="right">
-                          <Tooltip title="Ver detalle de remito y mercadería">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleOpenDetail(row, "remito")}
-                              sx={{ color: "text.secondary" }}
-                            >
-                              <VisibilityOutlinedIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </Box>
-      )}
-
-      {/* ================= MODAL: REGISTRAR FACTURA - UI ESTILIZADA ================= */}
-      <Dialog
-        open={openNewFactura}
-        onClose={() => setOpenNewFactura(false)}
-        maxWidth="md"
-        fullWidth
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: "blur(8px)",
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(0, 0, 0, 0.7)"
-                  : "rgba(15, 23, 42, 0.45)",
-            },
-          },
-        }}
-        PaperProps={{
+      {currentTab === 2 && <StockRecibido stock={receptionData.stock} remitos={remitos} onViewReceipt={remito => handleOpenDetail(remito, 'remito')} />}
+      <Dialog open={openNewFactura} onClose={() => setOpenNewFactura(false)} maxWidth="md" fullWidth slotProps={{
+      backdrop: {
+        sx: {
+          backdropFilter: "blur(8px)",
+          backgroundColor: theme => theme.palette.mode === "dark" ? "rgba(0, 0, 0, 0.7)" : "rgba(15, 23, 42, 0.45)"
+        }
+      },
+      paper: {
+        ...{
           component: "form",
           onSubmit: handleSaveFactura,
           sx: {
             borderRadius: "20px",
             overflow: "hidden",
-            boxShadow: (theme) =>
-              theme.palette.mode === "dark"
-                ? "0 24px 60px rgba(0,0,0,0.6)"
-                : "0 24px 60px rgba(15, 23, 42, 0.2)",
+            boxShadow: theme => theme.palette.mode === "dark" ? "0 24px 60px rgba(0,0,0,0.6)" : "0 24px 60px rgba(15, 23, 42, 0.2)",
             maxHeight: "92vh",
             display: "flex",
-            flexDirection: "column",
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            p: 2.5,
+            flexDirection: "column"
+          }
+        }
+      }
+    }}>
+        <DialogTitle sx={{
+        p: 2.5,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        bgcolor: theme => theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
+        borderBottom: "1px solid",
+        borderColor: "divider"
+      }}>
+          <Box sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5
+        }}>
+            <Box sx={{
+            width: 42,
+            height: 42,
+            borderRadius: "12px",
+            bgcolor: "primary.main",
+            color: "white",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
-            borderBottom: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Box
-              sx={{
-                width: 42,
-                height: 42,
-                borderRadius: "12px",
-                bgcolor: "primary.main",
-                color: "white",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: 2,
-              }}
-            >
+            justifyContent: "center",
+            boxShadow: 2
+          }}>
               <ReceiptLongIcon />
             </Box>
             <Box>
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 800, lineHeight: 1.2 }}
-              >
+              <Typography variant="h6" sx={{
+              fontWeight: 800,
+              lineHeight: 1.2
+            }}>
                 Registrar Factura de Proveedor
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -1690,802 +345,209 @@ export const FacturasRemitosScreen = () => {
               </Typography>
             </Box>
           </Box>
-          <IconButton onClick={() => setOpenNewFactura(false)} size="small">
+          <IconButton aria-label="Cerrar diálogo" onClick={() => setOpenNewFactura(false)} size="small">
             <CloseIcon fontSize="small" />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent
-          sx={{
-            px: 3.5,
-            pt: "24px !important",
-            pb: 2.5,
-            display: "flex",
-            flexDirection: "column",
-            gap: 2.5,
-            overflowY: "auto",
-          }}
-        >
+        <DialogContent sx={{
+        px: 3.5,
+        pt: "24px !important",
+        pb: 2.5,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2.5,
+        overflowY: "auto"
+      }}>
           {/* Sección 1: Identificación */}
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 2.5,
-              borderRadius: "14px",
-              bgcolor: (theme) =>
-                theme.palette.mode === "dark" ? "background.paper" : "#ffffff",
-              border: "1px solid",
-              borderColor: (theme) =>
-                theme.palette.mode === "dark" ? "divider" : "#e2e8f0",
-              boxShadow: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "none"
-                  : "0 1px 3px rgba(0,0,0,0.04)",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-              <BusinessIcon fontSize="small" sx={{ color: "primary.main" }} />
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: "0.02em",
-                  textTransform: "uppercase",
-                }}
-              >
-                1. Identificación y Proveedor Emisor
-              </Typography>
-            </Box>
+          <FormSection number={1} title="Identificación y Proveedor Emisor">
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Nº de Factura Oficial"
-                  placeholder="FC-A-0001-0000XXXX"
-                  value={facturaForm.id}
-                  onChange={(e) =>
-                    setFacturaForm({ ...facturaForm, id: e.target.value })
-                  }
-                  required
-                />
+              <Grid size={{
+              xs: 12,
+              sm: 6
+            }}>
+                <TextField fullWidth size="small" label="Nº de Factura Oficial" placeholder="FC-A-0001-0000XXXX" value={facturaForm.id} onChange={e => setFacturaForm({
+                ...facturaForm,
+                id: e.target.value
+              })} required />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid size={{
+              xs: 12,
+              sm: 6
+            }}>
                 <FormControl fullWidth size="small">
                   <InputLabel id="factura-prov-label">
                     Proveedor Emisor
                   </InputLabel>
-                  <Select
-                    labelId="factura-prov-label"
-                    value={facturaForm.proveedorId}
-                    label="Proveedor Emisor"
-                    onChange={(e) =>
-                      setFacturaForm({
-                        ...facturaForm,
-                        proveedorId: e.target.value,
-                      })
-                    }
-                  >
-                    {INITIAL_PROVEEDORES.map((p) => (
-                      <MenuItem key={p.id} value={p.id}>
+                  <Select labelId="factura-prov-label" value={facturaForm.proveedorId} label="Proveedor Emisor" onChange={e => setFacturaForm({
+                  ...facturaForm,
+                  proveedorId: e.target.value
+                })}>
+                    {INITIAL_PROVEEDORES.map(p => <MenuItem key={p.id} value={p.id}>
                         {p.razonSocial}
-                      </MenuItem>
-                    ))}
+                      </MenuItem>)}
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid size={{
+              xs: 12,
+              sm: 6
+            }}>
                 <FormControl fullWidth size="small">
                   <InputLabel id="factura-oc-label">
                     Orden de Compra Vinculada
                   </InputLabel>
-                  <Select
-                    labelId="factura-oc-label"
-                    value={facturaForm.ordenCompraId}
-                    label="Orden de Compra Vinculada"
-                    onChange={(e) =>
-                      setFacturaForm({
-                        ...facturaForm,
-                        ordenCompraId: e.target.value,
-                      })
-                    }
-                  >
-                    {INITIAL_ORDENES_COMPRA.map((o) => (
-                      <MenuItem key={o.id} value={o.id}>
+                  <Select labelId="factura-oc-label" value={facturaForm.ordenCompraId} label="Orden de Compra Vinculada" onChange={e => setFacturaForm({
+                  ...facturaForm,
+                  ordenCompraId: e.target.value
+                })}>
+                    {INITIAL_ORDENES_COMPRA.map(o => <MenuItem key={o.id} value={o.id}>
                         {o.id} - {o.proveedorNombre}
-                      </MenuItem>
-                    ))}
+                      </MenuItem>)}
                   </Select>
                 </FormControl>
               </Grid>
             </Grid>
-          </Paper>
+          </FormSection>
 
           {/* Sección 2: Fechas y Plazos */}
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 2.5,
-              borderRadius: "14px",
-              bgcolor: (theme) =>
-                theme.palette.mode === "dark" ? "background.paper" : "#ffffff",
-              border: "1px solid",
-              borderColor: (theme) =>
-                theme.palette.mode === "dark" ? "divider" : "#e2e8f0",
-              boxShadow: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "none"
-                  : "0 1px 3px rgba(0,0,0,0.04)",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-              <EventNoteIcon fontSize="small" sx={{ color: "primary.main" }} />
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: "0.02em",
-                  textTransform: "uppercase",
-                }}
-              >
-                2. Fechas de Emisión y Vencimiento
-              </Typography>
-            </Box>
+          <FormSection number={2} title="Fechas de Emisión y Vencimiento">
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  type="date"
-                  label="Fecha de Emisión"
-                  value={facturaForm.fechaEmision}
-                  onChange={(e) =>
-                    setFacturaForm({
-                      ...facturaForm,
-                      fechaEmision: e.target.value,
-                    })
-                  }
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  required
-                />
+              <Grid size={{
+              xs: 12,
+              sm: 6
+            }}>
+                <TextField fullWidth size="small" type="date" label="Fecha de Emisión" value={facturaForm.fechaEmision} onChange={e => setFacturaForm({
+                ...facturaForm,
+                fechaEmision: e.target.value
+              })} slotProps={{
+                inputLabel: {
+                  shrink: true
+                }
+              }} required />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  type="date"
-                  label="Fecha de Vencimiento"
-                  value={facturaForm.fechaVencimiento}
-                  onChange={(e) =>
-                    setFacturaForm({
-                      ...facturaForm,
-                      fechaVencimiento: e.target.value,
-                    })
-                  }
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  required
-                />
+              <Grid size={{
+              xs: 12,
+              sm: 6
+            }}>
+                <TextField fullWidth size="small" type="date" label="Fecha de Vencimiento" value={facturaForm.fechaVencimiento} onChange={e => setFacturaForm({
+                ...facturaForm,
+                fechaVencimiento: e.target.value
+              })} slotProps={{
+                inputLabel: {
+                  shrink: true
+                }
+              }} required />
               </Grid>
             </Grid>
-          </Paper>
+          </FormSection>
 
-          {/* Sección 3: Liquidación de Importes e IVA - Rediseño Profesional Anti-Slop */}
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 2.5,
-              borderRadius: "14px",
-              bgcolor: (theme) =>
-                theme.palette.mode === "dark" ? "background.paper" : "#ffffff",
-              border: "1px solid",
-              borderColor: (theme) =>
-                theme.palette.mode === "dark" ? "divider" : "#e2e8f0",
-              boxShadow: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "none"
-                  : "0 1px 3px rgba(0,0,0,0.04)",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-              <PriceCheckIcon fontSize="small" sx={{ color: "primary.main" }} />
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: "0.02em",
-                  textTransform: "uppercase",
-                }}
-              >
-                3. Liquidación de Importes e IVA
-              </Typography>
-            </Box>
-            <Grid container spacing={2} sx={{ alignItems: "stretch" }}>
-              {/* Columna 1: Base Imponible / Neto Gravado */}
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                    justifyContent: "center",
-                  }}
-                >
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Neto Gravado"
-                    type="number"
-                    value={facturaForm.netoGravado}
-                    onChange={(e) =>
-                      setFacturaForm({
-                        ...facturaForm,
-                        netoGravado: e.target.value,
-                      })
-                    }
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">$</InputAdornment>
-                      ),
-                    }}
-                    required
-                    sx={{ bgcolor: "background.paper" }}
-                  />
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ mt: 0.5, px: 0.5 }}
-                  >
-                    Base imponible sin impuestos
-                  </Typography>
+          <FormSection number={3} title="Importes e IVA">
+            <Grid container spacing={3} sx={{ alignItems: 'center' }}>
+              <Grid size={{ xs: 12, sm: 5 }}>
+                <TextField fullWidth label="Neto gravado" type="number" value={facturaForm.netoGravado} onChange={event => setFacturaForm({ ...facturaForm, netoGravado: event.target.value })} slotProps={{ htmlInput: { step: '0.01', inputMode: 'decimal' }, input: { startAdornment: <InputAdornment position="start">$</InputAdornment> } }} required helperText="Importe sin IVA" />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 7 }}>
+                <Box component="dl" sx={{ m: 0, pl: { sm: 3 }, pt: { xs: 2, sm: 0 }, borderLeft: { sm: '1px solid' }, borderTop: { xs: '1px solid', sm: 0 }, borderColor: 'divider', fontVariantNumeric: 'tabular-nums' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2, pb: 1.5 }}><Typography component="dt" variant="body2" color="text.secondary">IVA · 21%</Typography><Typography component="dd" variant="body2" sx={{ m: 0, textAlign: 'right', fontWeight: 600 }}>{money(Math.round(Number(facturaForm.netoGravado || 0) * 0.21))}</Typography></Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2, pt: 1.5, borderTop: '1px solid', borderColor: 'divider', flexWrap: 'wrap' }}><Typography component="dt" variant="subtitle2">Total a facturar</Typography><Typography component="dd" sx={{ m: 0, ml: 'auto', fontSize: { xs: '1.25rem', sm: '1.5rem' }, fontWeight: 750, textAlign: 'right', color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>{money(Number(facturaForm.netoGravado || 0) + Math.round(Number(facturaForm.netoGravado || 0) * 0.21))}</Typography></Box>
                 </Box>
               </Grid>
-
-              {/* Columna 2: IVA 21% Calculado */}
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <Paper
-                  variant="outlined"
-                  sx={{
-                    p: 1.75,
-                    borderRadius: "12px",
-                    bgcolor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "action.hover"
-                        : "#f8fafc",
-                    borderColor: "divider",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      mb: 0.5,
-                    }}
-                  >
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ fontWeight: 600 }}
-                    >
-                      IVA (21% Calculado)
-                    </Typography>
-                    <Chip
-                      label="21% Fiscal"
-                      size="small"
-                      color="info"
-                      variant="outlined"
-                      sx={{ height: 20, fontSize: "0.7rem", fontWeight: 700 }}
-                    />
-                  </Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 800,
-                      fontFamily: "monospace",
-                      color: "text.primary",
-                    }}
-                  >
-                    $
-                    {Math.round(
-                      Number(facturaForm.netoGravado || 0) * 0.21,
-                    ).toLocaleString("es-AR")}
-                  </Typography>
-                </Paper>
-              </Grid>
-
-              {/* Columna 3: Monto Total a Facturar */}
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 1.75,
-                    borderRadius: "12px",
-                    bgcolor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "rgba(0, 146, 70, 0.15)"
-                        : "rgba(0, 146, 70, 0.08)",
-                    border: "1px solid",
-                    borderColor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "primary.dark"
-                        : "primary.light",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontWeight: 800,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.04em",
-                      color: "primary.main",
-                      mb: 0.5,
-                    }}
-                  >
-                    Monto Total a Facturar
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 900,
-                      color: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "primary.light"
-                          : "primary.dark",
-                      lineHeight: 1.1,
-                    }}
-                  >
-                    $
-                    {(
-                      Number(facturaForm.netoGravado || 0) +
-                      Math.round(Number(facturaForm.netoGravado || 0) * 0.21)
-                    ).toLocaleString("es-AR")}
-                  </Typography>
-                </Paper>
-              </Grid>
             </Grid>
-          </Paper>
+          </FormSection>
 
           {/* Sección 4: Carga de Comprobante / Factura Oficial */}
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 2.5,
-              borderRadius: "14px",
-              bgcolor: (theme) =>
-                theme.palette.mode === "dark" ? "background.paper" : "#ffffff",
-              border: "1px solid",
-              borderColor: (theme) =>
-                theme.palette.mode === "dark" ? "divider" : "#e2e8f0",
-            }}
-          >
-            <DocumentoUploader
-              label="Comprobante / Foto de la Factura Oficial"
-              value={facturaForm.documentoUrl}
-              onChange={(newUrl) =>
-                setFacturaForm((prev) => ({ ...prev, documentoUrl: newUrl }))
-              }
-              helperText="Cargue la foto o escaneo digital de la factura fiscal emitida por el proveedor."
-              mockPlaceholder={MOCK_DOC_FACTURA}
-            />
-          </Paper>
+          <FormSection number={4} title="Documento de respaldo">
+            <DocumentoUploader label="Comprobante / Foto de la Factura Oficial" value={facturaForm.documentoUrl} onChange={newUrl => setFacturaForm(prev => ({
+            ...prev,
+            documentoUrl: newUrl
+          }))} helperText="Cargue la foto o escaneo digital de la factura fiscal emitida por el proveedor." />
+          </FormSection>
         </DialogContent>
 
-        <DialogActions
-          sx={{
-            px: 3.5,
-            py: 2,
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
-            borderTop: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Button
-            onClick={() => setOpenNewFactura(false)}
-            color="inherit"
-            sx={{ fontWeight: 600 }}
-          >
+        <DialogActions sx={{
+        px: 3.5,
+        py: 2,
+        bgcolor: theme => theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
+        borderTop: "1px solid",
+        borderColor: "divider"
+      }}>
+          <Button variant="outlined" onClick={() => setOpenNewFactura(false)} color="inherit" sx={{
+          fontWeight: 600
+        }}>
             Cancelar
           </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{
-              px: 3,
-              fontWeight: 700,
-              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": { transform: "translateY(-1px)" },
-            }}
-          >
+          <Button type="submit" variant="contained" color="primary" sx={{
+          px: 3,
+          fontWeight: 700,
+          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+          "&:hover": {
+            transform: "translateY(-1px)"
+          }
+        }}>
             Guardar Factura
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* ================= MODAL: REGISTRAR REMITO - UI ESTILIZADA ================= */}
-      <Dialog
-        open={openNewRemito}
-        onClose={() => setOpenNewRemito(false)}
-        maxWidth="md"
-        fullWidth
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: "blur(8px)",
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(0, 0, 0, 0.7)"
-                  : "rgba(15, 23, 42, 0.45)",
-            },
-          },
-        }}
-        PaperProps={{
-          component: "form",
-          onSubmit: handleSaveRemito,
-          sx: {
-            borderRadius: "20px",
-            overflow: "hidden",
-            boxShadow: (theme) =>
-              theme.palette.mode === "dark"
-                ? "0 24px 60px rgba(0,0,0,0.6)"
-                : "0 24px 60px rgba(15, 23, 42, 0.2)",
-            maxHeight: "92vh",
-            display: "flex",
-            flexDirection: "column",
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            p: 2.5,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
-            borderBottom: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Box
-              sx={{
-                width: 42,
-                height: 42,
-                borderRadius: "12px",
-                bgcolor: "primary.main",
-                color: "white",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: 2,
-              }}
-            >
-              <LocalShippingIcon />
-            </Box>
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 800, lineHeight: 1.2 }}
-              >
-                Registrar Remito de Mercadería Recibida
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Conformidad física y bromatológica de materias primas al
-                ingresar al almacén
-              </Typography>
-            </Box>
-          </Box>
-          <IconButton onClick={() => setOpenNewRemito(false)} size="small">
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </DialogTitle>
+      {openNewRemito && <RecepcionForm state={receptionData} onClose={() => setOpenNewRemito(false)} onReceive={(next, receipt) => {
+      setReceptionData(next);
+      setOpenNewRemito(false);
+      setReceptionNotice(`Remito ${receipt.id} confirmado. Cantidades aceptadas ingresadas al stock.`);
+    }} />}
 
-        <DialogContent
-          sx={{
-            px: 3.5,
-            pt: "24px !important",
-            pb: 2.5,
-            display: "flex",
-            flexDirection: "column",
-            gap: 2.5,
-            overflowY: "auto",
-          }}
-        >
-          {/* Sección 1: Datos de Transporte */}
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 2.5,
-              borderRadius: "14px",
-              bgcolor: (theme) =>
-                theme.palette.mode === "dark" ? "background.paper" : "#ffffff",
-              border: "1px solid",
-              borderColor: (theme) =>
-                theme.palette.mode === "dark" ? "divider" : "#e2e8f0",
-              boxShadow: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "none"
-                  : "0 1px 3px rgba(0,0,0,0.04)",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-              <LocalShippingIcon
-                fontSize="small"
-                sx={{ color: "primary.main" }}
-              />
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: "0.02em",
-                  textTransform: "uppercase",
-                }}
-              >
-                1. Datos del Transporte y Proveedor
-              </Typography>
-            </Box>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Nº de Remito del Transportista"
-                  placeholder="REM-0001-0000XXXX"
-                  value={remitoForm.id}
-                  onChange={(e) =>
-                    setRemitoForm({ ...remitoForm, id: e.target.value })
-                  }
-                  required
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="remito-prov-label">Proveedor</InputLabel>
-                  <Select
-                    labelId="remito-prov-label"
-                    value={remitoForm.proveedorId}
-                    label="Proveedor"
-                    onChange={(e) =>
-                      setRemitoForm({
-                        ...remitoForm,
-                        proveedorId: e.target.value,
-                      })
-                    }
-                  >
-                    {INITIAL_PROVEEDORES.map((p) => (
-                      <MenuItem key={p.id} value={p.id}>
-                        {p.razonSocial}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="remito-oc-label">
-                    Orden de Compra Vinculada
-                  </InputLabel>
-                  <Select
-                    labelId="remito-oc-label"
-                    value={remitoForm.ordenCompraId}
-                    label="Orden de Compra Vinculada"
-                    onChange={(e) =>
-                      setRemitoForm({
-                        ...remitoForm,
-                        ordenCompraId: e.target.value,
-                      })
-                    }
-                  >
-                    {INITIAL_ORDENES_COMPRA.map((o) => (
-                      <MenuItem key={o.id} value={o.id}>
-                        {o.id} - {o.proveedorNombre}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </Paper>
-
-          {/* Sección 2: Recepción y Control */}
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 2.5,
-              borderRadius: "14px",
-              bgcolor: (theme) =>
-                theme.palette.mode === "dark" ? "background.paper" : "#ffffff",
-              border: "1px solid",
-              borderColor: (theme) =>
-                theme.palette.mode === "dark" ? "divider" : "#e2e8f0",
-              boxShadow: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "none"
-                  : "0 1px 3px rgba(0,0,0,0.04)",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-              <AssignmentTurnedInIcon
-                fontSize="small"
-                sx={{ color: "primary.main" }}
-              />
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: "0.02em",
-                  textTransform: "uppercase",
-                }}
-              >
-                2. Conformidad y Fecha de Descarga
-              </Typography>
-            </Box>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  type="date"
-                  label="Fecha de Entrega Real"
-                  value={remitoForm.fechaEntregaReal}
-                  onChange={(e) =>
-                    setRemitoForm({
-                      ...remitoForm,
-                      fechaEntregaReal: e.target.value,
-                    })
-                  }
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  required
-                />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  multiline
-                  rows={2}
-                  label="Observaciones de Descarga y Bromatología"
-                  value={remitoForm.observaciones}
-                  onChange={(e) =>
-                    setRemitoForm({
-                      ...remitoForm,
-                      observaciones: e.target.value,
-                    })
-                  }
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-
-          {/* Sección 3: Carga de Comprobante / Remito Firmado */}
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 2.5,
-              borderRadius: "14px",
-              bgcolor: (theme) =>
-                theme.palette.mode === "dark" ? "background.paper" : "#ffffff",
-              border: "1px solid",
-              borderColor: (theme) =>
-                theme.palette.mode === "dark" ? "divider" : "#e2e8f0",
-            }}
-          >
-            <DocumentoUploader
-              label="Comprobante / Foto del Remito Firmado"
-              value={remitoForm.documentoUrl}
-              onChange={(newUrl) =>
-                setRemitoForm((prev) => ({ ...prev, documentoUrl: newUrl }))
-              }
-              helperText="Cargue la foto o escaneo del remito físico firmado y sellado por el chofer y depósito."
-              mockPlaceholder={MOCK_DOC_REMITO}
-            />
-          </Paper>
-        </DialogContent>
-
-        <DialogActions
-          sx={{
-            px: 3.5,
-            py: 2,
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
-            borderTop: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Button
-            onClick={() => setOpenNewRemito(false)}
-            color="inherit"
-            sx={{ fontWeight: 600 }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{
-              px: 3,
-              fontWeight: 700,
-              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": { transform: "translateY(-1px)" },
-            }}
-          >
-            Guardar Remito
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       {/* ================= MODAL: REGISTRAR PAGO A FACTURA - UI ESTILIZADA ================= */}
-      <Dialog
-        open={openPagarFactura}
-        onClose={() => setOpenPagarFactura(false)}
-        maxWidth="sm"
-        fullWidth
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: "blur(8px)",
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(0, 0, 0, 0.7)"
-                  : "rgba(15, 23, 42, 0.45)",
-            },
-          },
-        }}
-        PaperProps={{
+      <Dialog open={openPagarFactura} onClose={() => setOpenPagarFactura(false)} maxWidth="sm" fullWidth slotProps={{
+      backdrop: {
+        sx: {
+          backdropFilter: "blur(8px)",
+          backgroundColor: theme => theme.palette.mode === "dark" ? "rgba(0, 0, 0, 0.7)" : "rgba(15, 23, 42, 0.45)"
+        }
+      },
+      paper: {
+        ...{
           sx: {
             borderRadius: "20px",
             overflow: "hidden",
-            boxShadow: (theme) =>
-              theme.palette.mode === "dark"
-                ? "0 24px 60px rgba(0,0,0,0.6)"
-                : "0 24px 60px rgba(15, 23, 42, 0.2)",
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            p: 2.5,
+            boxShadow: theme => theme.palette.mode === "dark" ? "0 24px 60px rgba(0,0,0,0.6)" : "0 24px 60px rgba(15, 23, 42, 0.2)"
+          }
+        }
+      }
+    }}>
+        <DialogTitle sx={{
+        p: 2.5,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        bgcolor: theme => theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
+        borderBottom: "1px solid",
+        borderColor: "divider"
+      }}>
+          <Box sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5
+        }}>
+            <Box sx={{
+            width: 42,
+            height: 42,
+            borderRadius: "12px",
+            bgcolor: "success.main",
+            color: "white",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
-            borderBottom: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Box
-              sx={{
-                width: 42,
-                height: 42,
-                borderRadius: "12px",
-                bgcolor: "success.main",
-                color: "white",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: 2,
-              }}
-            >
+            justifyContent: "center",
+            boxShadow: 2
+          }}>
               <PaymentIcon />
             </Box>
             <Box>
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 800, lineHeight: 1.2 }}
-              >
+              <Typography variant="h6" sx={{
+              fontWeight: 800,
+              lineHeight: 1.2
+            }}>
                 Registrar Orden de Pago Proveedor
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -2493,62 +555,50 @@ export const FacturasRemitosScreen = () => {
               </Typography>
             </Box>
           </Box>
-          <IconButton onClick={() => setOpenPagarFactura(false)} size="small">
+          <IconButton aria-label="Cerrar diálogo" onClick={() => setOpenPagarFactura(false)} size="small">
             <CloseIcon fontSize="small" />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent
-          sx={{
-            px: 3.5,
-            pt: "24px !important",
-            pb: 2.5,
-            display: "flex",
-            flexDirection: "column",
-            gap: 2.5,
-          }}
-        >
-          {selectedItem && (
-            <>
-              <Box
-                sx={{
-                  p: 2,
-                  bgcolor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(46, 204, 113, 0.12)"
-                      : "rgba(46, 204, 113, 0.08)",
-                  borderRadius: "12px",
-                  border: "1px solid",
-                  borderColor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "success.dark"
-                      : "success.light",
-                }}
-              >
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+        <DialogContent sx={{
+        px: 3.5,
+        pt: "24px !important",
+        pb: 2.5,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2.5
+      }}>
+          {openPagarFactura && selectedItem && <>
+              <FormSection number={1} title="Factura y monto a cancelar"><Box sx={{
+            p: 2,
+            bgcolor: theme => theme.palette.mode === "dark" ? "rgba(46, 204, 113, 0.12)" : "rgba(46, 204, 113, 0.08)",
+            borderRadius: "12px",
+            border: "1px solid",
+            borderColor: theme => theme.palette.mode === "dark" ? "success.dark" : "success.light"
+          }}>
+                <Typography variant="body2" sx={{
+              fontWeight: 700
+            }}>
                   Factura a Cancelar: <strong>{selectedItem.id}</strong>
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Proveedor: {selectedItem.proveedorNombre}
                 </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 800, color: "success.main", mt: 1 }}
-                >
+                <Typography variant="h6" sx={{
+              fontWeight: 800,
+              color: "success.main",
+              mt: 1
+            }}>
                   Monto a Abonar: ${selectedItem.total.toLocaleString("es-AR")}
                 </Typography>
               </Box>
 
-              <FormControl fullWidth size="small">
+              </FormSection><FormSection number={2} title="Medio de pago y comprobante"><FormControl fullWidth size="small">
                 <InputLabel id="pago-medio-label">Medio de Pago</InputLabel>
-                <Select
-                  labelId="pago-medio-label"
-                  value={pagoForm.medioPago}
-                  label="Medio de Pago"
-                  onChange={(e) =>
-                    setPagoForm({ ...pagoForm, medioPago: e.target.value })
-                  }
-                >
+                <Select labelId="pago-medio-label" value={pagoForm.medioPago} label="Medio de Pago" onChange={e => setPagoForm({
+              ...pagoForm,
+              medioPago: e.target.value
+            })}>
                   <MenuItem value="Transferencia Bancaria">
                     Transferencia Bancaria (BAPRO)
                   </MenuItem>
@@ -2561,290 +611,83 @@ export const FacturasRemitosScreen = () => {
                 </Select>
               </FormControl>
 
-              <DocumentoUploader
-                label="Comprobante de Transferencia / Recibo de Pago"
-                value={pagoForm.documentoUrl}
-                onChange={(newUrl) =>
-                  setPagoForm((prev) => ({ ...prev, documentoUrl: newUrl }))
-                }
-                helperText="Cargue la foto o comprobante bancario para respaldar la liquidación del pago."
-                mockPlaceholder={MOCK_DOC_PAGO}
-              />
-            </>
-          )}
+              <DocumentoUploader label="Comprobante de Transferencia / Recibo de Pago" value={pagoForm.documentoUrl} onChange={newUrl => setPagoForm(prev => ({
+            ...prev,
+            documentoUrl: newUrl
+          }))} helperText="Cargue la foto o comprobante bancario para respaldar la liquidación del pago." /></FormSection>
+            </>}
         </DialogContent>
-        <DialogActions
-          sx={{
-            px: 3.5,
-            py: 2,
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
-            borderTop: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Button
-            onClick={() => setOpenPagarFactura(false)}
-            color="inherit"
-            sx={{ fontWeight: 600 }}
-          >
+        <DialogActions sx={{
+        px: 3.5,
+        py: 2,
+        bgcolor: theme => theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
+        borderTop: "1px solid",
+        borderColor: "divider"
+      }}>
+          <Button variant="outlined" onClick={() => setOpenPagarFactura(false)} color="inherit" sx={{
+          fontWeight: 600
+        }}>
             Cancelar
           </Button>
-          <Button
-            onClick={handleConfirmarPago}
-            variant="contained"
-            color="success"
-            sx={{
-              px: 3,
-              fontWeight: 700,
-              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": { transform: "translateY(-1px)" },
-            }}
-          >
+          <Button onClick={handleConfirmarPago} variant="contained" color="success" sx={{
+          px: 3,
+          fontWeight: 700,
+          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+          "&:hover": {
+            transform: "translateY(-1px)"
+          }
+        }}>
             Confirmar y Emitir Pago
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* ================= MODAL: VER DETALLE GENERAL - UI ESTILIZADA ================= */}
-      <Dialog
-        open={openDetail}
-        onClose={() => setOpenDetail(false)}
-        maxWidth="sm"
-        fullWidth
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: "blur(8px)",
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(0, 0, 0, 0.7)"
-                  : "rgba(15, 23, 42, 0.45)",
-            },
-          },
-        }}
-        PaperProps={{
-          sx: {
-            borderRadius: "20px",
-            overflow: "hidden",
-            boxShadow: (theme) =>
-              theme.palette.mode === "dark"
-                ? "0 24px 60px rgba(0,0,0,0.6)"
-                : "0 24px 60px rgba(15, 23, 42, 0.2)",
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            p: 2.5,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
-            borderBottom: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Box
-              sx={{
-                width: 42,
-                height: 42,
-                borderRadius: "12px",
-                bgcolor: "primary.main",
-                color: "white",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: 2,
-              }}
-            >
-              {detailType === "factura" && <ReceiptLongIcon />}
-              {detailType === "remito" && <LocalShippingIcon />}
-              {detailType === "pago" && <AccountBalanceIcon />}
-            </Box>
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 800, lineHeight: 1.2 }}
-              >
-                {detailType === "factura" && `Factura ${selectedItem?.id}`}
-                {detailType === "remito" && `Remito ${selectedItem?.id}`}
-                {detailType === "pago" && `Orden de Pago ${selectedItem?.id}`}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Proveedor: {selectedItem?.proveedorNombre}
-              </Typography>
-            </Box>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Chip
-              label={selectedItem?.estado}
-              size="small"
-              color="primary"
-              sx={{ fontWeight: 700 }}
-            />
-            <IconButton onClick={() => setOpenDetail(false)} size="small">
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-
-        <DialogContent
-          sx={{
-            px: 3.5,
-            pt: "24px !important",
-            pb: 2.5,
-            display: "flex",
-            flexDirection: "column",
-            gap: 2.5,
-          }}
-        >
-          {selectedItem && (
-            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: "14px" }}>
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 12 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Proveedor
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                    {selectedItem.proveedorNombre}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 6 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Fecha
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {selectedItem.fechaEmision || selectedItem.fechaEntregaReal}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 6 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Estado
-                  </Typography>
-                  <Box sx={{ mt: 0.5 }}>
-                    <Chip
-                      label={selectedItem.estado}
-                      size="small"
-                      color="primary"
-                    />
-                  </Box>
-                </Grid>
-
-                {detailType === "factura" && (
-                  <>
-                    <Grid size={{ xs: 6 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        Neto Gravado
-                      </Typography>
-                      <Typography variant="body2">
-                        ${selectedItem.netoGravado?.toLocaleString("es-AR")}
-                      </Typography>
-                    </Grid>
-                    <Grid size={{ xs: 6 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        IVA (21%)
-                      </Typography>
-                      <Typography variant="body2">
-                        ${selectedItem.iva21?.toLocaleString("es-AR")}
-                      </Typography>
-                    </Grid>
-                    <Grid size={{ xs: 12 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        Monto Total
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 800, color: "primary.main" }}
-                      >
-                        ${selectedItem.total?.toLocaleString("es-AR")}
-                      </Typography>
-                    </Grid>
-                  </>
-                )}
-
-                {detailType === "remito" && (
-                  <Grid size={{ xs: 12 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      Observaciones de Entrega
-                    </Typography>
-                    <Typography variant="body2">
-                      {selectedItem.observaciones ||
-                        "Recepción conforme sin observaciones."}
-                    </Typography>
-                  </Grid>
-                )}
-
-                {detailType === "pago" && (
-                  <>
-                    <Grid size={{ xs: 6 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        Medio de Pago
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {selectedItem.medioPago}
-                      </Typography>
-                    </Grid>
-                    <Grid size={{ xs: 6 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        Nº Transacción
-                      </Typography>
-                      <Typography variant="body2">
-                        {selectedItem.nroTransaccion}
-                      </Typography>
-                    </Grid>
-                    <Grid size={{ xs: 12 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        Total Pagado
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 800, color: "success.main" }}
-                      >
-                        ${selectedItem.total?.toLocaleString("es-AR")}
-                      </Typography>
-                    </Grid>
-                  </>
-                )}
-
-                {/* Comprobante Adjunto */}
-                <Grid size={{ xs: 12 }}>
-                  <DocumentoUploader
-                    label={getDetailDocumentoLabel(detailType)}
-                    value={
-                      selectedItem.documentoUrl ||
-                      getDetailDocumentoDefaultUrl(detailType)
-                    }
-                    readOnly
-                  />
-                </Grid>
-              </Grid>
-            </Paper>
-          )}
-        </DialogContent>
-        <DialogActions
-          sx={{
-            px: 3,
-            py: 2,
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark" ? "action.hover" : "#f8fafc",
-            borderTop: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Button
-            onClick={() => setOpenDetail(false)}
-            variant="contained"
-            color="primary"
-          >
-            Cerrar
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
-  );
+      <FormDialog open={openDetail} onClose={() => setOpenDetail(false)} title={detailType === 'factura' ? 'Detalle de factura' : detailType === 'remito' ? 'Detalle de remito' : 'Detalle de pago'} maxWidth="lg">
+        {selectedItem && <><ComprobanteDetalle tipo={detailType === 'factura' ? 'Factura de proveedor' : detailType === 'remito' ? 'Remito de entrega' : 'Comprobante de pago'} numero={selectedItem.id} estado={selectedItem.estado} emisor={detailType === 'pago' ? 'PastaFab' : selectedItem.proveedorNombre} quantityLabel="Cantidad recibida" items={detailType === 'remito' ? selectedItem.items : undefined} total={detailType === 'remito' ? undefined : selectedItem.total} observaciones={selectedItem.observaciones} fields={[{
+          label: 'Proveedor',
+          value: selectedItem.proveedorNombre
+        }, {
+          label: 'CUIT',
+          value: selectedItem.cuit
+        }, {
+          label: 'Fecha de emisión',
+          value: selectedItem.fechaEmision
+        }, ...(detailType === 'pago' ? [{
+          label: 'Factura vinculada',
+          value: selectedItem.facturaId
+        }, {
+          label: 'Medio de pago',
+          value: selectedItem.medioPago
+        }, {
+          label: 'Nº de transacción',
+          value: selectedItem.nroTransaccion
+        }, {
+          label: 'Banco',
+          value: selectedItem.banco
+        }] : [{
+          label: 'Orden de compra',
+          value: selectedItem.ordenCompraId
+        }]), ...(detailType === 'factura' ? [{
+          label: 'Vencimiento',
+          value: selectedItem.fechaVencimiento
+        }, {
+          label: 'Condición de pago',
+          value: selectedItem.condicionPago
+        }] : []), ...(detailType === 'remito' ? [{
+          label: 'Fecha de recepción',
+          value: selectedItem.fechaEntregaReal
+        }] : [])]} netoGravado={detailType === 'factura' ? selectedItem.netoGravado : undefined} importeIVA={detailType === 'factura' ? selectedItem.iva21 : undefined}>{detailType === 'remito' && receiptOrder && <Box>
+            <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap', mb: 1.5 }}><Typography variant="subtitle2">Estado de recepción</Typography><StatusChip value={receiptOrder.estado} /></Stack>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>Acumulado de la orden {receiptOrder.id}, incluyendo sus remitos registrados.</Typography>
+            <Box component="dl" sx={{ m: 0, display: 'grid', gap: 1.5 }}>{receiptBalance.map(item => <Box key={`${item.materiaPrima}|${item.unidad}`} sx={{ p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+              <Typography component="dt" variant="body2" sx={{ fontWeight: 600, mb: 1 }}>{item.materiaPrima}</Typography>
+              <Box component="dd" sx={{ m: 0, display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1 }}>{[['Pedido', item.cantidad], ['Recibido', item.recibida], ['Saldo', item.pendiente]].map(([label, value]) => <Box key={label}><Typography variant="caption" color="text.secondary">{label}</Typography><Typography variant="body2" sx={{ fontVariantNumeric: 'tabular-nums' }}>{value} {item.unidad}</Typography></Box>)}</Box>
+            </Box>)}</Box>
+          </Box>}</ComprobanteDetalle>
+          {selectedItem.documentoUrl && <DocumentoUploader label={getDetailDocumentoLabel(detailType)} value={selectedItem.documentoUrl} readOnly />}
+        </>}
+      </FormDialog>
+    </ModuleSurface>;
 };
-
 export default FacturasRemitosScreen;
