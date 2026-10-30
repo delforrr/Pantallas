@@ -3,7 +3,7 @@ import { ThemeProvider, CssBaseline } from '@mui/material';
 import { Box, Typography, Fade, GlobalStyles } from '@mui/material';
 import { getTheme } from './theme';
 import { AppProvider, useApp } from './context/AppContext';
-import LoginPage from './pages/LoginPage';
+import AdminLoginPage from './pages/LoginPage';
 import { AppLayout } from './components/layout';
 import ClientePortalLayout from './components/cliente/ClientePortalLayout';
 import ClienteAccesoScreen from './pages/cliente/ClienteAccesoScreen';
@@ -97,14 +97,14 @@ const PageContent = () => {
 // ── Root: switches between login and layout ─────────────────
 const AppRoot = () => {
   const { user, currentPage, themeMode, sidebarOpen, toggleSidebar } = useApp();
-  const portalPublico = !user && currentPage !== 'admin_login';
-  const accesoCliente = !user && ['carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil', 'ingresar', 'registrarse'].includes(currentPage);
+  const accesoAdmin = currentPage === 'admin_login';
+  const accesoCliente = ['ingresar', 'registrarse'].includes(currentPage) || (!user && ['carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'].includes(currentPage));
   const theme = React.useMemo(() => getTheme(user?.role === 'cliente' ? 'light' : themeMode), [themeMode, user?.role]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {user || portalPublico ? !user || user.role === 'cliente' ? (
+      {accesoAdmin ? <AdminLoginPage /> : !user || user.role === 'cliente' || accesoCliente ? (
         <ClientePortalLayout>{accesoCliente ? <ClienteAccesoScreen key={currentPage} /> : <PageContent />}</ClientePortalLayout>
       ) : (
         <>
@@ -126,8 +126,6 @@ const AppRoot = () => {
             <PageContent />
           </AppLayout>
         </>
-      ) : (
-        <LoginPage />
       )}
     </ThemeProvider>
   );
