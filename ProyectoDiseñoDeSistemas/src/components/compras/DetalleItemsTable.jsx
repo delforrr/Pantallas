@@ -69,7 +69,7 @@ export function DetalleItemsTable({
       borderRadius: 2
     }}><Typography component="legend" variant="subtitle2">Insumo {index + 1}</Typography><Stack sx={{
         gap: 2
-      }}>{material(item, index)}{quantity(item, index)}{unit(item, index)}{price(item, index)}<Typography>Importe: {amount(item)}</Typography>{remove(index)}</Stack></Paper>) : <TableContainer component={Paper} variant="outlined" tabIndex={0} aria-label="Detalle de insumos"><Table sx={{
+      }}>{material(item, index)}{quantity(item, index)}{unit(item, index)}{price(item, index)}<Typography sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark', fontWeight: 650 }}>Importe: {amount(item)}</Typography>{remove(index)}</Stack></Paper>) : <TableContainer component={Paper} variant="outlined" tabIndex={0} aria-label="Detalle de insumos"><Table sx={{
         minWidth: 880,
         '& .MuiTableCell-root': { px: 1.5, py: 1.5, verticalAlign: 'top' }
       }}><TableHead><TableRow>{['Materia prima', 'Cantidad', 'Unidad', 'Precio unitario', 'Importe', ...(!readOnly ? ['Acciones'] : [])].map(title => <TableCell key={title} sx={{
@@ -79,8 +79,9 @@ export function DetalleItemsTable({
             }}>{quantity(item, index)}</TableCell><TableCell sx={{
               minWidth: 90
             }}>{unit(item, index)}</TableCell><TableCell sx={{
+              color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark',
               minWidth: 140
-            }}>{price(item, index)}</TableCell><TableCell align="right" sx={{ whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{amount(item)}</TableCell>{!readOnly && <TableCell>{remove(index)}</TableCell>}</TableRow>)}</TableBody></Table></TableContainer>}
+            }}>{price(item, index)}</TableCell><TableCell align="right" sx={{ whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums', fontWeight: 650, color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>{amount(item)}</TableCell>{!readOnly && <TableCell>{remove(index)}</TableCell>}</TableRow>)}</TableBody></Table></TableContainer>}
     <Box sx={{
       display: 'flex',
       gap: 1,
@@ -100,7 +101,8 @@ export function DetalleItemsTable({
         ...{
           overflowWrap: 'anywhere'
         },
-        fontWeight: 700
+        fontWeight: 700,
+        color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark'
       }}>Total: {money(itemTotal(items))}</Typography>
     </Box>
   </Stack>;

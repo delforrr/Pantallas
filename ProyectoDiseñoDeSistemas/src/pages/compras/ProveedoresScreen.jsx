@@ -1,7 +1,7 @@
 import DomicilioProveedorFields from '../../components/compras/DomicilioProveedorFields';
 import { buildAddressCatalog } from './addressCatalog';
 import ComprobanteDetalle from '../../components/compras/ComprobanteDetalle';
-import { ModuleDialog as Dialog, ModuleSurface, FormSection, FormDialog, SummaryCards, ListToolbar, RecordsView, RecordIcon } from '../../components/compras/ModuleUI';
+import { ModuleDialog as Dialog, ModuleSurface, FormSection, FormDialog, SummaryCards, ListToolbar, RecordsView, RecordIcon, StatusSelect } from '../../components/compras/ModuleUI';
 import { useState, useMemo } from "react";
 import { Box, Typography, Button, TextField, FormControl, InputLabel, Select, MenuItem, IconButton, DialogTitle, DialogContent, DialogActions, Grid } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
@@ -13,12 +13,6 @@ import SaveIcon from "@mui/icons-material/Save";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { INITIAL_PROVEEDORES } from "./mockData";
 
-const EstadoSelect = ({ value, onChange, ariaLabel = "Cambiar estado del proveedor", size = "small", disabled = false }) => <FormControl size={size} sx={{ flexShrink: 0 }}>
-  <Select value={value} onChange={onChange} disabled={disabled} onClick={event => event.stopPropagation()} inputProps={{ 'aria-label': ariaLabel }} sx={{ minHeight: 44, '& .MuiSelect-select': { py: 0.75, display: 'flex', alignItems: 'center' } }}>
-    <MenuItem value="Activo">Activo</MenuItem>
-    <MenuItem value="Inactivo">Inactivo</MenuItem>
-  </Select>
-</FormControl>;
 export const ProveedoresScreen = () => {
   const [proveedores, setProveedores] = useState(INITIAL_PROVEEDORES);
   const [addressCatalog, setAddressCatalog] = useState(() => buildAddressCatalog(INITIAL_PROVEEDORES));
@@ -195,7 +189,7 @@ export const ProveedoresScreen = () => {
       render: p => p.telefono
     }, {
       label: 'Estado',
-      render: p => <EstadoSelect value={p.estado} onChange={e => handleStatusChange(p.id, e.target.value)} ariaLabel={`Cambiar estado de ${p.razonSocial}`} />
+      render: p => <StatusSelect options={['Activo', 'Inactivo']} value={p.estado} onChange={e => handleStatusChange(p.id, e.target.value)} label={`Cambiar estado de ${p.razonSocial}`} />
     }]} actions={p => <><RecordIcon label="Ver detalle" onClick={() => handleOpenDetail(p)}><VisibilityOutlinedIcon /></RecordIcon><RecordIcon label="Editar" color="primary" onClick={() => handleOpenEdit(p)}><EditOutlinedIcon /></RecordIcon><RecordIcon label="Eliminar" color="error" onClick={() => handleOpenDelete(p)}><DeleteOutlineIcon /></RecordIcon></>} />
 
       <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{

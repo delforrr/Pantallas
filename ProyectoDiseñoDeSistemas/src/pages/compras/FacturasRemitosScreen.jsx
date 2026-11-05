@@ -1,7 +1,7 @@
 import { money, pendingItems } from './logic';
 import StockRecibido from '../../components/compras/StockRecibido';
 import ComprobanteDetalle from '../../components/compras/ComprobanteDetalle';
-import { ModuleDialog as Dialog, ModuleSurface, FormSection, FormDialog, SummaryCards, ListToolbar, RecordsView, RecordIcon, StatusChip } from '../../components/compras/ModuleUI';
+import { ModuleDialog as Dialog, ModuleSurface, FormSection, FormDialog, SummaryCards, ListToolbar, RecordsView, RecordIcon, StatusChip, StatusSelect } from '../../components/compras/ModuleUI';
 import RecepcionForm from '../../components/compras/RecepcionForm';
 import { initialReceptionState } from './mockData';
 import { useState, useMemo } from "react";
@@ -216,12 +216,14 @@ export const FacturasRemitosScreen = () => {
       value: facturas.length
     }, {
       label: 'Total facturado',
+      monetary: true,
       value: facturas.filter(f => f.estado !== 'Anulada').reduce((sum, f) => sum + f.total, 0).toLocaleString('es-AR', {
         style: 'currency',
         currency: 'ARS'
       })
     }, {
       label: 'Pendiente de pago',
+      monetary: true,
       value: facturas.filter(f => f.estado === 'Pendiente de Pago').reduce((sum, f) => sum + f.total, 0).toLocaleString('es-AR', {
         style: 'currency',
         currency: 'ARS'
@@ -236,6 +238,7 @@ export const FacturasRemitosScreen = () => {
       value: pagos.length
     }, {
       label: 'Total abonado',
+      monetary: true,
       value: pagos.reduce((sum, p) => sum + p.total, 0).toLocaleString('es-AR', {
         style: 'currency',
         currency: 'ARS'
@@ -270,13 +273,14 @@ export const FacturasRemitosScreen = () => {
     }] : []), ...(currentTab !== 2 ? [{
       label: 'Total',
       numeric: true,
+      monetary: true,
       render: row => row.total.toLocaleString('es-AR', {
         style: 'currency',
         currency: 'ARS'
       })
     }, {
       label: 'Estado',
-      render: row => <StatusChip value={row.estado} />
+      render: row => <StatusSelect value={row.estado} options={currentTab === 0 && row.estado === 'Pendiente de Pago' ? ['Pagada'] : []} label={`Cambiar estado de ${row.id}`} onChange={() => handleOpenPagar(row)} helperText="El estado se establece al registrar el pago correspondiente." />
     }] : [{
       label: 'Fecha de recepción',
       render: row => row.fechaEntregaReal

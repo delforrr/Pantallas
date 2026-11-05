@@ -6,7 +6,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import { useState } from 'react';
 import { Alert, Stack, Typography } from '@mui/material';
-import { FormDialog, ListToolbar, ModuleSurface, RecordsView, StatusChip, RecordIcon, SummaryCards } from '../../components/compras/ModuleUI';
+import { FormDialog, ListToolbar, ModuleSurface, RecordsView, StatusChip, StatusSelect, RecordIcon, SummaryCards } from '../../components/compras/ModuleUI';
 import OrdenCompraForm from '../../components/compras/OrdenCompraForm';
 import RecepcionForm from '../../components/compras/RecepcionForm';
 import { INITIAL_PROVEEDORES, INITIAL_PRESUPUESTOS, INITIAL_FACTURAS, initialReceptionState } from './mockData';
@@ -30,13 +30,15 @@ export default function OrdenCompraScreen() {
     setSearch('');
     setStatus('TODOS');
   };
+  const sendOrder = order => setData(previous => ({
+    ...previous,
+    ordenes: previous.ordenes.map(item => item.id === order.id ? { ...item, estado: 'Enviada' } : item)
+  }));
+  const receiveOrder = order => { setDetailId(null); setReceiving(order.id); };
   const actions = (o, showDetail = true) => {
     const edit = <RecordIcon onClick={() => { setDetailId(null); setForm(o); }} label="Editar" color="primary"><EditOutlinedIcon /></RecordIcon>;
     const remove = <RecordIcon onClick={() => { setDetailId(null); setDeleting(o); }} label="Eliminar" color="error"><DeleteOutlineIcon /></RecordIcon>;
-    return <>{showDetail && <RecordIcon onClick={() => setDetailId(o.id)} label="Ver detalle" color="default"><VisibilityOutlinedIcon /></RecordIcon>}{o.estado === 'Pendiente' && <RecordIcon label="Enviar al proveedor" color="primary" onClick={() => setData(previous => ({
-      ...previous,
-      ordenes: previous.ordenes.map(order => order.id === o.id ? { ...order, estado: 'Enviada' } : order)
-    }))}><SendOutlinedIcon /></RecordIcon>}{['Enviada', 'Recibida Parcial'].includes(o.estado) && <RecordIcon label="Recibir mercadería" color="primary" onClick={() => { setDetailId(null); setReceiving(o.id); }}><Inventory2OutlinedIcon /></RecordIcon>}{edit}{remove}</>;
+    return <>{showDetail && <RecordIcon onClick={() => setDetailId(o.id)} label="Ver detalle" color="default"><VisibilityOutlinedIcon /></RecordIcon>}{o.estado === 'Pendiente' && <RecordIcon label="Enviar al proveedor" color="primary" onClick={() => sendOrder(o)}><SendOutlinedIcon /></RecordIcon>}{['Enviada', 'Recibida Parcial'].includes(o.estado) && <RecordIcon label="Recibir mercadería" color="primary" onClick={() => receiveOrder(o)}><Inventory2OutlinedIcon /></RecordIcon>}{edit}{remove}</>;
   };
   return <ModuleSurface><Stack sx={{
       gap: 2
@@ -58,10 +60,13 @@ export default function OrdenCompraScreen() {
       }, {
         label: 'Total',
         numeric: true,
+        monetary: true,
         render: o => money(o.total)
       }, {
         label: 'Estado',
-        render: o => <StatusChip value={o.estado} />
+        render: o => o.estado === 'Pendiente'
+          ? <StatusSelect value={o.estado} label={`Cambiar estado de ${o.id}`} options={['Enviada']} onChange={() => sendOrder(o)} />
+          : <StatusChip value={o.estado} />
       }]} actions={actions} />
     </Stack>
     {form && <OrdenCompraForm key={form.id || 'new'} open initial={form.id ? form : undefined} presupuestos={INITIAL_PRESUPUESTOS} proveedores={INITIAL_PROVEEDORES} ordenes={ordenes} onClose={() => setForm(null)} onSave={order => {

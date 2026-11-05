@@ -3,7 +3,7 @@ import { alpha } from '@mui/material/styles';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import { Children, cloneElement, isValidElement, useId, useState } from 'react';
-import { Box, Button, Chip, Dialog as MuiDialog, DialogTitle, DialogContent, DialogActions, IconButton, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, MenuItem, ToggleButton, ToggleButtonGroup, Typography, Tooltip, useMediaQuery } from '@mui/material';
+import { Box, Button, Chip, Dialog as MuiDialog, DialogTitle, DialogContent, DialogActions, IconButton, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Select, MenuItem, ToggleButton, ToggleButtonGroup, Typography, Tooltip, useMediaQuery } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
@@ -214,10 +214,7 @@ export function FormDialog({
     <DialogActions sx={{ justifyContent: 'flex-end' }}>{footerActions && <Stack direction="row" sx={{ gap: 1, flexWrap: 'wrap', mr: 'auto', maxWidth: '100%' }}>{footerActions}</Stack>}<Button variant="outlined" onClick={onClose} color="inherit">{onSubmit ? 'Cancelar' : 'Cerrar'}</Button>{onSubmit && <Button type="submit" variant="contained">{action}</Button>}</DialogActions>
   </ModuleDialog>;
 }
-export function StatusChip({
-  value
-}) {
-  const colors = {
+const statusColors = {
     Inactivo: 'default', Vencido: 'warning', 'Fuera de Servicio': 'error',
     Activo: 'success', Pagada: 'success', 'Pendiente de Pago': 'warning', Anulada: 'error', Conciliado: 'success',
     Operativa: 'success',
@@ -233,7 +230,9 @@ export function StatusChip({
     Cancelada: 'error',
     Rechazado: 'error'
   };
-  const color = colors[value] || 'default';
+
+export function StatusChip({ value }) {
+  const color = statusColors[value] || 'default';
   return <Chip size="small" label={value} icon={<Box component="span" sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'currentColor' }} />} sx={{
     maxWidth: '100%', height: 'auto', minHeight: 28, borderRadius: 1.5,
     fontWeight: 650, fontSize: '0.75rem',
@@ -245,6 +244,21 @@ export function StatusChip({
     '& .MuiChip-label': { px: 1, py: 0.5, whiteSpace: 'nowrap' }
   }} />;
 }
+export function StatusSelect({ value, options, onChange, label, helperText }) {
+  const color = statusColors[value] || 'default';
+  const values = [...new Set([value, ...options])];
+  return <Select size="small" value={value} onChange={onChange} inputProps={{ 'aria-label': label }} onClick={event => event.stopPropagation()} sx={{
+    minWidth: 130, maxWidth: '100%', minHeight: 44, borderRadius: 2, fontSize: '0.8125rem', fontWeight: 600,
+    color: theme => color === 'default' ? theme.palette.text.secondary : theme.palette[color][theme.palette.mode === 'dark' ? 'light' : 'dark'],
+    bgcolor: theme => alpha(color === 'default' ? theme.palette.text.secondary : theme.palette[color].main, 0.08),
+    '& .MuiOutlinedInput-notchedOutline': { borderColor: theme => alpha(color === 'default' ? theme.palette.text.secondary : theme.palette[color].main, 0.4) },
+    '& .MuiSelect-icon': { color: 'inherit' }
+  }}>
+    {values.map(option => <MenuItem key={option} value={option}>{option}</MenuItem>)}
+    {!options.length && <MenuItem disabled sx={{ whiteSpace: 'normal', fontSize: '0.75rem' }}>{helperText || 'Sin cambios de estado disponibles.'}</MenuItem>}
+  </Select>;
+}
+
 export function ListToolbar({
   search,
   onSearch,
@@ -328,7 +342,7 @@ export function RecordsView({
         </Stack>
         {mainField && mainField !== columns[0] && <Box sx={{ fontSize: '1rem', fontWeight: 650, lineHeight: 1.4, mb: 2 }}>{mainField.render(row)}</Box>}
         <Box component="dl" sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: metadata.length === 3 && !metadata.some(c => c.numeric) ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))' }, columnGap: 2, rowGap: 1.5, m: 0, mb: 2 }}>
-          {metadata.map(c => <Box key={c.label} sx={{ minWidth: 0 }}><Typography component="dt" variant="caption" color="text.secondary" sx={{ mb: 0.25 }}>{c.label}</Typography><Box component="dd" sx={{ m: 0, fontSize: '0.875rem', fontWeight: c.numeric ? 700 : 500, fontVariantNumeric: 'tabular-nums', overflowWrap: 'anywhere' }}>{c.render(row)}</Box></Box>)}
+          {metadata.map(c => <Box key={c.label} sx={{ minWidth: 0 }}><Typography component="dt" variant="caption" color="text.secondary" sx={{ mb: 0.25 }}>{c.label}</Typography><Box component="dd" sx={{ m: 0, fontSize: '0.875rem', fontWeight: c.numeric ? 700 : 500, color: c.monetary ? theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' : undefined, fontVariantNumeric: 'tabular-nums', overflowWrap: 'anywhere' }}>{c.render(row)}</Box></Box>)}
         </Box>
         <Stack direction="row" sx={{ gap: 0.75, flexWrap: 'wrap', justifyContent: 'flex-end', mt: 'auto', pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>{actions(row)}</Stack>
       </Paper>;
@@ -336,7 +350,7 @@ export function RecordsView({
       borderRadius: '14px'
     }}><Table sx={{
         minWidth: 700
-      }}><TableHead><TableRow>{columns.map(c => <TableCell key={c.label} align={c.numeric ? 'right' : 'left'} sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>{c.label}</TableCell>)}<TableCell align="right" sx={{ position: { xs: 'static', md: 'sticky' }, right: 0, bgcolor: 'background.paper', zIndex: 1 }}>Acciones</TableCell></TableRow></TableHead><TableBody>{rows.map(row => <TableRow key={row.id}>{columns.map(c => <TableCell key={c.label} align={c.numeric ? 'right' : 'left'} sx={{ whiteSpace: ['Proveedor','Descripción','Máquina','Técnico','Categoría'].includes(c.label) ? 'normal' : 'nowrap', minWidth: ['Proveedor','Descripción','Máquina','Técnico','Categoría'].includes(c.label) ? 180 : 90 }}>{c.render(row)}</TableCell>)}<TableCell sx={{ position: { xs: 'static', md: 'sticky' }, right: 0, bgcolor: 'background.paper', borderLeft: '1px solid', borderLeftColor: 'divider' }}><Stack direction="row" sx={{
+      }}><TableHead><TableRow>{columns.map(c => <TableCell key={c.label} align={c.numeric ? 'right' : 'left'} sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>{c.label}</TableCell>)}<TableCell align="right" sx={{ position: { xs: 'static', md: 'sticky' }, right: 0, bgcolor: 'background.paper', zIndex: 1 }}>Acciones</TableCell></TableRow></TableHead><TableBody>{rows.map(row => <TableRow key={row.id}>{columns.map(c => <TableCell key={c.label} align={c.numeric ? 'right' : 'left'} sx={{ color: c.monetary ? theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' : undefined, fontWeight: c.monetary ? 650 : undefined, whiteSpace: ['Proveedor','Descripción','Máquina','Técnico','Categoría'].includes(c.label) ? 'normal' : 'nowrap', minWidth: ['Proveedor','Descripción','Máquina','Técnico','Categoría'].includes(c.label) ? 180 : 90 }}>{c.render(row)}</TableCell>)}<TableCell sx={{ position: { xs: 'static', md: 'sticky' }, right: 0, bgcolor: 'background.paper', borderLeft: '1px solid', borderLeftColor: 'divider' }}><Stack direction="row" sx={{
                 gap: 1,
                 justifyContent: "flex-end",
                 flexWrap: "nowrap"
@@ -350,7 +364,7 @@ export function RecordIcon({ label, color = 'default', onClick, children }) {
 
 export function SummaryCards({ items }) {
   return <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: `repeat(${items.length}, minmax(0, 1fr))` }, gap: 1.5, mb: 2 }}>
-    {items.map(({ label, value, color = 'primary.main' }) => <Paper key={label} variant="outlined" sx={{
+    {items.map(({ label, value, color = 'primary.main', monetary = false }) => <Paper key={label} variant="outlined" sx={{
       p: { xs: 1.5, sm: 2 }, borderRadius: '14px', minWidth: 0,
       gridColumn: { xs: typeof value === 'string' ? 'span 2' : 'auto', md: 'auto' },
       backgroundImage: 'none', position: 'relative', overflow: 'hidden',
@@ -358,7 +372,7 @@ export function SummaryCards({ items }) {
       '&::before': { content: '""', position: 'absolute', inset: '0 auto 0 0', width: 3, bgcolor: color }
     }}>
       <Stack sx={{ gap: 0.75, minWidth: 0 }}><Box sx={{ width: 20, height: 3, borderRadius: 1, bgcolor: color }} /><Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, lineHeight: 1.4 }}>{label}</Typography></Stack>
-      <Box sx={{ bgcolor: 'action.hover', borderRadius: 2, px: { xs: 1, sm: 1.5 }, py: 0.75, flexShrink: 1, minWidth: 0 }}><Typography component="p" sx={{ fontWeight: 750, fontSize: { xs: typeof value === 'string' ? '0.95rem' : '1.6rem', sm: typeof value === 'string' ? '1.2rem' : '1.9rem' }, lineHeight: 1.2, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums', overflowWrap: 'anywhere' }}>{value}</Typography></Box>
+      <Box sx={{ bgcolor: 'action.hover', borderRadius: 2, px: { xs: 1, sm: 1.5 }, py: 0.75, flexShrink: 1, minWidth: 0 }}><Typography component="p" sx={{ fontWeight: 750, color: monetary ? theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' : undefined, fontSize: { xs: typeof value === 'string' ? '0.95rem' : '1.6rem', sm: typeof value === 'string' ? '1.2rem' : '1.9rem' }, lineHeight: 1.2, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums', overflowWrap: 'anywhere' }}>{value}</Typography></Box>
     </Paper>)}
   </Box>;
 }

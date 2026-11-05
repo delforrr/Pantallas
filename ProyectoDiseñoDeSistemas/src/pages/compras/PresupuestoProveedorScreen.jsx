@@ -7,7 +7,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import { useState } from 'react';
 import { Alert, Grid, Stack, TextField, MenuItem, Typography } from '@mui/material';
-import { FormSection, FormDialog, ListToolbar, ModuleSurface, RecordsView, StatusChip, RecordIcon, SummaryCards } from '../../components/compras/ModuleUI';
+import { FormSection, FormDialog, ListToolbar, ModuleSurface, RecordsView, StatusSelect, RecordIcon, SummaryCards } from '../../components/compras/ModuleUI';
 import { DocumentoUploader } from '../../components/compras/DocumentoUploader';
 import { DetalleItemsTable } from '../../components/compras/DetalleItemsTable';
 import OrdenCompraForm from '../../components/compras/OrdenCompraForm';
@@ -98,7 +98,7 @@ export default function PresupuestoProveedorScreen() {
       gap: 2
     }}>
     {notice && <Alert severity="info" onClose={() => setNotice('')}>{notice}</Alert>}
-    <SummaryCards items={[{ label: 'Presupuestos', value: presupuestos.length }, { label: 'Pendientes', value: presupuestos.filter(p => effectiveStatus(p) === 'Pendiente').length, color: 'warning.main' }, { label: 'Aceptados', value: presupuestos.filter(p => effectiveStatus(p) === 'Aprobado').length, color: 'success.main' }, { label: 'Monto aceptado', value: money(presupuestos.filter(p => effectiveStatus(p) === 'Aprobado').reduce((sum,p) => sum + p.total,0)) }]} />
+    <SummaryCards items={[{ label: 'Presupuestos', value: presupuestos.length }, { label: 'Pendientes', value: presupuestos.filter(p => effectiveStatus(p) === 'Pendiente').length, color: 'warning.main' }, { label: 'Aceptados', value: presupuestos.filter(p => effectiveStatus(p) === 'Aprobado').length, color: 'success.main' }, { label: 'Monto aceptado', monetary: true, value: money(presupuestos.filter(p => effectiveStatus(p) === 'Aprobado').reduce((sum,p) => sum + p.total,0)) }]} />
     <RecordsView toolbar={<ListToolbar search={search} onSearch={setSearch} status={status} onStatus={setStatus} statuses={['Pendiente', 'Aprobado', 'Rechazado', 'Vencido']} createLabel="Nuevo presupuesto" onCreate={() => openForm()} />} rows={rows} cardTitle={p => p.id} empty={presupuestos.length ? 'No hay resultados para estos filtros.' : 'Todavía no hay presupuestos registrados.'} onClear={search || status !== 'TODOS' ? clear : undefined} columns={[{
         label: 'Presupuesto',
         render: p => p.id
@@ -114,10 +114,11 @@ export default function PresupuestoProveedorScreen() {
       }, {
         label: 'Total',
         numeric: true,
+        monetary: true,
         render: p => money(p.total)
       }, {
         label: 'Estado',
-        render: p => <StatusChip value={effectiveStatus(p)} />
+        render: p => <StatusSelect value={effectiveStatus(p)} options={effectiveStatus(p) === 'Pendiente' ? ['Aprobado', 'Rechazado'] : []} label={`Cambiar estado de ${p.id}`} onChange={event => changeStatus(p, event.target.value)} helperText="La vigencia depende de la fecha del presupuesto." />
       }]} actions={actions} />
     </Stack>
     <FormDialog open={Boolean(form)} onClose={() => setForm(null)} title={form?.id ? `Editar ${form.id}` : 'Nuevo presupuesto de proveedor'} onSubmit={save} action={form?.id ? 'Guardar cambios' : 'Registrar presupuesto'} maxWidth="lg">{form && <>
