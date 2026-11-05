@@ -5,7 +5,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import { useState } from 'react';
 import { Alert, Button, Grid, TextField, Typography } from '@mui/material';
-import { FormSection, FormDialog, ListToolbar, ModuleSurface, RecordsView, StatusChip, RecordIcon, SummaryCards } from '../../components/mantenimiento/ModuleUI';
+import { FormSection, FormDialog, ListToolbar, ModuleSurface, RecordsView, StatusSelect, RecordIcon, SummaryCards } from '../../components/mantenimiento/ModuleUI';
 import { INITIAL_MAQUINARIAS, INITIAL_ORDENES_MANTENIMIENTO, INITIAL_TECNICOS } from './mockData';
 import OrdenMantenimientoForm from '../../components/mantenimiento/OrdenMantenimientoForm';
 import { nextMachineCode } from './logic';
@@ -74,7 +74,7 @@ export default function MaquinariaScreen() {
       render: m => m.nombre
     }, {
       label: 'Estado operativo',
-      render: m => <StatusChip value={m.estado} />
+      render: m => <StatusSelect value={m.estado} options={[]} label={`Estado operativo de ${m.codigo}`} helperText="El estado operativo se registra al iniciar o finalizar un mantenimiento." />
     }, {
       label: 'Horas de operación',
       numeric: true,

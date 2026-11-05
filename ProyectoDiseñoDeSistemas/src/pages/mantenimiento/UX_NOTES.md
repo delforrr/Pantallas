@@ -4,7 +4,7 @@
 - Sin prioridad ni inventario de repuestos. Los repuestos se mencionan en descripción u observaciones del trabajo.
 - Crear una orden deja la máquina sin cambios y la orden pendiente. La operación de creación es la misma desde Maquinaria y Órdenes; sus datos se mantienen locales a cada pantalla.
 - Iniciar registra fecha/hora de Buenos Aires y pasa la máquina a mantenimiento o reparación según el tipo.
-- Finalizar exige trabajo realizado y estado resultante, registra fin y actualiza la copia local de la máquina. El detalle de la orden muestra el resultado.
+- Finalizar exige trabajo realizado, fecha/hora de conclusión editable (inicialmente la actual, nunca anterior al inicio) y estado resultante: Operativa, En Reparación o Fuera de Servicio. En Mantenimiento no es válido al cerrar. Guarda el fin elegido y actualiza la copia local de la máquina. El detalle de la orden muestra el resultado.
 - Las fechas de avance se registran mediante Iniciar/Finalizar. La edición muestra esos valores como información de consulta para no omitir la validación de cierre.
 - No hay contexto/global store ni cambios en App, layout, tema o dependencias. Salir de una pantalla reinicia su simulación y los cambios no se propagan a otra pantalla.
 - La creación rápida desde Maquinaria permite consultar la orden en la confirmación local.

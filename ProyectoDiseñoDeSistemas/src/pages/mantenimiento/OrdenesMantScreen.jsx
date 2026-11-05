@@ -6,11 +6,10 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import { useState } from 'react';
 import { Alert, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { FormSection, FormDialog, ListToolbar, ModuleSurface, RecordsView, StatusChip, RecordIcon, SummaryCards } from '../../components/mantenimiento/ModuleUI';
+import { FormSection, FormDialog, ListToolbar, ModuleSurface, RecordsView, StatusSelect, RecordIcon, SummaryCards } from '../../components/mantenimiento/ModuleUI';
 import { INITIAL_MAQUINARIAS, INITIAL_ORDENES_MANTENIMIENTO, INITIAL_TECNICOS } from './mockData';
-import { localNow, transitionOrder, createMaintenanceOrder } from './logic';
+import { localNow, transitionOrder, createMaintenanceOrder, MAINTENANCE_RESULT_STATES } from './logic';
 const states = ['Pendiente', 'En Proceso', 'Finalizada', 'Cancelada'];
-const machineStates = ['Operativa', 'En Mantenimiento', 'En Reparación', 'Fuera de Servicio'];
 export default function OrdenesMantScreen() {
   const [data, setData] = useState({
     ordenes: INITIAL_ORDENES_MANTENIMIENTO,
@@ -38,6 +37,7 @@ export default function OrdenesMantScreen() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const selected = ordenes.find(o => o.id === detailId);
+  const closingOrder = ordenes.find(o => o.id === closing?.id);
   const rows = ordenes.filter(o => `${o.id} ${o.maquinariaNombre} ${o.tecnicoNombre}`.toLowerCase().includes(search.toLowerCase()) && (status === 'TODOS' || status === o.estado) && (type === 'TODOS' || type === o.tipo));
   const closeForm = () => setForm(null);
   const update = (key, value) => setData(previous => ({
@@ -86,6 +86,11 @@ export default function OrdenesMantScreen() {
       return false;
     }
   };
+  const finishOrder = order => {
+    setDetailId(null);
+    setError('');
+    setClosing({ id: order.id, tareaRealizada: '', estadoMaquina: '', fechaFin: localNow().replace(' ', 'T') });
+  };
   const actions = (o, showDetail = true) => {
     const edit = <RecordIcon onClick={() => {
       setDetailId(null);
@@ -96,15 +101,7 @@ export default function OrdenesMantScreen() {
       });
     }} label="Editar" color="primary"><EditOutlinedIcon /></RecordIcon>;
     const remove = <RecordIcon onClick={() => { setDetailId(null); setDeleting(o); }} label="Eliminar" color="error"><DeleteOutlineIcon /></RecordIcon>;
-    return <>{showDetail && <RecordIcon onClick={() => setDetailId(o.id)} label="Ver detalle" color="default"><VisibilityOutlinedIcon /></RecordIcon>}{o.estado === 'Pendiente' && <RecordIcon label="Iniciar mantenimiento" color="primary" onClick={() => change(o, 'En Proceso')}><PlayArrowOutlinedIcon /></RecordIcon>}{o.estado === 'En Proceso' && <RecordIcon label="Finalizar mantenimiento" color="success" onClick={() => {
-      setDetailId(null);
-      setError('');
-      setClosing({
-        id: o.id,
-        tareaRealizada: '',
-        estadoMaquina: ''
-      });
-    }}><CheckIcon /></RecordIcon>}{edit}{remove}</>;
+    return <>{showDetail && <RecordIcon onClick={() => setDetailId(o.id)} label="Ver detalle" color="default"><VisibilityOutlinedIcon /></RecordIcon>}{o.estado === 'Pendiente' && <RecordIcon label="Iniciar mantenimiento" color="primary" onClick={() => change(o, 'En Proceso')}><PlayArrowOutlinedIcon /></RecordIcon>}{o.estado === 'En Proceso' && <RecordIcon label="Finalizar mantenimiento" color="success" onClick={() => finishOrder(o)}><CheckIcon /></RecordIcon>}{edit}{remove}</>;
   };
   return <ModuleSurface>
     <Stack sx={{
@@ -135,7 +132,7 @@ export default function OrdenesMantScreen() {
         render: o => o.fechaEmision
       }, {
         label: 'Estado',
-        render: o => <StatusChip value={o.estado} />
+        render: o => <StatusSelect value={o.estado} options={o.estado === 'Pendiente' ? ['En Proceso'] : o.estado === 'En Proceso' ? ['Finalizada'] : []} label={`Cambiar estado de ${o.id}`} onChange={event => event.target.value === 'En Proceso' ? change(o, 'En Proceso') : finishOrder(o)} helperText="Esta orden no tiene transiciones de estado disponibles." />
       }]} actions={actions} />
     </Stack>
     <FormDialog open={Boolean(form)} onClose={closeForm} title={form?.id ? `Editar ${form.id}` : 'Nueva orden de mantenimiento'} status={form?.estado === 'Finalizada' ? 'Finalizada' : undefined} onSubmit={save} action={form?.id ? 'Guardar cambios' : 'Crear orden'}>
@@ -184,16 +181,18 @@ export default function OrdenesMantScreen() {
       event.preventDefault();
       if (change(ordenes.find(o => o.id === closing.id), 'Finalizada', {
         tareaRealizada: closing.tareaRealizada,
-        estadoMaquina: closing.estadoMaquina
+        estadoMaquina: closing.estadoMaquina,
+        fechaFin: closing.fechaFin
       })) setClosing(null);
     }}>
-      {closing && <><FormSection number={1} title="Trabajo realizado y estado resultante"><TextField autoFocus required multiline minRows={3} label="Trabajo realizado y observaciones" value={closing.tareaRealizada} onChange={e => setClosing({
-          ...closing,
-          tareaRealizada: e.target.value
-        })} helperText="Incluí los repuestos utilizados en este texto, si corresponde." error={Boolean(error) && !closing.tareaRealizada.trim()} /><TextField sx={{ width: { xs: '100%', sm: '50%' } }} required select label="Estado resultante de la máquina" value={closing.estadoMaquina} onChange={e => setClosing({
-          ...closing,
-          estadoMaquina: e.target.value
-        })} error={Boolean(error) && !closing.estadoMaquina}>{machineStates.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}</TextField></FormSection>{error && <Alert severity="error">{error}</Alert>}</>}
+      {closing && <><FormSection number={1} title="Trabajo realizado y conclusión">
+        <TextField autoFocus required multiline minRows={3} label="Trabajo realizado y observaciones" value={closing.tareaRealizada} onChange={e => setClosing({ ...closing, tareaRealizada: e.target.value })} helperText="Incluí los repuestos utilizados en este texto, si corresponde." error={Boolean(error) && !closing.tareaRealizada.trim()} />
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, sm: 6 }}><TextField fullWidth required type="datetime-local" label="Fecha y hora de conclusión" value={closing.fechaFin} onChange={e => setClosing({ ...closing, fechaFin: e.target.value })} slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: closingOrder?.fechaInicio?.replace(' ', 'T'), step: 60 } }} error={Boolean(error) && /conclusión|fecha|inicio/.test(error)} helperText={error && /conclusión|fecha|inicio/.test(error) ? error : undefined} /></Grid>
+          <Grid size={{ xs: 12, sm: 6 }}><TextField fullWidth required select label="Estado resultante de la máquina" value={closing.estadoMaquina} onChange={e => setClosing({ ...closing, estadoMaquina: e.target.value })} error={Boolean(error) && !closing.estadoMaquina}>{MAINTENANCE_RESULT_STATES.map(state => <MenuItem key={state} value={state}>{state}</MenuItem>)}</TextField></Grid>
+        </Grid>
+      </FormSection>{error && <Alert severity="error">{error}</Alert>}</>}
+
     </FormDialog>
     <FormDialog open={Boolean(deleting)} onClose={() => setDeleting(null)} title="Eliminar orden" action="Eliminar orden" onSubmit={event => {
       event.preventDefault();

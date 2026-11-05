@@ -3,7 +3,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import { Paper, Stack, Typography } from '@mui/material';
-import { StatusChip, RecordIcon } from './ModuleUI';
+import { StatusSelect, RecordIcon } from './ModuleUI';
 export const MaquinariaCard = ({
   maquinaria,
   onEdit,
@@ -32,7 +32,7 @@ export const MaquinariaCard = ({
       alignItems: "flex-start",
       gap: 1,
       mb: 2
-    }}><StatusChip value={maquinaria.estado} /><Typography variant="body2">Horas de operación: {maquinaria.horasUso} h</Typography></Stack>
+    }}><StatusSelect value={maquinaria.estado} options={[]} label={`Estado operativo de ${maquinaria.codigo}`} helperText="El estado operativo se registra al iniciar o finalizar un mantenimiento." /><Typography variant="body2">Horas de operación: {maquinaria.horasUso} h</Typography></Stack>
     <Stack direction="row" sx={{
       gap: 1,
       flexWrap: "wrap",
