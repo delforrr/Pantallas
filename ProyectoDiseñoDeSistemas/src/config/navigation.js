@@ -20,6 +20,8 @@ import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturi
 import EngineeringIcon from '@mui/icons-material/Engineering';
 
 export const PAGE_LABELS = {
+  admin_unidades: 'Unidades de medida',
+  admin_tipos_materia: 'Tipos de materia prima',
   // Cliente
   catalogo: 'Catálogo de Productos',
   carrito: 'Mi Carrito',
@@ -59,6 +61,15 @@ export const CLIENT_NAV = [
 ];
 
 export const ADMIN_NAV = [
+  {
+    id: 'administracion',
+    label: 'Administración',
+    icon: CategoryIcon,
+    children: [
+      { id: 'admin_unidades', label: PAGE_LABELS.admin_unidades, icon: AssignmentIcon },
+      { id: 'admin_tipos_materia', label: PAGE_LABELS.admin_tipos_materia, icon: GrassIcon },
+    ],
+  },
   {
     id: 'ventas',
     label: 'Ventas',

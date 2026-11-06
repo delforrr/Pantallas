@@ -1,3 +1,4 @@
+import CatalogoAdmin from './pages/administracion/CatalogoScreen';
 import React from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { Box, Typography, Fade, GlobalStyles } from '@mui/material';
@@ -40,6 +41,8 @@ import { PAGE_LABELS } from './config/navigation';
 const PedidosTienda = () => <><MayoristasTienda /><PedidosScreen /></>;
 
 const SCREEN_MAP = {
+  admin_unidades: () => <CatalogoAdmin tipo="unidades" entidad="unidad de medida" />,
+  admin_tipos_materia: () => <CatalogoAdmin tipo="tiposMateriaPrima" entidad="tipo de materia prima" />,
   catalogo: CatalogoScreen,
   carrito: CarritoScreen,
   pedidos_cliente: PedidosClienteScreen,

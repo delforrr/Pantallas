@@ -1,3 +1,4 @@
+import { catalogosBase } from '../pages/administracion/catalogos';
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const AppContext = createContext(null);
@@ -16,6 +17,25 @@ const pageUrl = (page) => {
 };
 
 export const AppProvider = ({ children }) => {
+  const [catalogosGuardados, setCatalogos] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('pastafab_catalogos')) ?? {};
+    } catch {
+      return {};
+    }
+  });
+  const catalogos = { ...catalogosBase, ...catalogosGuardados };
+
+  function guardarCatalogo(tipo, registro) {
+    const lista = catalogos[tipo];
+    const nuevaLista = lista.some(item => item.id === registro.id)
+      ? lista.map(item => item.id === registro.id ? registro : item)
+      : [...lista, registro];
+    const siguiente = { ...catalogosGuardados, [tipo]: nuevaLista };
+    localStorage.setItem('pastafab_catalogos', JSON.stringify(siguiente));
+    setCatalogos(siguiente);
+  }
+
   const [user, setUser] = useState(() => {
     try {
       const saved = sessionStorage.getItem('pastafab_user');
@@ -137,7 +157,7 @@ export const AppProvider = ({ children }) => {
   };
 
   return (
-    <AppContext.Provider value={{ user, currentPage, sidebarOpen, themeMode, login, logout, updateProfile, navigate, toggleSidebar, toggleTheme }}>
+    <AppContext.Provider value={{ catalogos, guardarCatalogo, user, currentPage, sidebarOpen, themeMode, login, logout, updateProfile, navigate, toggleSidebar, toggleTheme }}>
       {children}
     </AppContext.Provider>
   );

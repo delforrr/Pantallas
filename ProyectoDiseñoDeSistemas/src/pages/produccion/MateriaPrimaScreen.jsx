@@ -1,3 +1,5 @@
+import { useApp } from '../../context/AppContext';
+import { nombreCatalogo, opciones } from '../administracion/catalogos';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -41,21 +43,11 @@ import CategoryIcon from '@mui/icons-material/Category';
 
 import { MATERIAS_PRIMAS_INICIALES } from './mockData';
 
-const TIPOS_CATEGORIA = [
-  'Todas',
-  'Harinas y Cereales',
-  'Frescos y Granja',
-  'Lácteos',
-  'Verduras',
-  'Carnes',
-  'Condimentos',
-  'Packaging',
-];
-
-const UNIDADES_MEDIDA = ['kg', 'g', 'docenas', 'unidades', 'litros'];
 const ESTADOS = ['Todos', 'Activo', 'Inactivo'];
 
 export const MateriaPrimaScreen = () => {
+  const { catalogos } = useApp();
+  const { unidades, tiposMateriaPrima } = catalogos;
   const [materiasPrimas, setMateriasPrimas] = useState(MATERIAS_PRIMAS_INICIALES);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTipo, setSelectedTipo] = useState('Todas');
@@ -73,8 +65,8 @@ export const MateriaPrimaScreen = () => {
     codigo: '',
     nombre: '',
     marca: '',
-    tipo: 'Harinas y Cereales',
-    unidad: 'kg',
+    tipo: opciones(tiposMateriaPrima)[0]?.id ?? '',
+    unidad: opciones(unidades)[0]?.id ?? '',
     stockActual: 0,
     stockMinimo: 10,
     estado: 'Activo',
@@ -125,8 +117,8 @@ export const MateriaPrimaScreen = () => {
       codigo: nextCode,
       nombre: '',
       marca: '',
-      tipo: 'Harinas y Cereales',
-      unidad: 'kg',
+      tipo: opciones(tiposMateriaPrima)[0]?.id ?? '',
+      unidad: opciones(unidades)[0]?.id ?? '',
       stockActual: 50,
       stockMinimo: 20,
       estado: 'Activo',
@@ -230,9 +222,9 @@ export const MateriaPrimaScreen = () => {
               label="Categoría"
               onChange={(e) => setSelectedTipo(e.target.value)}
             >
-              {TIPOS_CATEGORIA.map((tipo) => (
-                <MenuItem key={tipo} value={tipo}>
-                  {tipo}
+              {['Todas', ...tiposMateriaPrima.map(r => r.id)].map((tipo) => (
+                <MenuItem key={nombreCatalogo(tiposMateriaPrima, tipo)} value={nombreCatalogo(tiposMateriaPrima, tipo)}>
+                  {nombreCatalogo(tiposMateriaPrima, tipo)}
                 </MenuItem>
               ))}
             </Select>
@@ -369,7 +361,7 @@ export const MateriaPrimaScreen = () => {
                     </TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
                       <Chip
-                        label={mp.tipo}
+                        label={nombreCatalogo(tiposMateriaPrima, mp.tipo)}
                         size="small"
                         color="default"
                         variant="outlined"
@@ -385,7 +377,7 @@ export const MateriaPrimaScreen = () => {
                             color: esBajoStock ? 'error.main' : 'text.primary',
                           }}
                         >
-                          {mp.stockActual} {mp.unidad}
+                          {mp.stockActual} {nombreCatalogo(unidades, mp.unidad)}
                         </Typography>
                         {esBajoStock && (
                           <Tooltip title="Stock en nivel crítico o por debajo del mínimo de seguridad">
@@ -396,7 +388,7 @@ export const MateriaPrimaScreen = () => {
                     </TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        {mp.stockMinimo} {mp.unidad}
+                        {mp.stockMinimo} {nombreCatalogo(unidades, mp.unidad)}
                       </Typography>
                     </TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
@@ -519,9 +511,9 @@ export const MateriaPrimaScreen = () => {
                 value={formState.tipo}
                 onChange={(e) => setFormState({ ...formState, tipo: e.target.value })}
               >
-                {TIPOS_CATEGORIA.filter((t) => t !== 'Todas').map((tipo) => (
-                  <MenuItem key={tipo} value={tipo}>
-                    {tipo}
+                {opciones(tiposMateriaPrima, editingMP?.tipo).map(r => r.id).map((tipo) => (
+                  <MenuItem key={nombreCatalogo(tiposMateriaPrima, tipo)} value={nombreCatalogo(tiposMateriaPrima, tipo)}>
+                    {nombreCatalogo(tiposMateriaPrima, tipo)}
                   </MenuItem>
                 ))}
               </TextField>
@@ -536,9 +528,9 @@ export const MateriaPrimaScreen = () => {
                 value={formState.unidad}
                 onChange={(e) => setFormState({ ...formState, unidad: e.target.value })}
               >
-                {UNIDADES_MEDIDA.map((u) => (
-                  <MenuItem key={u} value={u}>
-                    {u}
+                {opciones(unidades, editingMP?.unidad).map(r => r.id).map((u) => (
+                  <MenuItem key={nombreCatalogo(unidades, u)} value={nombreCatalogo(unidades, u)}>
+                    {nombreCatalogo(unidades, u)}
                   </MenuItem>
                 ))}
               </TextField>
@@ -648,7 +640,7 @@ export const MateriaPrimaScreen = () => {
                       Categoría / Tipo
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>
-                      {viewingMP.tipo}
+                      {nombreCatalogo(tiposMateriaPrima, viewingMP.tipo)}
                     </Typography>
                   </Paper>
                 </Grid>
@@ -668,7 +660,7 @@ export const MateriaPrimaScreen = () => {
                       Unidad de Medida
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>
-                      {viewingMP.unidad}
+                      {nombreCatalogo(unidades, viewingMP.unidad)}
                     </Typography>
                   </Paper>
                 </Grid>
@@ -696,7 +688,7 @@ export const MateriaPrimaScreen = () => {
                           mt: 0.2,
                         }}
                       >
-                        {viewingMP.stockActual} {viewingMP.unidad}
+                        {viewingMP.stockActual} {nombreCatalogo(unidades, viewingMP.unidad)}
                       </Typography>
                     </Box>
 
@@ -708,7 +700,7 @@ export const MateriaPrimaScreen = () => {
                       <WarningAmberIcon fontSize="inherit" /> Stock Mínimo
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 700, mt: 0.2 }}>
-                      {viewingMP.stockMinimo} {viewingMP.unidad}
+                      {viewingMP.stockMinimo} {nombreCatalogo(unidades, viewingMP.unidad)}
                     </Typography>
                   </Paper>
                 </Grid>
