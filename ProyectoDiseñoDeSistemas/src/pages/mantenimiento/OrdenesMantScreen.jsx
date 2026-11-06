@@ -1,3 +1,5 @@
+import { useApp } from '../../context/AppContext';
+import { opciones } from '../administracion/catalogos';
 import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined';
 import CheckIcon from '@mui/icons-material/Check';
 import OrdenMantenimientoDetalle from '../../components/mantenimiento/OrdenMantenimientoDetalle';
@@ -7,11 +9,13 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import { useState } from 'react';
 import { Alert, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { FormSection, FormDialog, ListToolbar, ModuleSurface, RecordsView, StatusChip, RecordIcon, SummaryCards } from '../../components/mantenimiento/ModuleUI';
-import { INITIAL_MAQUINARIAS, INITIAL_ORDENES_MANTENIMIENTO, INITIAL_TECNICOS } from './mockData';
+import { INITIAL_MAQUINARIAS, INITIAL_ORDENES_MANTENIMIENTO } from './mockData';
 import { localNow, transitionOrder, createMaintenanceOrder } from './logic';
 const states = ['Pendiente', 'En Proceso', 'Finalizada', 'Cancelada'];
 const machineStates = ['Operativa', 'En Mantenimiento', 'En Reparación', 'Fuera de Servicio'];
 export default function OrdenesMantScreen() {
+  const { catalogos } = useApp();
+  const tecnicos = opciones(catalogos.empleados).filter(e => e.area === 'Mantenimiento');
   const [data, setData] = useState({
     ordenes: INITIAL_ORDENES_MANTENIMIENTO,
     maquinarias: INITIAL_MAQUINARIAS
@@ -20,7 +24,6 @@ export default function OrdenesMantScreen() {
     ordenes,
     maquinarias
   } = data;
-  const tecnicos = INITIAL_TECNICOS;
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('TODOS');
   const [type, setType] = useState('TODOS');
@@ -52,7 +55,7 @@ export default function OrdenesMantScreen() {
   const save = event => {
     event.preventDefault();
     const machine = maquinarias.find(m => m.id === Number(form.maquinariaId));
-    const technician = tecnicos.find(t => t.id === Number(form.empleadoId));
+    const technician = tecnicos.find(t => String(t.id) === String(form.empleadoId));
     if (!machine || !technician || !form.descripcion.trim()) {
       setError('Seleccioná una máquina, un técnico y describí el trabajo previsto.');
       event.currentTarget.querySelector('[aria-invalid="true"], input, textarea')?.focus();

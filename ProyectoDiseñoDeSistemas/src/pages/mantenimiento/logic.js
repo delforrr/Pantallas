@@ -29,7 +29,7 @@ export function transitionOrder(state, id, target, result = {}) {
 }
 export function createMaintenanceOrder(orders, machines, technicians, form) {
   const machine = machines.find(m => m.id === Number(form.maquinariaId));
-  const technician = technicians.find(t => t.id === Number(form.empleadoId));
+  const technician = technicians.find(t => String(t.id) === String(form.empleadoId));
   if (!machine || !technician || !form.descripcion?.trim() || !['Preventivo', 'Correctivo'].includes(form.tipo)) throw new Error('Seleccioná una máquina, un técnico y describí el trabajo previsto.');
   return {
     ...form,

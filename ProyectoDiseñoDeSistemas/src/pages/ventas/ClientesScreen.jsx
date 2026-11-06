@@ -1,3 +1,5 @@
+import { useApp } from '../../context/AppContext';
+import { nombreCatalogo, opciones } from '../administracion/catalogos';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -54,6 +56,7 @@ import { INITIAL_CLIENTES, INITIAL_COMPROBANTES_VENTA, calcularEstadoMoroso } fr
 import { ClienteMorosoAlert } from '../../components/ventas';
 
 export const ClientesScreen = () => {
+  const { catalogos: { iva } } = useApp();
   const [clientes, setClientes] = useState(INITIAL_CLIENTES);
   const [viewMode, setViewMode] = useState('table');
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,7 +83,7 @@ export const ClientesScreen = () => {
     altura: '',
     localidad: 'Trenque Lauquen',
     provincia: 'Buenos Aires',
-    tipoIva: 'Responsable Inscripto',
+    tipoIva: opciones(iva)[0]?.id ?? '',
     tipoCliente: 'Mayorista (Restaurante / Semanal)',
     aceptaCredito: false,
     limiteCredito: 0,
@@ -150,7 +153,7 @@ export const ClientesScreen = () => {
   };
 
   const handleSave = () => {
-    if (!formData.razonSocial || !formData.cuit) return;
+    if (!formData.razonSocial || !formData.cuit || !formData.tipoIva) return;
 
     if (isEditing) {
       setClientes((prev) =>
@@ -391,7 +394,7 @@ export const ClientesScreen = () => {
                     {getStatusChip(cliente)}
                   </Box>
                   <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
-                    ID: #{cliente.idCliente} • CUIT: {cliente.cuit} • {cliente.tipoIva}
+                    ID: #{cliente.idCliente} • CUIT: {cliente.cuit} • {nombreCatalogo(iva, cliente.tipoIva)}
                   </Typography>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
@@ -477,10 +480,7 @@ export const ClientesScreen = () => {
                       label="Condición frente al IVA"
                       onChange={(e) => setFormData({ ...formData, tipoIva: e.target.value })}
                     >
-                      <MenuItem value="Responsable Inscripto">Responsable Inscripto</MenuItem>
-                      <MenuItem value="Monotributo">Monotributo</MenuItem>
-                      <MenuItem value="Consumidor Final">Consumidor Final</MenuItem>
-                      <MenuItem value="Exento">Exento</MenuItem>
+                      {opciones(iva, selectedCliente?.tipoIva).map(r => <MenuItem key={r.id} value={r.id}>{r.nombre}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -646,7 +646,7 @@ export const ClientesScreen = () => {
                         {selectedCliente.razonSocial}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, mt: 0.5 }}>
-                        CUIT: {selectedCliente.cuit} • Condición IVA: {selectedCliente.tipoIva}
+                        CUIT: {selectedCliente.cuit} • Condición IVA: {nombreCatalogo(iva, selectedCliente.tipoIva)}
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>

@@ -1,3 +1,5 @@
+import { EMPLEADOS } from '../produccion/mockData.js';
+import { INITIAL_TECNICOS } from '../mantenimiento/mockData.js';
 import { INITIAL_PROVEEDORES } from '../compras/mockData.js';
 import { buildAddressCatalog } from '../compras/addressCatalog.js';
 
@@ -9,6 +11,11 @@ export const unidades = ['kg', 'g', 'docenas', 'unidades', 'litros'];
 export const tiposMateriaPrima = ['Harinas y Cereales', 'Frescos y Granja', 'Lácteos', 'Verduras', 'Carnes', 'Condimentos', 'Packaging'];
 
 export const catalogosBase = {
+  iva: ['Responsable Inscripto', 'Monotributo', 'Consumidor Final', 'Exento'].map(id => ({ id, nombre: id })),
+  empleados: [
+    ...EMPLEADOS.map(({ idEmpleado, nombre, cargo }) => ({ id: idEmpleado, nombre, cargo, area: 'Producción' })),
+    ...INITIAL_TECNICOS.map(({ id, nombre, especialidad }) => ({ id: `tec-${id}`, nombre, cargo: especialidad, area: 'Mantenimiento' })),
+  ],
   provincias: domicilios.provincias.map(id => ({ id, nombre: id })),
   localidades: domicilios.localidades.map(({ provincia, nombre }) => ({
     id: localidadId(provincia, nombre), padre: provincia, nombre,

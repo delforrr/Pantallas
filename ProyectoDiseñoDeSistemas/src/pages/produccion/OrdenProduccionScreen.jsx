@@ -1,3 +1,5 @@
+import { useApp } from '../../context/AppContext';
+import { opciones } from '../administracion/catalogos';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -60,7 +62,6 @@ import {
   NOTAS_PEDIDO_MP_INICIALES,
   RECETAS_INICIALES,
   MATERIAS_PRIMAS_INICIALES,
-  EMPLEADOS,
   MAQUINARIAS,
   verificarDisponibilidadMultiplesProductos,
 } from './mockData';
@@ -88,6 +89,10 @@ const getMananaFecha = () => {
 };
 
 export const OrdenProduccionScreen = () => {
+  const { catalogos } = useApp();
+  const empleados = catalogos.empleados.filter(e => e.area === 'Producción');
+  const inicial = opciones(empleados)[0];
+  const nombreEmpleado = e => e ? `${e.nombre} (${e.cargo})` : '';
   // Estado de datos en memoria
   const [ordenes, setOrdenes] = useState(ORDENES_PRODUCCION_INICIALES);
   const [notasPedido] = useState(NOTAS_PEDIDO_MP_INICIALES);
@@ -114,8 +119,8 @@ export const OrdenProduccionScreen = () => {
   const [formFechaInicio, setFormFechaInicio] = useState(getMananaFecha());
   const [formFechaFin, setFormFechaFin] = useState(getMananaFecha());
   const [formTurno, setFormTurno] = useState('Mañana (06:00 - 14:00)');
-  const [formIdEmpleado, setFormIdEmpleado] = useState(1);
-  const [formResponsable, setFormResponsable] = useState('Juan Carlos Pérez (Jefe de Cuadra)');
+  const [formIdEmpleado, setFormIdEmpleado] = useState(inicial?.id ?? '');
+  const [formResponsable, setFormResponsable] = useState(nombreEmpleado(inicial));
   const [formMaquinasIds, setFormMaquinasIds] = useState([1, 3, 4]);
   const [formObservaciones, setFormObservaciones] = useState('');
 
@@ -344,8 +349,8 @@ export const OrdenProduccionScreen = () => {
     setFormFechaInicio(getMananaFecha());
     setFormFechaFin(getMananaFecha());
     setFormTurno('Mañana (06:00 - 14:00)');
-    setFormIdEmpleado(1);
-    setFormResponsable('Juan Carlos Pérez (Jefe de Cuadra)');
+    setFormIdEmpleado(inicial?.id ?? '');
+    setFormResponsable(nombreEmpleado(inicial));
     setFormMaquinasIds([1, 3, 4]);
     setFormObservaciones('');
     setOpenNewDialog(true);
@@ -458,7 +463,11 @@ export const OrdenProduccionScreen = () => {
         ? formItems[0].productoNombre
         : `${formItems[0].productoNombre} +${formItems.length - 1} más`;
 
-    const empleadoObj = EMPLEADOS.find((e) => e.idEmpleado === formIdEmpleado) || EMPLEADOS[0];
+    const empleadoObj = empleados.find(e => e.id === formIdEmpleado);
+    if (!empleadoObj) {
+      setSnackbar({ open: true, message: 'Seleccioná un empleado.', severity: 'warning' });
+      return;
+    }
     const maquinasSeleccionadas = MAQUINARIAS.filter((m) => formMaquinasIds.includes(m.idMaquinaria));
     const maquinasParaOrden = maquinasSeleccionadas.length > 0 ? maquinasSeleccionadas : [MAQUINARIAS[0], MAQUINARIAS[2], MAQUINARIAS[3]];
     const fechaHoy = new Date().toISOString().split('T')[0];
@@ -515,9 +524,9 @@ export const OrdenProduccionScreen = () => {
             notaPedidoMateriaPrima: notaPedidoCalculada,
             productoNombre: resumenNombre,
             cantidadKilos: totalKilos,
-            idEmpleado: empleadoObj.idEmpleado,
-            empleadoNombre: `${empleadoObj.nombre} (${empleadoObj.cargo})`,
-            responsable: `${empleadoObj.nombre} (${empleadoObj.cargo})`,
+            idEmpleado: empleadoObj.id,
+            empleadoNombre: nombreEmpleado(empleadoObj),
+            responsable: nombreEmpleado(empleadoObj),
             turno: formTurno,
             maquinariaProduccion: maquinariaProduccionCalculada,
             maquinasIds: maquinasParaOrden.map((m) => m.idMaquinaria),
@@ -557,9 +566,9 @@ export const OrdenProduccionScreen = () => {
       detallesOrdenProduccion: detallesCalculados,
       productoNombre: resumenNombre,
       cantidadKilos: totalKilos,
-      idEmpleado: empleadoObj.idEmpleado,
-      empleadoNombre: `${empleadoObj.nombre} (${empleadoObj.cargo})`,
-      responsable: `${empleadoObj.nombre} (${empleadoObj.cargo})`,
+      idEmpleado: empleadoObj.id,
+      empleadoNombre: nombreEmpleado(empleadoObj),
+      responsable: nombreEmpleado(empleadoObj),
       turno: formTurno,
       maquinariaProduccion: maquinariaProduccionCalculada,
       maquinasIds: maquinasParaOrden.map((m) => m.idMaquinaria),
@@ -1227,15 +1236,15 @@ export const OrdenProduccionScreen = () => {
                   value={formIdEmpleado}
                   label="Empleado Asignado (IdEmpleado)"
                   onChange={(e) => {
-                    const idEmp = Number(e.target.value);
+                    const idEmp = e.target.value;
                     setFormIdEmpleado(idEmp);
-                    const emp = EMPLEADOS.find((em) => em.idEmpleado === idEmp);
+                    const emp = empleados.find(em => em.id === idEmp);
                     if (emp) setFormResponsable(`${emp.nombre} (${emp.cargo})`);
                   }}
                 >
-                  {EMPLEADOS.map((emp) => (
-                    <MenuItem key={emp.idEmpleado} value={emp.idEmpleado}>
-                      Legajo #{emp.idEmpleado}: {emp.nombre} — {emp.cargo}
+                  {opciones(empleados, formIdEmpleado).map((emp) => (
+                    <MenuItem key={emp.id} value={emp.id}>
+                      {emp.nombre} — {emp.cargo}
                     </MenuItem>
                   ))}
                 </Select>
@@ -1349,7 +1358,7 @@ export const OrdenProduccionScreen = () => {
                     label="Cantidad en Kilos"
                     type="number"
                     value={cantidadKilosToAdd}
-                    onChange={(e) => setCantidadKilosToAdd(Math.max(1, Number(e.target.value)))}
+                    onChange={(e) => setCantidadKilosToAdd(Math.max(1, e.target.value))}
                     InputProps={{
                       endAdornment: <InputAdornment position="end">kg</InputAdornment>,
                     }}

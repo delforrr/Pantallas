@@ -1,3 +1,5 @@
+import { useApp } from '../../context/AppContext';
+import { opciones } from '../administracion/catalogos';
 import AddIcon from '@mui/icons-material/Add';
 import FichaMaquinariaDetalle from '../../components/mantenimiento/FichaMaquinariaDetalle';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
@@ -6,7 +8,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import { useState } from 'react';
 import { Alert, Button, Grid, TextField, Typography } from '@mui/material';
 import { FormSection, FormDialog, ListToolbar, ModuleSurface, RecordsView, StatusChip, RecordIcon, SummaryCards } from '../../components/mantenimiento/ModuleUI';
-import { INITIAL_MAQUINARIAS, INITIAL_ORDENES_MANTENIMIENTO, INITIAL_TECNICOS } from './mockData';
+import { INITIAL_MAQUINARIAS, INITIAL_ORDENES_MANTENIMIENTO } from './mockData';
 import OrdenMantenimientoForm from '../../components/mantenimiento/OrdenMantenimientoForm';
 import { nextMachineCode } from './logic';
 const states = ['Operativa', 'En Mantenimiento', 'En Reparación', 'Fuera de Servicio'];
@@ -16,6 +18,8 @@ const blank = {
   observaciones: ''
 };
 export default function MaquinariaScreen() {
+  const { catalogos } = useApp();
+  const tecnicos = opciones(catalogos.empleados).filter(e => e.area === 'Mantenimiento');
   const [maquinarias, setMaquinarias] = useState(INITIAL_MAQUINARIAS);
   const [ordenes, setOrdenes] = useState(INITIAL_ORDENES_MANTENIMIENTO);
   const [quickMachine, setQuickMachine] = useState(null);
@@ -85,7 +89,7 @@ export default function MaquinariaScreen() {
           ...m
         });
       }} label="Editar" color="primary"><EditOutlinedIcon /></RecordIcon><RecordIcon onClick={() => setDeleting(m)} label="Eliminar" color="error"><DeleteOutlineIcon /></RecordIcon></>} />
-    <OrdenMantenimientoForm open={Boolean(quickMachine)} onClose={() => setQuickMachine(null)} maquinarias={maquinarias} tecnicos={INITIAL_TECNICOS} initialMachine={quickMachine?.id} ordenes={ordenes} onSave={order => {
+    <OrdenMantenimientoForm open={Boolean(quickMachine)} onClose={() => setQuickMachine(null)} maquinarias={maquinarias} tecnicos={tecnicos} initialMachine={quickMachine?.id} ordenes={ordenes} onSave={order => {
       setOrdenes(previous => [order, ...previous]);
       setSelected(null);
       setQuickMachine(null);

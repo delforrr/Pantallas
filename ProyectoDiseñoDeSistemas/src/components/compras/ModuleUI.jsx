@@ -256,6 +256,7 @@ export function ListToolbar({
   children,
   viewControls,
   showStatus = true,
+  searchPlaceholder = "Código, descripción o responsable",
   filterActive = false,
   onClear
 }) {
@@ -271,7 +272,7 @@ export function ListToolbar({
       flexWrap: "wrap",
       alignItems: { xs: "stretch", sm: "center" }
     }}>
-      <TextField label="Buscar" placeholder="Código, descripción o responsable" value={search} onChange={e => onSearch(e.target.value)} sx={{
+      <TextField label="Buscar" placeholder={searchPlaceholder} value={search} onChange={e => onSearch(e.target.value)} sx={{
         flex: '1 1 180px',
         minWidth: 0,
         '@media (max-width:599px)': {
@@ -318,12 +319,12 @@ export function RecordsView({
         lg: 'repeat(3, minmax(0, 1fr))'
       }
     }}>{rows.map(row => {
-      const mainField = columns.find(c => ['Proveedor', 'Máquina', 'Descripción'].includes(c.label));
+      const mainField = columns.find(c => ['Nombre', 'Proveedor', 'Máquina', 'Descripción'].includes(c.label));
       const metadata = columns.filter((c, index) => index > 0 && c !== mainField && !c.label.startsWith('Estado'));
       const statusField = columns.find(c => c.label.startsWith('Estado'));
       return <Paper key={row.id} variant="outlined" sx={{ p: 2, borderRadius: '14px', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start', gap: 1, mb: 1.25 }}>
-          <Typography component="h3" variant="body2" sx={{ fontWeight: 700, fontFamily: mainField === columns[0] ? 'inherit' : 'monospace', color: mainField === columns[0] ? 'text.primary' : 'text.secondary', minWidth: 0 }}>{cardTitle(row)}</Typography>
+          <Typography component="h3" variant="body2" sx={{ fontWeight: 700, fontFamily: mainField === columns[0] ? 'inherit' : 'monospace', color: mainField === columns[0] ? 'text.primary' : 'text.secondary', minWidth: 0, overflowWrap: 'anywhere' }}>{cardTitle(row)}</Typography>
           {statusField && <Box sx={{ flexShrink: 0 }}>{statusField.render(row)}</Box>}
         </Stack>
         {mainField && mainField !== columns[0] && <Box sx={{ fontSize: '1rem', fontWeight: 650, lineHeight: 1.4, mb: 2 }}>{mainField.render(row)}</Box>}
@@ -336,7 +337,7 @@ export function RecordsView({
       borderRadius: '14px'
     }}><Table sx={{
         minWidth: 700
-      }}><TableHead><TableRow>{columns.map(c => <TableCell key={c.label} align={c.numeric ? 'right' : 'left'} sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>{c.label}</TableCell>)}<TableCell align="right" sx={{ position: { xs: 'static', md: 'sticky' }, right: 0, bgcolor: 'background.paper', zIndex: 1 }}>Acciones</TableCell></TableRow></TableHead><TableBody>{rows.map(row => <TableRow key={row.id}>{columns.map(c => <TableCell key={c.label} align={c.numeric ? 'right' : 'left'} sx={{ whiteSpace: ['Proveedor','Descripción','Máquina','Técnico','Categoría'].includes(c.label) ? 'normal' : 'nowrap', minWidth: ['Proveedor','Descripción','Máquina','Técnico','Categoría'].includes(c.label) ? 180 : 90 }}>{c.render(row)}</TableCell>)}<TableCell sx={{ position: { xs: 'static', md: 'sticky' }, right: 0, bgcolor: 'background.paper', borderLeft: '1px solid', borderLeftColor: 'divider' }}><Stack direction="row" sx={{
+      }}><TableHead><TableRow>{columns.map(c => <TableCell key={c.label} align={c.numeric ? 'right' : 'left'} sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>{c.label}</TableCell>)}<TableCell align="right" sx={{ position: { xs: 'static', md: 'sticky' }, right: 0, bgcolor: 'background.paper', zIndex: 1 }}>Acciones</TableCell></TableRow></TableHead><TableBody>{rows.map(row => <TableRow key={row.id}>{columns.map(c => <TableCell key={c.label} align={c.numeric ? 'right' : 'left'} sx={{ whiteSpace: ['Nombre','Proveedor','Descripción','Máquina','Técnico','Categoría'].includes(c.label) ? 'normal' : 'nowrap', minWidth: ['Nombre','Proveedor','Descripción','Máquina','Técnico','Categoría'].includes(c.label) ? 180 : 90 }}>{c.render(row)}</TableCell>)}<TableCell sx={{ position: { xs: 'static', md: 'sticky' }, right: 0, bgcolor: 'background.paper', borderLeft: '1px solid', borderLeftColor: 'divider' }}><Stack direction="row" sx={{
                 gap: 1,
                 justifyContent: "flex-end",
                 flexWrap: "nowrap"
