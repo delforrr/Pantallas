@@ -6,7 +6,7 @@ import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
 import RestoreOutlinedIcon from '@mui/icons-material/RestoreOutlined';
 import { FormDialog, ListToolbar, ModuleSurface, RecordIcon, RecordsView, StatusChip } from '../../components/compras/ModuleUI';
 import { useApp } from '../../context/AppContext';
-import { nombreCatalogo, nombreDuplicado, opciones } from './catalogos';
+import { catalogosBase, nombreCatalogo, nombreDuplicado, opciones } from './catalogos';
 
 export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, soloNombre }) {
   const { catalogos, guardarCatalogo } = useApp();
@@ -26,6 +26,10 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
   const [borrador, editar] = useState(null);
   const [error, mostrarError] = useState('');
   const [mensaje, avisar] = useState('');
+  const cargos = [...new Set([
+    ...catalogosBase.empleados.filter(e => e.area === borrador?.area).map(e => e.cargo),
+    borrador?.cargo,
+  ].filter(Boolean))];
   const estadoRegistro = r => r.inactivo ? 'Inactivo' : 'Activo';
   const visibles = registros.filter(r => (!soloNombre || r.padre === grupo) && (estado === 'TODOS' || estadoRegistro(r) === estado) && r.nombre.toLocaleLowerCase('es').includes(busqueda.trim().toLocaleLowerCase('es')));
   const abrir = registro => { mostrarError(''); editar(registro); };
@@ -91,11 +95,13 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
             onChange={e => { mostrarError(''); editar({ ...borrador, nombre: e.target.value }); }} />
           {empleados && <>
             <TextField select label="Área" value={borrador.area} disabled={Boolean(borrador.id)}
-              onChange={e => editar({ ...borrador, area: e.target.value })}>
+              onChange={e => editar({ ...borrador, area: e.target.value, cargo: '' })}>
               {['Producción', 'Mantenimiento', 'Ventas'].map(area => <MenuItem key={area} value={area}>{area}</MenuItem>)}
             </TextField>
-            <TextField label="Cargo" value={borrador.cargo} required
-              onChange={e => editar({ ...borrador, cargo: e.target.value })} />
+            <TextField select label="Cargo" value={borrador.cargo} required
+              onChange={e => editar({ ...borrador, cargo: e.target.value })}>
+              {cargos.map(cargo => <MenuItem key={cargo} value={cargo}>{cargo}</MenuItem>)}
+            </TextField>
           </>}
           {padres && <TextField select fullWidth label={etiquetaPadre} value={borrador.padre}
             disabled={Boolean(borrador.id)} onChange={e => editar({ ...borrador, padre: e.target.value })}>
