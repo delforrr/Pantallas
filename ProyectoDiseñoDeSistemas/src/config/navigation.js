@@ -1,3 +1,12 @@
+import Inventory2Icon from '@mui/icons-material/Inventory2';
+import StraightenIcon from '@mui/icons-material/Straighten';
+import RouteIcon from '@mui/icons-material/Route';
+import LocationCityIcon from '@mui/icons-material/LocationCity';
+import MapIcon from '@mui/icons-material/Map';
+import BadgeIcon from '@mui/icons-material/Badge';
+import PercentIcon from '@mui/icons-material/Percent';
+import RuleIcon from '@mui/icons-material/Rule';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 // Navigation config for each role
 import HomeIcon from '@mui/icons-material/Home';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -70,16 +79,16 @@ export const ADMIN_NAV = [
   {
     id: 'administracion',
     label: 'Administración',
-    icon: CategoryIcon,
+    icon: AdminPanelSettingsIcon,
     children: [
-      { id: 'admin_estados', label: PAGE_LABELS.admin_estados, icon: DescriptionIcon },
-      { id: 'admin_iva', label: PAGE_LABELS.admin_iva, icon: ReceiptLongIcon },
-      { id: 'admin_empleados', label: PAGE_LABELS.admin_empleados, icon: PeopleIcon },
-      { id: 'admin_provincias', label: PAGE_LABELS.admin_provincias, icon: AssignmentIcon },
-      { id: 'admin_localidades', label: PAGE_LABELS.admin_localidades, icon: AssignmentIcon },
-      { id: 'admin_calles', label: PAGE_LABELS.admin_calles, icon: AssignmentIcon },
-      { id: 'admin_unidades', label: PAGE_LABELS.admin_unidades, icon: AssignmentIcon },
-      { id: 'admin_tipos_materia', label: PAGE_LABELS.admin_tipos_materia, icon: GrassIcon },
+      { id: 'admin_estados', label: PAGE_LABELS.admin_estados, icon: RuleIcon },
+      { id: 'admin_iva', label: PAGE_LABELS.admin_iva, icon: PercentIcon },
+      { id: 'admin_empleados', label: PAGE_LABELS.admin_empleados, icon: BadgeIcon },
+      { id: 'admin_provincias', label: PAGE_LABELS.admin_provincias, icon: MapIcon },
+      { id: 'admin_localidades', label: PAGE_LABELS.admin_localidades, icon: LocationCityIcon },
+      { id: 'admin_calles', label: PAGE_LABELS.admin_calles, icon: RouteIcon },
+      { id: 'admin_unidades', label: PAGE_LABELS.admin_unidades, icon: StraightenIcon },
+      { id: 'admin_tipos_materia', label: PAGE_LABELS.admin_tipos_materia, icon: Inventory2Icon },
     ],
   },
   {
