@@ -1,3 +1,4 @@
+import { nombreCatalogo, opciones } from '../administracion/catalogos';
 import { useNombreEstado } from '../../context/AppContext';
 import { useState, useMemo } from 'react';
 import {
@@ -47,7 +48,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import NotesIcon from '@mui/icons-material/Notes';
 
-import { PRODUCTOS_INICIALES, RECETAS_INICIALES, PRODUCTOS_BASE, VARIEDADES, TIPOS_PRODUCTO, UNIDADES } from './mockData';
+import { PRODUCTOS_INICIALES, RECETAS_INICIALES, PRODUCTOS_BASE, VARIEDADES, TIPOS_PRODUCTO } from './mockData';
 import { useApp } from '../../context/AppContext';
 
 const CATEGORIAS = ['Todas', 'Pastas Rellenas', 'Pastas Simples', 'Otros'];
@@ -55,6 +56,9 @@ const ESTADOS = ['Todos', 'Activo', 'Inactivo'];
 
 export const ProductosCompuestosScreen = () => {
   const nombreEstado = useNombreEstado();
+  const { catalogos: { unidades } } = useApp();
+  const unidadInicial = opciones(unidades)[0]?.id ?? '';
+  const unidadProducto = producto => producto.unidadMedida || producto.unidad || 'kg';
   const { navigate } = useApp();
 
   const [productos, setProductos] = useState(PRODUCTOS_INICIALES);
@@ -85,7 +89,7 @@ export const ProductosCompuestosScreen = () => {
     idProducto: 1,
     idTipoDeProducto: 1,
     idVariedad: 1,
-    idUnidad: 1,
+    idUnidad: unidadInicial,
     idStock: 101,
     categoria: 'Pastas Rellenas',
     recetaId: 'REC-001',
@@ -93,8 +97,8 @@ export const ProductosCompuestosScreen = () => {
     precioVenta: 5000,
     stockActual: 0,
     stockMinimo: 15,
-    unidadMedida: 'kg',
-    unidad: 'kg',
+    unidadMedida: unidadInicial,
+    unidad: unidadInicial,
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: '',
@@ -187,7 +191,7 @@ export const ProductosCompuestosScreen = () => {
       if (cant > currentStock) {
         setSnackbar({
           open: true,
-          message: `No se puede egresar más de las existencias actuales (${currentStock} ${stockModalProducto.unidadMedida || 'kg'}).`,
+          message: `No se puede egresar más de las existencias actuales (${currentStock} ${nombreCatalogo(unidades, unidadProducto(stockModalProducto))}).`,
           severity: 'error',
         });
         return;
@@ -237,15 +241,15 @@ export const ProductosCompuestosScreen = () => {
       idProducto: 1,
       idTipoDeProducto: 1,
       idVariedad: 1,
-      idUnidad: 1,
+      idUnidad: unidadInicial,
       idStock: 100 + nextNum,
       categoria: 'Pastas Rellenas',
       precioUnitario: 5500,
       precioVenta: 5500,
       stockActual: 0,
       stockMinimo: 15,
-      unidadMedida: 'kg',
-      unidad: 'kg',
+      unidadMedida: unidadInicial,
+      unidad: unidadInicial,
       vidaUtil: '48 hs fresco / 90 días freezer',
       estado: 'Activo',
       descripcion: '',
@@ -262,7 +266,7 @@ export const ProductosCompuestosScreen = () => {
       idProducto: prod.idProducto || 1,
       idTipoDeProducto: prod.idTipoDeProducto || 1,
       idVariedad: prod.idVariedad || 1,
-      idUnidad: prod.idUnidad || 1,
+      idUnidad: unidadProducto(prod),
       idStock: prod.idStock || 101,
       categoria: prod.categoria,
       precioUnitario: prod.precioUnitario || prod.precioVenta || 0,
@@ -280,6 +284,10 @@ export const ProductosCompuestosScreen = () => {
 
   // Guardar alta o modificación
   const handleSave = () => {
+    if (!formState.idUnidad) {
+      setSnackbar({ open: true, message: 'Seleccioná una unidad de medida.', severity: 'error' });
+      return;
+    }
     if (!formState.nombre.trim() || !formState.codigo.trim()) {
       setSnackbar({ open: true, message: 'El código y el nombre son obligatorios.', severity: 'error' });
       return;
@@ -573,7 +581,7 @@ export const ProductosCompuestosScreen = () => {
                     )}
                   </TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
-                    <Typography variant="body2">{prod.unidadMedida || prod.unidad || 'kg'}</Typography>
+                    <Typography variant="body2">{nombreCatalogo(unidades, unidadProducto(prod))}</Typography>
                   </TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
@@ -589,7 +597,7 @@ export const ProductosCompuestosScreen = () => {
                               : 'text.primary',
                         }}
                       >
-                        {prod.stockActual ?? 0} {prod.unidadMedida || 'kg'}
+                        {prod.stockActual ?? 0} {nombreCatalogo(unidades, unidadProducto(prod))}
                       </Typography>
                       {prod.stockActual === 0 ? (
                         <Tooltip title="Sin stock disponible en fábrica">
@@ -941,20 +949,12 @@ export const ProductosCompuestosScreen = () => {
                 size="small"
                 value={formState.idUnidad}
                 onChange={(e) => {
-                  const val = Number(e.target.value);
-                  const uObj = UNIDADES.find((u) => u.idUnidad === val);
-                  setFormState({
-                    ...formState,
-                    idUnidad: val,
-                    unidadMedida: uObj ? uObj.unidad : formState.unidadMedida,
-                    unidad: uObj ? uObj.unidad : formState.unidad,
-                  });
+                  const unidad = e.target.value;
+                  setFormState({ ...formState, idUnidad: unidad, unidadMedida: unidad, unidad });
                 }}
               >
-                {UNIDADES.map((u) => (
-                  <MenuItem key={u.idUnidad} value={u.idUnidad}>
-                    {u.unidad}
-                  </MenuItem>
+                {opciones(unidades, editingProducto && unidadProducto(editingProducto)).map(u => (
+                  <MenuItem key={u.id} value={u.id}>{u.nombre}</MenuItem>
                 ))}
               </TextField>
             </Grid>
@@ -1081,7 +1081,7 @@ export const ProductosCompuestosScreen = () => {
                     Stock Actual:
                   </Typography>
                   <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                    {stockModalProducto.stockActual ?? 0} {stockModalProducto.unidadMedida || 'kg'}
+                    {stockModalProducto.stockActual ?? 0} {nombreCatalogo(unidades, unidadProducto(stockModalProducto))}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
@@ -1089,7 +1089,7 @@ export const ProductosCompuestosScreen = () => {
                     Stock Mínimo de Alerta:
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                    {stockModalProducto.stockMinimo ?? 15} {stockModalProducto.unidadMedida || 'kg'}
+                    {stockModalProducto.stockMinimo ?? 15} {nombreCatalogo(unidades, unidadProducto(stockModalProducto))}
                   </Typography>
                 </Box>
               </Paper>
@@ -1110,8 +1110,8 @@ export const ProductosCompuestosScreen = () => {
               <TextField
                 label={
                   stockMovimiento.tipo === 'Ajuste Directo'
-                    ? `Nuevo Stock Total (${stockModalProducto.unidadMedida || 'kg'})`
-                    : `Cantidad a ${stockMovimiento.tipo === 'Ingreso' ? 'Ingresar' : 'Egresar'} (${stockModalProducto.unidadMedida || 'kg'})`
+                    ? `Nuevo Stock Total (${nombreCatalogo(unidades, unidadProducto(stockModalProducto))})`
+                    : `Cantidad a ${stockMovimiento.tipo === 'Ingreso' ? 'Ingresar' : 'Egresar'} (${nombreCatalogo(unidades, unidadProducto(stockModalProducto))})`
                 }
                 type="number"
                 fullWidth
@@ -1153,7 +1153,7 @@ export const ProductosCompuestosScreen = () => {
                     color: proyectedStock === 0 ? 'error.main' : 'primary.main',
                   }}
                 >
-                  {proyectedStock} {stockModalProducto.unidadMedida || 'kg'}
+                  {proyectedStock} {nombreCatalogo(unidades, unidadProducto(stockModalProducto))}
                 </Typography>
               </Box>
             </DialogContent>
@@ -1254,7 +1254,7 @@ export const ProductosCompuestosScreen = () => {
                       Unidad
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>
-                      {viewingProducto.unidadMedida || viewingProducto.unidad || 'kg'}
+                      {nombreCatalogo(unidades, unidadProducto(viewingProducto))}
                     </Typography>
                   </Paper>
                 </Grid>
@@ -1267,7 +1267,7 @@ export const ProductosCompuestosScreen = () => {
                       ${(viewingProducto.precioUnitario || viewingProducto.precioVenta)?.toLocaleString('es-AR')}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      Por {viewingProducto.unidadMedida || 'kg'}
+                      Por {nombreCatalogo(unidades, unidadProducto(viewingProducto))}
                     </Typography>
                   </Paper>
                 </Grid>
@@ -1299,7 +1299,7 @@ export const ProductosCompuestosScreen = () => {
                               : 'text.primary',
                         }}
                       >
-                        {viewingProducto.stockActual} {viewingProducto.unidadMedida || 'kg'}
+                        {viewingProducto.stockActual} {nombreCatalogo(unidades, unidadProducto(viewingProducto))}
                       </Typography>
                     </Box>
                     <Button
@@ -1323,7 +1323,7 @@ export const ProductosCompuestosScreen = () => {
                       Stock Mínimo de Seguridad
                     </Typography>
                     <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: 0.2, color: 'text.secondary' }}>
-                      {viewingProducto.stockMinimo || 15} {viewingProducto.unidadMedida || 'kg'}
+                      {viewingProducto.stockMinimo || 15} {nombreCatalogo(unidades, unidadProducto(viewingProducto))}
                     </Typography>
                   </Paper>
                 </Grid>

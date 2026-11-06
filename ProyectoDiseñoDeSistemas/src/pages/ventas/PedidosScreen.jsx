@@ -1,4 +1,5 @@
-import { useNombreEstado } from '../../context/AppContext';
+import { nombreCatalogo, opciones } from '../administracion/catalogos';
+import { useApp, useNombreEstado } from '../../context/AppContext';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -47,6 +48,9 @@ import { DetalleItemsVentasTable, ClienteMorosoAlert, ComprobanteDocumentWrapper
 
 export const PedidosScreen = () => {
   const nombreEstado = useNombreEstado();
+  const { catalogos } = useApp();
+  const vendedores = catalogos.empleados.filter(e => e.area === 'Ventas');
+  const vendedorInicial = opciones(vendedores)[0];
   const [pedidos, setPedidos] = useState(INITIAL_PEDIDOS);
   const [clientesList, setClientesList] = useState(INITIAL_CLIENTES);
   const [searchTerm, setSearchTerm] = useState('');
@@ -99,8 +103,8 @@ export const PedidosScreen = () => {
     fechaEmision: '2026-09-24',
     fechaEntregaEstimada: '2026-09-25',
     horaEntregaEstimada: '12:00',
-    idEmpleado: 101,
-    vendedor: 'Juan Borlini',
+    idEmpleado: vendedorInicial?.id ?? '',
+    vendedor: vendedorInicial?.nombre ?? '',
     estadoPedido: 'Pendiente',
     señaExigida: 0,
     señaPagada: 0,
@@ -692,9 +696,12 @@ export const PedidosScreen = () => {
                     fullWidth
                     size="small"
                     sx={{ mt: 0.5 }}
-                    value={formData.vendedor || ''}
-                    onChange={(e) => setFormData({ ...formData, vendedor: e.target.value })}
-                  />
+                    select label="Vendedor"
+                    value={formData.idEmpleado ?? ''}
+                    onChange={(e) => setFormData({ ...formData, idEmpleado: e.target.value, vendedor: nombreCatalogo(vendedores, e.target.value) })}
+                  >
+                    {opciones(vendedores, selectedPedido?.idEmpleado).map(e => <MenuItem key={e.id} value={e.id}>{e.nombre}</MenuItem>)}
+                  </TextField>
                 </Grid>
                 <Grid item xs={12} sm={4} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
                   <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Forma de pago:</Typography>
@@ -905,7 +912,7 @@ export const PedidosScreen = () => {
                   </Grid>
                   <Grid item xs={12} sm={4} sx={{ p: 1.5, borderRight: '1px solid rgba(128,128,128,0.3)', borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
                     <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>VENDEDOR:</Typography>
-                    <Typography variant="body2">{selectedPedido.vendedor || 'Atención en Mostrador'}</Typography>
+                    <Typography variant="body2">{nombreCatalogo(vendedores, selectedPedido.idEmpleado) || selectedPedido.vendedor || 'Atención en Mostrador'}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={4} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
                     <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>FORMA DE PAGO:</Typography>

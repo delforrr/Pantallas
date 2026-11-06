@@ -148,6 +148,10 @@ export const MateriaPrimaScreen = () => {
 
   // Guardar alta o modificación
   const handleSave = () => {
+    if (!formState.unidad || !formState.tipo) {
+      setSnackbar({ open: true, message: 'Seleccioná una unidad de medida y un tipo de materia prima.', severity: 'error' });
+      return;
+    }
     if (!formState.nombre.trim() || !formState.codigo.trim()) {
       setSnackbar({ open: true, message: 'El código y el nombre son obligatorios.', severity: 'error' });
       return;

@@ -92,7 +92,7 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
           {empleados && <>
             <TextField select label="Área" value={borrador.area} disabled={Boolean(borrador.id)}
               onChange={e => editar({ ...borrador, area: e.target.value })}>
-              {['Producción', 'Mantenimiento'].map(area => <MenuItem key={area} value={area}>{area}</MenuItem>)}
+              {['Producción', 'Mantenimiento', 'Ventas'].map(area => <MenuItem key={area} value={area}>{area}</MenuItem>)}
             </TextField>
             <TextField label="Cargo" value={borrador.cargo} required
               onChange={e => editar({ ...borrador, cargo: e.target.value })} />

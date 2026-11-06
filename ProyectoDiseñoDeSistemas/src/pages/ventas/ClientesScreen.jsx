@@ -1,5 +1,6 @@
+import DomicilioProveedorFields from '../../components/compras/DomicilioProveedorFields';
 import { useApp } from '../../context/AppContext';
-import { nombreCatalogo, opciones } from '../administracion/catalogos';
+import { calleId, localidadId, nombreCatalogo, opciones } from '../administracion/catalogos';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -56,8 +57,11 @@ import { INITIAL_CLIENTES, INITIAL_COMPROBANTES_VENTA, calcularEstadoMoroso } fr
 import { ClienteMorosoAlert } from '../../components/ventas';
 
 export const ClientesScreen = () => {
-  const { catalogos: { iva } } = useApp();
-  const [clientes, setClientes] = useState(INITIAL_CLIENTES);
+  const { catalogos: { iva, provincias, localidades, calles } } = useApp();
+  const [clientes, setClientes] = useState(() => INITIAL_CLIENTES.map(c => ({
+    ...c, localidad: localidadId(c.provincia, c.localidad),
+    calle: c.calle ? calleId(c.provincia, c.localidad, c.calle) : '',
+  })));
   const [viewMode, setViewMode] = useState('table');
   const [searchTerm, setSearchTerm] = useState('');
   const [tipoFilter, setTipoFilter] = useState('TODOS');
@@ -81,8 +85,8 @@ export const ClientesScreen = () => {
     email: '',
     calle: '',
     altura: '',
-    localidad: 'Trenque Lauquen',
-    provincia: 'Buenos Aires',
+    localidad: '',
+    provincia: '',
     tipoIva: opciones(iva)[0]?.id ?? '',
     tipoCliente: 'Mayorista (Restaurante / Semanal)',
     aceptaCredito: false,
@@ -408,7 +412,7 @@ export const ClientesScreen = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <PlaceIcon fontSize="small" color="action" />
                     <Typography variant="body2" color="text.secondary">
-                      {cliente.calle} {cliente.altura}, {cliente.localidad}
+                      {nombreCatalogo(calles, cliente.calle)} {cliente.altura}, {nombreCatalogo(localidades, cliente.localidad)}
                     </Typography>
                   </Box>
 
@@ -474,9 +478,10 @@ export const ClientesScreen = () => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Condición frente al IVA</InputLabel>
+                    <InputLabel id="cliente-iva-label">Condición frente al IVA</InputLabel>
                     <Select
                       value={formData.tipoIva}
+                      labelId="cliente-iva-label"
                       label="Condición frente al IVA"
                       onChange={(e) => setFormData({ ...formData, tipoIva: e.target.value })}
                     >
@@ -540,34 +545,10 @@ export const ClientesScreen = () => {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </Grid>
-                <Grid item xs={12} sm={5}>
-                  <TextField
-                    label="Calle"
-                    fullWidth
-                    size="small"
-                    value={formData.calle}
-                    onChange={(e) => setFormData({ ...formData, calle: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    label="Altura / Número"
-                    fullWidth
-                    size="small"
-                    value={formData.altura}
-                    onChange={(e) => setFormData({ ...formData, altura: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="Localidad"
-                    fullWidth
-                    size="small"
-                    value={formData.localidad}
-                    onChange={(e) => setFormData({ ...formData, localidad: e.target.value })}
-                  />
-                </Grid>
               </Grid>
+              <Box sx={{ mt: 2 }}>
+                <DomicilioProveedorFields value={formData} onChange={setFormData} />
+              </Box>
             </Box>
 
             <Divider />
@@ -699,7 +680,7 @@ export const ClientesScreen = () => {
                           <Box>
                             <Typography variant="caption" color="text.secondary" display="block">Domicilio</Typography>
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                              {selectedCliente.calle} {selectedCliente.altura}, {selectedCliente.localidad} ({selectedCliente.provincia})
+                              {nombreCatalogo(calles, selectedCliente.calle)} {selectedCliente.altura}, {nombreCatalogo(localidades, selectedCliente.localidad)} ({nombreCatalogo(provincias, selectedCliente.provincia)})
                             </Typography>
                           </Box>
                         </Box>

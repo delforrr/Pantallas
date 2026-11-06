@@ -1,10 +1,11 @@
+import { INITIAL_CLIENTES, INITIAL_PEDIDOS } from '../ventas/mockData.js';
 import { estadosBase } from './estados.js';
 import { EMPLEADOS } from '../produccion/mockData.js';
 import { INITIAL_TECNICOS } from '../mantenimiento/mockData.js';
 import { INITIAL_PROVEEDORES } from '../compras/mockData.js';
 import { buildAddressCatalog } from '../compras/addressCatalog.js';
 
-const domicilios = buildAddressCatalog(INITIAL_PROVEEDORES);
+const domicilios = buildAddressCatalog([...INITIAL_PROVEEDORES, ...INITIAL_CLIENTES]);
 export const localidadId = (provincia, localidad) => JSON.stringify([provincia, localidad]);
 export const calleId = (provincia, localidad, calle) => JSON.stringify([provincia, localidad, calle]);
 
@@ -15,6 +16,8 @@ export const catalogosBase = {
   estados: estadosBase,
   iva: ['Responsable Inscripto', 'Monotributo', 'Consumidor Final', 'Exento'].map(id => ({ id, nombre: id })),
   empleados: [
+    ...Array.from(new Map(INITIAL_PEDIDOS.map(p => [p.idEmpleado, p.vendedor])),
+      ([id, nombre]) => ({ id, nombre, cargo: 'Vendedor', area: 'Ventas' })),
     ...EMPLEADOS.map(({ idEmpleado, nombre, cargo }) => ({ id: idEmpleado, nombre, cargo, area: 'Producción' })),
     ...INITIAL_TECNICOS.map(({ id, nombre, especialidad }) => ({ id: `tec-${id}`, nombre, cargo: especialidad, area: 'Mantenimiento' })),
   ],
