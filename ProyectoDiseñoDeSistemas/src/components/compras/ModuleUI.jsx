@@ -181,6 +181,7 @@ export function FormDialog({
   onSubmit,
   children,
   action = 'Guardar cambios',
+  submitDisabled = false,
   maxWidth = 'md'
 }) {
   const headingId = useId();
@@ -211,7 +212,7 @@ export function FormDialog({
     <DialogContent dividers><Stack sx={{
         gap: 2.5
       }}>{children}</Stack></DialogContent>
-    <DialogActions sx={{ justifyContent: 'flex-end' }}>{footerActions && <Stack direction="row" sx={{ gap: 1, flexWrap: 'wrap', mr: 'auto', maxWidth: '100%' }}>{footerActions}</Stack>}<Button variant="outlined" onClick={onClose} color="inherit">{onSubmit ? 'Cancelar' : 'Cerrar'}</Button>{onSubmit && <Button type="submit" variant="contained">{action}</Button>}</DialogActions>
+    <DialogActions sx={{ justifyContent: 'flex-end' }}>{footerActions && <Stack direction="row" sx={{ gap: 1, flexWrap: 'wrap', mr: 'auto', maxWidth: '100%' }}>{footerActions}</Stack>}<Button variant="outlined" onClick={onClose} color="inherit">{onSubmit ? 'Cancelar' : 'Cerrar'}</Button>{onSubmit && <Button type="submit" variant="contained" disabled={submitDisabled}>{action}</Button>}</DialogActions>
   </ModuleDialog>;
 }
 export function StatusChip({
