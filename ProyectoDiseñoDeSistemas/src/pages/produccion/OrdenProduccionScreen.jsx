@@ -669,7 +669,7 @@ export const OrdenProduccionScreen = () => {
               onChange={(e) => setFiltroEstado(e.target.value)}
             >
               <MenuItem value="TODOS">Todos los estados</MenuItem>
-              <MenuItem value="Planificada">Planificada</MenuItem>
+              <MenuItem value="Planificada">{nombreEstado('Planificada')}</MenuItem>
               <MenuItem value="En Proceso">{nombreEstado('En Proceso')}</MenuItem>
               <MenuItem value="Finalizada">{nombreEstado('Finalizada')}</MenuItem>
               <MenuItem value="Cancelada">{nombreEstado('Cancelada')}</MenuItem>

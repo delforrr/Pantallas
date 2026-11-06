@@ -1,3 +1,4 @@
+import { useNombreEstado } from '../../context/AppContext';
 import {
   Box,
   Card,
@@ -37,8 +38,8 @@ export const OrdenProduccionCard = ({
   onGenerarSolicitudCompra,
   onEdit,
 }) => {
+  const nombreEstado = useNombreEstado();
   if (!orden) return null;
-
   const esFaltante = orden.estadoInsumos === 'Faltante';
 
   return (
@@ -120,7 +121,7 @@ export const OrdenProduccionCard = ({
                 <CancelIcon style={{ fontSize: 16 }} />
               ) : undefined
             }
-            label={orden.estado}
+            label={nombreEstado(orden.estado)}
             color={ESTADO_OP_COLORS[orden.estado] || 'default'}
             variant={orden.estado === 'Finalizada' || orden.estado === 'Cancelada' ? 'outlined' : 'filled'}
             sx={{ fontWeight: 600, fontSize: '0.74rem', flexShrink: 0 }}
