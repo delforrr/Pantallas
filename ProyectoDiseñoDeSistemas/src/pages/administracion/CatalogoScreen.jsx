@@ -20,7 +20,7 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
   };
   const padresActivos = padres?.filter(r => padre !== 'localidades' || opciones(catalogos.provincias).some(p => p.id === r.padre));
   const empleados = tipo === 'empleados';
-  const [grupo, filtrarGrupo] = useState('materia_prima');
+  const [grupo, filtrarGrupo] = useState('TODOS');
   const [estado, filtrarEstado] = useState('TODOS');
   const [busqueda, buscar] = useState('');
   const [borrador, editar] = useState(null);
@@ -30,8 +30,9 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
     ...catalogosBase.empleados.filter(e => e.area === borrador?.area).map(e => e.cargo),
     borrador?.cargo,
   ].filter(Boolean))];
+  const gruposDe = r => r.grupos ?? [r.padre];
   const estadoRegistro = r => r.inactivo ? 'Inactivo' : 'Activo';
-  const visibles = registros.filter(r => (!soloNombre || r.padre === grupo) && (estado === 'TODOS' || estadoRegistro(r) === estado) && r.nombre.toLocaleLowerCase('es').includes(busqueda.trim().toLocaleLowerCase('es')));
+  const visibles = registros.filter(r => (!soloNombre || grupo === 'TODOS' || gruposDe(r).includes(grupo)) && (estado === 'TODOS' || estadoRegistro(r) === estado) && r.nombre.toLocaleLowerCase('es').includes(busqueda.trim().toLocaleLowerCase('es')));
   const abrir = registro => { mostrarError(''); editar(registro); };
 
   function guardar(registro, texto) {
@@ -48,7 +49,10 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
     event.preventDefault();
     const registro = { ...borrador, nombre: borrador.nombre.trim(), ...(empleados && { cargo: borrador.cargo.trim() }) };
     const problema = !registro.nombre ? 'Ingresá un nombre.' :
-      nombreDuplicado(registros, registro) ? 'Ya existe un registro con este nombre.' : '';
+      (soloNombre
+        ? registros.some(r => r.id !== registro.id && gruposDe(r).some(id => gruposDe(registro).includes(id)) &&
+          r.nombre.localeCompare(registro.nombre, 'es', { sensitivity: 'base' }) === 0)
+        : nombreDuplicado(registros, registro)) ? 'Ya existe un registro con este nombre.' : '';
     if (problema) {
       mostrarError(problema);
       event.currentTarget.elements.nombre.focus();
@@ -64,18 +68,22 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
       <RecordsView rows={visibles} cardTitle={r => r.nombre} empty="No se encontraron registros."
         toolbar={<ListToolbar search={busqueda} onSearch={buscar} status={estado} onStatus={filtrarEstado}
           searchPlaceholder="Nombre" showStatus={!soloNombre} statuses={['Activo', 'Inactivo']}
-          createLabel={`Crear ${entidad}`} onCreate={soloNombre ? undefined :
-            () => abrir({ nombre: '', padre: padres ? '' : undefined, ...(empleados && { area: 'Producción', cargo: '' }) })}>
+          createLabel={soloNombre ? 'Nuevo estado del sistema' : `Crear ${entidad}`}
+          onCreate={() => abrir({ nombre: '', padre: padres ? '' : undefined,
+            ...(soloNombre && { grupos: grupo === 'TODOS' ? [] : [grupo] }),
+            ...(empleados && { area: 'Producción', cargo: '' }) })}>
           {soloNombre && <TextField select label="Entidad o documento" value={grupo}
             onChange={e => filtrarGrupo(e.target.value)}>
+            <MenuItem value="TODOS">Todos los módulos y documentos</MenuItem>
             {Object.entries(gruposEstados).map(([id, [nombre]]) => <MenuItem key={id} value={id}>{nombre}</MenuItem>)}
           </TextField>}
         </ListToolbar>}
         columns={[
           { label: 'Nombre', render: r => r.nombre },
+          ...(soloNombre ? [{ label: 'Módulos y documentos', render: r => gruposDe(r).map(id => gruposEstados[id][0]).join(', ') }] : []),
           ...(padres ? [{ label: etiquetaPadre, render: r => nombrePadre(r.padre) }] : []),
           ...(empleados ? [{ label: 'Área', render: r => r.area }, { label: 'Cargo', render: r => r.cargo }] : []),
-          { label: 'Estado', render: r => <StatusChip value={soloNombre ? r.valor : estadoRegistro(r)} /> },
+          { label: 'Estado', render: r => <StatusChip value={soloNombre ? r.valor ?? 'Activo' : estadoRegistro(r)} /> },
         ]}
         actions={r => <>
           <RecordIcon label={`Editar ${r.nombre}`} color="primary" onClick={() => abrir(r)}><EditOutlinedIcon /></RecordIcon>
@@ -88,11 +96,17 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
       <FormDialog open={Boolean(borrador)} onClose={(_, motivo) => { if (motivo !== 'backdropClick') editar(null); }}
         title={`${borrador?.id ? 'Editar' : 'Crear'} ${entidad}`} maxWidth="xs" onSubmit={enviar}
         action={borrador?.id ? 'Guardar cambios' : `Crear ${entidad}`}
-        submitDisabled={Boolean(borrador && (padres && !borrador.padre || empleados && !borrador.cargo.trim()))}>
+        submitDisabled={Boolean(borrador && (soloNombre && borrador.grupos?.length === 0 || padres && !borrador.padre || empleados && !borrador.cargo.trim()))}>
         {borrador && <>
           <TextField autoFocus fullWidth name="nombre" label="Nombre" value={borrador.nombre}
             error={Boolean(error)} helperText={error}
             onChange={e => { mostrarError(''); editar({ ...borrador, nombre: e.target.value }); }} />
+          {soloNombre && borrador.grupos && <TextField select fullWidth label="Módulos y documentos"
+            value={borrador.grupos} helperText="Elegí al menos un módulo o documento."
+            slotProps={{ select: { multiple: true, renderValue: ids => ids.map(id => gruposEstados[id][0]).join(', ') } }}
+            onChange={e => editar({ ...borrador, grupos: e.target.value })}>
+            {Object.entries(gruposEstados).map(([id, [nombre]]) => <MenuItem key={id} value={id}>{nombre}</MenuItem>)}
+          </TextField>}
           {empleados && <>
             <TextField select label="Área" value={borrador.area} disabled={Boolean(borrador.id)}
               onChange={e => editar({ ...borrador, area: e.target.value, cargo: '' })}>
