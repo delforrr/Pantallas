@@ -1,4 +1,4 @@
-import { gruposEstados } from './estados';
+import { agruparEstados, gruposDe, gruposEstados } from './estados';
 import { useState } from 'react';
 import { Alert, MenuItem, TextField } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -30,16 +30,8 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
     ...catalogosBase.empleados.filter(e => e.area === borrador?.area).map(e => e.cargo),
     borrador?.cargo,
   ].filter(Boolean))];
-  const gruposDe = r => r.grupos ?? [r.padre];
   const estadoRegistro = r => r.inactivo ? 'Inactivo' : 'Activo';
-  const filas = soloNombre ? registros.filter((r, indice) =>
-    !['Activo', 'Inactivo'].includes(r.valor) ||
-    registros.findIndex(item => item.valor === r.valor && item.nombre === r.nombre) === indice
-  ).map(r => {
-    if (!['Activo', 'Inactivo'].includes(r.valor)) return r;
-    const miembros = registros.filter(item => item.valor === r.valor && item.nombre === r.nombre);
-    return { ...r, miembros, grupos: [...new Set(miembros.map(item => item.padre))] };
-  }) : registros;
+  const filas = soloNombre ? agruparEstados(registros) : registros;
   const visibles = filas.filter(r => (!soloNombre || grupo === 'TODOS' || gruposDe(r).includes(grupo)) && (estado === 'TODOS' || estadoRegistro(r) === estado) && r.nombre.toLocaleLowerCase('es').includes(busqueda.trim().toLocaleLowerCase('es')));
   const abrir = registro => { mostrarError(''); editar(registro); };
 

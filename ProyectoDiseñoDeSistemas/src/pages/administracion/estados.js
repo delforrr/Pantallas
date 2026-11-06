@@ -15,3 +15,20 @@ export const gruposEstados = {
 
 export const estadosBase = Object.entries(gruposEstados).flatMap(([grupo, [, ...valores]]) =>
   valores.map(valor => ({ id: `${grupo}:${valor}`, padre: grupo, nombre: valor, valor })));
+
+export const gruposDe = estado => estado.grupos ?? [estado.padre];
+
+export function agruparEstados(registros) {
+  const porNombre = new Map();
+  for (const registro of registros) {
+    const clave = registro.nombre.trim().toLocaleLowerCase('es');
+    const miembros = porNombre.get(clave) ?? [];
+    miembros.push(registro);
+    porNombre.set(clave, miembros);
+  }
+  return Array.from(porNombre.values(), miembros => miembros.length === 1 ? miembros[0] : {
+    ...miembros[0],
+    miembros,
+    grupos: [...new Set(miembros.flatMap(gruposDe))],
+  });
+}
