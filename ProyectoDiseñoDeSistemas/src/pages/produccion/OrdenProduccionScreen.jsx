@@ -1,3 +1,4 @@
+import { useNombreEstado } from '../../context/AppContext';
 import { useApp } from '../../context/AppContext';
 import { opciones } from '../administracion/catalogos';
 import { useState, useMemo } from 'react';
@@ -89,6 +90,7 @@ const getMananaFecha = () => {
 };
 
 export const OrdenProduccionScreen = () => {
+  const nombreEstado = useNombreEstado();
   const { catalogos } = useApp();
   const empleados = catalogos.empleados.filter(e => e.area === 'Producción');
   const inicial = opciones(empleados)[0];
@@ -668,9 +670,9 @@ export const OrdenProduccionScreen = () => {
             >
               <MenuItem value="TODOS">Todos los estados</MenuItem>
               <MenuItem value="Planificada">Planificada</MenuItem>
-              <MenuItem value="En Proceso">En Proceso</MenuItem>
-              <MenuItem value="Finalizada">Finalizada</MenuItem>
-              <MenuItem value="Cancelada">Cancelada</MenuItem>
+              <MenuItem value="En Proceso">{nombreEstado('En Proceso')}</MenuItem>
+              <MenuItem value="Finalizada">{nombreEstado('Finalizada')}</MenuItem>
+              <MenuItem value="Cancelada">{nombreEstado('Cancelada')}</MenuItem>
             </Select>
           </FormControl>
 
@@ -936,7 +938,7 @@ export const OrdenProduccionScreen = () => {
                           <CancelIcon style={{ fontSize: 16 }} />
                         ) : undefined
                       }
-                      label={row.estado}
+                      label={nombreEstado(row.estado)}
                       size="small"
                       color={ESTADO_OP_COLORS[row.estado] || 'default'}
                       variant={row.estado === 'Finalizada' || row.estado === 'Cancelada' ? 'outlined' : 'filled'}
@@ -1667,7 +1669,7 @@ export const OrdenProduccionScreen = () => {
                     <CancelIcon style={{ fontSize: 18 }} />
                   ) : undefined
                 }
-                label={selectedOrden.estado}
+                label={nombreEstado(selectedOrden.estado)}
                 color={ESTADO_OP_COLORS[selectedOrden.estado] || 'default'}
                 variant={selectedOrden.estado === 'Finalizada' || selectedOrden.estado === 'Cancelada' ? 'outlined' : 'filled'}
                 sx={{ fontWeight: 700 }}
@@ -1793,7 +1795,7 @@ export const OrdenProduccionScreen = () => {
                             {selectedOrden.estado === 'Finalizada' ? selectedOrden.cantidadKilos : 0} kg
                           </TableCell>
                           <TableCell>
-                            <Chip size="small" label={selectedOrden.estado} color={ESTADO_OP_COLORS[selectedOrden.estado]} variant="outlined" />
+                            <Chip size="small" label={nombreEstado(selectedOrden.estado)} color={ESTADO_OP_COLORS[selectedOrden.estado]} variant="outlined" />
                           </TableCell>
                         </TableRow>
                       )}

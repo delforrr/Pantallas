@@ -27,6 +27,7 @@ export const PAGE_LABELS = {
   admin_calles: 'Calles',
   admin_iva: 'Tipos de IVA',
   admin_empleados: 'Empleados',
+  admin_estados: 'Estados del sistema',
   // Cliente
   catalogo: 'Catálogo de Productos',
   carrito: 'Mi Carrito',
@@ -71,6 +72,7 @@ export const ADMIN_NAV = [
     label: 'Administración',
     icon: CategoryIcon,
     children: [
+      { id: 'admin_estados', label: PAGE_LABELS.admin_estados, icon: DescriptionIcon },
       { id: 'admin_iva', label: PAGE_LABELS.admin_iva, icon: ReceiptLongIcon },
       { id: 'admin_empleados', label: PAGE_LABELS.admin_empleados, icon: PeopleIcon },
       { id: 'admin_provincias', label: PAGE_LABELS.admin_provincias, icon: AssignmentIcon },

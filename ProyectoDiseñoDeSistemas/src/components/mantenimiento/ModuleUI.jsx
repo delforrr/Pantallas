@@ -1,3 +1,4 @@
+import { useNombreEstado } from '../../context/AppContext';
 import AddIcon from '@mui/icons-material/Add';
 import { alpha } from '@mui/material/styles';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
@@ -215,8 +216,9 @@ export function FormDialog({
   </ModuleDialog>;
 }
 export function StatusChip({
-  value
+  value, grupo
 }) {
+  const nombreEstado = useNombreEstado();
   const colors = {
     Inactivo: 'default', Vencido: 'warning', 'Fuera de Servicio': 'error',
     Activo: 'success', Pagada: 'success', 'Pendiente de Pago': 'warning', Anulada: 'error', Conciliado: 'success',
@@ -234,7 +236,7 @@ export function StatusChip({
     Rechazado: 'error'
   };
   const color = colors[value] || 'default';
-  return <Chip size="small" label={value} icon={<Box component="span" sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'currentColor' }} />} sx={{
+  return <Chip size="small" label={grupo === null ? value : nombreEstado(value, grupo)} icon={<Box component="span" sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'currentColor' }} />} sx={{
     maxWidth: '100%', height: 'auto', minHeight: 28, borderRadius: 1.5,
     fontWeight: 650, fontSize: '0.75rem',
     color: theme => color === 'default' ? theme.palette.text.secondary : theme.palette[color][theme.palette.mode === 'dark' ? 'light' : 'dark'],
@@ -259,6 +261,7 @@ export function ListToolbar({
   filterActive = false,
   onClear
 }) {
+  const nombreEstado = useNombreEstado();
   return <Stack role="group" aria-label="Filtros de registros" sx={{
     gap: 1.5,
     mb: 1.5
@@ -282,7 +285,7 @@ export function ListToolbar({
         minWidth: {
           sm: 160
         }
-      }}><MenuItem value="TODOS">Todos los estados</MenuItem>{statuses.map(s => <MenuItem value={s} key={s}>{s}</MenuItem>)}</TextField>}
+      }}><MenuItem value="TODOS">Todos los estados</MenuItem>{statuses.map(s => <MenuItem value={s} key={s}>{nombreEstado(s)}</MenuItem>)}</TextField>}
       {children}<Stack direction="row" sx={{ gap: 1.5, alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0, maxWidth: '100%' }}>
         {viewControls}{onCreate && <Button variant="contained" startIcon={<AddIcon />} onClick={onCreate} sx={{ minWidth: 0, flex: { xs: 1, sm: '0 1 auto' } }}>{createLabel}</Button>}
       </Stack>

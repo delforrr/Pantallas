@@ -1,3 +1,4 @@
+import { useNombreEstado } from '../../context/AppContext';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -41,6 +42,7 @@ import { DetalleItemsVentasTable, ComprobanteDocumentWrapper } from '../../compo
 
 
 export const PresupuestosScreen = () => {
+  const nombreEstado = useNombreEstado();
   const [presupuestos, setPresupuestos] = useState(INITIAL_PRESUPUESTOS);
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('TODOS');
@@ -163,13 +165,13 @@ export const PresupuestosScreen = () => {
   const getStatusChip = (estado) => {
     switch (estado) {
       case 'Aceptado':
-        return <Chip label="Aceptado" color="success" size="small" sx={{ fontWeight: 700 }} />;
+        return <Chip label={nombreEstado('Aceptado')} color="success" size="small" sx={{ fontWeight: 700 }} />;
       case 'Pendiente':
-        return <Chip label="Pendiente" color="warning" size="small" sx={{ fontWeight: 700 }} />;
+        return <Chip label={nombreEstado('Pendiente')} color="warning" size="small" sx={{ fontWeight: 700 }} />;
       case 'Expirado':
-        return <Chip label="Expirado" color="error" size="small" sx={{ fontWeight: 600 }} />;
+        return <Chip label={nombreEstado('Expirado')} color="error" size="small" sx={{ fontWeight: 600 }} />;
       default:
-        return <Chip label={estado} size="small" />;
+        return <Chip label={nombreEstado(estado)} size="small" />;
     }
   };
 
@@ -223,9 +225,9 @@ export const PresupuestosScreen = () => {
               <InputLabel>Filtrar por Estado</InputLabel>
               <Select value={estadoFilter} label="Filtrar por Estado" onChange={(e) => setEstadoFilter(e.target.value)}>
                 <MenuItem value="TODOS">Todos los Estados</MenuItem>
-                <MenuItem value="PENDIENTE">Pendientes</MenuItem>
-                <MenuItem value="ACEPTADO">Aceptados</MenuItem>
-                <MenuItem value="EXPIRADO">Expirados</MenuItem>
+                <MenuItem value="PENDIENTE">{nombreEstado('Pendiente')}</MenuItem>
+                <MenuItem value="ACEPTADO">{nombreEstado('Aceptado')}</MenuItem>
+                <MenuItem value="EXPIRADO">{nombreEstado('Expirado')}</MenuItem>
               </Select>
             </FormControl>
           </Grid>

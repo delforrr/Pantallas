@@ -1,3 +1,4 @@
+import { gruposEstados } from './estados';
 import { useState } from 'react';
 import { Alert, MenuItem, TextField } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -19,13 +20,14 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
   };
   const padresActivos = padres?.filter(r => padre !== 'localidades' || opciones(catalogos.provincias).some(p => p.id === r.padre));
   const empleados = tipo === 'empleados';
+  const [grupo, filtrarGrupo] = useState('materia_prima');
   const [estado, filtrarEstado] = useState('TODOS');
   const [busqueda, buscar] = useState('');
   const [borrador, editar] = useState(null);
   const [error, mostrarError] = useState('');
   const [mensaje, avisar] = useState('');
   const estadoRegistro = r => r.inactivo ? 'Inactivo' : 'Activo';
-  const visibles = registros.filter(r => (estado === 'TODOS' || estadoRegistro(r) === estado) && r.nombre.toLocaleLowerCase('es').includes(busqueda.trim().toLocaleLowerCase('es')));
+  const visibles = registros.filter(r => (!soloNombre || r.padre === grupo) && (estado === 'TODOS' || estadoRegistro(r) === estado) && r.nombre.toLocaleLowerCase('es').includes(busqueda.trim().toLocaleLowerCase('es')));
   const abrir = registro => { mostrarError(''); editar(registro); };
 
   function guardar(registro, texto) {
@@ -59,12 +61,17 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
         toolbar={<ListToolbar search={busqueda} onSearch={buscar} status={estado} onStatus={filtrarEstado}
           searchPlaceholder="Nombre" showStatus={!soloNombre} statuses={['Activo', 'Inactivo']}
           createLabel={`Crear ${entidad}`} onCreate={soloNombre ? undefined :
-            () => abrir({ nombre: '', padre: padres ? '' : undefined, ...(empleados && { area: 'Producción', cargo: '' }) })} />}
+            () => abrir({ nombre: '', padre: padres ? '' : undefined, ...(empleados && { area: 'Producción', cargo: '' }) })}>
+          {soloNombre && <TextField select label="Entidad o documento" value={grupo}
+            onChange={e => filtrarGrupo(e.target.value)}>
+            {Object.entries(gruposEstados).map(([id, [nombre]]) => <MenuItem key={id} value={id}>{nombre}</MenuItem>)}
+          </TextField>}
+        </ListToolbar>}
         columns={[
           { label: 'Nombre', render: r => r.nombre },
           ...(padres ? [{ label: etiquetaPadre, render: r => nombrePadre(r.padre) }] : []),
           ...(empleados ? [{ label: 'Área', render: r => r.area }, { label: 'Cargo', render: r => r.cargo }] : []),
-          { label: 'Estado', render: r => <StatusChip value={estadoRegistro(r)} /> },
+          { label: 'Estado', render: r => <StatusChip value={soloNombre ? r.valor : estadoRegistro(r)} /> },
         ]}
         actions={r => <>
           <RecordIcon label={`Editar ${r.nombre}`} color="primary" onClick={() => abrir(r)}><EditOutlinedIcon /></RecordIcon>

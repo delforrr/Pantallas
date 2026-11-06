@@ -1,3 +1,4 @@
+import { estadosBase } from './estados.js';
 import { EMPLEADOS } from '../produccion/mockData.js';
 import { INITIAL_TECNICOS } from '../mantenimiento/mockData.js';
 import { INITIAL_PROVEEDORES } from '../compras/mockData.js';
@@ -11,6 +12,7 @@ export const unidades = ['kg', 'g', 'docenas', 'unidades', 'litros'];
 export const tiposMateriaPrima = ['Harinas y Cereales', 'Frescos y Granja', 'Lácteos', 'Verduras', 'Carnes', 'Condimentos', 'Packaging'];
 
 export const catalogosBase = {
+  estados: estadosBase,
   iva: ['Responsable Inscripto', 'Monotributo', 'Consumidor Final', 'Exento'].map(id => ({ id, nombre: id })),
   empleados: [
     ...EMPLEADOS.map(({ idEmpleado, nombre, cargo }) => ({ id: idEmpleado, nombre, cargo, area: 'Producción' })),

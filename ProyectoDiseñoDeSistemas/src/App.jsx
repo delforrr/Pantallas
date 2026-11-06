@@ -41,6 +41,7 @@ import { PAGE_LABELS } from './config/navigation';
 const PedidosTienda = () => <><MayoristasTienda /><PedidosScreen /></>;
 
 const SCREEN_MAP = {
+  admin_estados: () => <CatalogoAdmin tipo="estados" entidad="estado" soloNombre />,
   admin_iva: () => <CatalogoAdmin tipo="iva" entidad="tipo de IVA" />,
   admin_empleados: () => <CatalogoAdmin tipo="empleados" entidad="empleado" />,
   admin_provincias: () => <CatalogoAdmin tipo="provincias" entidad="provincia" />,

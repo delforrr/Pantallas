@@ -1,3 +1,4 @@
+import { useNombreEstado } from '../../context/AppContext';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -39,6 +40,7 @@ import { ComprobanteDocumentWrapper, DetalleItemsVentasTable } from '../../compo
 
 
 export const ComprobantesVentaScreen = () => {
+  const nombreEstado = useNombreEstado();
   const [comprobantes, setComprobantes] = useState(INITIAL_COMPROBANTES_VENTA);
   const [searchTerm, setSearchTerm] = useState('');
   const [tipoFilter, setTipoFilter] = useState('TODOS');
@@ -235,7 +237,7 @@ export const ComprobantesVentaScreen = () => {
                   </TableCell>
                   <TableCell><Typography variant="body2">{item.condicionPago}</Typography></TableCell>
                   <TableCell>
-                    <Chip label={item.estado} color={item.estado.includes('Pagada') ? 'success' : 'warning'} size="small" />
+                    <Chip label={nombreEstado(item.estado)} color={item.estado.includes('Pagada') ? 'success' : 'warning'} size="small" />
                   </TableCell>
                   <TableCell align="center">
                     <Tooltip title="Ver Comprobante Fiscal">
@@ -430,7 +432,7 @@ export const ComprobantesVentaScreen = () => {
                   </Grid>
                   <Grid item xs={12} sm={6} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
                     <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>ESTADO FISCAL:</Typography>
-                    <Chip label={selectedComprobante.estado} color={selectedComprobante.estado.includes('Pagada') ? 'success' : 'warning'} size="small" sx={{ fontWeight: 700, ml: 1 }} />
+                    <Chip label={nombreEstado(selectedComprobante.estado)} color={selectedComprobante.estado.includes('Pagada') ? 'success' : 'warning'} size="small" sx={{ fontWeight: 700, ml: 1 }} />
                   </Grid>
                 </Grid>
               }

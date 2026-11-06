@@ -1,3 +1,4 @@
+import { useNombreEstado } from '../../context/AppContext';
 import DomicilioProveedorFields from '../../components/compras/DomicilioProveedorFields';
 import { useApp } from '../../context/AppContext';
 import { calleId, localidadId, nombreCatalogo } from '../administracion/catalogos';
@@ -14,13 +15,14 @@ import SaveIcon from "@mui/icons-material/Save";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { INITIAL_PROVEEDORES } from "./mockData";
 
-const EstadoSelect = ({ value, onChange, ariaLabel = "Cambiar estado del proveedor", size = "small", disabled = false }) => <FormControl size={size} sx={{ flexShrink: 0 }}>
+const EstadoSelect = ({ value, onChange, ariaLabel = "Cambiar estado del proveedor", size = "small", disabled = false, nombreEstado }) => <FormControl size={size} sx={{ flexShrink: 0 }}>
   <Select value={value} onChange={onChange} disabled={disabled} onClick={event => event.stopPropagation()} inputProps={{ 'aria-label': ariaLabel }} sx={{ minHeight: 44, '& .MuiSelect-select': { py: 0.75, display: 'flex', alignItems: 'center' } }}>
-    <MenuItem value="Activo">Activo</MenuItem>
-    <MenuItem value="Inactivo">Inactivo</MenuItem>
+    <MenuItem value="Activo">{nombreEstado('Activo')}</MenuItem>
+    <MenuItem value="Inactivo">{nombreEstado('Inactivo')}</MenuItem>
   </Select>
 </FormControl>;
 export const ProveedoresScreen = () => {
+  const nombreEstado = useNombreEstado();
   const { catalogos } = useApp();
   const [proveedores, setProveedores] = useState(() => INITIAL_PROVEEDORES.map(p => ({
     ...p,
@@ -200,7 +202,7 @@ export const ProveedoresScreen = () => {
       render: p => p.telefono
     }, {
       label: 'Estado',
-      render: p => <EstadoSelect value={p.estado} onChange={e => handleStatusChange(p.id, e.target.value)} ariaLabel={`Cambiar estado de ${p.razonSocial}`} />
+      render: p => <EstadoSelect nombreEstado={nombreEstado} value={p.estado} onChange={e => handleStatusChange(p.id, e.target.value)} ariaLabel={`Cambiar estado de ${p.razonSocial}`} />
     }]} actions={p => <><RecordIcon label="Ver detalle" onClick={() => handleOpenDetail(p)}><VisibilityOutlinedIcon /></RecordIcon><RecordIcon label="Editar" color="primary" onClick={() => handleOpenEdit(p)}><EditOutlinedIcon /></RecordIcon><RecordIcon label="Eliminar" color="error" onClick={() => handleOpenDelete(p)}><DeleteOutlineIcon /></RecordIcon></>} />
 
       <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{
@@ -337,10 +339,10 @@ export const ProveedoresScreen = () => {
                   estado: e.target.value
                 })}>
                       <MenuItem value="Activo">
-                        Activo
+                        {nombreEstado('Activo')}
                       </MenuItem>
                       <MenuItem value="Inactivo">
-                        Inactivo
+                        {nombreEstado('Inactivo')}
                       </MenuItem>
                     </Select>
                   </FormControl>

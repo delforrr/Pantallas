@@ -1,3 +1,4 @@
+import { useNombreEstado } from '../../context/AppContext';
 import { useApp } from '../../context/AppContext';
 import { nombreCatalogo, opciones } from '../administracion/catalogos';
 import { useState, useMemo } from 'react';
@@ -46,6 +47,7 @@ import { MATERIAS_PRIMAS_INICIALES } from './mockData';
 const ESTADOS = ['Todos', 'Activo', 'Inactivo'];
 
 export const MateriaPrimaScreen = () => {
+  const nombreEstado = useNombreEstado();
   const { catalogos } = useApp();
   const { unidades, tiposMateriaPrima } = catalogos;
   const [materiasPrimas, setMateriasPrimas] = useState(MATERIAS_PRIMAS_INICIALES);
@@ -240,7 +242,7 @@ export const MateriaPrimaScreen = () => {
             >
               {ESTADOS.map((est) => (
                 <MenuItem key={est} value={est}>
-                  {est}
+                  {nombreEstado(est)}
                 </MenuItem>
               ))}
             </Select>
@@ -395,7 +397,7 @@ export const MateriaPrimaScreen = () => {
                       {mp.estado === 'Activo' ? (
                         <Chip
                           icon={<CheckCircleIcon style={{ fontSize: 16 }} />}
-                          label="Activo"
+                          label={nombreEstado('Activo')}
                           size="small"
                           color="success"
                           variant="outlined"
@@ -404,7 +406,7 @@ export const MateriaPrimaScreen = () => {
                       ) : (
                         <Chip
                           icon={<CancelIcon style={{ fontSize: 16 }} />}
-                          label="Inactivo"
+                          label={nombreEstado('Inactivo')}
                           size="small"
                           color="default"
                           variant="outlined"
@@ -569,8 +571,8 @@ export const MateriaPrimaScreen = () => {
                 value={formState.estado}
                 onChange={(e) => setFormState({ ...formState, estado: e.target.value })}
               >
-                <MenuItem value="Activo">Activo</MenuItem>
-                <MenuItem value="Inactivo">Inactivo</MenuItem>
+                <MenuItem value="Activo">{nombreEstado('Activo')}</MenuItem>
+                <MenuItem value="Inactivo">{nombreEstado('Inactivo')}</MenuItem>
               </TextField>
             </Grid>
 
@@ -614,7 +616,7 @@ export const MateriaPrimaScreen = () => {
               {viewingMP.estado === 'Activo' ? (
                 <Chip
                   icon={<CheckCircleIcon style={{ fontSize: 16 }} />}
-                  label="Activo"
+                  label={nombreEstado('Activo')}
                   size="small"
                   color="success"
                   variant="outlined"
@@ -623,7 +625,7 @@ export const MateriaPrimaScreen = () => {
               ) : (
                 <Chip
                   icon={<CancelIcon style={{ fontSize: 16 }} />}
-                  label="Inactivo"
+                  label={nombreEstado('Inactivo')}
                   size="small"
                   color="default"
                   variant="outlined"

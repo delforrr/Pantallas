@@ -1,3 +1,4 @@
+import { useNombreEstado } from '../../context/AppContext';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -53,6 +54,7 @@ const CATEGORIAS = ['Todas', 'Pastas Rellenas', 'Pastas Simples', 'Otros'];
 const ESTADOS = ['Todos', 'Activo', 'Inactivo'];
 
 export const ProductosCompuestosScreen = () => {
+  const nombreEstado = useNombreEstado();
   const { navigate } = useApp();
 
   const [productos, setProductos] = useState(PRODUCTOS_INICIALES);
@@ -391,7 +393,7 @@ export const ProductosCompuestosScreen = () => {
             >
               {ESTADOS.map((est) => (
                 <MenuItem key={est} value={est}>
-                  {est}
+                  {nombreEstado(est)}
                 </MenuItem>
               ))}
             </Select>
@@ -609,7 +611,7 @@ export const ProductosCompuestosScreen = () => {
                     {prod.estado === 'Activo' ? (
                       <Chip
                         icon={<CheckCircleIcon style={{ fontSize: 16 }} />}
-                        label="Activo"
+                        label={nombreEstado('Activo')}
                         size="small"
                         color="success"
                         variant="outlined"
@@ -618,7 +620,7 @@ export const ProductosCompuestosScreen = () => {
                     ) : (
                       <Chip
                         icon={<CancelIcon style={{ fontSize: 16 }} />}
-                        label="Inactivo"
+                        label={nombreEstado('Inactivo')}
                         size="small"
                         color="default"
                         variant="outlined"
@@ -966,8 +968,8 @@ export const ProductosCompuestosScreen = () => {
                 value={formState.estado}
                 onChange={(e) => setFormState({ ...formState, estado: e.target.value })}
               >
-                <MenuItem value="Activo">Activo</MenuItem>
-                <MenuItem value="Inactivo">Inactivo</MenuItem>
+                <MenuItem value="Activo">{nombreEstado('Activo')}</MenuItem>
+                <MenuItem value="Inactivo">{nombreEstado('Inactivo')}</MenuItem>
               </TextField>
             </Grid>
 
@@ -1196,7 +1198,7 @@ export const ProductosCompuestosScreen = () => {
               {viewingProducto.estado === 'Activo' ? (
                 <Chip
                   icon={<CheckCircleIcon style={{ fontSize: 16 }} />}
-                  label="Activo"
+                  label={nombreEstado('Activo')}
                   size="small"
                   color="success"
                   variant="outlined"
@@ -1205,7 +1207,7 @@ export const ProductosCompuestosScreen = () => {
               ) : (
                 <Chip
                   icon={<CancelIcon style={{ fontSize: 16 }} />}
-                  label="Inactivo"
+                  label={nombreEstado('Inactivo')}
                   size="small"
                   color="default"
                   variant="outlined"

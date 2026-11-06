@@ -1,3 +1,4 @@
+import { useNombreEstado } from '../../context/AppContext';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -45,6 +46,7 @@ import { DetalleItemsVentasTable, ClienteMorosoAlert, ComprobanteDocumentWrapper
 
 
 export const PedidosScreen = () => {
+  const nombreEstado = useNombreEstado();
   const [pedidos, setPedidos] = useState(INITIAL_PEDIDOS);
   const [clientesList, setClientesList] = useState(INITIAL_CLIENTES);
   const [searchTerm, setSearchTerm] = useState('');
@@ -329,15 +331,15 @@ export const PedidosScreen = () => {
   const getStatusChip = (estado) => {
     switch (estado) {
       case 'Finalizado':
-        return <Chip label="Finalizado" color="success" size="small" sx={{ fontWeight: 700 }} />;
+        return <Chip label={nombreEstado('Finalizado')} color="success" size="small" sx={{ fontWeight: 700 }} />;
       case 'En Preparación':
-        return <Chip label="En Preparación" color="info" size="small" sx={{ fontWeight: 700 }} />;
+        return <Chip label={nombreEstado('En Preparación')} color="info" size="small" sx={{ fontWeight: 700 }} />;
       case 'Pendiente':
-        return <Chip label="Pendiente" color="warning" size="small" sx={{ fontWeight: 700 }} />;
+        return <Chip label={nombreEstado('Pendiente')} color="warning" size="small" sx={{ fontWeight: 700 }} />;
       case 'Cancelado':
-        return <Chip label="Cancelado" color="error" size="small" sx={{ fontWeight: 600 }} />;
+        return <Chip label={nombreEstado('Cancelado')} color="error" size="small" sx={{ fontWeight: 600 }} />;
       default:
-        return <Chip label={estado} size="small" />;
+        return <Chip label={nombreEstado(estado)} size="small" />;
     }
   };
 
@@ -405,10 +407,10 @@ export const PedidosScreen = () => {
               <InputLabel>Estado del Pedido</InputLabel>
               <Select value={estadoFilter} label="Estado del Pedido" onChange={(e) => setEstadoFilter(e.target.value)}>
                 <MenuItem value="TODOS">Todos los Estados</MenuItem>
-                <MenuItem value="PENDIENTE">Pendientes</MenuItem>
-                <MenuItem value="EN PREPARACIÓN">En Preparación</MenuItem>
-                <MenuItem value="FINALIZADO">Finalizados</MenuItem>
-                <MenuItem value="CANCELADO">Cancelados</MenuItem>
+                <MenuItem value="PENDIENTE">{nombreEstado('Pendiente')}</MenuItem>
+                <MenuItem value="EN PREPARACIÓN">{nombreEstado('En Preparación')}</MenuItem>
+                <MenuItem value="FINALIZADO">{nombreEstado('Finalizado')}</MenuItem>
+                <MenuItem value="CANCELADO">{nombreEstado('Cancelado')}</MenuItem>
               </Select>
             </FormControl>
           </Grid>

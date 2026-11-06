@@ -169,3 +169,10 @@ export const useApp = () => {
   if (!ctx) throw new Error('useApp must be used within AppProvider');
   return ctx;
 };
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function useNombreEstado() {
+  const ctx = useContext(AppContext);
+  return (valor, grupo = ctx?.currentPage) =>
+    ctx?.catalogos.estados.find(r => r.id === `${grupo}:${valor}`)?.nombre ?? valor;
+}
