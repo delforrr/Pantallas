@@ -27,10 +27,9 @@ export const AppProvider = ({ children }) => {
   const catalogos = { ...catalogosBase, ...catalogosGuardados };
 
   function guardarCatalogo(tipo, registro) {
-    const lista = catalogos[tipo];
-    const nuevaLista = lista.some(item => item.id === registro.id)
-      ? lista.map(item => item.id === registro.id ? registro : item)
-      : [...lista, registro];
+    const porId = new Map(catalogos[tipo].map(item => [item.id, item]));
+    for (const item of [registro].flat()) porId.set(item.id, item);
+    const nuevaLista = [...porId.values()];
     const siguiente = { ...catalogosGuardados, [tipo]: nuevaLista };
     localStorage.setItem('pastafab_catalogos', JSON.stringify(siguiente));
     setCatalogos(siguiente);

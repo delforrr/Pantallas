@@ -32,7 +32,15 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
   ].filter(Boolean))];
   const gruposDe = r => r.grupos ?? [r.padre];
   const estadoRegistro = r => r.inactivo ? 'Inactivo' : 'Activo';
-  const visibles = registros.filter(r => (!soloNombre || grupo === 'TODOS' || gruposDe(r).includes(grupo)) && (estado === 'TODOS' || estadoRegistro(r) === estado) && r.nombre.toLocaleLowerCase('es').includes(busqueda.trim().toLocaleLowerCase('es')));
+  const filas = soloNombre ? registros.filter((r, indice) =>
+    !['Activo', 'Inactivo'].includes(r.valor) ||
+    registros.findIndex(item => item.valor === r.valor && item.nombre === r.nombre) === indice
+  ).map(r => {
+    if (!['Activo', 'Inactivo'].includes(r.valor)) return r;
+    const miembros = registros.filter(item => item.valor === r.valor && item.nombre === r.nombre);
+    return { ...r, miembros, grupos: [...new Set(miembros.map(item => item.padre))] };
+  }) : registros;
+  const visibles = filas.filter(r => (!soloNombre || grupo === 'TODOS' || gruposDe(r).includes(grupo)) && (estado === 'TODOS' || estadoRegistro(r) === estado) && r.nombre.toLocaleLowerCase('es').includes(busqueda.trim().toLocaleLowerCase('es')));
   const abrir = registro => { mostrarError(''); editar(registro); };
 
   function guardar(registro, texto) {
@@ -50,7 +58,7 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
     const registro = { ...borrador, nombre: borrador.nombre.trim(), ...(empleados && { cargo: borrador.cargo.trim() }) };
     const problema = !registro.nombre ? 'Ingresá un nombre.' :
       (soloNombre
-        ? registros.some(r => r.id !== registro.id && gruposDe(r).some(id => gruposDe(registro).includes(id)) &&
+        ? registros.some(r => r.id !== registro.id && !registro.miembros?.some(item => item.id === r.id) && gruposDe(r).some(id => gruposDe(registro).includes(id)) &&
           r.nombre.localeCompare(registro.nombre, 'es', { sensitivity: 'base' }) === 0)
         : nombreDuplicado(registros, registro)) ? 'Ya existe un registro con este nombre.' : '';
     if (problema) {
@@ -58,7 +66,8 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
       event.currentTarget.elements.nombre.focus();
       return;
     }
-    guardar({ ...registro, id: registro.id ?? crypto.randomUUID() }, 'Cambios guardados.');
+    guardar(registro.miembros ? registro.miembros.map(item => ({ ...item, nombre: registro.nombre })) :
+      { ...registro, id: registro.id ?? crypto.randomUUID() }, 'Cambios guardados.');
   }
 
   return (
@@ -101,7 +110,7 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
           <TextField autoFocus fullWidth name="nombre" label="Nombre" value={borrador.nombre}
             error={Boolean(error)} helperText={error}
             onChange={e => { mostrarError(''); editar({ ...borrador, nombre: e.target.value }); }} />
-          {soloNombre && borrador.grupos && <TextField select fullWidth label="Módulos y documentos"
+          {soloNombre && borrador.grupos && !borrador.miembros && <TextField select fullWidth label="Módulos y documentos"
             value={borrador.grupos} helperText="Elegí al menos un módulo o documento."
             slotProps={{ select: { multiple: true, renderValue: ids => ids.map(id => gruposEstados[id][0]).join(', ') } }}
             onChange={e => editar({ ...borrador, grupos: e.target.value })}>
