@@ -1,5 +1,6 @@
 import DomicilioProveedorFields from '../../components/compras/DomicilioProveedorFields';
-import { buildAddressCatalog } from './addressCatalog';
+import { useApp } from '../../context/AppContext';
+import { calleId, localidadId, nombreCatalogo } from '../administracion/catalogos';
 import ComprobanteDetalle from '../../components/compras/ComprobanteDetalle';
 import { ModuleDialog as Dialog, ModuleSurface, FormSection, FormDialog, SummaryCards, ListToolbar, RecordsView, RecordIcon } from '../../components/compras/ModuleUI';
 import { useState, useMemo } from "react";
@@ -20,8 +21,12 @@ const EstadoSelect = ({ value, onChange, ariaLabel = "Cambiar estado del proveed
   </Select>
 </FormControl>;
 export const ProveedoresScreen = () => {
-  const [proveedores, setProveedores] = useState(INITIAL_PROVEEDORES);
-  const [addressCatalog, setAddressCatalog] = useState(() => buildAddressCatalog(INITIAL_PROVEEDORES));
+  const { catalogos } = useApp();
+  const [proveedores, setProveedores] = useState(() => INITIAL_PROVEEDORES.map(p => ({
+    ...p,
+    localidad: localidadId(p.provincia, p.localidad),
+    calle: p.calle ? calleId(p.provincia, p.localidad, p.calle) : '',
+  })));
   const [searchTerm, setSearchTerm] = useState("");
   const [categoriaFilter, setCategoriaFilter] = useState("TODAS");
   const [estadoFilter, setEstadoFilter] = useState("TODOS");
@@ -189,7 +194,7 @@ export const ProveedoresScreen = () => {
       render: p => p.categoria
     }, {
       label: 'Localidad',
-      render: p => p.localidad
+      render: p => nombreCatalogo(catalogos.localidades, p.localidad)
     }, {
       label: 'Teléfono',
       render: p => p.telefono
@@ -369,7 +374,7 @@ export const ProveedoresScreen = () => {
 
           {/* Sección 3: Domicilio e Insumos */}
           <FormSection number={3} title="Domicilio fiscal">
-            <DomicilioProveedorFields value={formData} onChange={setFormData} catalog={addressCatalog} onCatalogChange={setAddressCatalog} legacyNoNumber={isEditing && selectedProveedor?.altura === 'S/N'} />
+            <DomicilioProveedorFields value={formData} onChange={setFormData} legacyNoNumber={isEditing && selectedProveedor?.altura === 'S/N'} />
           </FormSection>
         </DialogContent>
 
@@ -419,16 +424,16 @@ export const ProveedoresScreen = () => {
         value: selectedProveedor.email
       }, {
         label: 'Domicilio',
-        value: `${selectedProveedor.calle} ${selectedProveedor.altura}`
+        value: `${nombreCatalogo(catalogos.calles, selectedProveedor.calle)} ${selectedProveedor.altura}`
       }, {
         label: 'Piso / Dpto',
         value: [selectedProveedor.piso, selectedProveedor.depto].map(value => value == null || value === '' ? '—' : value).join(' / ')
       }, {
         label: 'Localidad',
-        value: selectedProveedor.localidad
+        value: nombreCatalogo(catalogos.localidades, selectedProveedor.localidad)
       }, {
         label: 'Provincia',
-        value: selectedProveedor.provincia
+        value: nombreCatalogo(catalogos.provincias, selectedProveedor.provincia)
       }]} />}</FormDialog>
 
       {/* Modal Dialog: Confirmación de Eliminación */}

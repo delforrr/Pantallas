@@ -1,7 +1,21 @@
+import { INITIAL_PROVEEDORES } from '../compras/mockData.js';
+import { buildAddressCatalog } from '../compras/addressCatalog.js';
+
+const domicilios = buildAddressCatalog(INITIAL_PROVEEDORES);
+export const localidadId = (provincia, localidad) => JSON.stringify([provincia, localidad]);
+export const calleId = (provincia, localidad, calle) => JSON.stringify([provincia, localidad, calle]);
+
 export const unidades = ['kg', 'g', 'docenas', 'unidades', 'litros'];
 export const tiposMateriaPrima = ['Harinas y Cereales', 'Frescos y Granja', 'Lácteos', 'Verduras', 'Carnes', 'Condimentos', 'Packaging'];
 
 export const catalogosBase = {
+  provincias: domicilios.provincias.map(id => ({ id, nombre: id })),
+  localidades: domicilios.localidades.map(({ provincia, nombre }) => ({
+    id: localidadId(provincia, nombre), padre: provincia, nombre,
+  })),
+  calles: domicilios.calles.map(({ provincia, localidad, nombre }) => ({
+    id: calleId(provincia, localidad, nombre), padre: localidadId(provincia, localidad), nombre,
+  })),
   unidades: unidades.map(id => ({ id, nombre: id })),
   tiposMateriaPrima: tiposMateriaPrima.map(id => ({ id, nombre: id })),
 };

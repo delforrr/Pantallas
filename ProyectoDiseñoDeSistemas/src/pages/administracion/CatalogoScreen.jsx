@@ -11,6 +11,13 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
   const { catalogos, guardarCatalogo } = useApp();
   const registros = catalogos[tipo];
   const padres = catalogos[padre];
+  const nombrePadre = id => {
+    const nombre = nombreCatalogo(padres, id);
+    if (padre !== 'localidades') return nombre;
+    const provincia = padres.find(r => r.id === id)?.padre;
+    return provincia ? `${nombre} · ${nombreCatalogo(catalogos.provincias, provincia)}` : nombre;
+  };
+  const padresActivos = padres?.filter(r => padre !== 'localidades' || opciones(catalogos.provincias).some(p => p.id === r.padre));
   const [busqueda, buscar] = useState('');
   const [borrador, editar] = useState(null);
   const [error, mostrarError] = useState('');
@@ -63,10 +70,10 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
               <TableRow key={r.id}>
                 <TableCell component="th" scope="row" sx={{ overflowWrap: 'anywhere' }}>
                   {r.nombre}
-                  {movil && padres && <Typography variant="body2" color="text.secondary">{nombreCatalogo(padres, r.padre)}</Typography>}
+                  {movil && padres && <Typography variant="body2" color="text.secondary">{nombrePadre(r.padre)}</Typography>}
                   {movil && !soloNombre && <Typography variant="body2" color="text.secondary">{r.inactivo ? 'Inactivo' : 'Activo'}</Typography>}
                 </TableCell>
-                {padres && !movil && <TableCell>{nombreCatalogo(padres, r.padre)}</TableCell>}
+                {padres && !movil && <TableCell>{nombrePadre(r.padre)}</TableCell>}
                 {!soloNombre && !movil && <TableCell><Chip size="small" label={r.inactivo ? 'Inactivo' : 'Activo'} /></TableCell>}
                 <TableCell align="right">
                   <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="flex-end">
@@ -91,7 +98,7 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
                 onChange={e => { mostrarError(''); editar({ ...borrador, nombre: e.target.value }); }} />
               {padres && <TextField select fullWidth label={etiquetaPadre} value={borrador.padre}
                 disabled={Boolean(borrador.id)} onChange={e => editar({ ...borrador, padre: e.target.value })}>
-                {opciones(padres, borrador.padre).map(r => <MenuItem key={r.id} value={r.id}>{r.nombre}</MenuItem>)}
+                {opciones(borrador.id ? padres : padresActivos, borrador.padre).map(r => <MenuItem key={r.id} value={r.id}>{nombrePadre(r.id)}</MenuItem>)}
               </TextField>}
             </Stack>
           </DialogContent>

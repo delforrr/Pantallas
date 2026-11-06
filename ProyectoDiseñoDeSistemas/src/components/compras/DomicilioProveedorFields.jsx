@@ -1,29 +1,41 @@
+import { useApp } from '../../context/AppContext';
+import { nombreCatalogo, nombreDuplicado, opciones } from '../../pages/administracion/catalogos';
 import { useState } from 'react';
 import { Grid, IconButton, MenuItem, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { FormDialog } from './ModuleUI';
-import { addAddressOption, selectAddressOption } from '../../pages/compras/addressCatalog';
+import { selectAddressOption } from '../../pages/compras/addressCatalog';
 
-export default function DomicilioProveedorFields({ value, onChange, catalog, onCatalogChange, legacyNoNumber }) {
+export default function DomicilioProveedorFields({ value, onChange, legacyNoNumber }) {
   const [adding, setAdding] = useState(null);
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const labels = { provincia: 'Provincia', localidad: 'Localidad', calle: 'Calle' };
-  const options = {
-    provincia: catalog.provincias,
-    localidad: catalog.localidades.filter(l => l.provincia === value.provincia).map(l => l.nombre),
-    calle: catalog.calles.filter(c => c.provincia === value.provincia && c.localidad === value.localidad).map(c => c.nombre)
+  const { catalogos, guardarCatalogo } = useApp();
+  const opcionesPorCampo = {
+    provincia: catalogos.provincias,
+    localidad: catalogos.localidades.filter(l => l.padre === value.provincia),
+    calle: catalogos.calles.filter(c => c.padre === value.localidad),
   };
+  const listas = { provincia: 'provincias', localidad: 'localidades', calle: 'calles' };
   const add = event => {
     event.preventDefault();
     event.stopPropagation();
+    const tipo = listas[adding];
+    const registro = {
+      id: crypto.randomUUID(), nombre: name.trim(),
+      padre: adding === 'calle' ? value.localidad : adding === 'localidad' ? value.provincia : undefined,
+    };
+    if (!registro.nombre || nombreDuplicado(catalogos[tipo], registro)) {
+      setError(registro.nombre ? 'Ya existe un registro con este nombre.' : 'Ingresá un nombre.');
+      return;
+    }
     try {
-      const next = addAddressOption(catalog, adding, name, value);
-      onCatalogChange(next);
-      onChange(selectAddressOption(value, adding, name.trim()));
+      guardarCatalogo(tipo, registro);
+      onChange(selectAddressOption(value, adding, registro.id));
       setAdding(null);
-    } catch (reason) {
-      setError(reason.message);
+    } catch {
+      setError('No se pudo guardar el registro.');
     }
   };
   return <>
@@ -34,7 +46,7 @@ export default function DomicilioProveedorFields({ value, onChange, catalog, onC
         return <Grid key={type} size={{ xs: 12, sm: 6 }}><Stack direction="row" sx={{ gap: 1, alignItems: 'flex-start' }}>
           <TextField fullWidth select size="small" label={labels[type]} value={value[type] || ''} disabled={disabled} onChange={event => onChange(selectAddressOption(value, type, event.target.value))} helperText={helper} autoComplete="off" sx={{ minWidth: 0 }}>
             <MenuItem value="">Sin seleccionar</MenuItem>
-            {[...options[type]].sort((a, b) => a.localeCompare(b, 'es')).map(option => <MenuItem key={option} value={option} sx={{ whiteSpace: 'normal' }}>{option}</MenuItem>)}
+            {opciones(opcionesPorCampo[type], value[type]).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')).map(option => <MenuItem key={option.id} value={option.id} sx={{ whiteSpace: 'normal' }}>{option.nombre}</MenuItem>)}
           </TextField>
           <Tooltip title={helper || `Agregar ${type}`} arrow><span><IconButton aria-label={`Agregar ${type}`} disabled={disabled} onClick={() => { setAdding(type); setName(''); setError(''); }} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}><AddIcon /></IconButton></span></Tooltip>
         </Stack></Grid>;
@@ -46,7 +58,7 @@ export default function DomicilioProveedorFields({ value, onChange, catalog, onC
       </Grid></Grid>
     </Grid>
     <FormDialog open={Boolean(adding)} onClose={() => setAdding(null)} title={`Agregar ${adding || ''}`} onSubmit={add} action="Agregar" maxWidth="sm">
-      {adding !== 'provincia' && <Typography variant="body2" color="text.secondary">{value.provincia}{adding === 'calle' ? ` · ${value.localidad}` : ''}</Typography>}
+      {adding !== 'provincia' && <Typography variant="body2" color="text.secondary">{nombreCatalogo(catalogos.provincias, value.provincia)}{adding === 'calle' ? ` · ${nombreCatalogo(catalogos.localidades, value.localidad)}` : ''}</Typography>}
       <TextField autoFocus fullWidth required label={`Nombre de ${adding === 'calle' ? 'la calle' : adding === 'localidad' ? 'la localidad' : 'la provincia'}`} value={name} onChange={event => { setName(event.target.value); setError(''); }} error={Boolean(error)} helperText={error || undefined} />
     </FormDialog>
   </>;

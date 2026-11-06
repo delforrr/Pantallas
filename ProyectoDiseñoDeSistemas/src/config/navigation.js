@@ -22,6 +22,9 @@ import EngineeringIcon from '@mui/icons-material/Engineering';
 export const PAGE_LABELS = {
   admin_unidades: 'Unidades de medida',
   admin_tipos_materia: 'Tipos de materia prima',
+  admin_provincias: 'Provincias',
+  admin_localidades: 'Localidades',
+  admin_calles: 'Calles',
   // Cliente
   catalogo: 'Catálogo de Productos',
   carrito: 'Mi Carrito',
@@ -66,6 +69,9 @@ export const ADMIN_NAV = [
     label: 'Administración',
     icon: CategoryIcon,
     children: [
+      { id: 'admin_provincias', label: PAGE_LABELS.admin_provincias, icon: AssignmentIcon },
+      { id: 'admin_localidades', label: PAGE_LABELS.admin_localidades, icon: AssignmentIcon },
+      { id: 'admin_calles', label: PAGE_LABELS.admin_calles, icon: AssignmentIcon },
       { id: 'admin_unidades', label: PAGE_LABELS.admin_unidades, icon: AssignmentIcon },
       { id: 'admin_tipos_materia', label: PAGE_LABELS.admin_tipos_materia, icon: GrassIcon },
     ],
