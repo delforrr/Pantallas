@@ -1,5 +1,8 @@
 export { default as CarritoItem } from './CarritoItem';
+export { default as CarritoMayoristaItem } from './CarritoMayoristaItem';
 export { default as ResumenPedido } from './ResumenPedido';
+export { default as ConfirmarPedidoModal } from './ConfirmarPedidoModal';
+export { default as ClienteCarritoMenu } from './ClienteCarritoMenu';
 export { default as MetodoPagoItem } from './MetodoPagoItem';
 export { default as NuevoMetodoPagoForm } from './NuevoMetodoPagoForm';
 export { default as PedidoClienteItem } from './PedidoClienteItem';

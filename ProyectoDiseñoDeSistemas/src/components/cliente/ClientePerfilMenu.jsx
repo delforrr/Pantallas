@@ -1,5 +1,5 @@
 import { useId, useState } from 'react';
-import { IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText, Divider, Typography } from '@mui/material';
+import { Box, IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText, Divider, Typography } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
@@ -18,14 +18,22 @@ export default function ClientePerfilMenu({ sobreVerde = false }) {
   const open = Boolean(anchorEl);
   const close = () => setAnchorEl(null);
   const goTo = (page) => { close(); navigate(page); };
+  const saludo = user?.name?.trim().split(/\s+/)[0];
 
   return (
     <>
+      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+      {saludo && (
+        <Typography component="span" sx={{ display: { xs: 'none', sm: 'inline-block' }, maxWidth: { sm: 90, md: 140 }, fontSize: 13, fontWeight: 600, lineHeight: 1.2, color: sobreVerde ? 'primary.contrastText' : 'primary.main', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', userSelect: 'none' }}>
+          {saludo}
+        </Typography>
+      )}
       <Tooltip title="Mi cuenta">
         <IconButton id={`${id}-button`} aria-label="Mi cuenta" aria-haspopup="menu" aria-controls={open ? `${id}-menu` : undefined} aria-expanded={open ? 'true' : undefined} onClick={(event) => setAnchorEl(event.currentTarget)} sx={{ color: sobreVerde ? '#fff' : 'primary.main', border: '1px solid', borderColor: sobreVerde ? 'rgba(255,255,255,0.6)' : 'divider', bgcolor: sobreVerde ? 'primary.main' : 'background.paper', '&:hover': { bgcolor: sobreVerde ? 'primary.dark' : 'action.hover' } }}>
           <AccountCircleIcon />
         </IconButton>
       </Tooltip>
+      </Box>
       <Menu id={`${id}-menu`} anchorEl={anchorEl} open={open} onClose={close} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }} slotProps={{ list: { 'aria-labelledby': `${id}-button` }, paper: { sx: { mt: 1, minWidth: 230, borderRadius: '14px', border: '1px solid', borderColor: 'divider', boxShadow: '0 8px 28px #51482d26' } } }}>
         {!user && <MenuItem onClick={() => goTo('ingresar')}><ListItemIcon><LoginIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Iniciar sesión</ListItemText></MenuItem>}
         {!user && <MenuItem onClick={() => goTo('registrarse')}><ListItemIcon><PersonAddOutlinedIcon fontSize="small" color="primary" /></ListItemIcon><ListItemText>Registrarme</ListItemText></MenuItem>}

@@ -96,7 +96,7 @@ export const calcularPresupuestoMayorista = (cantidades) => {
   const items = Object.entries(cantidades).map(([id, cantidad]) => {
     const producto = CATALOGO_CLIENTE.find((p) => p.idProducto === Number(id));
     if (!producto || !Number.isInteger(cantidad) || cantidad < MINIMO_MAYORISTA || cantidad > producto.stock) return null;
-    return { idProducto: producto.idProducto, nombre: producto.nombre, cantidad, unidad: producto.unidad, precioUnitario: producto.precio, subtotal: producto.precio * cantidad };
+    return { idProducto: producto.idProducto, nombre: producto.nombre, categoria: producto.categoria, cantidad, unidad: producto.unidad, precioUnitario: producto.precio, subtotal: producto.precio * cantidad, imagen: producto.imagen, stock: producto.stock };
   });
   const valido = items.length > 0 && items.every(Boolean);
   const subtotal = valido ? items.reduce((total, item) => total + item.subtotal, 0) : 0;
@@ -675,6 +675,11 @@ export const clientStore = {
 
   clearCart() {
     currentStore = { ...currentStore, cart: [] };
+    emitChange();
+  },
+
+  clearWholesaleCart() {
+    currentStore = { ...currentStore, mayoristaItems: {} };
     emitChange();
   },
 

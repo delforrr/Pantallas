@@ -13,7 +13,7 @@ const olive = '#416522';
 const tomato = '#c93600';
 const script = '"Kristi", "Brush Script MT", cursive';
 
-export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAbout, onContact, onSocial }) {
+export default function ClienteLanding({ onCatalogo, onEvento, onAbout, onContact, onSocial }) {
   return (
     <Box sx={{ bgcolor: '#fff', minHeight: '100vh', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', fontFamily: '"Montserrat", sans-serif', position: 'relative', overflowX: 'hidden' }}>
       <Box component="section" aria-label="Bienvenidos a PastaFab" sx={{ position: 'relative', bgcolor: '#fff', color: olive, width: '100%', height: { xs: 'auto', md: '100vh' }, minHeight: { xs: '100vh', md: '100vh' }, overflowY: { xs: 'auto', md: 'hidden' }, overflowX: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: { xs: 'space-between', md: 'initial' } }}>
@@ -76,7 +76,7 @@ export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAb
         />
 
         {/* Navegación superior */}
-        <ClienteCatalogoHeader cartSummary={cartSummary} onInicio={() => window.scrollTo({ top: 0, behavior: 'smooth' })} onProductos={onCatalogo} />
+        <ClienteCatalogoHeader onInicio={() => window.scrollTo({ top: 0, behavior: 'smooth' })} onProductos={onCatalogo} />
 
         {/* Versión móvil del plato destacado con fondo dividido verde (izq) y blanco/rojo (der) */}
         <Box
@@ -196,7 +196,7 @@ export default function ClienteLanding({ cartSummary, onCatalogo, onEvento, onAb
           <Typography variant="caption" sx={{ display: { xs: 'none', md: 'block' }, color: olive, fontWeight: 600, whiteSpace: 'nowrap', textAlign: 'center', fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
             PastaFab · Pastas artesanales
           </Typography>
-          <Stack direction="row" alignItems="center" gap={0.5} sx={{ flexWrap: 'nowrap' }}>
+          <Stack direction="row" sx={{ flexWrap: 'nowrap', alignItems: 'center', gap: 0.5 }}>
             <Button onClick={onAbout} size="small" sx={{ color: olive, textTransform: 'none', minWidth: 'auto', px: 1, fontSize: 12 }}>Nosotros</Button>
             <Button onClick={onContact} size="small" sx={{ color: olive, textTransform: 'none', minWidth: 'auto', px: 1, fontSize: 12 }}>Contacto</Button>
             {[[InstagramIcon, 'Instagram'], [FacebookIcon, 'Facebook'], [WhatsAppIcon, 'WhatsApp']].map(([Icon, name]) => (
