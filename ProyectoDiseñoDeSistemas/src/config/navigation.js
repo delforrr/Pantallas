@@ -1,138 +1,186 @@
-import Inventory2Icon from '@mui/icons-material/Inventory2';
-import StraightenIcon from '@mui/icons-material/Straighten';
-import RouteIcon from '@mui/icons-material/Route';
-import LocationCityIcon from '@mui/icons-material/LocationCity';
-import MapIcon from '@mui/icons-material/Map';
-import BadgeIcon from '@mui/icons-material/Badge';
-import PercentIcon from '@mui/icons-material/Percent';
-import RuleIcon from '@mui/icons-material/Rule';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import StraightenIcon from "@mui/icons-material/Straighten";
+import RouteIcon from "@mui/icons-material/Route";
+import LocationCityIcon from "@mui/icons-material/LocationCity";
+import MapIcon from "@mui/icons-material/Map";
+import BadgeIcon from "@mui/icons-material/Badge";
+import PercentIcon from "@mui/icons-material/Percent";
+import RuleIcon from "@mui/icons-material/Rule";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 // Navigation config for each role
-import HomeIcon from '@mui/icons-material/Home';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import PaymentIcon from '@mui/icons-material/Payment';
-import PeopleIcon from '@mui/icons-material/People';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
-import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import CategoryIcon from '@mui/icons-material/Category';
-import GrassIcon from '@mui/icons-material/Grass';
-import StorefrontIcon from '@mui/icons-material/Storefront';
-import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
-import DescriptionIcon from '@mui/icons-material/Description';
-import BuildCircleIcon from '@mui/icons-material/BuildCircle';
-import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
-import EngineeringIcon from '@mui/icons-material/Engineering';
+import HomeIcon from "@mui/icons-material/Home";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import PaymentIcon from "@mui/icons-material/Payment";
+import PeopleIcon from "@mui/icons-material/People";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import CategoryIcon from "@mui/icons-material/Category";
+import GrassIcon from "@mui/icons-material/Grass";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import DescriptionIcon from "@mui/icons-material/Description";
+import BuildCircleIcon from "@mui/icons-material/BuildCircle";
+import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
+import EngineeringIcon from "@mui/icons-material/Engineering";
 
 export const PAGE_LABELS = {
-  admin_unidades: 'Unidades de medida',
-  admin_tipos_materia: 'Tipos de materia prima',
-  admin_provincias: 'Provincias',
-  admin_localidades: 'Localidades',
-  admin_calles: 'Calles',
-  admin_iva: 'Tipos de IVA',
-  admin_empleados: 'Empleados',
-  admin_estados: 'Estados del sistema',
+  admin_unidades: "Unidades de medida",
+  admin_tipos_materia: "Tipos de materia prima",
+  admin_provincias: "Provincias",
+  admin_localidades: "Localidades",
+  admin_calles: "Calles",
+  admin_iva: "Tipos de IVA",
+  admin_empleados: "Empleados",
+  admin_estados: "Estados del sistema",
   // Cliente
-  catalogo: 'Catálogo de Productos',
-  carrito: 'Mi Carrito',
-  pedidos_cliente: 'Mis Pedidos',
-  medios_pago: 'Medios de Pago',
+  catalogo: "Catálogo de Productos",
+  carrito: "Mi Carrito",
+  pedidos_cliente: "Mis Pedidos",
+  medios_pago: "Medios de Pago",
 
   // Ventas
-  clientes: 'Administrar Clientes',
-  pedidos: 'Pedidos',
-  presupuestos: 'Presupuestos',
-  comprobantes_venta: 'Comprobantes de Venta',
-  comprobantes_pago: 'Comprobantes de Pago',
-  cierre_caja: 'Cierre de Caja',
+  clientes: "Administrar Clientes",
+  pedidos: "Pedidos",
+  presupuestos: "Presupuestos",
+  comprobantes_venta: "Comprobantes de Venta",
+  comprobantes_pago: "Comprobantes de Pago",
+  cierre_caja: "Cierre de Caja",
 
   // Producción
-  orden_produccion: 'Orden de Producción',
-  recetas: 'Recetas',
-  productos_compuestos: 'Productos',
-  materia_prima: 'Materia Prima',
+  orden_produccion: "Orden de Producción",
+  recetas: "Recetas",
+  productos_compuestos: "Productos",
+  materia_prima: "Materia Prima",
 
   // Compras
-  proveedores: 'Proveedores',
-  orden_compra: 'Orden de Compra',
-  presupuesto_proveedor: 'Presupuesto Proveedor',
-  facturas_remitos: 'Facturas / Remitos',
+  proveedores: "Proveedores",
+  orden_compra: "Orden de Compra",
+  presupuesto_proveedor: "Presupuesto Proveedor",
+  facturas_remitos: "Facturas / Remitos",
 
   // Mantenimiento
-  maquinaria: 'Maquinaria',
-  ordenes_mantenimiento: 'Órdenes de Mantenimiento',
+  maquinaria: "Maquinaria",
+  ordenes_mantenimiento: "Órdenes de Mantenimiento",
 };
 
 export const CLIENT_NAV = [
-  { id: 'catalogo', label: 'Inicio / Catálogo', icon: HomeIcon },
-  { id: 'carrito', label: 'Mi Carrito', icon: ShoppingCartIcon },
-  { id: 'pedidos_cliente', label: 'Mis Pedidos', icon: ReceiptLongIcon },
-  { id: 'medios_pago', label: 'Medios de Pago', icon: PaymentIcon },
+  { id: "catalogo", label: "Inicio / Catálogo", icon: HomeIcon },
+  { id: "carrito", label: "Mi Carrito", icon: ShoppingCartIcon },
+  { id: "pedidos_cliente", label: "Mis Pedidos", icon: ReceiptLongIcon },
+  { id: "medios_pago", label: "Medios de Pago", icon: PaymentIcon },
 ];
 
 export const ADMIN_NAV = [
   {
-    id: 'administracion',
-    label: 'Administración',
-    icon: AdminPanelSettingsIcon,
-    children: [
-      { id: 'admin_estados', label: PAGE_LABELS.admin_estados, icon: RuleIcon },
-      { id: 'admin_iva', label: PAGE_LABELS.admin_iva, icon: PercentIcon },
-      { id: 'admin_empleados', label: PAGE_LABELS.admin_empleados, icon: BadgeIcon },
-      { id: 'admin_provincias', label: PAGE_LABELS.admin_provincias, icon: MapIcon },
-      { id: 'admin_localidades', label: PAGE_LABELS.admin_localidades, icon: LocationCityIcon },
-      { id: 'admin_calles', label: PAGE_LABELS.admin_calles, icon: RouteIcon },
-      { id: 'admin_unidades', label: PAGE_LABELS.admin_unidades, icon: StraightenIcon },
-      { id: 'admin_tipos_materia', label: PAGE_LABELS.admin_tipos_materia, icon: Inventory2Icon },
-    ],
-  },
-  {
-    id: 'ventas',
-    label: 'Ventas',
+    id: "ventas",
+    label: "Ventas",
     icon: PointOfSaleIcon,
     children: [
-      { id: 'clientes', label: 'Administrar Clientes', icon: PeopleIcon },
-      { id: 'pedidos', label: 'Pedidos', icon: LocalShippingIcon },
-      { id: 'presupuestos', label: 'Presupuestos', icon: RequestQuoteIcon },
-      { id: 'comprobantes_venta', label: 'Comp. de Venta', icon: DescriptionIcon },
-      { id: 'comprobantes_pago', label: 'Comp. de Pago', icon: AccountBalanceWalletIcon },
-      { id: 'cierre_caja', label: 'Cierre de Caja', icon: AccountBalanceWalletIcon },
+      { id: "clientes", label: "Administrar Clientes", icon: PeopleIcon },
+      { id: "pedidos", label: "Pedidos", icon: LocalShippingIcon },
+      { id: "presupuestos", label: "Presupuestos", icon: RequestQuoteIcon },
+      {
+        id: "comprobantes_venta",
+        label: "Comp. de Venta",
+        icon: DescriptionIcon,
+      },
+      {
+        id: "comprobantes_pago",
+        label: "Comp. de Pago",
+        icon: AccountBalanceWalletIcon,
+      },
+      {
+        id: "cierre_caja",
+        label: "Cierre de Caja",
+        icon: AccountBalanceWalletIcon,
+      },
     ],
   },
   {
-    id: 'produccion',
-    label: 'Producción',
+    id: "produccion",
+    label: "Producción",
     icon: PrecisionManufacturingIcon,
     children: [
-      { id: 'orden_produccion', label: 'Orden de Producción', icon: AssignmentIcon },
-      { id: 'recetas', label: 'Recetas', icon: MenuBookIcon },
-      { id: 'productos_compuestos', label: 'Productos', icon: CategoryIcon },
-      { id: 'materia_prima', label: 'Materia Prima', icon: GrassIcon },
+      {
+        id: "orden_produccion",
+        label: "Orden de Producción",
+        icon: AssignmentIcon,
+      },
+      { id: "recetas", label: "Recetas", icon: MenuBookIcon },
+      { id: "productos_compuestos", label: "Productos", icon: CategoryIcon },
+      { id: "materia_prima", label: "Materia Prima", icon: GrassIcon },
     ],
   },
   {
-    id: 'compras',
-    label: 'Compras',
+    id: "compras",
+    label: "Compras",
     icon: ShoppingBagIcon,
     children: [
-      { id: 'proveedores', label: 'Proveedores', icon: StorefrontIcon },
-      { id: 'orden_compra', label: 'Orden de Compra', icon: ShoppingCartIcon },
-      { id: 'presupuesto_proveedor', label: 'Presupuesto Proveedor', icon: RequestQuoteIcon },
-      { id: 'facturas_remitos', label: 'Facturas / Remitos', icon: ReceiptLongIcon },
+      { id: "proveedores", label: "Proveedores", icon: StorefrontIcon },
+      { id: "orden_compra", label: "Orden de Compra", icon: ShoppingCartIcon },
+      {
+        id: "presupuesto_proveedor",
+        label: "Presupuesto Proveedor",
+        icon: RequestQuoteIcon,
+      },
+      {
+        id: "facturas_remitos",
+        label: "Facturas / Remitos",
+        icon: ReceiptLongIcon,
+      },
     ],
   },
   {
-    id: 'mantenimiento',
-    label: 'Mantenimiento',
+    id: "mantenimiento",
+    label: "Mantenimiento",
     icon: EngineeringIcon,
     children: [
-      { id: 'maquinaria', label: 'Maquinaria', icon: BuildCircleIcon },
-      { id: 'ordenes_mantenimiento', label: 'Órdenes de Mantenimiento', icon: AssignmentIcon },
+      { id: "maquinaria", label: "Maquinaria", icon: BuildCircleIcon },
+      {
+        id: "ordenes_mantenimiento",
+        label: "Órdenes de Mantenimiento",
+        icon: AssignmentIcon,
+      },
+    ],
+  },
+  {
+    id: "administracion",
+    label: "Configuración",
+    icon: AdminPanelSettingsIcon,
+    children: [
+      { id: "admin_estados", label: PAGE_LABELS.admin_estados, icon: RuleIcon },
+      { id: "admin_iva", label: PAGE_LABELS.admin_iva, icon: PercentIcon },
+      {
+        id: "admin_empleados",
+        label: PAGE_LABELS.admin_empleados,
+        icon: BadgeIcon,
+      },
+      {
+        id: "admin_provincias",
+        label: PAGE_LABELS.admin_provincias,
+        icon: MapIcon,
+      },
+      {
+        id: "admin_localidades",
+        label: PAGE_LABELS.admin_localidades,
+        icon: LocationCityIcon,
+      },
+      { id: "admin_calles", label: PAGE_LABELS.admin_calles, icon: RouteIcon },
+      {
+        id: "admin_unidades",
+        label: PAGE_LABELS.admin_unidades,
+        icon: StraightenIcon,
+      },
+      {
+        id: "admin_tipos_materia",
+        label: PAGE_LABELS.admin_tipos_materia,
+        icon: Inventory2Icon,
+      },
     ],
   },
 ];

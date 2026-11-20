@@ -84,7 +84,7 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
           ...(soloNombre ? [{ label: 'Módulos y documentos', render: r => gruposDe(r).map(id => gruposEstados[id][0]).join(', ') }] : []),
           ...(padres ? [{ label: etiquetaPadre, render: r => nombrePadre(r.padre) }] : []),
           ...(empleados ? [{ label: 'Área', render: r => r.area }, { label: 'Cargo', render: r => r.cargo }] : []),
-          { label: 'Estado', render: r => <StatusChip value={soloNombre ? r.valor ?? 'Activo' : estadoRegistro(r)} /> },
+          ...(soloNombre ? [] : [{ label: 'Estado', render: r => <StatusChip value={estadoRegistro(r)} /> }]),
         ]}
         actions={r => <>
           <RecordIcon label={`Editar ${r.nombre}`} color="primary" onClick={() => abrir(r)}><EditOutlinedIcon /></RecordIcon>

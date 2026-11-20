@@ -1,7 +1,7 @@
 import { useNombreEstado } from '../../context/AppContext';
 import DomicilioProveedorFields from '../../components/compras/DomicilioProveedorFields';
 import { useApp } from '../../context/AppContext';
-import { calleId, localidadId, nombreCatalogo } from '../administracion/catalogos';
+import { calleId, localidadId, nombreCatalogo, opciones } from '../administracion/catalogos';
 import ComprobanteDetalle from '../../components/compras/ComprobanteDetalle';
 import { ModuleDialog as Dialog, ModuleSurface, FormSection, FormDialog, SummaryCards, ListToolbar, RecordsView, RecordIcon } from '../../components/compras/ModuleUI';
 import { useState, useMemo } from "react";
@@ -55,6 +55,7 @@ export const ProveedoresScreen = () => {
     depto: "",
     localidad: "",
     provincia: "",
+    tipoIva: opciones(catalogos.iva)[0]?.id ?? '',
     categoria: "Insumos Locales / Frescos",
     insumosPrincipales: "",
     estado: "Activo"
@@ -195,6 +196,9 @@ export const ProveedoresScreen = () => {
       label: 'Categoría',
       render: p => p.categoria
     }, {
+      label: 'Condición IVA',
+      render: p => nombreCatalogo(catalogos.iva, p.tipoIva)
+    }, {
       label: 'Localidad',
       render: p => nombreCatalogo(catalogos.localidades, p.localidad)
     }, {
@@ -304,7 +308,23 @@ export const ProveedoresScreen = () => {
               </Grid>
               <Grid size={{
               xs: 12,
-              sm: isEditing ? 6 : 12
+              sm: 6
+            }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="prov-iva-label">
+                    Condición frente al IVA
+                  </InputLabel>
+                  <Select labelId="prov-iva-label" value={formData.tipoIva ?? ''} label="Condición frente al IVA" onChange={e => setFormData({
+                  ...formData,
+                  tipoIva: e.target.value
+                })}>
+                    {opciones(catalogos.iva, selectedProveedor?.tipoIva).map(r => <MenuItem key={r.id} value={r.id}>{r.nombre}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={{
+              xs: 12,
+              sm: 6
             }}>
                 <FormControl fullWidth size="small">
                   <InputLabel id="prov-cat-label">
@@ -412,6 +432,9 @@ export const ProveedoresScreen = () => {
       }, {
         label: 'CUIT',
         value: selectedProveedor.cuit
+      }, {
+        label: 'Condición frente al IVA',
+        value: nombreCatalogo(catalogos.iva, selectedProveedor.tipoIva)
       }, {
         label: 'Categoría',
         value: selectedProveedor.categoria

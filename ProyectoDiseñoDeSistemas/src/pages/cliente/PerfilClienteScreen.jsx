@@ -5,13 +5,14 @@ import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import { useApp } from '../../context/AppContext';
-import { clientStore, useClientStore } from './mockData';
+import { clientStore, TIPOS_IVA, useClientStore } from './mockData';
 
 const formularioPerfil = (cliente, user) => ({
   nombre: cliente.nombre || user.name,
   email: user.email,
   documentoTipo: cliente.documentoTipo || (cliente.cuit ? 'CUIT' : 'DNI'),
   documentoNumero: cliente.documentoNumero || cliente.cuit || cliente.dni || '',
+  tipoIva: cliente.tipoIva || TIPOS_IVA[2],
   telefono: cliente.telefono || '',
   direccion: cliente.direccion || '',
   localidad: cliente.localidad || '',
@@ -80,6 +81,11 @@ export default function PerfilClienteScreen() {
             <Grid size={{ xs: 12, sm: 6 }}>{editando ? <TextField fullWidth size="small" label="Correo electrónico" value={user.email} slotProps={{ input: { readOnly: true } }} helperText="Es el correo con el que creaste tu cuenta." /> : <Box sx={{ py: 0.5 }}><Typography variant="caption" color="text.secondary">Correo electrónico</Typography><Typography sx={{ mt: 0.5, fontSize: 14, fontWeight: 600, overflowWrap: 'anywhere' }}>{user.email}</Typography></Box>}</Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               {editando ? <Stack direction="row" spacing={1}><TextField select size="small" label="Tipo" value={form.documentoTipo} onChange={cambiar('documentoTipo')} sx={{ minWidth: 100 }}><MenuItem value="DNI">DNI</MenuItem><MenuItem value="CUIT">CUIT</MenuItem></TextField><TextField fullWidth size="small" label="Número de documento" value={form.documentoNumero} onChange={cambiar('documentoNumero')} error={Boolean(errores.documentoNumero)} helperText={errores.documentoNumero} slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 15 } }} /></Stack> : <Box sx={{ py: 0.5 }}><Typography variant="caption" color="text.secondary">{datos.documentoTipo}</Typography><Typography sx={{ mt: 0.5, fontSize: 14, fontWeight: datos.documentoNumero ? 600 : 400, color: datos.documentoNumero ? 'text.primary' : 'text.secondary' }}>{datos.documentoNumero || 'Sin completar'}</Typography></Box>}
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              {editando ? <TextField select fullWidth size="small" label="Condición frente al IVA" value={form.tipoIva} onChange={cambiar('tipoIva')} error={Boolean(errores.tipoIva)} helperText={errores.tipoIva}>
+                {TIPOS_IVA.map(tipo => <MenuItem key={tipo} value={tipo}>{tipo}</MenuItem>)}
+              </TextField> : <Box sx={{ py: 0.5 }}><Typography variant="caption" color="text.secondary">Condición frente al IVA</Typography><Typography sx={{ mt: 0.5, fontSize: 14, fontWeight: datos.tipoIva ? 600 : 400, color: datos.tipoIva ? 'text.primary' : 'text.secondary' }}>{datos.tipoIva || 'Sin completar'}</Typography></Box>}
             </Grid>
             {campo('telefono', 'Teléfono', { autoComplete: 'tel', tipo: 'tel' })}
           </Grid>

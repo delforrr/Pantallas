@@ -1,5 +1,8 @@
 import { useSyncExternalStore } from 'react';
 
+// Condiciones frente al IVA alineadas con los datos fiscales de compras y ventas.
+export const TIPOS_IVA = ['Responsable Inscripto', 'Monotributo', 'Consumidor Final', 'Exento'];
+
 // Cuentas de demostración: viven únicamente mientras la página está abierta.
 const cuentasCliente = [{ name: 'María García', username: 'cliente', email: 'cliente@mail.com', password: 'cliente' }];
 
@@ -14,7 +17,7 @@ export const autenticarCliente = (email, password) => {
     mayoristaItems: {},
     pedidos: [],
     mediosPago: [],
-    cliente: { ...INITIAL_CLIENT_PROFILE, nombre: cuenta.name, razonSocial: cuenta.name, responsable: cuenta.name, email: cuenta.email, cuit: '', dni: '', telefono: '', direccion: '', localidad: '', provincia: '', codigoPostal: '', referencias: '', tipoCliente: 'Minorista', aceptaCredito: false },
+    cliente: { ...INITIAL_CLIENT_PROFILE, nombre: cuenta.name, razonSocial: cuenta.name, responsable: cuenta.name, email: cuenta.email, cuit: '', dni: '', telefono: '', direccion: '', localidad: '', provincia: '', codigoPostal: '', referencias: '', tipoIva: 'Consumidor Final', tipoCliente: 'Minorista', aceptaCredito: false },
   };
   currentStore = { ...currentStore, cliente: { ...currentStore.cliente, nombre: cuenta.name, email: cuenta.email } };
   cuentaActiva = cuenta.email;
@@ -281,6 +284,7 @@ export const INITIAL_CLIENT_PROFILE = {
   direccion: 'Av. Villegas 450',
   localidad: 'Trenque Lauquen',
   provincia: 'Buenos Aires',
+  tipoIva: 'Responsable Inscripto',
   tipoCliente: 'Mayorista Registrado (Restaurante)',
   diaEntregaHabitual: 'Jueves',
   aceptaCredito: true,
@@ -556,7 +560,7 @@ export const clientStore = {
     guardarSesionCliente();
     currentStore = sesionesCliente.get(user.email) || {
       ...currentStore, cart: [], mayoristaItems: {}, pedidos: [], mediosPago: [],
-      cliente: { nombre: user.name, responsable: user.name, razonSocial: user.name, email: user.email, cuit: '', dni: '', telefono: '', direccion: '', localidad: '', provincia: '', codigoPostal: '', referencias: '', aceptaCredito: false, tipoCliente: 'Minorista' },
+      cliente: { nombre: user.name, responsable: user.name, razonSocial: user.name, email: user.email, cuit: '', dni: '', telefono: '', direccion: '', localidad: '', provincia: '', codigoPostal: '', referencias: '', tipoIva: 'Consumidor Final', aceptaCredito: false, tipoCliente: 'Minorista' },
     };
     currentStore = { ...currentStore, cliente: { ...currentStore.cliente, nombre: user.name, email: user.email } };
     cuentaActiva = user.email;
@@ -564,10 +568,12 @@ export const clientStore = {
   },
 
   actualizarPerfilCliente(datos) {
-    const campos = ['nombre', 'documentoTipo', 'documentoNumero', 'telefono', 'direccion', 'localidad', 'provincia', 'codigoPostal', 'referencias'];
+    const campos = ['nombre', 'documentoTipo', 'documentoNumero', 'telefono', 'direccion', 'localidad', 'provincia', 'codigoPostal', 'referencias', 'tipoIva'];
     const perfil = Object.fromEntries(campos.map((campo) => [campo, String(datos[campo] || '').trim()]));
     const errores = {};
     if (!perfil.nombre) errores.nombre = 'Ingresá tu nombre y apellido.';
+    const tipoIva = perfil.tipoIva || currentStore.cliente.tipoIva || TIPOS_IVA[2];
+    if (!TIPOS_IVA.includes(tipoIva)) errores.tipoIva = 'Elegí una condición frente al IVA válida.';
     const documento = perfil.documentoNumero.replace(/[.\s-]/g, '');
     if (!['DNI', 'CUIT'].includes(perfil.documentoTipo)) errores.documentoTipo = 'Elegí DNI o CUIT.';
     if (documento && !(perfil.documentoTipo === 'DNI' ? /^\d{7,8}$/ : /^\d{11}$/).test(documento)) errores.documentoNumero = perfil.documentoTipo === 'DNI' ? 'El DNI debe tener 7 u 8 dígitos.' : 'El CUIT debe tener 11 dígitos.';
@@ -577,7 +583,7 @@ export const clientStore = {
     const email = cuentaActiva || datos.email;
     const cuenta = cuentasCliente.find((item) => item.email === email);
     if (cuenta) cuenta.name = perfil.nombre;
-    const cliente = { ...currentStore.cliente, ...perfil, email, responsable: perfil.nombre, documentoNumero: documento, cuit: perfil.documentoTipo === 'CUIT' ? documento : '', dni: perfil.documentoTipo === 'DNI' ? documento : '' };
+    const cliente = { ...currentStore.cliente, ...perfil, email, responsable: perfil.nombre, documentoNumero: documento, cuit: perfil.documentoTipo === 'CUIT' ? documento : '', dni: perfil.documentoTipo === 'DNI' ? documento : '', tipoIva };
     currentStore = { ...currentStore, cliente };
     sesionesCliente.set(email, currentStore);
     emitChange();
