@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { RecordIcon } from '../../components/shared/ModuleUI';
 import {
   Box,
   Paper,
@@ -19,7 +20,6 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
-  Tooltip,
 } from '@mui/material';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import LockIcon from '@mui/icons-material/Lock';
@@ -314,11 +314,9 @@ export const CierreCajaScreen = () => {
                     />
                   </TableCell>
                   <TableCell align="center">
-                    <Tooltip title="Ver Resumen Cierre">
-                      <IconButton size="small" color="info" onClick={() => handleOpenDetailModal(row)}>
-                        <VisibilityOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <RecordIcon label="Ver Resumen Cierre" color="default" onClick={() => handleOpenDetailModal(row)}>
+                      <VisibilityOutlinedIcon fontSize="small" />
+                    </RecordIcon>
                   </TableCell>
                 </TableRow>
               ))}

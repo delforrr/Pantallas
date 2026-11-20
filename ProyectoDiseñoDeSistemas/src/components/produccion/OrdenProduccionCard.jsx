@@ -1,4 +1,5 @@
 import { useNombreEstado } from '../../context/AppContext';
+import { RecordIcon } from '../shared/ModuleUI';
 import {
   Box,
   Card,
@@ -273,17 +274,11 @@ export const OrdenProduccionCard = ({
               Nota Materia Prima
             </Button>
 
-            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'center' }}>
               {onEdit && orden.estado === 'Planificada' && (
-                <Tooltip title="Editar Orden">
-                  <IconButton
-                    size="small"
-                    onClick={() => onEdit(orden)}
-                    sx={{ color: 'text.secondary' }}
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                <RecordIcon label="Editar Orden" color="primary" onClick={() => onEdit(orden)} sx={{ minWidth: 36, minHeight: 36 }}>
+                  <EditIcon fontSize="small" />
+                </RecordIcon>
               )}
               {orden.estado === 'Planificada' && (
                 <Button
@@ -292,7 +287,7 @@ export const OrdenProduccionCard = ({
                   color="primary"
                   startIcon={<PlayArrowIcon />}
                   onClick={() => onCambiarEstado(orden.id, 'En Proceso')}
-                  sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.78rem' }}
+                  sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.8rem', minHeight: 36, px: 1.5 }}
                 >
                   Iniciar
                 </Button>
@@ -304,22 +299,15 @@ export const OrdenProduccionCard = ({
                   color="success"
                   startIcon={<DoneAllIcon />}
                   onClick={() => onCambiarEstado(orden.id, 'Finalizada')}
-                  sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.78rem' }}
+                  sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.8rem', minHeight: 36, px: 1.5 }}
                 >
                   Finalizar
                 </Button>
               )}
               {orden.estado === 'Planificada' && (
-                <Tooltip title="Cancelar Orden">
-                  <IconButton
-                    size="small"
-                    color="default"
-                    onClick={() => onCambiarEstado(orden.id, 'Cancelada')}
-                    sx={{ color: 'text.secondary' }}
-                  >
-                    <BlockIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                <RecordIcon label="Cancelar Orden" color="error" onClick={() => onCambiarEstado(orden.id, 'Cancelada')} sx={{ minWidth: 36, minHeight: 36 }}>
+                  <BlockIcon fontSize="small" />
+                </RecordIcon>
               )}
             </Box>
           </Box>

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { RecordIcon } from '../../components/shared/ModuleUI';
 import {
   Box,
   Paper,
@@ -18,7 +19,6 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -256,16 +256,12 @@ export const ComprobantesPagoScreen = () => {
                     ${item.montoAbonado.toLocaleString()}
                   </TableCell>
                   <TableCell align="center">
-                    <Tooltip title="Ver Recibo Oficial">
-                      <IconButton size="small" color="info" onClick={() => handleOpenDetail(item)}>
-                        <VisibilityOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Anular Recibo">
-                      <IconButton size="small" color="error" onClick={() => handleOpenDelete(item)}>
-                        <DeleteOutlineIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <RecordIcon label="Ver Recibo Oficial" color="default" onClick={() => handleOpenDetail(item)}>
+                      <VisibilityOutlinedIcon fontSize="small" />
+                    </RecordIcon>
+                    <RecordIcon label="Anular Recibo" color="error" onClick={() => handleOpenDelete(item)}>
+                      <DeleteOutlineIcon fontSize="small" />
+                    </RecordIcon>
                   </TableCell>
                 </TableRow>
               ))

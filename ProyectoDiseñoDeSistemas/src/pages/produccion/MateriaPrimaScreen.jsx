@@ -1,5 +1,6 @@
 import { useNombreEstado } from '../../context/AppContext';
 import { useApp } from '../../context/AppContext';
+import { RecordIcon } from '../../components/shared/ModuleUI';
 import { nombreCatalogo, opciones } from '../administracion/catalogos';
 import { useState, useMemo } from 'react';
 import {
@@ -13,7 +14,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  IconButton,
   Paper,
   Divider,
   Snackbar,
@@ -355,13 +355,24 @@ export const MateriaPrimaScreen = () => {
                         {mp.codigo || mp.id}
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ py: 1.5 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                        {mp.nombre}
-                      </Typography>
+                    <TableCell sx={{ py: 1.5, maxWidth: 200 }}>
+                      <Tooltip title={mp.nombre}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 700,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            maxWidth: 190,
+                          }}
+                        >
+                          {mp.nombre}
+                        </Typography>
+                      </Tooltip>
                       {mp.marca && (
-                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', maxWidth: 280 }} noWrap>
-                          Marca: {mp.marca}
+                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', maxWidth: 190 }} noWrap>
+                          {mp.marca}
                         </Typography>
                       )}
                     </TableCell>
@@ -419,35 +430,16 @@ export const MateriaPrimaScreen = () => {
                       )}
                     </TableCell>
                     <TableCell align="right" sx={{ whiteSpace: 'nowrap', width: 120, minWidth: 120, py: 1.5 }}>
-                      <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.2, flexWrap: 'nowrap' }}>
-                        <Tooltip title="Ver Ficha de Materia Prima">
-                          <IconButton
-                            size="small"
-                            onClick={() => setViewingMP(mp)}
-                            sx={{ color: 'text.secondary' }}
-                          >
-                            <VisibilityOutlinedIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Editar Materia Prima">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => handleOpenEdit(mp)}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Eliminar del Catálogo">
-                          <IconButton
-                            size="small"
-                            color="default"
-                            onClick={() => setDeleteConfirmId(mp.id)}
-                            sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                      <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.75, flexWrap: 'nowrap' }}>
+                        <RecordIcon label="Ver Ficha de Materia Prima" color="default" onClick={() => setViewingMP(mp)}>
+                          <VisibilityOutlinedIcon fontSize="small" />
+                        </RecordIcon>
+                        <RecordIcon label="Editar Materia Prima" color="primary" onClick={() => handleOpenEdit(mp)}>
+                          <EditIcon fontSize="small" />
+                        </RecordIcon>
+                        <RecordIcon label="Eliminar del Catálogo" color="error" onClick={() => setDeleteConfirmId(mp.id)}>
+                          <DeleteIcon fontSize="small" />
+                        </RecordIcon>
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -474,7 +466,7 @@ export const MateriaPrimaScreen = () => {
         <Divider />
         <DialogContent sx={{ pt: 2.5 }}>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
+            {editingMP && <Grid item xs={12} sm={4}>
               <TextField
                 label="Código"
                 fullWidth
@@ -483,8 +475,8 @@ export const MateriaPrimaScreen = () => {
                 disabled
                 helperText="Asignado automáticamente"
               />
-            </Grid>
-            <Grid item xs={12} sm={5}>
+            </Grid>}
+            <Grid item xs={12} sm={editingMP ? 5 : 9}>
               <TextField
                 label="Nombre de la Materia Prima"
                 fullWidth

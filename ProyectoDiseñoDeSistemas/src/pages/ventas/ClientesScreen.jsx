@@ -21,7 +21,6 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -55,6 +54,7 @@ import EmailIcon from '@mui/icons-material/Email';
 
 import { INITIAL_CLIENTES, INITIAL_COMPROBANTES_VENTA, calcularEstadoMoroso } from './mockData';
 import { ClienteMorosoAlert } from '../../components/ventas';
+import { SummaryCards, RecordIcon } from '../../components/shared/ModuleUI';
 
 export const ClientesScreen = () => {
   const { catalogos: { iva, provincias, localidades, calles } } = useApp();
@@ -219,49 +219,15 @@ export const ClientesScreen = () => {
       </Box>
 
 
-      {/* Métricas */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, borderRadius: '14px', borderLeft: '5px solid #009246' }} elevation={1}>
-            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700 }}>
-              Total Clientes
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: '#009246', mt: 0.5 }}>
-              {stats.total}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, borderRadius: '14px', borderLeft: '5px solid #1976d2' }} elevation={1}>
-            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700 }}>
-              Clientes Mayoristas
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: '#1976d2', mt: 0.5 }}>
-              {stats.mayoristas}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, borderRadius: '14px', borderLeft: '5px solid #ed6c02' }} elevation={1}>
-            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700 }}>
-              Crédito Autorizado Total
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: '#ed6c02', mt: 0.5 }}>
-              ${stats.creditoOtorgado.toLocaleString()}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, borderRadius: '14px', borderLeft: '5px solid #ce2b37' }} elevation={1}>
-            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700 }}>
-              Clientes Morosos
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: '#ce2b37', mt: 0.5 }}>
-              {stats.morosos}
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
+      {/* Métricas estilo Maquinaria */}
+      <SummaryCards
+        items={[
+          { label: 'Total Clientes', value: stats.total, color: 'primary.main' },
+          { label: 'Clientes Mayoristas', value: stats.mayoristas, color: 'info.main' },
+          { label: 'Crédito Autorizado Total', value: `$${stats.creditoOtorgado.toLocaleString()}`, color: 'warning.main' },
+          { label: 'Clientes Morosos', value: stats.morosos, color: 'error.main' },
+        ]}
+      />
 
       {/* Buscador y Filtros */}
       <Paper elevation={1} sx={{ p: 2, mb: 3, borderRadius: '14px' }}>
@@ -363,21 +329,15 @@ export const ClientesScreen = () => {
                       {getStatusChip(cliente)}
                     </TableCell>
                     <TableCell align="center">
-                      <Tooltip title="Ver Ficha Completa">
-                        <IconButton size="small" color="info" onClick={() => handleOpenDetail(cliente)}>
-                          <VisibilityOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Editar Cliente">
-                        <IconButton size="small" color="primary" onClick={() => handleOpenEditForm(cliente)}>
-                          <EditOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Eliminar">
-                        <IconButton size="small" color="error" onClick={() => handleOpenDelete(cliente)}>
-                          <DeleteOutlineIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      <RecordIcon label="Ver Ficha Completa" color="default" onClick={() => handleOpenDetail(cliente)}>
+                        <VisibilityOutlinedIcon fontSize="small" />
+                      </RecordIcon>
+                      <RecordIcon label="Editar Cliente" color="primary" onClick={() => handleOpenEditForm(cliente)}>
+                        <EditOutlinedIcon fontSize="small" />
+                      </RecordIcon>
+                      <RecordIcon label="Eliminar" color="error" onClick={() => handleOpenDelete(cliente)}>
+                        <DeleteOutlineIcon fontSize="small" />
+                      </RecordIcon>
                     </TableCell>
                   </TableRow>
                 ))

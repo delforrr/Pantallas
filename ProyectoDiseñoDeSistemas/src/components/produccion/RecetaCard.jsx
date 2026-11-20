@@ -1,12 +1,11 @@
 import { useState } from 'react';
+import { RecordIcon } from '../shared/ModuleUI';
 import {
   Box,
   Card,
   CardContent,
   Typography,
   Chip,
-  IconButton,
-  Tooltip,
   Collapse,
   Button,
   Divider,
@@ -61,17 +60,13 @@ export const RecetaCard = ({ receta, onEdit, onDelete }) => {
               {receta.nombreProducto}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <Tooltip title="Editar receta">
-              <IconButton size="small" onClick={() => onEdit(receta)} sx={{ color: 'text.secondary' }}>
-                <EditIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Eliminar receta">
-              <IconButton size="small" onClick={() => onDelete(receta.id)} sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}>
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+          <Box sx={{ display: 'flex', gap: 0.75 }}>
+            <RecordIcon label="Editar receta" color="primary" onClick={() => onEdit(receta)} sx={{ minWidth: 36, minHeight: 36 }}>
+              <EditIcon fontSize="small" />
+            </RecordIcon>
+            <RecordIcon label="Eliminar receta" color="error" onClick={() => onDelete(receta.id)} sx={{ minWidth: 36, minHeight: 36 }}>
+              <DeleteIcon fontSize="small" />
+            </RecordIcon>
           </Box>
         </Box>
 

@@ -96,7 +96,7 @@ export default function MaquinariaScreen() {
       setNotice(`Orden ${order.id} creada como pendiente.`);
     }} />
     <FormDialog open={Boolean(form)} onClose={() => setForm(null)} title={form?.id ? `Editar ${form.codigo}` : 'Nueva maquinaria'} onSubmit={save} action={form?.id ? 'Guardar cambios' : 'Crear maquinaria'}>
-      {form && <><FormSection number={1} title="Identificación y operación"><Typography variant="body2" color="text.secondary">Código: {form.codigo || `${nextMachineCode(maquinarias)} · generado al guardar`}</Typography><Grid container spacing={2}><Grid size={{ xs: 12, sm: 8 }}><TextField fullWidth autoFocus required label="Descripción" value={form.nombre} onChange={e => setForm({
+      {form && <><FormSection number={1} title="Identificación y operación">{form.id && <Typography variant="body2" color="text.secondary">Código: {form.codigo}</Typography>}<Grid container spacing={2}><Grid size={{ xs: 12, sm: 8 }}><TextField fullWidth autoFocus required label="Descripción" value={form.nombre} onChange={e => setForm({
           ...form,
           nombre: e.target.value
         })} error={Boolean(error) && !form.nombre.trim()} helperText={error && !form.nombre.trim() ? 'Ingresá la descripción de la máquina.' : ''} /></Grid>

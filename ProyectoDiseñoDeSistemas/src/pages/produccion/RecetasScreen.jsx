@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { FormDialog, FormSection, RecordIcon } from '../../components/shared/ModuleUI';
 import {
   Box,
   Typography,
@@ -12,7 +13,6 @@ import {
   DialogActions,
   IconButton,
   Paper,
-  Divider,
   Alert,
   Snackbar,
   Chip,
@@ -24,7 +24,6 @@ import {
   TableRow,
   Tooltip,
   Grid,
-  Autocomplete,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
@@ -33,9 +32,16 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import NotesIcon from '@mui/icons-material/Notes';
 
-import { RECETAS_INICIALES, MATERIAS_PRIMAS_INICIALES, PRODUCTOS_FABRICABLES } from './mockData';
+import {
+  RECETAS_INICIALES,
+  PRODUCTOS_FABRICABLES,
+  TIPOS_PRODUCTO,
+} from './mockData';
 
 const CATEGORIAS = ['Todas', 'Pastas Rellenas', 'Pastas Simples'];
+const TIPOS_CON_PRODUCTOS = TIPOS_PRODUCTO.filter(tipo =>
+  PRODUCTOS_FABRICABLES.some(producto => producto.categoria === tipo.tipoProducto)
+);
 
 export const RecetasScreen = () => {
   const [recetas, setRecetas] = useState(RECETAS_INICIALES);
@@ -57,10 +63,6 @@ export const RecetasScreen = () => {
     pasos: '',
     ingredientes: [],
   });
-
-  // Ingrediente en construcción dentro del modal
-  const [selectedMPId, setSelectedMPId] = useState('');
-  const [cantidadMP, setCantidadMP] = useState('');
 
   // Diálogo confirmación eliminación
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
@@ -103,8 +105,6 @@ export const RecetasScreen = () => {
         '1. Pesar y tamizar los ingredientes secos en tolva de carga.\n2. Incorporar líquidos/huevos y amasar durante 12-15 minutos.\n3. Laminar la masa en sobadora hasta el espesor uniforme deseado.\n4. Conformar el producto en la línea de producción correspondiente.\n5. Control de calidad y envasado en cajas térmicas de 1 kg.',
       ingredientes: [],
     });
-    setSelectedMPId('');
-    setCantidadMP('');
     setModalOpen(true);
   };
 
@@ -122,39 +122,7 @@ export const RecetasScreen = () => {
         : (receta.pasos || ''),
       ingredientes: [...receta.ingredientes],
     });
-    setSelectedMPId('');
-    setCantidadMP('');
     setModalOpen(true);
-  };
-
-  // Agregar ingrediente al formulario
-  const handleAddIngrediente = () => {
-    if (!selectedMPId || !cantidadMP || Number(cantidadMP) <= 0) return;
-    const mp = MATERIAS_PRIMAS_INICIALES.find((m) => m.id === selectedMPId);
-    if (!mp) return;
-
-    const existsIndex = formState.ingredientes.findIndex((i) => i.materiaPrimaId === selectedMPId);
-    if (existsIndex >= 0) {
-      const updated = [...formState.ingredientes];
-      updated[existsIndex].cantidad = Number(cantidadMP);
-      setFormState({ ...formState, ingredientes: updated });
-    } else {
-      setFormState({
-        ...formState,
-        ingredientes: [
-          ...formState.ingredientes,
-          {
-            materiaPrimaId: mp.id,
-            nombre: mp.nombre,
-            cantidad: Number(cantidadMP),
-            unidad: mp.unidad,
-          },
-        ],
-      });
-    }
-
-    setSelectedMPId('');
-    setCantidadMP('');
   };
 
   // Quitar ingrediente
@@ -354,10 +322,21 @@ export const RecetasScreen = () => {
                   <TableCell sx={{ fontWeight: 600, color: 'text.secondary' }}>
                     {receta.codigoProducto || receta.id}
                   </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {receta.nombreProducto}
-                    </Typography>
+                  <TableCell sx={{ maxWidth: 200 }}>
+                    <Tooltip title={receta.nombreProducto}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 700,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          maxWidth: 190,
+                        }}
+                      >
+                        {receta.nombreProducto}
+                      </Typography>
+                    </Tooltip>
                   </TableCell>
                   <TableCell>
                     <Chip
@@ -374,20 +353,9 @@ export const RecetasScreen = () => {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      size="small"
-                      variant="text"
-                      startIcon={<VisibilityOutlinedIcon fontSize="small" />}
-                      onClick={() => setViewingReceta(receta)}
-                      sx={{
-                        textTransform: 'none',
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
-                        color: 'primary.main',
-                      }}
-                    >
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {receta.ingredientes?.length || 0} materias primas
-                    </Button>
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <Tooltip
@@ -400,9 +368,7 @@ export const RecetasScreen = () => {
                       placement="top-start"
                     >
                       <Box
-                        onClick={() => setViewingReceta(receta)}
                         sx={{
-                          cursor: 'pointer',
                           maxWidth: 240,
                           p: 0.6,
                           borderRadius: '6px',
@@ -432,25 +398,16 @@ export const RecetasScreen = () => {
                     </Tooltip>
                   </TableCell>
                   <TableCell align="right">
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
-                      <Tooltip title="Editar receta">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenEdit(receta)}
-                          sx={{ color: 'text.secondary' }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Eliminar receta">
-                        <IconButton
-                          size="small"
-                          onClick={() => setDeleteConfirmId(receta.id)}
-                          sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.75 }}>
+                      <RecordIcon label="Ver receta" color="default" onClick={() => setViewingReceta(receta)}>
+                        <VisibilityOutlinedIcon fontSize="small" />
+                      </RecordIcon>
+                      <RecordIcon label="Editar receta" color="primary" onClick={() => handleOpenEdit(receta)}>
+                        <EditIcon fontSize="small" />
+                      </RecordIcon>
+                      <RecordIcon label="Eliminar receta" color="error" onClick={() => setDeleteConfirmId(receta.id)}>
+                        <DeleteIcon fontSize="small" />
+                      </RecordIcon>
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -564,285 +521,130 @@ export const RecetasScreen = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal Dialog para Crear / Editar Receta */}
-      <Dialog
+      <FormDialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
+        title={editingReceta ? `Editar ${editingReceta.nombreProducto}` : 'Nueva receta'}
         maxWidth="md"
-        fullWidth
-        PaperProps={{ sx: { borderRadius: '16px' } }}
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleSave();
+        }}
+        action={editingReceta ? 'Guardar cambios' : 'Crear receta'}
       >
-        <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
-          {editingReceta ? `Editar Receta (${editingReceta.codigoProducto})` : 'Nueva Receta de Producto'}
-        </DialogTitle>
-        <DialogContent dividers sx={{ p: 3 }}>
+        <FormSection number={1} title="Producto y rendimiento">
           <Grid container spacing={2}>
-            {/* Selección de Producto Tabulado con Buscador */}
-            <Grid item xs={12} sm={8}>
-              <Autocomplete
-                options={PRODUCTOS_FABRICABLES}
-                getOptionLabel={(option) =>
-                  typeof option === 'string'
-                    ? option
-                    : `${option.nombre} (${option.codigo})`
-                }
-                value={
-                  PRODUCTOS_FABRICABLES.find(
-                    (p) => p.nombre === formState.nombreProducto
-                  ) ||
-                  (formState.nombreProducto
-                    ? {
-                        nombre: formState.nombreProducto,
-                        codigo: formState.codigoProducto,
-                        categoria: formState.categoria,
-                      }
-                    : null)
-                }
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    setFormState((prev) => ({
-                      ...prev,
-                      nombreProducto: newValue.nombre,
-                      codigoProducto: newValue.codigo,
-                      categoria: newValue.categoria || prev.categoria,
-                    }));
-                  } else {
-                    setFormState((prev) => ({
-                      ...prev,
-                      nombreProducto: '',
-                      codigoProducto: '',
-                    }));
-                  }
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    size="small"
-                    label="Producto"
-                    placeholder="Escribe para buscar el producto..."
-                    required
-                    helperText="Selecciona un producto del catálogo"
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={5}>
               <TextField
                 fullWidth
+                select
                 size="small"
-                label="Código Producto"
-                value={formState.codigoProducto}
-                disabled
-                helperText="Asignado automáticamente del catálogo"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                size="small"
-                label="Categoría"
+                label="Tipo de producto"
                 value={formState.categoria}
-                disabled
-                helperText="Determinada por el producto"
-              />
+                onChange={(event) => setFormState(prev => ({
+                  ...prev,
+                  categoria: event.target.value,
+                  nombreProducto: '',
+                  codigoProducto: '',
+                }))}
+              >
+                {TIPOS_CON_PRODUCTOS.map(tipo => (
+                  <MenuItem key={tipo.idTipoDeProducto} value={tipo.tipoProducto}>
+                    {tipo.tipoProducto}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Grid>
-
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={5}>
               <TextField
                 fullWidth
+                select
                 size="small"
-                type="number"
-                label="Rendimiento Base (kg)"
-                value={formState.rendimientoBase}
-                onChange={(e) =>
-                  setFormState({ ...formState, rendimientoBase: Number(e.target.value) })
-                }
-                helperText="Cantidad de kilos producidos por lote"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                size="small"
-                type="number"
-                label="Tiempo Elaboración (min)"
-                value={formState.tiempoElaboracionMin}
-                onChange={(e) =>
-                  setFormState({ ...formState, tiempoElaboracionMin: Number(e.target.value) })
-                }
-                helperText="Minutos estimados por lote"
-              />
-            </Grid>
-
-            {/* Sección de Ingredientes / Materia Prima */}
-            <Grid item xs={12}>
-              <Divider sx={{ my: 1 }} />
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5, color: 'text.primary' }}>
-                Materias Primas de la Receta
-              </Typography>
-
-              {/* Selector para agregar materia prima */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  gap: 1.5,
-                  alignItems: 'center',
-                  p: 2,
-                  borderRadius: '10px',
-                  bgcolor: 'action.hover',
-                  mb: 2,
-                  flexWrap: 'wrap',
+                label="Producto"
+                value={formState.codigoProducto}
+                required
+                autoFocus
+                onChange={(event) => {
+                  const producto = PRODUCTOS_FABRICABLES.find(item => item.codigo === event.target.value);
+                  setFormState(prev => ({
+                    ...prev,
+                    nombreProducto: producto?.nombre || '',
+                    codigoProducto: producto?.codigo || '',
+                  }));
                 }}
               >
-                <Autocomplete
-                  options={MATERIAS_PRIMAS_INICIALES}
-                  getOptionLabel={(option) =>
-                    typeof option === 'string'
-                      ? option
-                      : `${option.nombre} (${option.tipo} - en ${option.unidad})`
-                  }
-                  value={
-                    MATERIAS_PRIMAS_INICIALES.find((mp) => mp.id === selectedMPId) || null
-                  }
-                  onChange={(event, newValue) => {
-                    setSelectedMPId(newValue ? newValue.id : '');
-                  }}
-                  sx={{ minWidth: 260, flex: 2 }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      size="small"
-                      label="Materia Prima"
-                      placeholder="Escribe para buscar materia prima..."
-                    />
-                  )}
-                />
-
+                {PRODUCTOS_FABRICABLES
+                  .filter(producto => producto.categoria === formState.categoria)
+                  .map(producto => (
+                    <MenuItem key={producto.codigo} value={producto.codigo}>
+                      {producto.nombre}
+                    </MenuItem>
+                  ))}
+              </TextField>
+            </Grid>
+            <Grid item xs={6} sm={2}>
+              <TextField
+                fullWidth
+                size="small"
+                type="number"
+                label="Rendimiento (kg)"
+                value={formState.rendimientoBase}
+                onChange={(e) => setFormState({ ...formState, rendimientoBase: Number(e.target.value) })}
+              />
+            </Grid>
+            {editingReceta && (
+              <Grid item xs={6} sm={2}>
                 <TextField
+                  fullWidth
                   size="small"
                   type="number"
-                  label={
-                    selectedMPId
-                      ? `Cantidad (${MATERIAS_PRIMAS_INICIALES.find((m) => m.id === selectedMPId)?.unidad || ''})`
-                      : 'Cantidad'
-                  }
-                  value={cantidadMP}
-                  onChange={(e) => setCantidadMP(e.target.value)}
-                  placeholder="0.0"
-                  inputProps={{ step: '0.1' }}
-                  sx={{ minWidth: 140, flex: 1 }}
+                  label="Tiempo (min)"
+                  value={formState.tiempoElaboracionMin}
+                  onChange={(e) => setFormState({ ...formState, tiempoElaboracionMin: Number(e.target.value) })}
                 />
-
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  startIcon={<AddIcon />}
-                  onClick={handleAddIngrediente}
-                  disabled={!selectedMPId || !cantidadMP || Number(cantidadMP) <= 0}
-                  sx={{ textTransform: 'none', fontWeight: 600, height: 40 }}
-                >
-                  Agregar Materia Prima
-                </Button>
-              </Box>
-
-              {/* Lista de ingredientes agregados */}
+              </Grid>
+            )}
+          </Grid>
+        </FormSection>
+        <FormSection number={2} title="Ingredientes y elaboración">
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={7}>
               {formState.ingredientes.length === 0 ? (
-                <Alert severity="info" sx={{ borderRadius: '10px' }}>
-                  Aún no agregaste materias primas para esta receta. Usa el selector arriba para cargarlos.
-                </Alert>
+                <Alert severity="info" sx={{ py: 0 }}>Aún no hay materias primas asociadas.</Alert>
               ) : (
-                <Paper
-                  variant="outlined"
-                  sx={{ borderRadius: '10px', overflow: 'hidden' }}
-                >
-                  {formState.ingredientes.map((ing, idx) => (
-                    <Box
-                      key={ing.materiaPrimaId}
-                      sx={{
-                        p: 1.5,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        borderBottom:
-                          idx < formState.ingredientes.length - 1 ? '1px solid' : 'none',
-                        borderColor: 'divider',
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {ing.nombre}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          Proporción: {ing.cantidad} {ing.unidad} (por lote de {formState.rendimientoBase} kg)
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                          {ing.cantidad} {ing.unidad}
-                        </Typography>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleRemoveIngrediente(ing.materiaPrimaId)}
-                          sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
-                        >
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 0.5 }}>
+                  {formState.ingredientes.map((ing) => (
+                    <Paper key={ing.materiaPrimaId} variant="outlined" sx={{ px: 0.75, py: 0.35, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.5, minWidth: 0 }}>
+                      <Typography variant="caption" noWrap title={ing.nombre} sx={{ minWidth: 0, fontWeight: 600 }}>
+                        {ing.nombre}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'primary.main' }}>{ing.cantidad} {ing.unidad}</Typography>
+                        <IconButton size="small" aria-label={`Quitar ${ing.nombre}`} onClick={() => handleRemoveIngrediente(ing.materiaPrimaId)}>
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Box>
-                    </Box>
+                    </Paper>
                   ))}
-                </Paper>
+                </Box>
               )}
             </Grid>
-
-            {/* Sección de Pasos de Elaboración (Texto Libre / Comentario Único) */}
-            <Grid item xs={12} sx={{ mt: 1 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <NotesIcon color="primary" fontSize="small" />
-                Instrucciones y Pasos de Elaboración
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
-                Ingrese el texto libre con el procedimiento, parámetros técnicos y secuencia de pasos para elaborar el lote base de la receta.
-              </Typography>
+            <Grid item xs={12} md={5}>
               <TextField
                 fullWidth
+                size="small"
                 multiline
                 minRows={5}
-                maxRows={10}
-                label="Procedimiento y Pasos de Elaboración (Texto Libre)"
-                placeholder="Detalle aquí las instrucciones paso a paso o comentarios generales para elaborar la receta (temperaturas, tiempos de reposo, amasado, laminado, dosificación, etc.)..."
+                maxRows={5}
+                label="Pasos de elaboración"
+                placeholder="Describí el procedimiento de elaboración"
                 value={formState.pasos}
-                onChange={(e) =>
-                  setFormState((prev) => ({ ...prev, pasos: e.target.value }))
-                }
-                helperText="Campo de texto libre / comentario único con las instrucciones técnicas de la receta."
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '10px',
-                  },
-                }}
+                onChange={(e) => setFormState((prev) => ({ ...prev, pasos: e.target.value }))}
               />
             </Grid>
           </Grid>
-        </DialogContent>
-        <DialogActions sx={{ p: 2.5 }}>
-          <Button
-            onClick={() => setModalOpen(false)}
-            sx={{ textTransform: 'none', fontWeight: 600, color: 'text.secondary' }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSave}
-            sx={{ textTransform: 'none', fontWeight: 700, px: 3 }}
-          >
-            {editingReceta ? 'Guardar Cambios' : 'Crear Receta'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </FormSection>
+      </FormDialog>
 
       {/* Diálogo de Confirmación de Borrado */}
       <Dialog

@@ -1,5 +1,6 @@
 import { nombreCatalogo, opciones } from '../administracion/catalogos';
 import { useApp, useNombreEstado } from '../../context/AppContext';
+import { RecordIcon } from '../../components/shared/ModuleUI';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -20,7 +21,6 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -465,27 +465,19 @@ export const PedidosScreen = () => {
                   <TableCell>{getStatusChip(pedido.estadoPedido)}</TableCell>
                   <TableCell align="center">
                     {pedido.total > 0 && pedido.señaPagada < pedido.total && (
-                      <Tooltip title="Registrar Pago / Seña">
-                        <IconButton size="small" color="success" onClick={() => handleOpenRegistrarPagoModal(pedido)}>
-                          <PriceCheckIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      <RecordIcon label="Registrar Pago / Seña" color="success" onClick={() => handleOpenRegistrarPagoModal(pedido)}>
+                        <PriceCheckIcon fontSize="small" />
+                      </RecordIcon>
                     )}
-                    <Tooltip title="Ver Detalle">
-                      <IconButton size="small" color="info" onClick={() => handleOpenDetail(pedido)}>
-                        <VisibilityOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Editar Pedido">
-                      <IconButton size="small" color="primary" onClick={() => handleOpenEditForm(pedido)}>
-                        <EditOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Eliminar">
-                      <IconButton size="small" color="error" onClick={() => handleOpenDelete(pedido)}>
-                        <DeleteOutlineIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <RecordIcon label="Ver Detalle" color="default" onClick={() => handleOpenDetail(pedido)}>
+                      <VisibilityOutlinedIcon fontSize="small" />
+                    </RecordIcon>
+                    <RecordIcon label="Editar Pedido" color="primary" onClick={() => handleOpenEditForm(pedido)}>
+                      <EditOutlinedIcon fontSize="small" />
+                    </RecordIcon>
+                    <RecordIcon label="Eliminar" color="error" onClick={() => handleOpenDelete(pedido)}>
+                      <DeleteOutlineIcon fontSize="small" />
+                    </RecordIcon>
                   </TableCell>
                 </TableRow>
               ))

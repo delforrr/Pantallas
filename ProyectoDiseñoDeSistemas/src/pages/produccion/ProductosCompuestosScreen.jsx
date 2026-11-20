@@ -1,5 +1,6 @@
 import { nombreCatalogo, opciones } from '../administracion/catalogos';
 import { useNombreEstado } from '../../context/AppContext';
+import { FormDialog, FormSection, RecordIcon } from '../../components/shared/ModuleUI';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -12,7 +13,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  IconButton,
   Paper,
   Divider,
   Snackbar,
@@ -530,12 +530,26 @@ export const ProductosCompuestosScreen = () => {
                       sx={{ fontWeight: 600, fontSize: '0.72rem' }}
                     />
                   </TableCell>
-                  <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {getProductoBaseNombre(prod)}
-                    </Typography>
+                  <TableCell sx={{ py: 1.5, maxWidth: 180 }}>
+                    <Tooltip title={getProductoBaseNombre(prod)}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 700,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          maxWidth: 170,
+                        }}
+                      >
+                        {getProductoBaseNombre(prod)}
+                      </Typography>
+                    </Tooltip>
                     {prod.descripcion && (
-                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', maxWidth: 200 }} noWrap>
+                      <Typography
+                        variant="caption"
+                        sx={{ color: 'text.secondary', display: 'block', maxWidth: 170, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      >
                         {prod.descripcion}
                       </Typography>
                     )}
@@ -637,44 +651,19 @@ export const ProductosCompuestosScreen = () => {
                     )}
                   </TableCell>
                   <TableCell align="right" sx={{ whiteSpace: 'nowrap', width: 145, minWidth: 145, py: 1.5 }}>
-                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.2, flexWrap: 'nowrap' }}>
-                      <Tooltip title="Ajustar Stock de Producto">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenStockModal(prod)}
-                          sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
-                        >
-                          <Inventory2OutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Ver Detalle del Producto">
-                        <IconButton
-                          size="small"
-                          onClick={() => setViewingProducto(prod)}
-                          sx={{ color: 'text.secondary' }}
-                        >
-                          <VisibilityOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Editar Producto">
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => handleOpenEdit(prod)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Eliminar Producto">
-                        <IconButton
-                          size="small"
-                          color="default"
-                          onClick={() => setDeleteConfirmId(prod.id)}
-                          sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.75, flexWrap: 'nowrap' }}>
+                      <RecordIcon label="Ajustar Stock de Producto" color="default" onClick={() => handleOpenStockModal(prod)}>
+                        <Inventory2OutlinedIcon fontSize="small" />
+                      </RecordIcon>
+                      <RecordIcon label="Ver Detalle del Producto" color="default" onClick={() => setViewingProducto(prod)}>
+                        <VisibilityOutlinedIcon fontSize="small" />
+                      </RecordIcon>
+                      <RecordIcon label="Editar Producto" color="primary" onClick={() => handleOpenEdit(prod)}>
+                        <EditIcon fontSize="small" />
+                      </RecordIcon>
+                      <RecordIcon label="Eliminar Producto" color="error" onClick={() => setDeleteConfirmId(prod.id)}>
+                        <DeleteIcon fontSize="small" />
+                      </RecordIcon>
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -828,32 +817,22 @@ export const ProductosCompuestosScreen = () => {
       </Dialog>
 
       {/* ── Modal: Alta / Edición de Producto ────────────────── */}
-      <Dialog
+      <FormDialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
+        title={editingProducto ? `Editar ${editingProducto.nombre}` : 'Nuevo producto'}
         maxWidth="md"
-        fullWidth
-        PaperProps={{ sx: { borderRadius: '14px' } }}
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleSave();
+        }}
+        action={editingProducto ? 'Guardar cambios' : 'Crear producto'}
       >
-        <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
-          {editingProducto ? `Editar Producto: ${editingProducto.nombre}` : 'Nuevo Producto'}
-        </DialogTitle>
-        <Divider />
-        <DialogContent sx={{ pt: 2.5 }}>
+        <FormSection number={1} title="Identificación del producto">
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12}>
               <TextField
-                label="Código"
-                fullWidth
-                size="small"
-                value={formState.codigo}
-                disabled
-                helperText="Asignado automáticamente"
-              />
-            </Grid>
-            <Grid item xs={12} sm={8}>
-              <TextField
-                label="Nombre del Producto"
+                label="Nombre del producto"
                 fullWidth
                 size="small"
                 value={formState.nombre}
@@ -863,11 +842,10 @@ export const ProductosCompuestosScreen = () => {
                 autoFocus
               />
             </Grid>
-
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 select
-                label="Tipo de Producto (TipoDeProducto)"
+                label="Tipo de producto"
                 fullWidth
                 size="small"
                 value={formState.idTipoDeProducto}
@@ -888,37 +866,10 @@ export const ProductosCompuestosScreen = () => {
                 ))}
               </TextField>
             </Grid>
-
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 select
-                label="Producto Base (Producto)"
-                fullWidth
-                size="small"
-                value={formState.idProducto}
-                onChange={(e) => {
-                  const val = Number(e.target.value);
-                  const prodObj = PRODUCTOS_BASE.find((p) => p.idProducto === val);
-                  const varObj = VARIEDADES.find((v) => v.idVariedad === formState.idVariedad);
-                  setFormState({
-                    ...formState,
-                    idProducto: val,
-                    nombre: prodObj ? `${prodObj.producto} ${varObj?.variedad || ''}`.trim() : formState.nombre,
-                  });
-                }}
-              >
-                {PRODUCTOS_BASE.map((pb) => (
-                  <MenuItem key={pb.idProducto} value={pb.idProducto}>
-                    {pb.producto}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
-            <Grid item xs={12} sm={4}>
-              <TextField
-                select
-                label="Variedad (Variedad)"
+                label="Variedad"
                 fullWidth
                 size="small"
                 value={formState.idVariedad}
@@ -940,7 +891,6 @@ export const ProductosCompuestosScreen = () => {
                 ))}
               </TextField>
             </Grid>
-
             <Grid item xs={12} sm={6}>
               <TextField
                 select
@@ -958,47 +908,43 @@ export const ProductosCompuestosScreen = () => {
                 ))}
               </TextField>
             </Grid>
-
-            <Grid item xs={12} sm={6}>
+            {editingProducto && (
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  select
+                  label="Estado"
+                  fullWidth
+                  size="small"
+                  value={formState.estado}
+                  onChange={(e) => setFormState({ ...formState, estado: e.target.value })}
+                >
+                  <MenuItem value="Activo">{nombreEstado('Activo')}</MenuItem>
+                  <MenuItem value="Inactivo">{nombreEstado('Inactivo')}</MenuItem>
+                </TextField>
+              </Grid>
+            )}
+          </Grid>
+        </FormSection>
+        <FormSection number={2} title="Inventario y comercialización">
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, minmax(0, 1fr))' }, gap: 2 }}>
               <TextField
-                select
-                label="Estado"
-                fullWidth
-                size="small"
-                value={formState.estado}
-                onChange={(e) => setFormState({ ...formState, estado: e.target.value })}
-              >
-                <MenuItem value="Activo">{nombreEstado('Activo')}</MenuItem>
-                <MenuItem value="Inactivo">{nombreEstado('Inactivo')}</MenuItem>
-              </TextField>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Stock Actual en Fábrica"
+                label="Stock actual en fábrica"
                 type="number"
                 fullWidth
                 size="small"
                 value={formState.stockActual}
                 onChange={(e) => setFormState({ ...formState, stockActual: e.target.value })}
               />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
               <TextField
-                label="Stock Mínimo de Alerta"
+                label="Stock mínimo de alerta"
                 type="number"
                 fullWidth
                 size="small"
                 value={formState.stockMinimo}
                 onChange={(e) => setFormState({ ...formState, stockMinimo: e.target.value })}
-                helperText="Dispara alerta cuando las existencias caigan a este nivel"
               />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
               <TextField
-                label="Precio Unitario ($) (PrecioUnitario)"
+                label="Precio unitario"
                 type="number"
                 fullWidth
                 size="small"
@@ -1014,46 +960,21 @@ export const ProductosCompuestosScreen = () => {
                   startAdornment: <InputAdornment position="start">$</InputAdornment>,
                 }}
               />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Vida Útil / Conservación"
-                fullWidth
-                size="small"
-                value={formState.vidaUtil}
-                onChange={(e) => setFormState({ ...formState, vidaUtil: e.target.value })}
-                placeholder="Ej. 48 hs refrigerado / 90 días freezer"
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                label="Descripción"
-                fullWidth
-                size="small"
-                value={formState.descripcion}
-                onChange={(e) => setFormState({ ...formState, descripcion: e.target.value })}
-                placeholder="Breve descripción o notas del producto"
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <Divider />
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setModalOpen(false)} color="inherit" sx={{ textTransform: 'none', fontWeight: 600 }}>
-            Cancelar
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSave}
-            sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '8px', px: 3 }}
-          >
-            {editingProducto ? 'Guardar Cambios' : 'Crear Producto'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </Box>
+        </FormSection>
+        <FormSection number={3} title="Descripción">
+          <TextField
+            label="Descripción"
+            fullWidth
+            size="small"
+            multiline
+            minRows={3}
+            value={formState.descripcion}
+            onChange={(e) => setFormState({ ...formState, descripcion: e.target.value })}
+            placeholder="Breve descripción o notas del producto"
+          />
+        </FormSection>
+      </FormDialog>
 
       {/* ── Modal: Ajustar Stock de Producto ───────────────── */}
       <Dialog
@@ -1180,162 +1101,91 @@ export const ProductosCompuestosScreen = () => {
       <Dialog
         open={Boolean(viewingProducto)}
         onClose={() => setViewingProducto(null)}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
         PaperProps={{ sx: { borderRadius: '14px' } }}
       >
         {viewingProducto && (
           <>
-            <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box>
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                  {viewingProducto.codigo}
-                </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                  {viewingProducto.nombre}
-                </Typography>
-              </Box>
-              {viewingProducto.estado === 'Activo' ? (
-                <Chip
-                  icon={<CheckCircleIcon style={{ fontSize: 16 }} />}
-                  label={nombreEstado('Activo')}
-                  size="small"
-                  color="success"
-                  variant="outlined"
-                  sx={{ fontWeight: 600 }}
-                />
-              ) : (
-                <Chip
-                  icon={<CancelIcon style={{ fontSize: 16 }} />}
-                  label={nombreEstado('Inactivo')}
-                  size="small"
-                  color="default"
-                  variant="outlined"
-                  sx={{ fontWeight: 600 }}
-                />
-              )}
-            </DialogTitle>
-            <Divider />
-            <DialogContent sx={{ pt: 2.5 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
-                  <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px' }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      Tipo de Producto
+            <DialogContent sx={{ p: { xs: 1.5, sm: 2 }, overflowY: 'visible' }}>
+              <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                <Box sx={{ px: 2, py: 1.25, borderBottom: '2px solid', borderColor: 'primary.main', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                  <Box>
+                    <Typography variant="subtitle1" sx={{ color: 'primary.main', fontWeight: 800, lineHeight: 1.2 }}>PastaFab</Typography>
+                    <Typography variant="caption" color="text.secondary">Registro de productos</Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'right' }}>
+                    <Typography variant="caption" sx={{ display: 'block', textTransform: 'uppercase', fontWeight: 800 }}>Ficha de producto</Typography>
+                    <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{viewingProducto.codigo}</Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ p: { xs: 1.5, sm: 2 }, display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(3, minmax(0, 1fr))' }, gap: { xs: 1, sm: 1.5 } }}>
+                  <Box sx={{ gridColumn: '1 / -1' }}>
+                    <Typography variant="caption" color="text.secondary">Nombre del producto</Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.25 }}>{viewingProducto.nombre}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.25 }}>Estado</Typography>
+                    <Chip
+                      icon={viewingProducto.estado === 'Activo' ? <CheckCircleIcon style={{ fontSize: 16 }} /> : <CancelIcon style={{ fontSize: 16 }} />}
+                      label={nombreEstado(viewingProducto.estado)}
+                      size="small"
+                      color={viewingProducto.estado === 'Activo' ? 'success' : 'default'}
+                      variant="outlined"
+                      sx={{ fontWeight: 600 }}
+                    />
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Tipo de producto</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{getTipoProductoNombre(viewingProducto)}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Producto</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{getProductoBaseNombre(viewingProducto)}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Variedad</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{getVariedadNombre(viewingProducto)}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Unidad de medida</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{nombreCatalogo(unidades, unidadProducto(viewingProducto))}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <AttachMoneyIcon fontSize="inherit" /> Precio unitario
                     </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>
-                      {getTipoProductoNombre(viewingProducto)}
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px' }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      Producto
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>
-                      {getProductoBaseNombre(viewingProducto)}
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px' }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      Variedad
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>
-                      {getVariedadNombre(viewingProducto)}
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px' }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      Unidad
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>
-                      {nombreCatalogo(unidades, unidadProducto(viewingProducto))}
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px' }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <AttachMoneyIcon fontSize="inherit" /> Precio Unitario (PrecioUnitario)
-                    </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main', mt: 0.2 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 800, color: 'primary.main' }}>
                       ${(viewingProducto.precioUnitario || viewingProducto.precioVenta)?.toLocaleString('es-AR')}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                    <Typography variant="caption" color="text.secondary">
                       Por {nombreCatalogo(unidades, unidadProducto(viewingProducto))}
                     </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Paper
-                    variant="outlined"
-                    sx={{
-                      p: 1.8,
-                      borderRadius: '10px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Inventory2OutlinedIcon fontSize="inherit" /> Stock en Almacén
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontWeight: 700,
-                          mt: 0.2,
-                          color:
-                            viewingProducto.stockActual === 0
-                              ? 'error.main'
-                              : Number(viewingProducto.stockActual) <= Number(viewingProducto.stockMinimo || 10)
-                              ? 'warning.main'
-                              : 'text.primary',
-                        }}
-                      >
-                        {viewingProducto.stockActual} {nombreCatalogo(unidades, unidadProducto(viewingProducto))}
-                      </Typography>
-                    </Box>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      color="inherit"
-                      onClick={() => {
-                        const prod = viewingProducto;
-                        setViewingProducto(null);
-                        handleOpenStockModal(prod);
-                      }}
-                      sx={{ textTransform: 'none', fontSize: '0.75rem', fontWeight: 600, borderRadius: '8px' }}
-                    >
-                      Ajustar
-                    </Button>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Paper variant="outlined" sx={{ p: 1.8, borderRadius: '10px' }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      Stock Mínimo de Seguridad
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Inventory2OutlinedIcon fontSize="inherit" /> Stock actual
                     </Typography>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: 0.2, color: 'text.secondary' }}>
-                      {viewingProducto.stockMinimo || 15} {nombreCatalogo(unidades, unidadProducto(viewingProducto))}
+                    <Typography variant="body1" sx={{
+                      fontWeight: 700,
+                      color: viewingProducto.stockActual === 0
+                        ? 'error.main'
+                        : Number(viewingProducto.stockActual) <= Number(viewingProducto.stockMinimo || 10)
+                          ? 'warning.main'
+                          : 'text.primary',
+                    }}>
+                      {viewingProducto.stockActual} {nombreCatalogo(unidades, unidadProducto(viewingProducto))}
                     </Typography>
-                  </Paper>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Paper variant="outlined" sx={{ p: 2, borderRadius: '10px' }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                      <MenuBookIcon fontSize="small" color="primary" /> Receta de Producción Asociada
-                    </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
-                      <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                        {viewingProducto.recetaNombre || 'Sin receta vinculada'}
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Stock mínimo de seguridad</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewingProducto.stockMinimo || 15} {nombreCatalogo(unidades, unidadProducto(viewingProducto))}</Typography>
+                  </Box>
+                  <Box sx={{ gridColumn: { xs: '1 / -1', sm: 'span 2' }, borderTop: '1px solid', borderColor: 'divider', pt: 1 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Receta de producción</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {viewingProducto.recetaNombre || 'Sin receta vinculada'}
                       </Typography>
                       {viewingProducto.recetaId && (
                         <Button
@@ -1346,38 +1196,23 @@ export const ProductosCompuestosScreen = () => {
                             setViewingProducto(null);
                             handleOpenRecetaModal(viewingProducto);
                           }}
-                          sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.8rem' }}
+                          sx={{ textTransform: 'none', fontWeight: 700, py: 0 }}
                         >
                           Ver / Cambiar
                         </Button>
                       )}
                     </Box>
-                  </Paper>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                    Conservación y Vida Útil:
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.2 }}>
-                    {viewingProducto.vidaUtil}
-                  </Typography>
-                </Grid>
-
-                {viewingProducto.descripcion && (
-                  <Grid item xs={12}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      Descripción:
+                  </Box>
+                  <Box sx={{ gridColumn: { xs: '1 / -1', sm: 'span 1' }, borderTop: '1px solid', borderColor: 'divider', pt: 1 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Descripción</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {viewingProducto.descripcion || 'Sin descripción registrada.'}
                     </Typography>
-                    <Typography variant="body2" sx={{ mt: 0.2, color: 'text.primary' }}>
-                      {viewingProducto.descripcion}
-                    </Typography>
-                  </Grid>
-                )}
-              </Grid>
+                  </Box>
+                </Box>
+              </Paper>
             </DialogContent>
-            <Divider />
-            <DialogActions sx={{ p: 2, gap: 1 }}>
+            <DialogActions sx={{ px: 2, pt: 0.5, pb: 1.5, gap: 1 }}>
               <Button onClick={() => setViewingProducto(null)} color="inherit" sx={{ textTransform: 'none', fontWeight: 600 }}>
                 Cerrar
               </Button>

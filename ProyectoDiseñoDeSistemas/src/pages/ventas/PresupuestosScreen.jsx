@@ -1,4 +1,5 @@
 import { useNombreEstado } from '../../context/AppContext';
+import { RecordIcon } from '../../components/shared/ModuleUI';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -19,7 +20,6 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -280,27 +280,19 @@ export const PresupuestosScreen = () => {
                   <TableCell>{getStatusChip(item.estado)}</TableCell>
                   <TableCell align="center">
                     {item.estado === 'Pendiente' && (
-                      <Tooltip title="Aceptar y Convertir a Pedido">
-                        <IconButton size="small" color="success" onClick={() => handleConvertirAPedido(item)}>
-                          <ShoppingCartCheckoutIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      <RecordIcon label="Aceptar y Convertir a Pedido" color="success" onClick={() => handleConvertirAPedido(item)}>
+                        <ShoppingCartCheckoutIcon fontSize="small" />
+                      </RecordIcon>
                     )}
-                    <Tooltip title="Ver Cotización">
-                      <IconButton size="small" color="info" onClick={() => handleOpenDetail(item)}>
-                        <VisibilityOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Editar">
-                      <IconButton size="small" color="primary" onClick={() => handleOpenEditForm(item)}>
-                        <EditOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Eliminar">
-                      <IconButton size="small" color="error" onClick={() => handleOpenDelete(item)}>
-                        <DeleteOutlineIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <RecordIcon label="Ver Cotización" color="default" onClick={() => handleOpenDetail(item)}>
+                      <VisibilityOutlinedIcon fontSize="small" />
+                    </RecordIcon>
+                    <RecordIcon label="Editar" color="primary" onClick={() => handleOpenEditForm(item)}>
+                      <EditOutlinedIcon fontSize="small" />
+                    </RecordIcon>
+                    <RecordIcon label="Eliminar" color="error" onClick={() => handleOpenDelete(item)}>
+                      <DeleteOutlineIcon fontSize="small" />
+                    </RecordIcon>
                   </TableCell>
                 </TableRow>
               ))

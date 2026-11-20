@@ -9,6 +9,7 @@ import { AppLayout } from './components/layout';
 import ClientePortalLayout from './components/cliente/ClientePortalLayout';
 import ClienteAccesoScreen from './pages/cliente/ClienteAccesoScreen';
 import MayoristasTienda from './components/cliente/MayoristasTienda';
+import { ModuleSurface } from './components/shared/ModuleUI';
 
 // ── All screen imports ──────────────────────────────────────
 import CatalogoScreen from './pages/cliente/CatalogoScreen';
@@ -93,7 +94,15 @@ const PageContent = () => {
           </Typography>
           <Box sx={{ width: 40, height: 3, background: (theme) => `linear-gradient(90deg, ${theme.palette.primary.main}, transparent)`, borderRadius: 2, mt: 0.8 }} />
         </Box>}
-        {Screen ? <Screen /> : (
+        {Screen ? (
+          !isCliente ? (
+            <ModuleSurface>
+              <Screen />
+            </ModuleSurface>
+          ) : (
+            <Screen />
+          )
+        ) : (
           <Box sx={{ color: 'text.disabled', mt: 6, textAlign: 'center' }}>
             <Typography variant="h6">Seleccioná una sección del menú</Typography>
           </Box>
@@ -114,6 +123,47 @@ const AppRoot = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      {!accesoCliente && !paginaPortalCliente && (
+        <GlobalStyles
+          styles={(t) => ({
+            '.MuiButton-root': {
+              minHeight: 44,
+            },
+            '.MuiButton-contained.MuiButton-colorPrimary': {
+              backgroundColor: (t.palette.mode === 'dark' ? t.palette.primary.main : t.palette.primary.dark) + ' !important',
+              color: (t.palette.mode === 'dark' ? t.palette.common.black : t.palette.common.white) + ' !important',
+              '&:hover': {
+                backgroundColor: (t.palette.mode === 'dark' ? t.palette.primary.light : t.palette.primary.dark) + ' !important',
+              },
+            },
+            '.MuiButton-outlined.MuiButton-colorPrimary, .MuiButton-text.MuiButton-colorPrimary': {
+              color: (t.palette.mode === 'dark' ? t.palette.primary.light : t.palette.primary.dark) + ' !important',
+            },
+            '.MuiButton-contained.MuiButton-colorError': {
+              backgroundColor: t.palette.error.dark + ' !important',
+              color: t.palette.common.white + ' !important',
+            },
+            '.MuiTableCell-root .MuiIconButton-root:not(.MuiTablePagination-root .MuiIconButton-root)': {
+              border: `1px solid ${t.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.12)'}`,
+              borderRadius: '8px',
+              minWidth: 38,
+              minHeight: 38,
+              margin: '2px',
+              transition: 'all 0.15s ease-in-out',
+              '&:hover': {
+                backgroundColor: t.palette.action.hover,
+                borderColor: t.palette.text.secondary,
+              },
+            },
+            '.MuiInputBase-root:not(.MuiTablePagination-root .MuiInputBase-root)': {
+              minHeight: 44,
+            },
+            '.MuiDialog-paper': {
+              borderRadius: '16px !important',
+            },
+          })}
+        />
+      )}
       {accesoAdmin ? <AdminLoginPage /> : !user || user.role === 'cliente' || accesoCliente || paginaPortalCliente ? (
         <ClientePortalLayout>{accesoCliente ? <ClienteAccesoScreen key={currentPage} /> : <PageContent />}</ClientePortalLayout>
       ) : (

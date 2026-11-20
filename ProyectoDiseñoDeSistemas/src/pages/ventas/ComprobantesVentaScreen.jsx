@@ -1,4 +1,5 @@
 import { useNombreEstado } from '../../context/AppContext';
+import { RecordIcon } from '../../components/shared/ModuleUI';
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -19,7 +20,6 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -240,16 +240,12 @@ export const ComprobantesVentaScreen = () => {
                     <Chip label={nombreEstado(item.estado)} color={item.estado.includes('Pagada') ? 'success' : 'warning'} size="small" />
                   </TableCell>
                   <TableCell align="center">
-                    <Tooltip title="Ver Comprobante Fiscal">
-                      <IconButton size="small" color="info" onClick={() => handleOpenDetail(item)}>
-                        <VisibilityOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Anular Comprobante">
-                      <IconButton size="small" color="error" onClick={() => handleOpenDelete(item)}>
-                        <DeleteOutlineIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <RecordIcon label="Ver Comprobante Fiscal" color="default" onClick={() => handleOpenDetail(item)}>
+                      <VisibilityOutlinedIcon fontSize="small" />
+                    </RecordIcon>
+                    <RecordIcon label="Anular Comprobante" color="error" onClick={() => handleOpenDelete(item)}>
+                      <DeleteOutlineIcon fontSize="small" />
+                    </RecordIcon>
                   </TableCell>
                 </TableRow>
               ))

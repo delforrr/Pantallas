@@ -67,6 +67,7 @@ import {
   verificarDisponibilidadMultiplesProductos,
 } from './mockData';
 import { OrdenProduccionCard } from '../../components/produccion';
+import { SummaryCards, RecordIcon } from '../../components/shared/ModuleUI';
 
 const ESTADO_OP_COLORS = {
   Planificada: 'default',
@@ -108,7 +109,7 @@ export const OrdenProduccionScreen = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('TODOS');
   const [filtroInsumos, setFiltroInsumos] = useState('TODOS');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
+  const [viewMode, setViewMode] = useState('table'); // 'grid' | 'table'
 
   // Modales
   const [openNewDialog, setOpenNewDialog] = useState(false);
@@ -633,6 +634,16 @@ export const OrdenProduccionScreen = () => {
 
       {tabIndex === 0 && (
         <>
+          {/* Métricas de Órdenes de Producción estilo Maquinaria */}
+          <SummaryCards
+            items={[
+              { label: 'Órdenes de producción', value: stats.total },
+              { label: 'Volumen planificado', value: `${stats.totalKilos} kg`, color: 'info.main' },
+              { label: 'En proceso', value: stats.totalEnProceso, color: 'primary.main' },
+              { label: 'Con faltante de insumos', value: stats.conFaltante, color: 'error.main' },
+            ]}
+          />
+
           {/* ── Barra de Búsqueda, Filtros con Chips de Resumen y Acciones ─── */}
           <Box
         sx={{
@@ -860,14 +871,31 @@ export const OrdenProduccionScreen = () => {
                       />
                     </Tooltip>
                   </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {row.items && row.items.length > 0
-                        ? row.items.length === 1
-                          ? row.items[0].productoNombre
-                          : `${row.items[0].productoNombre} (+${row.items.length - 1} más)`
-                        : row.productoNombre}
-                    </Typography>
+                  <TableCell sx={{ maxWidth: 200 }}>
+                    {(() => {
+                      const fullName =
+                        row.items && row.items.length > 0
+                          ? row.items.length === 1
+                            ? row.items[0].productoNombre
+                            : `${row.items[0].productoNombre} (+${row.items.length - 1} más)`
+                          : row.productoNombre;
+                      return (
+                        <Tooltip title={fullName}>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 600,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              maxWidth: 190,
+                            }}
+                          >
+                            {fullName}
+                          </Typography>
+                        </Tooltip>
+                      );
+                    })()}
                     <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700 }}>
                       {row.cantidadKilos} kg ({row.items?.length || 1} productos)
                     </Typography>
@@ -946,56 +974,29 @@ export const OrdenProduccionScreen = () => {
                     />
                   </TableCell>
                   <TableCell align="right" sx={{ whiteSpace: 'nowrap', width: 170 }}>
-                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5, flexWrap: 'nowrap' }}>
-                      <Tooltip title="Ver Detalle y Nota de Materia Prima">
-                        <IconButton size="small" onClick={() => handleOpenDetail(row)} sx={{ color: 'text.secondary' }}>
-                          <VisibilityOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.75, flexWrap: 'nowrap' }}>
+                      <RecordIcon label="Ver Detalle y Nota de Materia Prima" color="default" onClick={() => handleOpenDetail(row)}>
+                        <VisibilityOutlinedIcon fontSize="small" />
+                      </RecordIcon>
                       {row.estado === 'Planificada' && (
-                        <Tooltip title="Editar Orden">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => handleOpenEdit(row)}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <RecordIcon label="Editar Orden" color="primary" onClick={() => handleOpenEdit(row)}>
+                          <EditIcon fontSize="small" />
+                        </RecordIcon>
                       )}
                       {row.estado === 'Planificada' && (
-                        <Tooltip title="Iniciar Elaboración">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => handleCambiarEstado(row.id, 'En Proceso')}
-                          >
-                            <PlayArrowIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <RecordIcon label="Iniciar Elaboración" color="primary" onClick={() => handleCambiarEstado(row.id, 'En Proceso')}>
+                          <PlayArrowIcon fontSize="small" />
+                        </RecordIcon>
                       )}
                       {row.estado === 'En Proceso' && (
-                        <Tooltip title="Marcar como Finalizada">
-                          <IconButton
-                            size="small"
-                            color="success"
-                            onClick={() => handleCambiarEstado(row.id, 'Finalizada')}
-                          >
-                            <DoneAllIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <RecordIcon label="Marcar como Finalizada" color="success" onClick={() => handleCambiarEstado(row.id, 'Finalizada')}>
+                          <DoneAllIcon fontSize="small" />
+                        </RecordIcon>
                       )}
                       {row.estado === 'Planificada' && (
-                        <Tooltip title="Cancelar Orden">
-                          <IconButton
-                            size="small"
-                            color="default"
-                            onClick={() => handleCambiarEstado(row.id, 'Cancelada')}
-                            sx={{ color: 'text.secondary' }}
-                          >
-                            <BlockIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <RecordIcon label="Cancelar Orden" color="error" onClick={() => handleCambiarEstado(row.id, 'Cancelada')}>
+                          <BlockIcon fontSize="small" />
+                        </RecordIcon>
                       )}
                     </Box>
                   </TableCell>
@@ -1314,9 +1315,19 @@ export const OrdenProduccionScreen = () => {
 
             {/* Fila para agregar producto */}
             <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: '10px', bgcolor: 'action.hover' }}>
-              <Grid container spacing={1.5} alignItems="center">
-                <Grid item xs={12} sm={7}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  alignItems: 'center',
+                  gap: 1.5,
+                  width: '100%',
+                }}
+              >
+                {/* Selector de Producto con máximo ancho disponible */}
+                <Box sx={{ flex: 1, minWidth: 0, width: { xs: '100%', sm: 'auto' } }}>
                   <Autocomplete
+                    fullWidth
                     size="small"
                     options={recetas}
                     getOptionLabel={(option) =>
@@ -1330,10 +1341,10 @@ export const OrdenProduccionScreen = () => {
                     slotProps={{
                       popper: {
                         sx: {
-                          minWidth: 340,
+                          minWidth: 360,
                           zIndex: 1400,
                           '& .MuiAutocomplete-paper': {
-                            minWidth: 340,
+                            minWidth: 360,
                           },
                           '& .MuiAutocomplete-option': {
                             fontSize: '0.85rem',
@@ -1345,42 +1356,54 @@ export const OrdenProduccionScreen = () => {
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label="Producto a Elaborar (Escribir o Seleccionar)"
+                        label="Producto a Elaborar"
                         placeholder="Escribí para buscar producto o receta..."
                       />
                     )}
                     noOptionsText="No se encontraron recetas"
                   />
-                </Grid>
+                </Box>
 
-                <Grid item xs={7} sm={3}>
+                {/* Controles de Cantidad y Botón Agregar a la derecha */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    width: { xs: '100%', sm: 'auto' },
+                    flexShrink: 0,
+                  }}
+                >
                   <TextField
-                    fullWidth
                     size="small"
-                    label="Cantidad en Kilos"
+                    label="Cantidad"
                     type="number"
                     value={cantidadKilosToAdd}
                     onChange={(e) => setCantidadKilosToAdd(Math.max(1, e.target.value))}
                     InputProps={{
                       endAdornment: <InputAdornment position="end">kg</InputAdornment>,
                     }}
+                    sx={{ width: { xs: '50%', sm: 130 } }}
                   />
-                </Grid>
 
-                <Grid item xs={5} sm={2}>
                   <Button
-                    fullWidth
                     variant="contained"
                     color="primary"
                     startIcon={<AddIcon />}
                     onClick={handleAddItem}
                     disabled={!selectedRecetaToAdd || !cantidadKilosToAdd || Number(cantidadKilosToAdd) <= 0}
-                    sx={{ height: 40, fontWeight: 700 }}
+                    sx={{
+                      height: 40,
+                      fontWeight: 700,
+                      whiteSpace: 'nowrap',
+                      px: 2.5,
+                      width: { xs: '50%', sm: 'auto' },
+                    }}
                   >
                     Agregar
                   </Button>
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
             </Paper>
 
             {/* Tabla de Productos Cargados */}
