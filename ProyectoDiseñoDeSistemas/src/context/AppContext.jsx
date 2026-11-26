@@ -124,11 +124,12 @@ export const AppProvider = ({ children }) => {
     try {
       sessionStorage.removeItem('pastafab_user');
       sessionStorage.removeItem('pastafab_page');
-      if (typeof window !== 'undefined') {
-        window.history.pushState({ page: loginPage }, '', pageUrl(loginPage));
-      }
     } catch {
       // ignore
+    }
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({ page: loginPage }, '', pageUrl(loginPage));
+      window.location.reload();
     }
   };
 

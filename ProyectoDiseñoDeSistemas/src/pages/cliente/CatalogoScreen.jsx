@@ -26,7 +26,6 @@ import {
   useClientStore,
   clientStore,
   MINIMO_MAYORISTA,
-  calcularPresupuestoMayorista,
   CATEGORIAS_PRODUCTOS,
   CATALOGO_CLIENTE,
 } from './mockData';
@@ -55,12 +54,6 @@ export const CatalogoScreen = () => {
     message: '',
     severity: 'success',
   });
-
-  const cartSummary = useMemo(() => {
-    const totalItems = store.cart.length + Object.keys(store.mayoristaItems).length;
-    const totalPrice = store.cart.reduce((acc, item) => acc + item.subtotal, 0) + calcularPresupuestoMayorista(store.mayoristaItems).total;
-    return { totalItems, totalPrice };
-  }, [store.cart, store.mayoristaItems]);
 
   const handleSocialClick = (network) => {
     if (network === 'WhatsApp') {
@@ -104,7 +97,6 @@ export const CatalogoScreen = () => {
          ───────────────────────────────────────────────────────────── */}
       {!vistaCompleta ? (
         <ClienteLanding
-          cartSummary={cartSummary}
           onCatalogo={() => { clientStore.setCatalogoModo('productos'); clientStore.setCarritoModo('habitual'); }}
           onEvento={() => { clientStore.setCatalogoModo('mayorista'); clientStore.setCarritoModo('mayorista'); handleClearFilters(); }}
           onAbout={() => setAboutModalOpen(true)}
@@ -117,7 +109,7 @@ export const CatalogoScreen = () => {
            ───────────────────────────────────────────────────────────── */
         <Fade in timeout={300}>
           <Box sx={{ minHeight: '100vh', bgcolor: 'primary.main' }}>
-            <ClienteCatalogoHeader cartSummary={cartSummary} productosActivo sobreVerde onInicio={() => clientStore.setCatalogoModo('inicio')} onProductos={handleClearFilters} />
+            <ClienteCatalogoHeader productosActivo sobreVerde onInicio={() => clientStore.setCatalogoModo('inicio')} onProductos={handleClearFilters} />
             <Box sx={{ maxWidth: 1520, mx: 'auto', p: { xs: 1.5, md: 5 } }}>
             <Box sx={{ pt: { xs: 0, md: 3 }, pb: 3, backgroundImage: `url("${ingredientesPattern}")`, backgroundRepeat: 'repeat', backgroundSize: { xs: '320px', md: '440px' } }}>
             <Box sx={{ bgcolor: 'transparent', px: { xs: 0, sm: 2, md: 4 }, pt: { xs: 0, md: 2 }, mb: 0 }}>

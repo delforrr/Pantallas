@@ -18,10 +18,14 @@ import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import { useClientStore, clientStore } from "../../pages/cliente/mockData";
 import { useApp } from "../../context/AppContext";
+import { ConfirmarPedidoModal } from "./ConfirmarPedidoModal";
 
 export const ResumenPedido = ({ onOrderSuccess }) => {
   const { cart, cliente } = useClientStore();
   const { navigate } = useApp();
+
+  const DIRECCION_FABRICA = "San Martín 1123";
+  const LUGAR_RETIRO_FABRICA = `Fábrica (${DIRECCION_FABRICA})`;
 
   const [modalidadEntrega, setModalidadEntrega] = useState("Retiro en Fábrica");
   const [medioPago, setMedioPago] = useState("Efectivo en Mostrador");
@@ -29,6 +33,7 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
     cliente?.direccion || "",
   );
   const [observaciones, setObservaciones] = useState("");
+  const [openConfirmarPedido, setOpenConfirmarPedido] = useState(false);
 
   // Cálculos financieros para venta habitual minorista
   const subtotal = cart.reduce(
@@ -50,7 +55,7 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
       modalidadEntrega,
       domicilioEntrega:
         modalidadEntrega === "Retiro en Fábrica"
-          ? "Retiro en Fábrica"
+          ? LUGAR_RETIRO_FABRICA
           : direccionEntrega.trim(),
       telefonoContacto: cliente?.telefono || "",
       medioPago,
@@ -82,7 +87,28 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
     }
   };
 
+  const detallesPedido = [
+    { label: "Modalidad de entrega", value: modalidadEntrega },
+    {
+      label: "Lugar de entrega / retiro",
+      value:
+        modalidadEntrega === "Retiro en Fábrica"
+          ? LUGAR_RETIRO_FABRICA
+          : direccionEntrega.trim(),
+    },
+    { label: "Medio de pago", value: medioPago },
+    ...(observaciones.trim()
+      ? [{ label: "Observaciones", value: observaciones.trim() }]
+      : []),
+  ];
+
+  const handleConfirmarDesdeModal = () => {
+    setOpenConfirmarPedido(false);
+    handleConfirmOrder();
+  };
+
   return (
+    <>
     <Paper
       elevation={1}
       sx={{
@@ -142,7 +168,11 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
       </Box>
 
       {/* Selector de Modalidad de Entrega */}
-      <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+      <FormControl
+        fullWidth
+        size="small"
+        sx={{ mb: modalidadEntrega === "Retiro en Fábrica" ? 1 : 2 }}
+      >
         <InputLabel id="modalidad-entrega-label">
           Modalidad de Entrega
         </InputLabel>
@@ -173,6 +203,23 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
           </MenuItem>
         </Select>
       </FormControl>
+
+      {modalidadEntrega === "Retiro en Fábrica" && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            mb: 2,
+            px: 1,
+          }}
+        >
+          <StorefrontOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+            Retirás en la fábrica: <strong>{DIRECCION_FABRICA}</strong>
+          </Typography>
+        </Box>
+      )}
 
       {/* Domicilio de Entrega (si no es retiro en fábrica) */}
       {modalidadEntrega !== "Retiro en Fábrica" && (
@@ -280,7 +327,7 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
         fullWidth
         size="large"
         disabled={cart.length === 0 || faltanDatosEntrega}
-        onClick={handleConfirmOrder}
+        onClick={() => setOpenConfirmarPedido(true)}
         startIcon={<CheckCircleIcon />}
         sx={{
           py: 1.5,
@@ -320,6 +367,20 @@ export const ResumenPedido = ({ onOrderSuccess }) => {
         ¿Buscás pedidos mayoristas semanales o de eventos? Ingresá desde la portada a <strong>Pedido Mayorista</strong> (mínimo 10 unidades).
       </Typography>
     </Paper>
+
+    <ConfirmarPedidoModal
+      open={openConfirmarPedido}
+      onClose={() => setOpenConfirmarPedido(false)}
+      onConfirm={handleConfirmarDesdeModal}
+      items={cart}
+      detalles={detallesPedido}
+      subtotal={subtotal}
+      descuento={0}
+      envio={costoEnvio}
+      total={total}
+      confirmLabel="Confirmar y Realizar Pedido"
+    />
+    </>
   );
 };
 
