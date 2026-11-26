@@ -1,6 +1,6 @@
 import { agruparEstados, gruposDe, gruposEstados } from './estados';
 import { useState } from 'react';
-import { Alert, MenuItem, TextField } from '@mui/material';
+import { Alert, Box, MenuItem, TextField } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
 import RestoreOutlinedIcon from '@mui/icons-material/RestoreOutlined';
@@ -64,6 +64,26 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
 
   return (
     <ModuleSurface>
+      <Box sx={{
+        minWidth: 0,
+        '& .MuiTable-root': { minWidth: 0, width: '100%', tableLayout: 'fixed' },
+        '& .MuiTableCell-root': {
+          minWidth: 0,
+          whiteSpace: 'normal',
+          overflowWrap: 'anywhere',
+          px: { xs: 1, sm: 2 },
+        },
+        '& .MuiTableCell-root:last-child': {
+          width: soloNombre ? { xs: 64, sm: 80 } : { xs: 116, sm: 132 },
+          position: 'static',
+        },
+        '& [role="group"] .MuiTextField-root': { minWidth: 0, maxWidth: '100%' },
+        '& [role="group"] > .MuiStack-root > .MuiStack-root': {
+          minWidth: 0,
+          flexShrink: 1,
+          flexWrap: 'wrap',
+        },
+      }}>
       {mensaje && <Alert severity="success" onClose={() => avisar('')} sx={{ mb: 2 }}>{mensaje}</Alert>}
       {error && !borrador && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <RecordsView rows={visibles} cardTitle={r => r.nombre} empty="No se encontraron registros."
@@ -124,6 +144,7 @@ export default function CatalogoScreen({ tipo, entidad, padre, etiquetaPadre, so
           </TextField>}
         </>}
       </FormDialog>
+      </Box>
     </ModuleSurface>
   );
 }
