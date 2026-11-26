@@ -194,7 +194,20 @@ export const ComprobantesVentaScreen = () => {
         <Table sx={{
           width: '100%',
           tableLayout: 'fixed',
-          '& .MuiTableCell-root': { px: 1, overflowWrap: 'anywhere' },
+          '& .MuiTableCell-root': {
+            px: 1.5,
+            py: 2,
+            textAlign: 'center',
+            verticalAlign: 'middle',
+            overflowWrap: 'anywhere',
+          },
+          '& .MuiTableHead-root .MuiTableCell-root': {
+            fontSize: '0.8125rem',
+            lineHeight: 1.5,
+            whiteSpace: 'normal',
+            overflowWrap: 'normal',
+            textWrap: 'balance',
+          },
           '& .MuiTableCell-root:last-child': { width: 112 },
           '& .MuiChip-root': { maxWidth: '100%', height: 'auto', minHeight: 24 },
           '& .MuiChip-label': { whiteSpace: 'normal', overflowWrap: 'anywhere', py: 0.5 },
@@ -236,7 +249,7 @@ export const ComprobantesVentaScreen = () => {
                   </TableCell>
                   <TableCell><Typography variant="body2">{item.condicionPago}</Typography></TableCell>
                   <TableCell>
-                    <Chip label={nombreEstado(item.estado)} color={item.estado.includes('Pagada') ? 'success' : 'warning'} size="small" />
+                    <Chip label={item.estado === 'Pendiente de Cobro' ? 'Pendiente' : nombreEstado(item.estado)} color={item.estado.includes('Pagada') ? 'success' : 'warning'} size="small" />
                   </TableCell>
                   <TableCell align="center">
                     <RecordIcon label="Ver Comprobante Fiscal" color="default" onClick={() => handleOpenDetail(item)}>
@@ -427,7 +440,7 @@ export const ComprobantesVentaScreen = () => {
                   </Grid>
                   <Grid item xs={12} sm={6} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
                     <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>ESTADO FISCAL:</Typography>
-                    <Chip label={nombreEstado(selectedComprobante.estado)} color={selectedComprobante.estado.includes('Pagada') ? 'success' : 'warning'} size="small" sx={{ fontWeight: 700, ml: 1 }} />
+                    <Chip label={selectedComprobante.estado === 'Pendiente de Cobro' ? 'Pendiente' : nombreEstado(selectedComprobante.estado)} color={selectedComprobante.estado.includes('Pagada') ? 'success' : 'warning'} size="small" sx={{ fontWeight: 700, ml: 1 }} />
                   </Grid>
                 </Grid>
               }
