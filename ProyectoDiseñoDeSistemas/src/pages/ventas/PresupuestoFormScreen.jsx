@@ -110,7 +110,7 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
             {subtiposProducto.map(subtipo => <MenuItem key={subtipo} value={subtipo}>{subtipo}</MenuItem>)}
           </TextField>
           <Buscador
-            sx={{ width: { xs: '100%', sm: 320 }, minWidth: 0, maxWidth: '100%' }}
+            sx={{ width: { xs: '100%', sm: 400 }, minWidth: 0, maxWidth: '100%' }}
             options={productosDisponibles}
             listarAlEntrar={tipoProducto !== 'TODOS' || subtipoProducto !== 'TODOS'}
             value={null}
@@ -120,7 +120,7 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
             onChange={(_, producto) => { agregarItem(producto); setBusquedaProducto(''); }}
             renderInput={params => <TextField {...params} label="Buscar producto" placeholder="Escribí el nombre del producto" size="small" />}
           />
-          <Typography component="h2" variant="subtitle1" sx={{ fontWeight: 700, ml: 'auto', whiteSpace: 'nowrap' }}>Productos ({datos.items.length})</Typography>
+          <Typography component="h2" variant="subtitle1" sx={{ fontWeight: 700, ml: 'auto', mr: { sm: 4 }, whiteSpace: 'nowrap' }}>Productos ({datos.items.length})</Typography>
         </Box>
         <Box sx={{ display: 'grid', gap: 1 }}>
           {!datos.items.length && <Typography color="text.secondary" variant="body2">Buscá un producto para comenzar.</Typography>}
