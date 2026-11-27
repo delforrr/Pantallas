@@ -557,15 +557,15 @@ export const INITIAL_CIERRE_CAJA = {
 };
 
 export const CATALOGO_PRODUCTOS_VENTAS = [
-  { idProductoCompuesto: 101, nombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', categoria: 'Pasta Rellena', precioUnitario: 4500, stock: 45 },
-  { idProductoCompuesto: 102, nombre: 'Ravioles de Espinaca y Ricotta (Caja 1kg)', categoria: 'Pasta Rellena', precioUnitario: 4000, stock: 60 },
-  { idProductoCompuesto: 103, nombre: 'Fideos Tallarines al Huevo (Kg)', categoria: 'Pasta Simple', precioUnitario: 3200, stock: 80 },
-  { idProductoCompuesto: 104, nombre: 'Ñoquis de Papa Artesanales (Kg)', categoria: 'Pasta Simple', precioUnitario: 3600, stock: 50 },
-  { idProductoCompuesto: 105, nombre: 'Panzotti de Cordero al Malbec (Caja 1kg)', categoria: 'Pasta Gourmet', precioUnitario: 5800, stock: 25 },
-  { idProductoCompuesto: 201, nombre: 'Salsa Tuco Casero Especial (Pote 500cc)', categoria: 'Salsas', precioUnitario: 2500, stock: 40 },
-  { idProductoCompuesto: 202, nombre: 'Salsa Bolognesa Tradicional (Pote 500cc)', categoria: 'Salsas', precioUnitario: 2800, stock: 35 },
-  { idProductoCompuesto: 203, nombre: 'Salsa Cuatro Quesos Cremosa (Pote 500cc)', categoria: 'Salsas', precioUnitario: 3400, stock: 30 },
-  { idProductoCompuesto: 204, nombre: 'Salsa Pesto a la Genovesa (Pote 250cc)', categoria: 'Salsas', precioUnitario: 3100, stock: 20 },
+  { idProductoCompuesto: 101, tipoProducto: 'Pasta', subTipoProducto: 'Sorrentinos', nombre: 'Sorrentinos Jamón y Queso (Caja 1kg)', categoria: 'Pasta Rellena', precioUnitario: 4500, stock: 45 },
+  { idProductoCompuesto: 102, tipoProducto: 'Pasta', subTipoProducto: 'Ravioles', nombre: 'Ravioles de Espinaca y Ricotta (Caja 1kg)', categoria: 'Pasta Rellena', precioUnitario: 4000, stock: 60 },
+  { idProductoCompuesto: 103, tipoProducto: 'Pasta', subTipoProducto: 'Tallarines', nombre: 'Fideos Tallarines al Huevo (Kg)', categoria: 'Pasta Simple', precioUnitario: 3200, stock: 80 },
+  { idProductoCompuesto: 104, tipoProducto: 'Pasta', subTipoProducto: 'Ñoquis', nombre: 'Ñoquis de Papa Artesanales (Kg)', categoria: 'Pasta Simple', precioUnitario: 3600, stock: 50 },
+  { idProductoCompuesto: 105, tipoProducto: 'Pasta', subTipoProducto: 'Panzotti', nombre: 'Panzotti de Cordero al Malbec (Caja 1kg)', categoria: 'Pasta Gourmet', precioUnitario: 5800, stock: 25 },
+  { idProductoCompuesto: 201, tipoProducto: 'Salsa', subTipoProducto: 'Tuco', nombre: 'Salsa Tuco Casero Especial (Pote 500cc)', categoria: 'Salsas', precioUnitario: 2500, stock: 40 },
+  { idProductoCompuesto: 202, tipoProducto: 'Salsa', subTipoProducto: 'Bolognesa', nombre: 'Salsa Bolognesa Tradicional (Pote 500cc)', categoria: 'Salsas', precioUnitario: 2800, stock: 35 },
+  { idProductoCompuesto: 203, tipoProducto: 'Salsa', subTipoProducto: 'Cuatro quesos', nombre: 'Salsa Cuatro Quesos Cremosa (Pote 500cc)', categoria: 'Salsas', precioUnitario: 3400, stock: 30 },
+  { idProductoCompuesto: 204, tipoProducto: 'Salsa', subTipoProducto: 'Pesto', nombre: 'Salsa Pesto a la Genovesa (Pote 250cc)', categoria: 'Salsas', precioUnitario: 3100, stock: 20 },
 ];
 
 /**
