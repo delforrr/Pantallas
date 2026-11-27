@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, MenuItem, Paper, Stack, Tab, Tabs, TextField, Typography, useMediaQuery } from '@mui/material';
 import { alpha, darken, lighten } from '@mui/material/styles';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import BuildCircleOutlinedIcon from '@mui/icons-material/BuildCircleOutlined';
@@ -21,7 +21,12 @@ const panel = {
 };
 
 const coloresCobros = ['primary.main', 'text.secondary', 'primary.dark', 'text.primary', 'action.disabled'];
-const resumenPendientes = 4;
+const secciones = [
+  { id: 'indicadores', titulo: 'Resumen' },
+  { id: 'pendientes', titulo: 'Pendientes' },
+  { id: 'entregas', titulo: 'Entregas' },
+  { id: 'cobros', titulo: 'Cobros' },
+];
 
 const indicadores = [
   { destino: 'pedidos', titulo: 'Pedidos vencidos o para hoy', modulo: 'Pedidos', tono: 'info', Icono: LocalShippingOutlinedIcon },
@@ -36,6 +41,9 @@ function Indicadores() {
     <Box component="section" aria-label="Indicadores operativos" sx={{
       display: 'grid', gap: { xs: 1, sm: 2 },
       gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: 'repeat(4, minmax(0, 1fr))' },
+      '@media (min-width: 700px) and (max-height: 579px)': {
+        gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+      },
     }}>
       {indicadores.map(({ destino, titulo, modulo, tono, Icono }) => (
         <Paper
@@ -104,9 +112,12 @@ function Acceso({ destino, children, etiqueta }) {
   );
 }
 
-function Pendientes() {
-  const [mostrarTodo, setMostrarTodo] = useState(false);
-  const visibles = mostrarTodo ? alertas : alertas.slice(0, resumenPendientes);
+function Pendientes({ filasPorPagina }) {
+  const [pagina, setPagina] = useState(0);
+  const paginas = Math.ceil(alertas.length / filasPorPagina);
+  const paginaVisible = Math.min(pagina, Math.max(0, paginas - 1));
+  const inicio = paginaVisible * filasPorPagina;
+  const visibles = alertas.slice(inicio, inicio + filasPorPagina);
   return (
     <Paper component="section" variant="outlined" aria-labelledby="pendientes-titulo" sx={panel}>
       <Stack direction="row" sx={{ alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
@@ -141,44 +152,52 @@ function Pendientes() {
         ))}
       </Box>
       {alertas.length === 0 && <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>No hay pendientes de atención.</Typography>}
-      {alertas.length > resumenPendientes && (
-        <Button
-          color="inherit"
-          aria-expanded={mostrarTodo}
-          aria-controls="pendientes-lista"
-          onClick={() => setMostrarTodo(!mostrarTodo)}
-          sx={{ mt: 0.5 }}
-        >
-          {mostrarTodo ? 'Mostrar menos' : 'Ver todos los pendientes'}
-        </Button>
+      {paginas > 1 && (
+        <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+          <Button color="inherit" aria-controls="pendientes-lista" disabled={paginaVisible === 0} onClick={() => setPagina(paginaVisible - 1)}>
+            Anterior
+          </Button>
+          <Typography variant="caption" color="text.secondary" aria-live="polite">
+            {inicio + 1}–{inicio + visibles.length} de {alertas.length}
+          </Typography>
+          <Button color="inherit" aria-controls="pendientes-lista" disabled={paginaVisible === paginas - 1} onClick={() => setPagina(paginaVisible + 1)}>
+            Siguiente
+          </Button>
+        </Stack>
       )}
     </Paper>
   );
 }
 
-function Entregas() {
+function Entregas({ compactarGrafico }) {
   const maximo = Math.max(0, ...entregas.map((dia) => dia.cantidad));
   const paso = Math.max(1, Math.ceil((maximo + 1) / 3));
   const marcas = [3, 2, 1, 0].map((indice) => indice * paso);
+  const altura = compactarGrafico ? 84 : 136;
   return (
-    <Paper component="section" variant="outlined" aria-labelledby="entregas-titulo" sx={panel}>
-      <Typography id="entregas-titulo" component="h2" sx={{ fontSize: 18, fontWeight: 700 }}>Próximas entregas</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>Pedidos abiertos · próximos 7 días</Typography>
-      <Box sx={{ display: 'grid', gridTemplateColumns: '2ch minmax(0, 1fr)', columnGap: 1, mt: 2 }}>
-        <Stack aria-hidden="true" sx={{ justifyContent: 'space-between', height: 146, textAlign: 'right', color: 'text.secondary', fontSize: 12, lineHeight: 1 }}>
+    <Paper component="section" variant="outlined" aria-labelledby="entregas-titulo" sx={{ ...panel, ...(compactarGrafico && { p: 1.5 }) }}>
+      <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 0.5, flexWrap: 'wrap' }}>
+        <Box>
+          <Typography id="entregas-titulo" component="h2" sx={{ fontSize: 18, fontWeight: 700 }}>Próximas entregas</Typography>
+          <Typography variant="body2" color="text.secondary">Pedidos abiertos · próximos 7 días</Typography>
+        </Box>
+        <Acceso destino="pedidos">Ir a Pedidos</Acceso>
+      </Stack>
+      <Box sx={{ display: 'grid', gridTemplateColumns: '2ch minmax(0, 1fr)', columnGap: 1, mt: 1.5 }}>
+        <Stack aria-hidden="true" sx={{ justifyContent: 'space-between', height: altura + 10, textAlign: 'right', color: 'text.secondary', fontSize: 12, lineHeight: 1 }}>
           {marcas.map((marca) => <span key={marca}>{marca}</span>)}
         </Stack>
         <Box sx={{ position: 'relative' }}>
-          <Stack aria-hidden="true" sx={{ justifyContent: 'space-between', position: 'absolute', inset: '5px 0 auto', height: 136 }}>
+          <Stack aria-hidden="true" sx={{ justifyContent: 'space-between', position: 'absolute', inset: '5px 0 auto', height: altura }}>
             {marcas.map((marca) => <Box key={marca} sx={{ borderTop: '1px solid', borderColor: 'divider' }} />)}
           </Stack>
           <Box component="ol" aria-label="Cantidad de pedidos por día" sx={{ position: 'relative', m: 0, p: 0, listStyle: 'none', display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
             {entregas.map((dia, indice) => (
               <Box component="li" key={dia.fecha} title={fechaVisible(dia.fecha)} sx={{ textAlign: 'center', minWidth: 0 }}>
-                <Stack sx={{ alignItems: 'center', justifyContent: 'flex-end', height: 141 }}>
+                <Stack sx={{ alignItems: 'center', justifyContent: 'flex-end', height: altura + 5 }}>
                   <Typography component="span" variant="caption" color={dia.cantidad ? 'text.primary' : 'text.secondary'} sx={{ fontWeight: dia.cantidad ? 700 : 400 }}>{dia.cantidad}</Typography>
                   <Box aria-hidden="true" sx={{
-                    height: `${dia.cantidad / marcas[0] * 136}px`, width: '48%', maxWidth: 30,
+                    height: `${dia.cantidad / marcas[0] * altura}px`, width: '48%', maxWidth: 30,
                     bgcolor: indice === 0 ? 'primary.main' : 'text.secondary', borderRadius: '3px 3px 0 0',
                   }} />
                 </Stack>
@@ -189,32 +208,40 @@ function Entregas() {
         </Box>
       </Box>
       {!maximo && <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>No hay entregas previstas.</Typography>}
-      <Box sx={{ mt: 1 }}><Acceso destino="pedidos">Ir a Pedidos</Acceso></Box>
     </Paper>
   );
 }
 
-function Cobros() {
+function Cobros({ compactarGrafico }) {
   const [mes, setMes] = useState(mesesCobros[0].valor);
   const cobros = cobrosPorTipo(mes);
   const total = cobros.reduce((suma, cobro) => suma + cobro.centavos, 0);
   const porciones = [];
   let inicio = 0;
+  const diametro = compactarGrafico ? 112 : 132;
   for (const [indice, cobro] of cobros.entries()) {
     const proporcion = cobro.centavos / total;
     porciones.push({ ...cobro, proporcion, inicio, color: coloresCobros[indice % coloresCobros.length] });
     inicio += proporcion;
   }
   return (
-    <Paper component="section" variant="outlined" aria-labelledby="cobros-titulo" sx={panel}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1 }}>
+    <Paper component="section" variant="outlined" aria-labelledby="cobros-titulo" sx={{
+      ...panel, ...(compactarGrafico && { p: 1.5 }),
+      '@media (min-width: 600px) and (max-height: 579px)': {
+        display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto',
+        gridTemplateAreas: '"cabecera acceso" "grafico grafico"', columnGap: 0.5,
+      },
+    }}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} sx={{
+        gridArea: 'cabecera', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1, flexWrap: 'wrap',
+      }}>
         <Typography id="cobros-titulo" component="h2" sx={{ fontSize: 18, fontWeight: 700 }}>Cobros por tipo de pedido</Typography>
         <TextField select label="Mes de cobro" size="small" value={mes} onChange={(evento) => setMes(evento.target.value)} sx={{ minWidth: 160 }}>
           {mesesCobros.map((opcion) => <MenuItem key={opcion.valor} value={opcion.valor}>{opcion.etiqueta}</MenuItem>)}
         </TextField>
       </Stack>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ my: 1.5, alignItems: 'center' }} aria-live="polite">
-        <Box sx={{ display: 'grid', placeItems: 'center', position: 'relative', width: 156, height: 156, flexShrink: 0 }}>
+      <Stack direction="row" spacing={{ xs: 1, sm: 2 }} sx={{ gridArea: 'grafico', my: 1, alignItems: 'center' }} aria-live="polite">
+        <Box sx={{ display: 'grid', placeItems: 'center', position: 'relative', width: diametro, height: diametro, flexShrink: 0 }}>
           <Box component="svg" viewBox="0 0 156 156" aria-hidden="true" sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
             <Box component="circle" cx="78" cy="78" r="70" fill="none" stroke="currentColor" strokeWidth="10" sx={{ color: 'divider' }} />
             {porciones.map((porcion) => (
@@ -228,7 +255,7 @@ function Cobros() {
           </Box>
           <Box sx={{ textAlign: 'center', maxWidth: 128 }}>
             <Typography variant="caption" color="text.secondary">Total cobrado</Typography>
-            <Typography sx={{ fontSize: 16, fontWeight: 700 }}>{moneda.format(total / 100)}</Typography>
+            <Typography sx={{ fontSize: compactarGrafico ? 13 : 14, fontWeight: 700 }}>{moneda.format(total / 100)}</Typography>
           </Box>
         </Box>
         {total ? (
@@ -249,28 +276,55 @@ function Cobros() {
           </Box>
         ) : <Typography variant="body2" color="text.secondary">Sin cobros en este período.</Typography>}
       </Stack>
-      <Acceso destino="comprobantes_pago">Ir a Comprobantes de Pago</Acceso>
+      <Box sx={{ gridArea: 'acceso' }}><Acceso destino="comprobantes_pago">Ir a Comprobantes de Pago</Acceso></Box>
     </Paper>
   );
 }
 
 export default function DashboardScreen() {
+  const tienePestanas = useMediaQuery('(max-width: 1099px), (max-height: 759px)');
+  const pocoAlto = useMediaQuery('(max-height: 579px)');
+  const [seccion, setSeccion] = useState('indicadores');
+  const contenido = {
+    indicadores: <Indicadores />,
+    pendientes: <Pendientes filasPorPagina={tienePestanas ? (pocoAlto ? 1 : 2) : 4} />,
+    entregas: <Entregas compactarGrafico={!tienePestanas || pocoAlto} />,
+    cobros: <Cobros compactarGrafico={!tienePestanas || pocoAlto} />,
+  };
+
   return (
-    <Stack spacing={2} sx={{ px: { xs: 0.5, sm: 0 }, fontVariantNumeric: 'tabular-nums' }}>
-      <Box component="header">
+    <Stack sx={{
+      height: '100%', gap: { xs: 1, sm: 1.5 }, px: { xs: 0.5, sm: 0 }, fontVariantNumeric: 'tabular-nums',
+      '@media (max-height: 579px)': { gap: 0.5 },
+    }}>
+      <Box component="header" sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', columnGap: 2 }}>
         <Typography component="h1" variant="h5" sx={{ fontWeight: 700 }}>Inicio</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
           Datos de demostración · <time dateTime={FECHA_DEMO}>{fechaVisible(FECHA_DEMO)}</time>
         </Typography>
       </Box>
 
-      <Indicadores />
-
-      <Pendientes />
-
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'minmax(0, 1fr) minmax(0, 1fr)' } }}>
-        <Entregas />
-        <Cobros />
+      {tienePestanas && (
+        <Tabs value={seccion} onChange={(_, valor) => setSeccion(valor)} variant="fullWidth" aria-label="Secciones de Inicio"
+          sx={{ flexShrink: 0, borderBottom: '1px solid', borderColor: 'divider', '& .MuiTab-root': { minWidth: 0, px: 0.5 } }}>
+          {secciones.map(({ id, titulo }) => (
+            <Tab key={id} id={`tab-inicio-${id}`} aria-controls={`panel-inicio-${id}`} value={id} label={titulo} />
+          ))}
+        </Tabs>
+      )}
+      <Box sx={{
+        flex: 1, minHeight: 0, display: 'grid', gap: 1.5,
+        gridTemplateColumns: tienePestanas ? 'minmax(0, 1fr)' : 'minmax(0, 1.1fr) minmax(0, 1fr)',
+        gridTemplateRows: tienePestanas ? 'minmax(0, 1fr)' : 'auto auto minmax(0, 1fr)',
+        gridTemplateAreas: tienePestanas ? `"${seccion}"` : '"indicadores indicadores" "pendientes entregas" "pendientes cobros"',
+      }}>
+        {secciones.map(({ id }) => (
+          <Box key={id} id={`panel-inicio-${id}`} role={tienePestanas ? 'tabpanel' : undefined}
+            aria-labelledby={tienePestanas ? `tab-inicio-${id}` : undefined} hidden={tienePestanas && seccion !== id}
+            sx={{ gridArea: id, minWidth: 0, minHeight: 0, overflowY: 'auto', p: '2px', m: '-2px' }}>
+            {contenido[id]}
+          </Box>
+        ))}
       </Box>
     </Stack>
   );

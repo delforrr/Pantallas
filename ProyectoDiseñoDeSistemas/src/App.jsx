@@ -82,15 +82,25 @@ const PageContent = () => {
   const Screen = !user || (user.role === 'cliente' && !paginaCliente) ? CatalogoScreen : SCREEN_MAP[currentPage || 'catalogo'];
   const label = PAGE_LABELS[currentPage] || 'Dashboard';
   const isCliente = !user || user?.role === 'cliente' || ['catalogo', 'carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'].includes(currentPage);
+  const isDashboard = !isCliente && currentPage === 'dashboard';
 
   return (
     <Fade in key={currentPage} timeout={300}>
-      <Box sx={{ flex: 1, p: isCliente ? 0 : { xs: 1.5, sm: 2.5, md: 3 }, overflowY: 'auto', minWidth: 0, width: '100%', maxWidth: '100%', height: isCliente ? '100%' : 'auto', display: isCliente ? 'flex' : 'block', flexDirection: isCliente ? 'column' : 'initial' }}>
+      <Box sx={{
+        flex: isDashboard ? '0 0 auto' : 1,
+        p: isCliente ? 0 : { xs: 1.5, sm: 2.5, md: 3 },
+        ...(isDashboard && { '@media (max-height: 579px)': { py: 1.5 } }),
+        overflowY: isDashboard ? 'hidden' : 'auto',
+        minWidth: 0, width: '100%', maxWidth: '100%',
+        height: isDashboard ? { xs: 'calc(100dvh - 61px)', sm: 'calc(100dvh - 65px)' } : isCliente ? '100%' : 'auto',
+        display: isCliente ? 'flex' : 'block', flexDirection: isCliente ? 'column' : 'initial',
+      }}>
+        {isDashboard && <GlobalStyles styles={{ body: { overflow: 'hidden' } }} />}
         {isCliente && (
           <GlobalStyles styles={{ '#notifications-btn': { display: 'none !important' } }} />
         )}
         {/* Page header */}
-        {!isCliente && currentPage !== 'dashboard' && <Box sx={{ mb: 3 }}>
+        {!isCliente && !isDashboard && <Box sx={{ mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', letterSpacing: '-0.01em' }}>
             {label}
           </Typography>
@@ -98,7 +108,7 @@ const PageContent = () => {
         </Box>}
         {Screen ? (
           !isCliente ? (
-            <ModuleSurface>
+            <ModuleSurface sx={isDashboard ? { height: '100%' } : undefined}>
               <Screen />
             </ModuleSurface>
           ) : (
