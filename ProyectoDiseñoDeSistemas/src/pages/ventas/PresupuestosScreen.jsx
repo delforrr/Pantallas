@@ -42,6 +42,8 @@ import PresupuestoFormScreen from './PresupuestoFormScreen';
 import { DetalleItemsVentasTable, ComprobanteDocumentWrapper } from '../../components/ventas';
 
 
+const DESCUENTO_MAYORISTA = 10;
+
 export const PresupuestosScreen = () => {
   const nombreEstado = useNombreEstado();
   const [presupuestos, setPresupuestos] = useState(INITIAL_PRESUPUESTOS);
@@ -68,7 +70,7 @@ export const PresupuestosScreen = () => {
     tipoPedido: 'Evento / Cena de Gala (150 personas)',
     fechaEmision: '2026-09-24',
     validezHasta: '2026-10-01',
-    descuentoPorcentaje: 0,
+    descuentoPorcentaje: DESCUENTO_MAYORISTA,
     observaciones: '',
     estado: 'Pendiente',
     items: [
@@ -99,9 +101,9 @@ export const PresupuestosScreen = () => {
   }, [formData.items]);
 
   const totalForm = useMemo(() => {
-    const desc = (subtotalForm * (formData.descuentoPorcentaje || 0)) / 100;
+    const desc = (subtotalForm * DESCUENTO_MAYORISTA) / 100;
     return subtotalForm - desc;
-  }, [subtotalForm, formData.descuentoPorcentaje]);
+  }, [subtotalForm]);
 
   const adelanto50Form = useMemo(() => {
     return totalForm * 0.5;
@@ -127,7 +129,7 @@ export const PresupuestosScreen = () => {
     setSavedMessage('');
     setIsEditing(true);
     setSelectedPresupuesto(item);
-    setFormData({ ...item, items: item.items.map(producto => ({ ...producto })) });
+    setFormData({ ...item, descuentoPorcentaje: DESCUENTO_MAYORISTA, items: item.items.map(producto => ({ ...producto })) });
     setOpenForm(true);
   };
 
@@ -143,7 +145,6 @@ export const PresupuestosScreen = () => {
 
   const handleSave = () => {
     const clienteObj = INITIAL_CLIENTES.find((c) => c.idCliente === formData.idCliente);
-    const descuento = Number(formData.descuentoPorcentaje);
     if (!clienteObj || !formData.fechaEmision || !formData.validezHasta || formData.validezHasta < formData.fechaEmision) {
       setFormError('Seleccioná un cliente y fechas válidas. La validez debe ser igual o posterior a la emisión.');
       return;
@@ -152,17 +153,13 @@ export const PresupuestosScreen = () => {
       setFormError('Agregá al menos un producto con una cantidad mínima de 10 y un precio válido.');
       return;
     }
-    if (!Number.isFinite(descuento) || descuento < 0 || descuento > 100) {
-      setFormError('El descuento debe estar entre 0 y 100%.');
-      return;
-    }
     const payload = {
       ...formData,
-      descuentoPorcentaje: descuento,
+      descuentoPorcentaje: DESCUENTO_MAYORISTA,
       items: formData.items.map(item => ({ ...item, cantidad: Number(item.cantidad), precioUnitario: Number(item.precioUnitario) })),
       clienteNombre: clienteObj ? clienteObj.razonSocial : 'Cliente General',
       subtotal: subtotalForm,
-      montoDescuento: (subtotalForm * (formData.descuentoPorcentaje || 0)) / 100,
+      montoDescuento: (subtotalForm * DESCUENTO_MAYORISTA) / 100,
       total: totalForm,
       adelanto50Requerido: adelanto50Form,
     };
@@ -213,7 +210,7 @@ export const PresupuestosScreen = () => {
     return <PresupuestoFormScreen datos={formData} isEditing={isEditing}
       onChange={datos => { setFormData(datos); setFormError(''); }}
       onCancel={() => setOpenForm(false)} onSubmit={handleSave}
-      subtotal={subtotalForm} total={totalForm} adelanto={adelanto50Form} error={formError} />;
+      subtotal={subtotalForm} descuento={DESCUENTO_MAYORISTA} total={totalForm} adelanto={adelanto50Form} error={formError} />;
   }
 
   return (

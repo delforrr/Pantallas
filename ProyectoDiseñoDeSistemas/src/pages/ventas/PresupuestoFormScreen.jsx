@@ -11,7 +11,19 @@ import { CATALOGO_PRODUCTOS_VENTAS, INITIAL_CLIENTES } from './mockData';
 const moneda = valor => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 2 }).format(valor);
 const panel = { p: 1.5, borderRadius: '14px', minWidth: 0 };
 
-export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSubmit, isEditing, subtotal, total, adelanto, error }) {
+function Buscador({ ...props }) {
+  const [mostrarResultados, setMostrarResultados] = useState(false);
+
+  return <Autocomplete {...props}
+    forcePopupIcon={false}
+    open={mostrarResultados}
+    onInputChange={(_, texto, motivo) => setMostrarResultados(motivo === 'input' && Boolean(texto.trim()))}
+    onClose={() => setMostrarResultados(false)}
+    noOptionsText="No se encontraron coincidencias"
+  />;
+}
+
+export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSubmit, isEditing, subtotal, descuento, total, adelanto, error }) {
   const errorRef = useRef(null);
   const [pagina, setPagina] = useState(0);
   const paginas = Math.max(1, Math.ceil(datos.items.length / 2));
@@ -50,13 +62,13 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
 
       <Paper variant="outlined" sx={panel}>
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'minmax(0, 1fr) 220px' }, gap: 1.5 }}>
-          <Autocomplete
+          <Buscador
             options={INITIAL_CLIENTES}
             value={INITIAL_CLIENTES.find(cliente => cliente.idCliente === datos.idCliente) || null}
             getOptionLabel={cliente => cliente.razonSocial}
             isOptionEqualToValue={(a, b) => a.idCliente === b.idCliente}
             onChange={(_, cliente) => cambiar({ idCliente: cliente?.idCliente ?? '' })}
-            renderInput={params => <TextField {...params} label="Cliente" required autoFocus size="small" />}
+            renderInput={params => <TextField {...params} label="Cliente" placeholder="Escribí para buscar un cliente" required autoFocus size="small" />}
           />
           <TextField label="Válido hasta" type="date" required size="small" value={datos.validezHasta} onChange={event => cambiar({ validezHasta: event.target.value })} slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: datos.fechaEmision } }} />
         </Box>
@@ -73,7 +85,7 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
             const index = inicio + posicion;
             return (
             <Box key={index} sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr) minmax(0, 1fr) 44px', md: 'minmax(0, 1fr) 110px 150px 130px 44px' }, gap: 1, alignItems: 'center', p: 1, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
-              <Autocomplete
+              <Buscador
                 sx={{ minWidth: 0, gridColumn: { xs: '1 / -1', md: 'auto' } }}
                 options={CATALOGO_PRODUCTOS_VENTAS}
                 value={CATALOGO_PRODUCTOS_VENTAS.find(producto => producto.idProductoCompuesto === item.idProductoCompuesto) || null}
@@ -84,7 +96,7 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
                   productoNombre: producto?.nombre ?? '',
                   precioUnitario: producto?.precioUnitario ?? 0,
                 })}
-                renderInput={params => <TextField {...params} label={`Producto ${index + 1}`} size="small" required />}
+                renderInput={params => <TextField {...params} label={`Producto ${index + 1}`} placeholder="Escribí para buscar un producto" size="small" required />}
               />
               <TextField label="Cantidad" type="number" size="small" required value={item.cantidad} onChange={event => cambiarItem(index, { cantidad: event.target.value })} slotProps={{ htmlInput: { min: 10, step: 1, 'aria-label': `Cantidad del producto ${index + 1}` } }} />
               <TextField label="Precio unitario ($)" type="number" size="small" required value={item.precioUnitario} onChange={event => cambiarItem(index, { precioUnitario: event.target.value })} slotProps={{ htmlInput: { min: 0, step: '0.01', 'aria-label': `Precio del producto ${index + 1}` } }} />
@@ -108,8 +120,8 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
 
       <Paper variant="outlined" sx={{ ...panel, display: 'grid', gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: 'minmax(0, 1fr) 110px repeat(3, minmax(100px, auto))' }, alignItems: 'center', gap: 1.5 }}>
           <TextField fullWidth size="small" label="Observaciones" value={datos.observaciones || ''} onChange={event => cambiar({ observaciones: event.target.value })} sx={{ gridColumn: { xs: '1 / -1', md: 'auto' } }} />
-          <TextField label="Descuento (%)" type="number" size="small" required value={datos.descuentoPorcentaje} onChange={event => cambiar({ descuentoPorcentaje: event.target.value })} slotProps={{ htmlInput: { min: 0, max: 100, step: '0.01' } }} />
           <Box sx={{ textAlign: 'right' }}><Typography variant="caption" color="text.secondary">Subtotal</Typography><Typography variant="body2" sx={{ fontWeight: 600 }}>{moneda(subtotal)}</Typography></Box>
+          <Box sx={{ textAlign: 'right' }}><Typography variant="caption" color="text.secondary">Mayorista ({descuento}%)</Typography><Typography variant="body2" sx={{ fontWeight: 600 }}>−{moneda(subtotal * descuento / 100)}</Typography></Box>
           <Box sx={{ textAlign: 'right' }}><Typography variant="caption" color="text.secondary">Total</Typography><Typography sx={{ fontWeight: 800, color: 'primary.main' }}>{moneda(total)}</Typography></Box>
           <Box sx={{ textAlign: 'right' }}><Typography variant="caption" color="text.secondary">Seña (50%)</Typography><Typography variant="body2" sx={{ fontWeight: 600 }}>{moneda(adelanto)}</Typography></Box>
       </Paper>
