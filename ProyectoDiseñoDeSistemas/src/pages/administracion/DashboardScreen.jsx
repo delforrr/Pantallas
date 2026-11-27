@@ -811,7 +811,6 @@ export default function DashboardScreen() {
           Inicio
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Datos de demostración ·{" "}
           <time dateTime={FECHA_DEMO}>{fechaVisible(FECHA_DEMO)}</time>
         </Typography>
       </Box>
