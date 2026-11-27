@@ -19,6 +19,7 @@ const panel = {
   borderColor: 'divider',
   p: { xs: 2, sm: 2.5 },
 };
+const panelExpandido = { ...panel, flex: '1 0 auto', display: 'flex', flexDirection: 'column' };
 
 const coloresCobros = ['primary.main', 'text.secondary', 'primary.dark', 'text.primary', 'action.disabled'];
 const secciones = [
@@ -39,7 +40,8 @@ function Indicadores() {
   const { navigate } = useApp();
   return (
     <Box component="section" aria-label="Indicadores operativos" sx={{
-      display: 'grid', gap: { xs: 1, sm: 2 },
+      flex: '1 0 auto', display: 'grid', gap: { xs: 1, sm: 2 },
+      gridAutoRows: 'minmax(min-content, 1fr)',
       gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: 'repeat(4, minmax(0, 1fr))' },
       '@media (min-width: 700px) and (max-height: 579px)': {
         gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
@@ -83,9 +85,9 @@ function Indicadores() {
               {alertas.filter((alerta) => alerta.destino === destino).length}
             </Typography>
           </Box>
-          <Typography component="span" variant="body2" sx={{ fontWeight: 650, pb: 0.5 }}>{titulo}</Typography>
+          <Typography component="span" variant="body2" sx={{ my: 'auto', fontWeight: 650 }}>{titulo}</Typography>
           <Typography component="span" variant="caption" sx={{
-            mt: 'auto', display: 'inline-flex', alignItems: 'center', gap: 0.5,
+            display: 'inline-flex', alignItems: 'center', gap: 0.5,
             color: 'var(--indicador-acento)', fontWeight: 600,
             '.MuiPaper-root:hover &': { textDecoration: 'underline' },
           }}>
@@ -119,15 +121,17 @@ function Pendientes({ filasPorPagina }) {
   const inicio = paginaVisible * filasPorPagina;
   const visibles = alertas.slice(inicio, inicio + filasPorPagina);
   return (
-    <Paper component="section" variant="outlined" aria-labelledby="pendientes-titulo" sx={panel}>
+    <Paper component="section" variant="outlined" aria-labelledby="pendientes-titulo" sx={panelExpandido}>
       <Stack direction="row" sx={{ alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
         <Typography id="pendientes-titulo" component="h2" sx={{ fontSize: 18, fontWeight: 700 }}>Pendientes de hoy</Typography>
         <Typography variant="body2" color="text.secondary">{alertas.length} {alertas.length === 1 ? 'alerta' : 'alertas'}</Typography>
       </Stack>
-      <Box component="ul" id="pendientes-lista" sx={{ p: 0, m: 0, mt: 1, listStyle: 'none' }}>
+      <Box component="ul" id="pendientes-lista" sx={{
+        p: 0, m: 0, mt: 1, flex: '1 0 auto', listStyle: 'none', display: 'flex', flexDirection: 'column',
+      }}>
         {visibles.map((alerta) => (
           <Box component="li" key={alerta.referencia} sx={{
-            display: 'grid',
+            display: 'grid', flex: '1 0 auto',
             gridTemplateColumns: { xs: 'minmax(0, 1fr) auto', sm: 'minmax(0, 1fr) minmax(0, 0.9fr) auto' },
             alignItems: 'center', columnGap: { xs: 1, sm: 3 }, rowGap: 0.25, py: { xs: 1.25, sm: 0.5 },
             borderTop: '1px solid', borderColor: 'divider',
@@ -175,7 +179,7 @@ function Entregas({ compactarGrafico }) {
   const marcas = [3, 2, 1, 0].map((indice) => indice * paso);
   const altura = compactarGrafico ? 84 : 136;
   return (
-    <Paper component="section" variant="outlined" aria-labelledby="entregas-titulo" sx={{ ...panel, ...(compactarGrafico && { p: 1.5 }) }}>
+    <Paper component="section" variant="outlined" aria-labelledby="entregas-titulo" sx={{ ...panelExpandido, ...(compactarGrafico && { p: 1.5 }) }}>
       <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 0.5, flexWrap: 'wrap' }}>
         <Box>
           <Typography id="entregas-titulo" component="h2" sx={{ fontSize: 18, fontWeight: 700 }}>Próximas entregas</Typography>
@@ -183,25 +187,32 @@ function Entregas({ compactarGrafico }) {
         </Box>
         <Acceso destino="pedidos">Ir a Pedidos</Acceso>
       </Stack>
-      <Box sx={{ display: 'grid', gridTemplateColumns: '2ch minmax(0, 1fr)', columnGap: 1, mt: 1.5 }}>
-        <Stack aria-hidden="true" sx={{ justifyContent: 'space-between', height: altura + 10, textAlign: 'right', color: 'text.secondary', fontSize: 12, lineHeight: 1 }}>
+      <Box sx={{
+        display: 'grid', gridTemplateColumns: '2ch minmax(0, 1fr)', columnGap: 1, mt: 1.5,
+        flex: '1 0 auto', minHeight: altura + 32, '--etiquetas-eje': '22px',
+      }}>
+        <Stack aria-hidden="true" sx={{ justifyContent: 'space-between', mb: 'var(--etiquetas-eje)', textAlign: 'right', color: 'text.secondary', fontSize: 12, lineHeight: 1 }}>
           {marcas.map((marca) => <span key={marca}>{marca}</span>)}
         </Stack>
-        <Box sx={{ position: 'relative' }}>
-          <Stack aria-hidden="true" sx={{ justifyContent: 'space-between', position: 'absolute', inset: '5px 0 auto', height: altura }}>
+        <Box sx={{ position: 'relative', display: 'flex' }}>
+          <Stack aria-hidden="true" sx={{ justifyContent: 'space-between', position: 'absolute', inset: '5px 0 calc(var(--etiquetas-eje) + 5px)' }}>
             {marcas.map((marca) => <Box key={marca} sx={{ borderTop: '1px solid', borderColor: 'divider' }} />)}
           </Stack>
-          <Box component="ol" aria-label="Cantidad de pedidos por día" sx={{ position: 'relative', m: 0, p: 0, listStyle: 'none', display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
+          <Box component="ol" aria-label="Cantidad de pedidos por día" sx={{ position: 'relative', m: 0, p: 0, flex: 1, listStyle: 'none', display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
             {entregas.map((dia, indice) => (
-              <Box component="li" key={dia.fecha} title={fechaVisible(dia.fecha)} sx={{ textAlign: 'center', minWidth: 0 }}>
-                <Stack sx={{ alignItems: 'center', justifyContent: 'flex-end', height: altura + 5 }}>
-                  <Typography component="span" variant="caption" color={dia.cantidad ? 'text.primary' : 'text.secondary'} sx={{ fontWeight: dia.cantidad ? 700 : 400 }}>{dia.cantidad}</Typography>
-                  <Box aria-hidden="true" sx={{
-                    height: `${dia.cantidad / marcas[0] * altura}px`, width: '48%', maxWidth: 30,
+              <Box component="li" key={dia.fecha} title={fechaVisible(dia.fecha)} sx={{ display: 'flex', flexDirection: 'column', textAlign: 'center', minWidth: 0 }}>
+                <Box sx={{ position: 'relative', flex: 1, my: '5px' }}>
+                  <Box sx={{
+                    position: 'absolute', bottom: 0, insetInline: 0, mx: 'auto',
+                    height: `${dia.cantidad / marcas[0] * 100}%`, width: '48%', maxWidth: 52,
                     bgcolor: indice === 0 ? 'primary.main' : 'text.secondary', borderRadius: '3px 3px 0 0',
-                  }} />
-                </Stack>
-                <Typography component="time" dateTime={dia.fecha} variant="caption" sx={{ display: 'block', mt: 0.75, fontWeight: indice === 0 ? 700 : 400 }}>{dia.etiqueta}</Typography>
+                  }}>
+                    <Typography component="span" variant="caption" color={dia.cantidad ? 'text.primary' : 'text.secondary'} sx={{
+                      position: 'absolute', bottom: '100%', insetInline: 0, fontWeight: dia.cantidad ? 700 : 400,
+                    }}>{dia.cantidad}</Typography>
+                  </Box>
+                </Box>
+                <Typography component="time" dateTime={dia.fecha} variant="caption" sx={{ height: 'var(--etiquetas-eje)', fontWeight: indice === 0 ? 700 : 400 }}>{dia.etiqueta}</Typography>
               </Box>
             ))}
           </Box>
@@ -226,10 +237,10 @@ function Cobros({ compactarGrafico }) {
   }
   return (
     <Paper component="section" variant="outlined" aria-labelledby="cobros-titulo" sx={{
-      ...panel, ...(compactarGrafico && { p: 1.5 }),
+      ...panelExpandido, ...(compactarGrafico && { p: 1.5 }),
       '@media (min-width: 600px) and (max-height: 579px)': {
         display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto',
-        gridTemplateAreas: '"cabecera acceso" "grafico grafico"', columnGap: 0.5,
+        gridTemplateAreas: '"cabecera acceso" "grafico grafico"', gridTemplateRows: 'auto 1fr', columnGap: 0.5,
       },
     }}>
       <Stack direction={{ xs: 'column', sm: 'row' }} sx={{
@@ -240,8 +251,16 @@ function Cobros({ compactarGrafico }) {
           {mesesCobros.map((opcion) => <MenuItem key={opcion.valor} value={opcion.valor}>{opcion.etiqueta}</MenuItem>)}
         </TextField>
       </Stack>
-      <Stack direction="row" spacing={{ xs: 1, sm: 2 }} sx={{ gridArea: 'grafico', my: 1, alignItems: 'center' }} aria-live="polite">
-        <Box sx={{ display: 'grid', placeItems: 'center', position: 'relative', width: diametro, height: diametro, flexShrink: 0 }}>
+      <Stack direction="row" spacing={{ xs: 1, sm: 2 }} sx={{
+        gridArea: 'grafico', my: 1, alignItems: 'center', flex: '1 0 auto', minHeight: diametro, containerType: 'size',
+      }} aria-live="polite">
+        <Box sx={{
+          display: 'grid', placeItems: 'center', position: 'relative', flexShrink: 0, aspectRatio: '1',
+          width: {
+            xs: `clamp(${diametro}px, 100cqh, 40cqw)`,
+            sm: `clamp(${diametro}px, 100cqh, min(48cqw, 200px))`,
+          },
+        }}>
           <Box component="svg" viewBox="0 0 156 156" aria-hidden="true" sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
             <Box component="circle" cx="78" cy="78" r="70" fill="none" stroke="currentColor" strokeWidth="10" sx={{ color: 'divider' }} />
             {porciones.map((porcion) => (
@@ -262,7 +281,11 @@ function Cobros({ compactarGrafico }) {
           <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0, width: '100%', minWidth: 0 }}>
             {porciones.map((porcion) => (
               <Stack component="li" key={porcion.tipo} direction="row"
-                sx={{ py: 0.75, justifyContent: 'space-between', alignItems: 'baseline', gap: 1, '& + &': { borderTop: '1px solid', borderColor: 'divider' } }}>
+                sx={{
+                  py: 0.75, justifyContent: 'space-between', alignItems: 'baseline', gap: 1,
+                  '& + &': { borderTop: '1px solid', borderColor: 'divider' },
+                  '@media (max-width: 359px)': { flexDirection: 'column', alignItems: 'stretch', gap: 0 },
+                }}>
                 <Stack direction="row" sx={{ alignItems: 'baseline', gap: 0.75 }}>
                   <Box aria-hidden="true" sx={{ width: 8, height: 8, flexShrink: 0, borderRadius: '50%', bgcolor: porcion.color }} />
                   <Typography variant="body2">{porcion.tipo}</Typography>
@@ -291,6 +314,17 @@ export default function DashboardScreen() {
     entregas: <Entregas compactarGrafico={!tienePestanas || pocoAlto} />,
     cobros: <Cobros compactarGrafico={!tienePestanas || pocoAlto} />,
   };
+  const mostrarPanel = (id) => (
+    <Box id={`panel-inicio-${id}`} role={tienePestanas ? 'tabpanel' : undefined}
+      aria-labelledby={tienePestanas ? `tab-inicio-${id}` : undefined} hidden={tienePestanas && seccion !== id}
+      sx={{
+        gridArea: tienePestanas || id === 'indicadores' || id === 'pendientes' ? id : undefined,
+        minWidth: 0, minHeight: 0, overflowY: 'auto', p: '2px', m: '-2px',
+        '&:not([hidden])': { display: 'flex', flexDirection: 'column' },
+      }}>
+      {contenido[id]}
+    </Box>
+  );
 
   return (
     <Stack sx={{
@@ -315,16 +349,18 @@ export default function DashboardScreen() {
       <Box sx={{
         flex: 1, minHeight: 0, display: 'grid', gap: 1.5,
         gridTemplateColumns: tienePestanas ? 'minmax(0, 1fr)' : 'minmax(0, 1.1fr) minmax(0, 1fr)',
-        gridTemplateRows: tienePestanas ? 'minmax(0, 1fr)' : 'auto auto minmax(0, 1fr)',
-        gridTemplateAreas: tienePestanas ? `"${seccion}"` : '"indicadores indicadores" "pendientes entregas" "pendientes cobros"',
+        gridTemplateRows: tienePestanas ? 'minmax(0, 1fr)' : 'auto minmax(0, 1fr)',
+        gridTemplateAreas: tienePestanas ? `"${seccion}"` : '"indicadores indicadores" "pendientes graficos"',
       }}>
-        {secciones.map(({ id }) => (
-          <Box key={id} id={`panel-inicio-${id}`} role={tienePestanas ? 'tabpanel' : undefined}
-            aria-labelledby={tienePestanas ? `tab-inicio-${id}` : undefined} hidden={tienePestanas && seccion !== id}
-            sx={{ gridArea: id, minWidth: 0, minHeight: 0, overflowY: 'auto', p: '2px', m: '-2px' }}>
-            {contenido[id]}
-          </Box>
-        ))}
+        {mostrarPanel('indicadores')}
+        {mostrarPanel('pendientes')}
+        <Box sx={tienePestanas ? { display: 'contents' } : {
+          gridArea: 'graficos', minHeight: 0, display: 'grid', gap: 1.5,
+          gridTemplateRows: 'minmax(min-content, 0.95fr) minmax(min-content, 1.05fr)',
+        }}>
+          {mostrarPanel('entregas')}
+          {mostrarPanel('cobros')}
+        </Box>
       </Box>
     </Stack>
   );
