@@ -4,8 +4,6 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import SaveOutlinedIcon from '@mui/icons-material/Save';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { CATALOGO_PRODUCTOS_VENTAS } from './mockData';
 import NuevoClientePresupuestoDialog from './NuevoClientePresupuestoDialog';
 
@@ -32,7 +30,6 @@ function Buscador({ onInputChange, listarAlEntrar = false, ...props }) {
 
 export default function PresupuestoFormScreen({ datos, clientes, onCreateCliente, onChange, onCancel, onSubmit, isEditing, subtotal, descuento, total, error }) {
   const errorRef = useRef(null);
-  const [pagina, setPagina] = useState(0);
   const [nuevoCliente, setNuevoCliente] = useState(false);
   const clienteSeleccionado = clientes.some(cliente => cliente.idCliente === datos.idCliente);
   const [busquedaProducto, setBusquedaProducto] = useState('');
@@ -41,9 +38,6 @@ export default function PresupuestoFormScreen({ datos, clientes, onCreateCliente
   const productosDelTipo = CATALOGO_PRODUCTOS_VENTAS.filter(producto => tipoProducto === 'TODOS' || producto.tipoProducto === tipoProducto);
   const subtiposProducto = [...new Set(productosDelTipo.map(producto => producto.subTipoProducto))];
   const productosDisponibles = productosDelTipo.filter(producto => subtipoProducto === 'TODOS' || producto.subTipoProducto === subtipoProducto);
-  const paginas = Math.max(1, Math.ceil(datos.items.length / 2));
-  const paginaActual = Math.min(pagina, paginas - 1);
-  const inicio = paginaActual * 2;
   useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
   const cambiar = cambios => onChange({ ...datos, ...cambios });
   const cambiarItem = (index, cambios) => cambiar({
@@ -58,10 +52,8 @@ export default function PresupuestoFormScreen({ datos, clientes, onCreateCliente
     const existente = datos.items.findIndex(item => item.idProductoCompuesto === producto.idProductoCompuesto);
     if (existente !== -1) {
       cambiarItem(existente, { cantidad: Number(datos.items[existente].cantidad) + 10 });
-      setPagina(Math.floor(existente / 2));
       return;
     }
-    setPagina(Math.floor(datos.items.length / 2));
     cambiar({ items: [...datos.items, {
       idProductoCompuesto: producto.idProductoCompuesto,
       productoNombre: producto.nombre,
@@ -133,26 +125,29 @@ export default function PresupuestoFormScreen({ datos, clientes, onCreateCliente
           </Box>
           <Typography component="h2" variant="subtitle1" sx={{ fontWeight: 700, ml: 'auto', mr: { sm: 4 }, whiteSpace: 'nowrap' }}>Productos ({datos.items.length})</Typography>
         </Box>
-        <Box sx={{ display: 'grid', gap: 1 }}>
-          {datos.items.slice(inicio, inicio + 2).map((item, posicion) => {
-            const index = inicio + posicion;
-            return (
-            <Box key={index} sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr) minmax(0, 1fr) 44px', md: 'minmax(0, 1fr) 110px 150px 130px 44px' }, gap: 1, alignItems: 'center', p: 1, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
-              <Typography variant="body2" sx={{ minWidth: 0, fontWeight: 600, overflowWrap: 'anywhere', gridColumn: { xs: '1 / -1', md: 'auto' } }}>{item.productoNombre}</Typography>
-              <TextField label="Cantidad" type="number" size="small" required value={item.cantidad} onChange={event => cambiarItem(index, { cantidad: event.target.value })} slotProps={{ htmlInput: { min: 10, step: 1, 'aria-label': `Cantidad del producto ${index + 1}` } }} />
-              <TextField label="Precio unitario ($)" type="number" size="small" required value={item.precioUnitario} onChange={event => cambiarItem(index, { precioUnitario: event.target.value })} slotProps={{ htmlInput: { min: 0, step: '0.01', 'aria-label': `Precio del producto ${index + 1}` } }} />
-              <Box sx={{ textAlign: { xs: 'left', md: 'right' }, gridColumn: { xs: '1 / 3', md: 'auto' }, gridRow: { xs: 3, md: 'auto' }, overflowWrap: 'anywhere' }}>
-                <Typography variant="caption" color="text.secondary">Subtotal</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>{moneda(item.subtotal)}</Typography>
+        {datos.items.length > 0 && <Box sx={{
+          '--columnas-producto': { xs: 'minmax(0, 1fr) 56px 64px 64px 32px', sm: 'minmax(0, 1fr) 90px 120px 120px 32px' },
+          '&& .MuiInputBase-root': { minHeight: 32, borderRadius: 1 },
+          '& .MuiInputBase-input': { py: 0.5, px: 1, fontSize: '0.8125rem', textAlign: 'center' },
+          '&& .MuiIconButton-root': { minHeight: 32, minWidth: 32, p: 0.5, borderRadius: 1 },
+        }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'var(--columnas-producto)', gap: 0.5, px: 1, py: 0.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="caption" color="text.secondary">Producto</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>Cantidad</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'right' }}>Precio unitario</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'right' }}>Subtotal</Typography>
+          </Box>
+          <Box role="list" aria-label="Productos del presupuesto">
+            {datos.items.map((item, index) => (
+              <Box key={item.idProductoCompuesto} role="listitem" sx={{ display: 'grid', gridTemplateColumns: 'var(--columnas-producto)', gap: 0.5, alignItems: 'center', px: 1, py: 0.5, minHeight: 40, borderBottom: '1px solid', borderColor: 'divider', '&:last-child': { borderBottom: 0 } }}>
+                <Typography variant="body2" sx={{ minWidth: 0, fontWeight: 500, overflowWrap: 'anywhere' }}>{item.productoNombre}</Typography>
+                <TextField type="number" size="small" required value={item.cantidad} onChange={event => cambiarItem(index, { cantidad: event.target.value })} slotProps={{ htmlInput: { min: 10, step: 1, 'aria-label': `Cantidad del producto ${index + 1}` } }} />
+                <Typography variant="body2" sx={{ textAlign: 'right', overflowWrap: 'anywhere' }}>{moneda(item.precioUnitario)}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700, textAlign: 'right', overflowWrap: 'anywhere' }}>{moneda(item.subtotal)}</Typography>
+                <Tooltip title="Quitar producto"><IconButton color="error" aria-label={`Quitar producto ${index + 1}`} onClick={() => cambiar({ items: datos.items.filter((_, i) => i !== index) })}><DeleteOutlineIcon fontSize="small" /></IconButton></Tooltip>
               </Box>
-              <Tooltip title="Quitar producto"><IconButton color="error" aria-label={`Quitar producto ${index + 1}`} onClick={() => cambiar({ items: datos.items.filter((_, i) => i !== index) })} sx={{ gridColumn: { xs: 3, md: 'auto' }, gridRow: { xs: '2 / 4', md: 'auto' } }}><DeleteOutlineIcon /></IconButton></Tooltip>
-            </Box>
-          ); })}
-        </Box>
-        {paginas > 1 && <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">{inicio + 1}–{Math.min(inicio + 2, datos.items.length)} de {datos.items.length}</Typography>
-            <IconButton aria-label="Productos anteriores" disabled={paginaActual === 0} onClick={() => setPagina(paginaActual - 1)}><ChevronLeftIcon /></IconButton>
-            <IconButton aria-label="Productos siguientes" disabled={paginaActual === paginas - 1} onClick={() => setPagina(paginaActual + 1)}><ChevronRightIcon /></IconButton>
+            ))}
+          </Box>
         </Box>}
       </Paper>
 
