@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Box,
   Button,
+  Chip,
   MenuItem,
   Paper,
   Stack,
@@ -70,6 +71,7 @@ const indicadores = [
     destino: "pedidos",
     titulo: "Pedidos vencidos o para hoy",
     modulo: "Pedidos",
+    area: "Ventas",
     tono: "info",
     Icono: LocalShippingOutlinedIcon,
   },
@@ -77,6 +79,7 @@ const indicadores = [
     destino: "materia_prima",
     titulo: "Materias primas en alerta",
     modulo: "Materia Prima",
+    area: "Producción",
     tono: "warning",
     Icono: GrassOutlinedIcon,
   },
@@ -84,6 +87,7 @@ const indicadores = [
     destino: "orden_compra",
     titulo: "Recepciones atrasadas",
     modulo: "Órdenes de Compra",
+    area: "Compras",
     tono: "primary",
     Icono: Inventory2OutlinedIcon,
   },
@@ -91,6 +95,7 @@ const indicadores = [
     destino: "maquinaria",
     titulo: "Equipos fuera de servicio",
     modulo: "Maquinaria",
+    area: "Mantenimiento",
     tono: "secondary",
     Icono: BuildCircleOutlinedIcon,
   },
@@ -252,6 +257,29 @@ function Acceso({ destino, children, etiqueta }) {
   );
 }
 
+function EtiquetaModulo({ destino }) {
+  const indicador = indicadores.find((item) => item.destino === destino);
+  if (!indicador) return null;
+
+  return (
+    <Chip
+      label={indicador.area}
+      size="small"
+      sx={(theme) => {
+        const color = theme.palette[indicador.tono].main;
+        const oscuro = theme.palette.mode === "dark";
+        return {
+          height: 20,
+          fontSize: 12,
+          fontWeight: 600,
+          bgcolor: alpha(color, oscuro ? 0.18 : 0.09),
+          color: oscuro ? lighten(color, 0.36) : darken(color, 0.42),
+        };
+      }}
+    />
+  );
+}
+
 function Pendientes({ filasPorPagina }) {
   const [pagina, setPagina] = useState(0);
   const paginas = Math.ceil(alertas.length / filasPorPagina);
@@ -313,9 +341,15 @@ function Pendientes({ filasPorPagina }) {
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 {alerta.nombre}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {alerta.referencia}
-              </Typography>
+              <Stack
+                direction="row"
+                sx={{ alignItems: "center", flexWrap: "wrap", gap: 0.75 }}
+              >
+                <Typography variant="caption" color="text.secondary">
+                  {alerta.referencia}
+                </Typography>
+                <EtiquetaModulo destino={alerta.destino} />
+              </Stack>
             </Box>
             <Box
               sx={{
