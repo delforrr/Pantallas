@@ -11,14 +11,16 @@ const moneda = valor => new Intl.NumberFormat('es-AR', { style: 'currency', curr
 const panel = { p: 1.5, borderRadius: '14px', minWidth: 0 };
 const tiposProducto = [...new Set(CATALOGO_PRODUCTOS_VENTAS.map(producto => producto.tipoProducto))];
 
-function Buscador({ onInputChange, ...props }) {
+function Buscador({ onInputChange, listarAlEntrar = false, ...props }) {
   const [mostrarResultados, setMostrarResultados] = useState(false);
 
   return <Autocomplete {...props}
     forcePopupIcon={false}
     open={mostrarResultados}
+    openOnFocus={listarAlEntrar}
+    onOpen={() => { if (listarAlEntrar) setMostrarResultados(true); }}
     onInputChange={(event, texto, motivo) => {
-      setMostrarResultados(motivo === 'input' && Boolean(texto.trim()));
+      setMostrarResultados(['input', 'clear'].includes(motivo) && (Boolean(texto.trim()) || listarAlEntrar));
       onInputChange?.(event, texto, motivo);
     }}
     onClose={() => setMostrarResultados(false)}
@@ -97,16 +99,6 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
       <Paper variant="outlined" sx={panel}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap', mb: 1 }}>
           <Typography component="h2" variant="subtitle1" sx={{ fontWeight: 700 }}>Productos ({datos.items.length})</Typography>
-          <Buscador
-            sx={{ flex: 1, minWidth: { xs: '100%', sm: 180 } }}
-            options={productosDisponibles}
-            value={null}
-            inputValue={busquedaProducto}
-            getOptionLabel={producto => producto.nombre}
-            onInputChange={(_, texto, motivo) => setBusquedaProducto(motivo === 'input' ? texto : '')}
-            onChange={(_, producto) => { agregarItem(producto); setBusquedaProducto(''); }}
-            renderInput={params => <TextField {...params} label="Buscar producto" placeholder="Escribí el nombre del producto" size="small" />}
-          />
           <TextField select size="small" label="Tipo de producto" value={tipoProducto}
             onChange={event => { setTipoProducto(event.target.value); setSubtipoProducto('TODOS'); }}
             sx={{ width: { xs: '100%', sm: 170 } }}>
@@ -118,6 +110,17 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
             <MenuItem value="TODOS">Todos los subtipos</MenuItem>
             {subtiposProducto.map(subtipo => <MenuItem key={subtipo} value={subtipo}>{subtipo}</MenuItem>)}
           </TextField>
+          <Buscador
+            sx={{ flex: 1, minWidth: { xs: '100%', sm: 180 } }}
+            options={productosDisponibles}
+            listarAlEntrar={tipoProducto !== 'TODOS' || subtipoProducto !== 'TODOS'}
+            value={null}
+            inputValue={busquedaProducto}
+            getOptionLabel={producto => producto.nombre}
+            onInputChange={(_, texto, motivo) => setBusquedaProducto(motivo === 'input' ? texto : '')}
+            onChange={(_, producto) => { agregarItem(producto); setBusquedaProducto(''); }}
+            renderInput={params => <TextField {...params} label="Buscar producto" placeholder="Escribí el nombre del producto" size="small" />}
+          />
         </Box>
         <Box sx={{ display: 'grid', gap: 1 }}>
           {!datos.items.length && <Typography color="text.secondary" variant="body2">Buscá un producto para comenzar.</Typography>}
