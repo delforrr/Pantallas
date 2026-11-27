@@ -29,6 +29,7 @@ import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturi
 import EngineeringIcon from "@mui/icons-material/Engineering";
 
 export const PAGE_LABELS = {
+  dashboard: "Inicio",
   admin_unidades: "Unidades de medida",
   admin_tipos_materia: "Tipos de materia prima",
   admin_provincias: "Provincias",
@@ -76,6 +77,7 @@ export const CLIENT_NAV = [
 ];
 
 export const ADMIN_NAV = [
+  { id: "dashboard", label: "Inicio", icon: HomeIcon },
   {
     id: "ventas",
     label: "Ventas",
