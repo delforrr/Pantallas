@@ -127,11 +127,11 @@ function Pendientes({ filasPorPagina }) {
         <Typography variant="body2" color="text.secondary">{alertas.length} {alertas.length === 1 ? 'alerta' : 'alertas'}</Typography>
       </Stack>
       <Box component="ul" id="pendientes-lista" sx={{
-        p: 0, m: 0, mt: 1, flex: '1 0 auto', listStyle: 'none', display: 'flex', flexDirection: 'column',
+        p: 0, m: 0, mt: 1, flex: '1 0 auto', listStyle: 'none',
       }}>
         {visibles.map((alerta) => (
           <Box component="li" key={alerta.referencia} sx={{
-            display: 'grid', flex: '1 0 auto',
+            display: 'grid',
             gridTemplateColumns: { xs: 'minmax(0, 1fr) auto', sm: 'minmax(0, 1fr) minmax(0, 0.9fr) auto' },
             alignItems: 'center', columnGap: { xs: 1, sm: 3 }, rowGap: 0.25, py: { xs: 1.25, sm: 0.5 },
             borderTop: '1px solid', borderColor: 'divider',
@@ -307,10 +307,16 @@ function Cobros({ compactarGrafico }) {
 export default function DashboardScreen() {
   const tienePestanas = useMediaQuery('(max-width: 1099px), (max-height: 759px)');
   const pocoAlto = useMediaQuery('(max-height: 579px)');
+  const cabenDiezAlertas = useMediaQuery('(min-width: 600px) and (min-height: 1000px)');
+  const cabenSieteAlertas = useMediaQuery('(min-width: 600px) and (min-height: 850px)');
+  const cabenCuatroAlertas = useMediaQuery('(min-width: 600px) and (min-height: 760px)');
+  const cabenTresAlertas = useMediaQuery('(min-height: 760px)');
+  const filasPorPagina = cabenDiezAlertas ? 10 : cabenSieteAlertas ? 7
+    : cabenCuatroAlertas ? 4 : cabenTresAlertas ? 3 : pocoAlto ? 1 : 2;
   const [seccion, setSeccion] = useState('indicadores');
   const contenido = {
     indicadores: <Indicadores />,
-    pendientes: <Pendientes filasPorPagina={tienePestanas ? (pocoAlto ? 1 : 2) : 4} />,
+    pendientes: <Pendientes filasPorPagina={filasPorPagina} />,
     entregas: <Entregas compactarGrafico={!tienePestanas || pocoAlto} />,
     cobros: <Cobros compactarGrafico={!tienePestanas || pocoAlto} />,
   };
