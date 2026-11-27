@@ -54,6 +54,8 @@ export const PresupuestosScreen = () => {
   const [savedMessage, setSavedMessage] = useState('');
   const [openDetail, setOpenDetail] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [presupuestoParaPedido, setPresupuestoParaPedido] = useState(null);
+  const [tipoNuevoPedido, setTipoNuevoPedido] = useState('Evento (Mayorista)');
 
   // Selecciones
   const [selectedPresupuesto, setSelectedPresupuesto] = useState(null);
@@ -116,7 +118,7 @@ export const PresupuestosScreen = () => {
     const vencimiento = new Date(hoy);
     vencimiento.setDate(vencimiento.getDate() + 7);
     const fechaLocal = fecha => new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-    setFormData({ ...initialFormState, tipoPedido: 'Evento (Mayorista)', nroPresupuesto: generatedNro, fechaEmision: fechaLocal(hoy), validezHasta: fechaLocal(vencimiento), items: [] });
+    setFormData({ ...initialFormState, tipoPedido: 'Mayorista', nroPresupuesto: generatedNro, fechaEmision: fechaLocal(hoy), validezHasta: fechaLocal(vencimiento), items: [] });
     setOpenForm(true);
   };
 
@@ -178,10 +180,15 @@ export const PresupuestosScreen = () => {
   };
 
   const handleConvertirAPedido = (presupuesto) => {
-    setPresupuestos((prev) =>
-      prev.map((p) => (p.idPresupuestoCliente === presupuesto.idPresupuestoCliente ? { ...p, estado: 'Aceptado' } : p))
-    );
-    alert(`¡Presupuesto ${presupuesto.nroPresupuesto} ACEPTADO! Se ha generado la Orden de Pedido correspondiente con un adelanto del 50% ($${(presupuesto.total * 0.5).toLocaleString()}).`);
+    setTipoNuevoPedido('Evento (Mayorista)');
+    setPresupuestoParaPedido(presupuesto);
+  };
+
+  const confirmarPedido = () => {
+    setPresupuestos(prev => prev.map(p => p.idPresupuestoCliente === presupuestoParaPedido.idPresupuestoCliente
+      ? { ...p, estado: 'Aceptado', tipoPedido: tipoNuevoPedido } : p));
+    setSavedMessage(`Presupuesto ${presupuestoParaPedido.nroPresupuesto} aceptado para pedido ${tipoNuevoPedido === 'Semanal' ? 'semanal' : 'de evento'}.`);
+    setPresupuestoParaPedido(null);
   };
 
   const handleDeleteConfirm = () => {
@@ -336,6 +343,21 @@ export const PresupuestosScreen = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Dialog open={Boolean(presupuestoParaPedido)} onClose={() => setPresupuestoParaPedido(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Generar pedido</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{presupuestoParaPedido?.nroPresupuesto}</Typography>
+          <TextField select fullWidth label="Tipo de pedido" value={tipoNuevoPedido} onChange={event => setTipoNuevoPedido(event.target.value)}>
+            <MenuItem value="Evento (Mayorista)">Evento</MenuItem>
+            <MenuItem value="Semanal">Semanal</MenuItem>
+          </TextField>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button color="inherit" onClick={() => setPresupuestoParaPedido(null)}>Cancelar</Button>
+          <Button variant="contained" onClick={confirmarPedido}>Generar pedido</Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Modal Vista Previa Documento Cotización */}
       <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="md" fullWidth>
