@@ -1,52 +1,31 @@
+import ComprobanteVentaFormScreen from './ComprobanteVentaFormScreen';
+import { emisionActual } from './documentoHelpers';
 import { useNombreEstado } from '../../context/AppContext';
 import { RecordIcon } from '../../components/shared/ModuleUI';
 import { useState, useMemo } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  TextField,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-} from '@mui/material';
+import { Box, Paper, Typography, Button, TextField, InputAdornment, FormControl, InputLabel, Select, MenuItem, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Grid } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
+
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import PrintIcon from '@mui/icons-material/Print';
 
-import { INITIAL_COMPROBANTES_VENTA, INITIAL_CLIENTES, INITIAL_PEDIDOS } from './mockData';
+import { INITIAL_COMPROBANTES_VENTA, INITIAL_CLIENTES, INITIAL_PEDIDOS, MEDIOS_DE_PAGO } from './mockData';
 import { ComprobanteDocumentWrapper, DetalleItemsVentasTable } from '../../components/ventas';
-
 
 export const ComprobantesVentaScreen = () => {
   const nombreEstado = useNombreEstado();
   const [comprobantes, setComprobantes] = useState(INITIAL_COMPROBANTES_VENTA);
+  const [clientesList, setClientesList] = useState(INITIAL_CLIENTES);
   const [searchTerm, setSearchTerm] = useState('');
   const [tipoFilter, setTipoFilter] = useState('TODOS');
 
   // Modales
   const [openForm, setOpenForm] = useState(false);
+  const [formError, setFormError] = useState('');
   const [openDetail, setOpenDetail] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
@@ -88,7 +67,8 @@ export const ComprobantesVentaScreen = () => {
   const handleOpenNewForm = () => {
     const nextNum = comprobantes.length + 102;
     const generatedNro = `FAC-A-0001-00000${nextNum}`;
-    setFormData({ ...initialFormState, nroComprobante: generatedNro });
+    setFormError('');
+    setFormData({ ...initialFormState, ...emisionActual(), nroComprobante: generatedNro, idCliente: '', idComprobantePedidoCliente: '', total: 0, medioPago: MEDIOS_DE_PAGO[0]?.descripcion || '' });
     setOpenForm(true);
   };
 
@@ -102,9 +82,27 @@ export const ComprobantesVentaScreen = () => {
     setOpenDelete(true);
   };
 
+  const handleCreateCliente = datos => {
+    const cliente = { ...datos, idCliente: Math.max(0, ...clientesList.map(c => c.idCliente)) + 1,
+      estado: 'Activo', aceptaCredito: false, limiteCredito: 0, creditoUsado: 0,
+      calle: '', altura: '', localidad: '', provincia: '' };
+    setClientesList(prev => [...prev, cliente]);
+    setFormData(prev => ({ ...prev, idCliente: cliente.idCliente, tipoIva: cliente.tipoIva,
+      telefonoPedido: cliente.telefono || '' }));
+    setFormError('');
+  };
+
   const handleSave = () => {
-    const clienteObj = INITIAL_CLIENTES.find((c) => c.idCliente === formData.idCliente);
+    const clienteObj = clientesList.find((c) => c.idCliente === formData.idCliente);
     const pedidoObj = INITIAL_PEDIDOS.find((p) => p.idComprobantePedidoCliente === formData.idComprobantePedidoCliente);
+    if (!clienteObj || !Number.isFinite(Number(formData.total)) || Number(formData.total) <= 0 || !MEDIOS_DE_PAGO.some(m => m.descripcion === formData.medioPago)) {
+      setFormError('Seleccioná un cliente, un medio de pago y un importe mayor a cero.');
+      return;
+    }
+    if (formData.idComprobantePedidoCliente && (!pedidoObj || pedidoObj.idCliente !== formData.idCliente)) {
+      setFormError('El pedido debe corresponder al cliente seleccionado.');
+      return;
+    }
 
     const totalVal = parseFloat(formData.total) || 0;
     const neto = totalVal / 1.21;
@@ -129,6 +127,9 @@ export const ComprobantesVentaScreen = () => {
     setComprobantes((prev) => prev.filter((c) => c.idComprobanteVentaCliente !== selectedComprobante.idComprobanteVentaCliente));
     setOpenDelete(false);
   };
+
+  if (openForm) return <ComprobanteVentaFormScreen datos={formData} clientes={clientesList} onCreateCliente={handleCreateCliente}
+    onChange={datos => { setFormData(datos); setFormError(''); }} onSave={handleSave} onCancel={() => setOpenForm(false)} error={formError}  />;
 
   return (
     <Box sx={{ p: { xs: 1.5, md: 3 } }}>
@@ -265,131 +266,6 @@ export const ComprobantesVentaScreen = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* Modal Formulario Estructurado de Comprobante Fiscal estilo Voucher */}
-      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
-        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ReceiptLongIcon color="primary" />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>Emisión de Comprobante Fiscal</Typography>
-          </Box>
-          <IconButton onClick={() => setOpenForm(false)}><CloseIcon /></IconButton>
-        </DialogTitle>
-        <DialogContent dividers sx={{ maxHeight: '80vh', overflowY: 'auto', p: { xs: 1.5, sm: 2.5 } }}>
-          <ComprobanteDocumentWrapper
-            tipoDocTitle={formData.tipoComprobante || 'Factura A'}
-            nroDocumento={formData.nroComprobante || 'FAC-A-0001-00000101'}
-            headerGrid={
-              <Grid container spacing={0}>
-                {/* Fila 1: Cliente & Tipo Comprobante */}
-                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' }, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Cliente Receptor:</Typography>
-                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
-                    <InputLabel>Cliente Receptor</InputLabel>
-                    <Select value={formData.idCliente} label="Cliente Receptor" onChange={(e) => setFormData({ ...formData, idCliente: e.target.value })}>
-                      {INITIAL_CLIENTES.map((c) => (
-                        <MenuItem key={c.idCliente} value={c.idCliente}>{c.razonSocial} ({c.cuit})</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12} md={5} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Tipo Comprobante Fiscal:</Typography>
-                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
-                    <Select value={formData.tipoComprobante} onChange={(e) => setFormData({ ...formData, tipoComprobante: e.target.value })}>
-                      <MenuItem value="Factura A">Factura A (Resp. Inscripto)</MenuItem>
-                      <MenuItem value="Factura B">Factura B (Consumidor Final)</MenuItem>
-                      <MenuItem value="Recibo Venta">Recibo de Venta Oficial</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                {/* Fila 2: Pedido Vinculado & Fecha Emisión */}
-                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' } }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Pedido Asociado:</Typography>
-                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
-                    <Select value={formData.idComprobantePedidoCliente} onChange={(e) => setFormData({ ...formData, idComprobantePedidoCliente: e.target.value })}>
-                      {INITIAL_PEDIDOS.map((p) => (
-                        <MenuItem key={p.idComprobantePedidoCliente} value={p.idComprobantePedidoCliente}>{p.nroPedido} - {p.clienteNombre}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12} md={5} sx={{ p: 1.5 }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Fecha & Hora Emisión:</Typography>
-                  <Grid container spacing={1} sx={{ mt: 0.2 }}>
-                    <Grid item xs={7}>
-                      <TextField type="date" fullWidth size="small" InputLabelProps={{ shrink: true }} value={formData.fechaEmision || ''} onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })} />
-                    </Grid>
-                    <Grid item xs={5}>
-                      <TextField type="time" fullWidth size="small" InputLabelProps={{ shrink: true }} value={formData.horaEmision || ''} onChange={(e) => setFormData({ ...formData, horaEmision: e.target.value })} />
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </Grid>
-            }
-            itemsTitle="Por favor suministrar lo siguiente"
-            itemsTable={
-              <DetalleItemsVentasTable
-                items={
-                  INITIAL_PEDIDOS.find((p) => p.idComprobantePedidoCliente === formData.idComprobantePedidoCliente)?.items || [
-                    { idProductoCompuesto: 101, productoNombre: 'Facturación Global de Pedido', cantidad: 1, precioUnitario: formData.total || 0, subtotal: formData.total || 0 }
-                  ]
-                }
-                readOnly
-              />
-            }
-            footerGrid={
-              <Grid container spacing={0}>
-                <Grid item xs={12} sm={6} sx={{ p: 1.5, borderRight: '1px solid rgba(128,128,128,0.3)', borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Condición de Pago:</Typography>
-                  <TextField fullWidth size="small" sx={{ mt: 0.5 }} value={formData.condicionPago || ''} onChange={(e) => setFormData({ ...formData, condicionPago: e.target.value })} />
-                </Grid>
-                <Grid item xs={12} sm={6} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Condición IVA Cliente:</Typography>
-                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
-                    <Select value={formData.tipoIva} onChange={(e) => setFormData({ ...formData, tipoIva: e.target.value })}>
-                      <MenuItem value="Responsable Inscripto">Responsable Inscripto</MenuItem>
-                      <MenuItem value="Consumidor Final">Consumidor Final</MenuItem>
-                      <MenuItem value="Monotributo">Monotributo</MenuItem>
-                      <MenuItem value="Exento">Exento</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
-            }
-            observacionesInput={
-              <Box>
-                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Monto Total a Facturar ($):</Typography>
-                <TextField
-                  type="number"
-                  fullWidth
-                  size="small"
-                  sx={{ mt: 0.5 }}
-                  value={formData.total}
-                  onChange={(e) => setFormData({ ...formData, total: parseFloat(e.target.value) || 0 })}
-                />
-              </Box>
-            }
-            totalLabel="Valor total comprobante:"
-            totalAmount={parseFloat(formData.total) || 0}
-            extraTotals={
-              <Box sx={{ mb: 1 }}>
-                <Typography variant="caption" color="text.secondary">Neto Gravado (21%): ${((parseFloat(formData.total) || 0) / 1.21).toLocaleString('es-AR', { maximumFractionDigits: 2 })}</Typography>
-                <Typography variant="caption" color="text.secondary" display="block">IVA (21%): ${((parseFloat(formData.total) || 0) - (parseFloat(formData.total) || 0) / 1.21).toLocaleString('es-AR', { maximumFractionDigits: 2 })}</Typography>
-              </Box>
-            }
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setOpenForm(false)} color="inherit">Cancelar</Button>
-          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave} sx={{ px: 3, fontWeight: 700 }}>
-            Emitir Comprobante
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       {/* Modal Vista Previa Documento Factura Fiscal */}
       <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="md" fullWidth>

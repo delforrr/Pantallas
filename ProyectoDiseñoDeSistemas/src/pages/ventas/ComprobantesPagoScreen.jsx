@@ -1,36 +1,14 @@
+import CobroFormScreen from './CobroFormScreen';
+import { emisionActual } from './documentoHelpers';
 import { useState, useMemo } from 'react';
 import { RecordIcon } from '../../components/shared/ModuleUI';
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  TextField,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-} from '@mui/material';
+import { Box, Paper, Typography, Button, TextField, InputAdornment, FormControl, InputLabel, Select, MenuItem, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Grid } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
+
 import PaidIcon from '@mui/icons-material/Paid';
 import PrintIcon from '@mui/icons-material/Print';
 import PaymentsIcon from '@mui/icons-material/Payments';
@@ -38,14 +16,15 @@ import PaymentsIcon from '@mui/icons-material/Payments';
 import { INITIAL_COMPROBANTES_PAGO, INITIAL_CLIENTES, INITIAL_PEDIDOS, MEDIOS_DE_PAGO } from './mockData';
 import { ComprobanteDocumentWrapper, DetalleItemsVentasTable } from '../../components/ventas';
 
-
 export const ComprobantesPagoScreen = () => {
   const [pagos, setPagos] = useState(INITIAL_COMPROBANTES_PAGO);
+  const [clientesList, setClientesList] = useState(INITIAL_CLIENTES);
   const [searchTerm, setSearchTerm] = useState('');
   const [medioFilter, setMedioFilter] = useState('TODOS');
 
   // Modales
   const [openForm, setOpenForm] = useState(false);
+  const [formError, setFormError] = useState('');
   const [openDetail, setOpenDetail] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
@@ -90,7 +69,8 @@ export const ComprobantesPagoScreen = () => {
   const handleOpenNewForm = () => {
     const nextNum = pagos.length + 105;
     const generatedNro = `PAG-2026-00${nextNum}`;
-    setFormData({ ...initialFormState, nroComprobantePago: generatedNro });
+    setFormError('');
+    setFormData({ ...initialFormState, ...emisionActual(), nroComprobantePago: generatedNro, idCliente: '', idComprobantePedidoCliente: '', montoAbonado: 0, concepto: '', observaciones: '' });
     setOpenForm(true);
   };
 
@@ -104,17 +84,35 @@ export const ComprobantesPagoScreen = () => {
     setOpenDelete(true);
   };
 
+  const handleCreateCliente = datos => {
+    const cliente = { ...datos, idCliente: Math.max(0, ...clientesList.map(c => c.idCliente)) + 1,
+      estado: 'Activo', aceptaCredito: false, limiteCredito: 0, creditoUsado: 0,
+      calle: '', altura: '', localidad: '', provincia: '' };
+    setClientesList(prev => [...prev, cliente]);
+    setFormData(prev => ({ ...prev, idCliente: cliente.idCliente, tipoIva: cliente.tipoIva,
+      telefonoPedido: cliente.telefono || '' }));
+    setFormError('');
+  };
+
   const handleSave = () => {
-    const clienteObj = INITIAL_CLIENTES.find((c) => c.idCliente === formData.idCliente);
+    const clienteObj = clientesList.find((c) => c.idCliente === formData.idCliente);
     const pedidoObj = INITIAL_PEDIDOS.find((p) => p.idComprobantePedidoCliente === formData.idComprobantePedidoCliente);
     const medioObj = MEDIOS_DE_PAGO.find((m) => m.idMedioDePagoCliente === formData.idMedioDePagoCliente);
+    if (!clienteObj || !medioObj || !formData.concepto.trim() || !Number.isFinite(Number(formData.montoAbonado)) || Number(formData.montoAbonado) <= 0) {
+      setFormError('Completá el cliente, el medio de pago, el concepto y un monto mayor a cero.');
+      return;
+    }
+    if (formData.idComprobantePedidoCliente && (!pedidoObj || pedidoObj.idCliente !== formData.idCliente)) {
+      setFormError('El pedido debe corresponder al cliente seleccionado.');
+      return;
+    }
 
     const payload = {
       ...formData,
       clienteNombre: clienteObj ? clienteObj.razonSocial : 'Cliente General',
       nroPedido: pedidoObj ? pedidoObj.nroPedido : 'VENTA-DIRECTA',
       medioPago: medioObj ? medioObj.descripcion : 'Efectivo',
-      fechaEmision: '2026-09-24 16:30',
+      ...emisionActual(),
       montoAbonado: parseFloat(formData.montoAbonado) || 0,
     };
 
@@ -127,6 +125,9 @@ export const ComprobantesPagoScreen = () => {
     setPagos((prev) => prev.filter((p) => p.idComprobantePagoCliente !== selectedPago.idComprobantePagoCliente));
     setOpenDelete(false);
   };
+
+  if (openForm) return <CobroFormScreen datos={formData} clientes={clientesList} onCreateCliente={handleCreateCliente}
+    onChange={datos => { setFormData(datos); setFormError(''); }} onSave={handleSave} onCancel={() => setOpenForm(false)} error={formError}  />;
 
   return (
     <Box sx={{ p: { xs: 1.5, md: 3 } }}>
@@ -269,105 +270,6 @@ export const ComprobantesPagoScreen = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* Modal Formulario Estructurado de Recibo de Pago estilo Voucher */}
-      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
-        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <PaidIcon color="primary" />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>Registrar Cobro a Cliente</Typography>
-          </Box>
-          <IconButton onClick={() => setOpenForm(false)}><CloseIcon /></IconButton>
-        </DialogTitle>
-        <DialogContent dividers sx={{ maxHeight: '80vh', overflowY: 'auto', p: { xs: 1.5, sm: 2.5 } }}>
-          <ComprobanteDocumentWrapper
-            tipoDocTitle="Recibo de Cobro"
-            nroDocumento={formData.nroComprobantePago || 'PAG-2026-0001'}
-            headerGrid={
-              <Grid container spacing={0}>
-                {/* Fila 1: Cliente & Medio de Pago */}
-                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' }, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Cliente Pagador:</Typography>
-                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
-                    <InputLabel>Cliente Solicitante</InputLabel>
-                    <Select value={formData.idCliente} label="Cliente Solicitante" onChange={(e) => setFormData({ ...formData, idCliente: e.target.value })}>
-                      {INITIAL_CLIENTES.map((c) => (
-                        <MenuItem key={c.idCliente} value={c.idCliente}>{c.razonSocial} ({c.cuit})</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12} md={5} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Medio de Pago:</Typography>
-                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
-                    <Select value={formData.idMedioDePagoCliente} label="Medio de Pago" onChange={(e) => setFormData({ ...formData, idMedioDePagoCliente: e.target.value })}>
-                      {MEDIOS_DE_PAGO.map((m) => (
-                        <MenuItem key={m.idMedioDePagoCliente} value={m.idMedioDePagoCliente}>{m.descripcion}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                {/* Fila 2: Pedido Vinculado & Transacción */}
-                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' } }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Pedido Vinculado:</Typography>
-                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
-                    <Select value={formData.idComprobantePedidoCliente} onChange={(e) => setFormData({ ...formData, idComprobantePedidoCliente: e.target.value })}>
-                      {INITIAL_PEDIDOS.map((p) => (
-                        <MenuItem key={p.idComprobantePedidoCliente} value={p.idComprobantePedidoCliente}>{p.nroPedido} - {p.clienteNombre}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12} md={5} sx={{ p: 1.5 }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Nro Transacción / Ticket:</Typography>
-                  <TextField fullWidth size="small" sx={{ mt: 0.5 }} placeholder="Ej. EF-CAJA-05 / TRF-9921" value={formData.nroTransaccion || ''} onChange={(e) => setFormData({ ...formData, nroTransaccion: e.target.value })} />
-                </Grid>
-              </Grid>
-            }
-            itemsTitle="Por favor suministrar lo siguiente"
-            itemsTable={
-              <DetalleItemsVentasTable
-                items={[
-                  { idProductoCompuesto: 101, productoNombre: formData.concepto || 'Cobro de Venta / Imputación de Pedido', cantidad: 1, precioUnitario: parseFloat(formData.montoAbonado) || 0, subtotal: parseFloat(formData.montoAbonado) || 0 }
-                ]}
-                readOnly
-              />
-            }
-            footerGrid={
-              <Grid container spacing={0}>
-                <Grid item xs={12} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Concepto del Pago:</Typography>
-                  <TextField fullWidth size="small" sx={{ mt: 0.5 }} value={formData.concepto || ''} onChange={(e) => setFormData({ ...formData, concepto: e.target.value })} />
-                </Grid>
-              </Grid>
-            }
-            observacionesInput={
-              <Box>
-                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Monto Abonado ($):</Typography>
-                <TextField
-                  type="number"
-                  fullWidth
-                  size="small"
-                  sx={{ mt: 0.5 }}
-                  value={formData.montoAbonado}
-                  onChange={(e) => setFormData({ ...formData, montoAbonado: parseFloat(e.target.value) || 0 })}
-                />
-              </Box>
-            }
-            totalLabel="Monto total abonado:"
-            totalAmount={parseFloat(formData.montoAbonado) || 0}
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setOpenForm(false)} color="inherit">Cancelar</Button>
-          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave} sx={{ px: 3, fontWeight: 700 }}>
-            Guardar Recibo
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       {/* Modal Vista Previa Documento Recibo */}
       <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="md" fullWidth>

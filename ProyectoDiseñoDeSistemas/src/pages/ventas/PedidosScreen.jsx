@@ -1,50 +1,24 @@
+import PedidoFormScreen from './PedidoFormScreen';
+import { emisionActual, validarProductos } from './documentoHelpers';
 import { nombreCatalogo, opciones } from '../administracion/catalogos';
 import { useApp, useNombreEstado } from '../../context/AppContext';
 import { RecordIcon } from '../../components/shared/ModuleUI';
 import { useState, useMemo } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  TextField,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-} from '@mui/material';
+import { Box, Paper, Typography, Button, TextField, InputAdornment, FormControl, InputLabel, Select, MenuItem, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Grid } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
+
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 
-
-import { INITIAL_PEDIDOS, INITIAL_CLIENTES, INITIAL_PRESUPUESTOS, INITIAL_COMPROBANTES_VENTA, MEDIOS_DE_PAGO, calcularEstadoMoroso } from './mockData';
-import { DetalleItemsVentasTable, ClienteMorosoAlert, ComprobanteDocumentWrapper } from '../../components/ventas';
-
+import { INITIAL_PEDIDOS, INITIAL_CLIENTES, INITIAL_PRESUPUESTOS, MEDIOS_DE_PAGO, INITIAL_COMPROBANTES_VENTA, calcularEstadoMoroso } from './mockData';
+import { DetalleItemsVentasTable, ComprobanteDocumentWrapper } from '../../components/ventas';
 
 export const PedidosScreen = () => {
   const nombreEstado = useNombreEstado();
@@ -59,10 +33,10 @@ export const PedidosScreen = () => {
 
   // Modales
   const [openForm, setOpenForm] = useState(false);
+  const [formError, setFormError] = useState('');
   const [openDetail, setOpenDetail] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [openRegistrarPago, setOpenRegistrarPago] = useState(false);
-  const [openQuickClienteModal, setOpenQuickClienteModal] = useState(false);
 
   // Selecciones
   const [selectedPedido, setSelectedPedido] = useState(null);
@@ -72,31 +46,12 @@ export const PedidosScreen = () => {
   const [montoPago, setMontoPago] = useState(0);
   const [idMedioDePagoCliente, setIdMedioDePagoCliente] = useState(1);
 
-  // State para rápido nuevo cliente
-  const initialQuickClienteData = {
-    razonSocial: '',
-    cuit: '',
-    responsable: '',
-    telefono: '',
-    email: '',
-    calle: '',
-    altura: '',
-    localidad: 'Trenque Lauquen',
-    tipoIva: 'Responsable Inscripto',
-    tipoCliente: 'Mayorista (Restaurante / Semanal)',
-    aceptaCredito: false,
-    limiteCredito: 0,
-    creditoUsado: 0,
-    estado: 'Activo',
-  };
-  const [quickClienteData, setQuickClienteData] = useState(initialQuickClienteData);
-
   // Form State Inicial Pedido
   const initialFormState = {
     nroPedido: '',
     idPresupuestoCliente: '',
     idCliente: 1,
-    tipoPedido: 'Venta Mostrador / Local',
+    tipoPedido: 'Minorista',
     diaEntregaHabitual: 'Lunes',
     domicilioEntrega: 'Retiro en Local Comercial',
     telefonoPedido: '(02392) 43-9901',
@@ -120,15 +75,6 @@ export const PedidosScreen = () => {
 
   const [formData, setFormData] = useState(initialFormState);
 
-  // Cliente Seleccionado en Formulario para validar morosidad calculada
-  const selectedClienteForm = useMemo(() => {
-    return clientesList.find((c) => c.idCliente === formData.idCliente);
-  }, [clientesList, formData.idCliente]);
-
-  const morosidadCalculada = useMemo(() => {
-    return calcularEstadoMoroso(selectedClienteForm, INITIAL_COMPROBANTES_VENTA);
-  }, [selectedClienteForm]);
-
   // Handler para cargar datos desde un Presupuesto Existente
   const handleSelectPresupuesto = (idPresupuesto) => {
     if (!idPresupuesto) {
@@ -150,9 +96,9 @@ export const PedidosScreen = () => {
       subtotal: item.subtotal,
     }));
 
-    let tipoPedidoMapped = 'Evento Especial (Cena 48hs)';
+    let tipoPedidoMapped = 'Mayorista';
     if (presupuesto.tipoPedido.toLowerCase().includes('semanal')) {
-      tipoPedidoMapped = 'Mayorista Semanal Fijo';
+      tipoPedidoMapped = 'Semanal';
     }
 
     setFormData((prev) => ({
@@ -164,7 +110,7 @@ export const PedidosScreen = () => {
       calleEntrega: clienteObj?.calle || prev.calleEntrega,
       alturaEntrega: clienteObj?.altura || prev.alturaEntrega,
       localidadEntrega: clienteObj?.localidad || prev.localidadEntrega,
-      descuentoAplicado: presupuesto.descuentoPorcentaje || 0,
+      descuentoAplicado: 10,
       señaExigida: presupuesto.adelanto50Requerido || 0,
       señaPagada: presupuesto.adelanto50Requerido || 0,
       estadoPago: presupuesto.adelanto50Requerido > 0 ? 'Seña 50% Pagada' : 'Pendiente',
@@ -217,7 +163,7 @@ export const PedidosScreen = () => {
       setFormData({
         ...initialFormState,
         nroPedido: generatedNro,
-        tipoPedido: 'Canje por Reclamo (Mal Estado)',
+        tipoPedido: 'Minorista',
         esCanje: true,
         descuentoAplicado: 100,
         observaciones: 'Canje sin costo por reposición de producto en mal estado (Regla TP: Orden $0).',
@@ -227,7 +173,7 @@ export const PedidosScreen = () => {
       setFormData({
         ...initialFormState,
         nroPedido: generatedNro,
-        tipoPedido: 'Donación Institucional ($0)',
+        tipoPedido: 'Donación',
         esDonacion: true,
         descuentoAplicado: 100,
         observaciones: 'Donación documentada de alimentos a institución de caridad.',
@@ -236,13 +182,16 @@ export const PedidosScreen = () => {
     } else {
       setFormData({ ...initialFormState, nroPedido: generatedNro });
     }
+    setFormData(prev => ({ ...prev, ...emisionActual(), idCliente: '', telefonoPedido: '', items: [], fechaEntregaEstimada: emisionActual().fechaEmision }));
+    setFormError('');
     setOpenForm(true);
   };
 
   const handleOpenEditForm = (item) => {
     setIsEditing(true);
     setSelectedPedido(item);
-    setFormData({ ...item });
+    setFormData({ ...item, items: item.items.map(i => ({ ...i })), descuentoAplicado: item.esCanje || item.esDonacion ? 100 : ['Mayorista', 'Semanal'].includes(item.tipoPedido) ? 10 : item.descuentoAplicado || 0 });
+    setFormError('');
     setOpenForm(true);
   };
 
@@ -262,27 +211,29 @@ export const PedidosScreen = () => {
     setOpenDelete(true);
   };
 
-  // Crear Cliente Rápido desde Formulario de Pedidos
-  const handleSaveQuickCliente = () => {
-    if (!quickClienteData.razonSocial || !quickClienteData.cuit) return;
-    const newId = clientesList.length > 0 ? Math.max(...clientesList.map((c) => c.idCliente)) + 1 : 1;
-    const newCliente = { ...quickClienteData, idCliente: newId };
-    
-    setClientesList((prev) => [...prev, newCliente]);
-    setFormData((prev) => ({
-      ...prev,
-      idCliente: newId,
-      telefonoPedido: newCliente.telefono || prev.telefonoPedido,
-      calleEntrega: newCliente.calle || prev.calleEntrega,
-      alturaEntrega: newCliente.altura || prev.alturaEntrega,
-      localidadEntrega: newCliente.localidad || prev.localidadEntrega,
-    }));
-    setOpenQuickClienteModal(false);
+  const handleCreateCliente = datos => {
+    const cliente = { ...datos, idCliente: Math.max(0, ...clientesList.map(c => c.idCliente)) + 1,
+      estado: 'Activo', aceptaCredito: false, limiteCredito: 0, creditoUsado: 0,
+      calle: '', altura: '', localidad: '', provincia: '' };
+    setClientesList(prev => [...prev, cliente]);
+    setFormData(prev => ({ ...prev, idCliente: cliente.idCliente, tipoIva: cliente.tipoIva,
+      telefonoPedido: cliente.telefono || '' }));
+    setFormError('');
   };
 
   const handleSave = () => {
     const clienteObj = clientesList.find((c) => c.idCliente === formData.idCliente);
-    
+    const minimo = ['Mayorista', 'Semanal'].includes(formData.tipoPedido) ? 10 : 1;
+    if (!clienteObj || !validarProductos(formData.items, minimo) || !formData.idEmpleado) {
+      setFormError(`Seleccioná un cliente, un vendedor y productos con cantidad mínima de ${minimo}.`);
+      return;
+    }
+    if (!formData.fechaEntregaEstimada || formData.fechaEntregaEstimada < formData.fechaEmision || !formData.horaEntregaEstimada || formData.tipoPedido === 'Semanal' && !formData.diaEntregaHabitual) {
+      setFormError('Completá la fecha y hora de entrega y los días del pedido semanal.');
+      return;
+    }
+
+    const morosidadCalculada = calcularEstadoMoroso(clienteObj, INITIAL_COMPROBANTES_VENTA);
     // Regla TP: Bloqueo de cliente moroso para ventas a crédito
     if (morosidadCalculada.esMoroso && formData.estadoPago.includes('Cuenta Corriente')) {
       alert(`¡VENTA A CRÉDITO BLOQUEADA! El cliente ${clienteObj?.razonSocial} ha sido detectado como MOROSO (${morosidadCalculada.razon}). Solo se permite pago de contado o en efectivo.`);
@@ -294,7 +245,7 @@ export const PedidosScreen = () => {
       clienteNombre: clienteObj ? clienteObj.razonSocial : 'Cliente General',
       subtotal: subtotalForm,
       total: totalForm,
-      señaExigida: formData.tipoPedido.includes('Evento') ? totalForm * 0.5 : 0,
+      señaExigida: formData.tipoPedido === 'Mayorista' ? totalForm * 0.5 : 0,
       estadoPago: (formData.esCanje || formData.esDonacion) ? 'Canje / Donación $0' : formData.estadoPago,
     };
 
@@ -346,6 +297,9 @@ export const PedidosScreen = () => {
         return <Chip label={nombreEstado(estado)} size="small" />;
     }
   };
+
+  if (openForm) return <PedidoFormScreen datos={formData} clientes={clientesList} onCreateCliente={handleCreateCliente}
+    onChange={datos => { setFormData(datos); setFormError(''); }} onSave={handleSave} onCancel={() => setOpenForm(false)} error={formError} isEditing={isEditing} subtotal={subtotalForm} total={totalForm} onSelectPresupuesto={handleSelectPresupuesto} />;
 
   return (
     <Box sx={{ p: { xs: 1.5, md: 3 } }}>
@@ -485,346 +439,6 @@ export const PedidosScreen = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* Modal Formulario Estructurado de Pedidos estilo Voucher / Comprobante */}
-      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
-        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ShoppingBagOutlinedIcon color="primary" />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              {isEditing ? `Editar Pedido ${formData.nroPedido}` : formData.esCanje ? 'Registrar Canje por Reclamo ($0)' : formData.esDonacion ? 'Registrar Donación ($0)' : 'Formulario de Pedido de Venta'}
-            </Typography>
-          </Box>
-          <IconButton onClick={() => setOpenForm(false)}><CloseIcon /></IconButton>
-        </DialogTitle>
-        <DialogContent dividers sx={{ maxHeight: '80vh', overflowY: 'auto', p: { xs: 1.5, sm: 2.5 } }}>
-          {/* Alerta de morosidad */}
-          {morosidadCalculada.esMoroso && (
-            <Box sx={{ mb: 2 }}>
-              <ClienteMorosoAlert cliente={selectedClienteForm} comprobantesVenta={INITIAL_COMPROBANTES_VENTA} />
-            </Box>
-          )}
-
-          {/* Selector Opcional de Presupuesto */}
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 1.5,
-              mb: 2,
-              borderRadius: '8px',
-              borderColor: (theme) => formData.idPresupuestoCliente ? theme.palette.primary.main : theme.palette.divider,
-              bgcolor: (theme) =>
-                formData.idPresupuestoCliente
-                  ? theme.palette.mode === 'dark' ? 'rgba(0,146,70,0.12)' : '#f0fbf4'
-                  : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : '#fafafa',
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <DescriptionOutlinedIcon color="primary" fontSize="small" />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                Cargar Datos desde Presupuesto de Origen (Opcional)
-              </Typography>
-            </Box>
-            <FormControl fullWidth size="small">
-              <InputLabel>Seleccionar Presupuesto de Origen</InputLabel>
-              <Select
-                value={formData.idPresupuestoCliente || ''}
-                label="Seleccionar Presupuesto de Origen"
-                onChange={(e) => handleSelectPresupuesto(e.target.value)}
-              >
-                <MenuItem value="">
-                  <em>-- Ninguno (Creación manual desde cero) --</em>
-                </MenuItem>
-                {INITIAL_PRESUPUESTOS.map((p) => (
-                  <MenuItem key={p.idPresupuestoCliente} value={p.idPresupuestoCliente}>
-                    {p.nroPresupuesto} - {p.clienteNombre} ({p.tipoPedido} - Total: ${p.total.toLocaleString()})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Paper>
-
-          {/* CONTENEDOR DOCUMENTO VOUCHER ESTILO REFERENCIA */}
-          <ComprobanteDocumentWrapper
-            tipoDocTitle={formData.esCanje ? 'Canje Reclamo' : formData.esDonacion ? 'Donación' : 'Pedido de Venta'}
-            nroDocumento={formData.nroPedido || 'PED-2026-0001'}
-            headerGrid={
-              <Grid container spacing={0} sx={{ borderCollapse: 'collapse' }}>
-                {/* Fila 1: Cliente & Fecha */}
-                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' }, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Cliente:</Typography>
-                  <Box sx={{ display: 'flex', gap: 1, mt: 0.5, alignItems: 'center' }}>
-                    <FormControl fullWidth size="small" disabled={Boolean(formData.idPresupuestoCliente)}>
-                      <InputLabel>Seleccionar Cliente</InputLabel>
-                      <Select
-                        value={formData.idCliente}
-                        label="Seleccionar Cliente"
-                        disabled={Boolean(formData.idPresupuestoCliente)}
-                        onChange={(e) => {
-                          const c = clientesList.find((item) => item.idCliente === e.target.value);
-                          setFormData({
-                            ...formData,
-                            idCliente: e.target.value,
-                            telefonoPedido: c?.telefono || formData.telefonoPedido,
-                            calleEntrega: c?.calle || formData.calleEntrega,
-                            alturaEntrega: c?.altura || formData.alturaEntrega,
-                            localidadEntrega: c?.localidad || formData.localidadEntrega,
-                          });
-                        }}
-                      >
-                        {clientesList.map((c) => (
-                          <MenuItem key={c.idCliente} value={c.idCliente}>
-                            {c.razonSocial} ({c.cuit})
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      size="small"
-                      disabled={Boolean(formData.idPresupuestoCliente)}
-                      startIcon={<PersonAddIcon />}
-                      onClick={() => {
-                        setQuickClienteData(initialQuickClienteData);
-                        setOpenQuickClienteModal(true);
-                      }}
-                      sx={{ whiteSpace: 'nowrap', fontWeight: 700, height: 40, px: 1, flexShrink: 0 }}
-                    >
-                      + Cliente
-                    </Button>
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12} md={5} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Fecha de Emisión:</Typography>
-                  <TextField
-                    type="date"
-                    fullWidth
-                    size="small"
-                    sx={{ mt: 0.5 }}
-                    InputLabelProps={{ shrink: true }}
-                    value={formData.fechaEmision || ''}
-                    onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
-                  />
-                </Grid>
-
-                {/* Fila 2: Dirección & Teléfono */}
-                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' }, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Dirección de Entrega:</Typography>
-                  <Grid container spacing={1} sx={{ mt: 0.2 }}>
-                    <Grid item xs={7}>
-                      <TextField size="small" placeholder="Calle" fullWidth value={formData.calleEntrega || ''} onChange={(e) => setFormData({ ...formData, calleEntrega: e.target.value })} />
-                    </Grid>
-                    <Grid item xs={5}>
-                      <TextField size="small" placeholder="Altura / Nro" fullWidth value={formData.alturaEntrega || ''} onChange={(e) => setFormData({ ...formData, alturaEntrega: e.target.value })} />
-                    </Grid>
-                  </Grid>
-                </Grid>
-
-                <Grid item xs={12} md={5} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Teléfono:</Typography>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    sx={{ mt: 0.5 }}
-                    placeholder="Ej. (02392) 43-9901"
-                    value={formData.telefonoPedido || ''}
-                    onChange={(e) => setFormData({ ...formData, telefonoPedido: e.target.value })}
-                  />
-                </Grid>
-
-                {/* Fila 3: Para Despachar a & Hora / Vencimiento */}
-                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' } }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Para despachar a / Destino:</Typography>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    sx={{ mt: 0.5 }}
-                    value={formData.domicilioEntrega || ''}
-                    onChange={(e) => setFormData({ ...formData, domicilioEntrega: e.target.value })}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={5} sx={{ p: 1.5 }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Hora de Entrega:</Typography>
-                  <TextField
-                    type="time"
-                    fullWidth
-                    size="small"
-                    sx={{ mt: 0.5 }}
-                    InputLabelProps={{ shrink: true }}
-                    value={formData.horaEntregaEstimada || ''}
-                    onChange={(e) => setFormData({ ...formData, horaEntregaEstimada: e.target.value })}
-                  />
-                </Grid>
-              </Grid>
-            }
-            itemsTitle="Por favor suministrar lo siguiente"
-            itemsTable={
-              <DetalleItemsVentasTable
-                items={formData.items || []}
-                onChangeItems={(newItems) => setFormData({ ...formData, items: newItems })}
-                esCanjeOReclamo={formData.esCanje || formData.esDonacion}
-              />
-            }
-            footerGrid={
-              <Grid container spacing={0}>
-                <Grid item xs={12} sm={4} sx={{ p: 1.5, borderRight: '1px solid rgba(128,128,128,0.3)', borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Fecha de despacho:</Typography>
-                  <TextField
-                    type="date"
-                    fullWidth
-                    size="small"
-                    sx={{ mt: 0.5 }}
-                    InputLabelProps={{ shrink: true }}
-                    value={formData.fechaEntregaEstimada || ''}
-                    onChange={(e) => setFormData({ ...formData, fechaEntregaEstimada: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4} sx={{ p: 1.5, borderRight: '1px solid rgba(128,128,128,0.3)', borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Vendedor:</Typography>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    sx={{ mt: 0.5 }}
-                    select label="Vendedor"
-                    value={formData.idEmpleado ?? ''}
-                    onChange={(e) => setFormData({ ...formData, idEmpleado: e.target.value, vendedor: nombreCatalogo(vendedores, e.target.value) })}
-                  >
-                    {opciones(vendedores, selectedPedido?.idEmpleado).map(e => <MenuItem key={e.id} value={e.id}>{e.nombre}</MenuItem>)}
-                  </TextField>
-                </Grid>
-                <Grid item xs={12} sm={4} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Forma de pago:</Typography>
-                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
-                    <Select value={formData.estadoPago} onChange={(e) => setFormData({ ...formData, estadoPago: e.target.value })}>
-                      <MenuItem value="Pendiente">Pendiente</MenuItem>
-                      <MenuItem value="Pendiente Cuenta Corriente">Cuenta Corriente</MenuItem>
-                      <MenuItem value="Seña 50% Pagada">Seña 50% Pagada</MenuItem>
-                      <MenuItem value="Saldado 100%">Contado / Saldado 100%</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
-            }
-            observacionesInput={
-              <Box>
-                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Observaciones:</Typography>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  size="small"
-                  sx={{ mt: 0.5 }}
-                  placeholder="Notas adicionales para despacho o facturación..."
-                  value={formData.observaciones || ''}
-                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-                />
-              </Box>
-            }
-            totalLabel="Valor total del pedido:"
-            totalAmount={totalForm}
-            extraTotals={
-              formData.descuentoAplicado > 0 ? (
-                <Box sx={{ mb: 1 }}>
-                  <Typography variant="caption" color="text.secondary">Subtotal: ${subtotalForm.toLocaleString()}</Typography>
-                  <Typography variant="caption" color="error" display="block">Desc. ({formData.descuentoAplicado}%): -${((subtotalForm * formData.descuentoAplicado) / 100).toLocaleString()}</Typography>
-                </Box>
-              ) : null
-            }
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setOpenForm(false)} color="inherit">Cancelar</Button>
-          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave} sx={{ px: 3, fontWeight: 700 }}>
-            {isEditing ? 'Guardar Cambios' : 'Guardar Pedido'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Modal Alta Rápida de Nuevo Cliente desde Pedidos */}
-      <Dialog open={openQuickClienteModal} onClose={() => setOpenQuickClienteModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <PersonAddIcon color="primary" />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>Crear Nuevo Cliente Rápido</Typography>
-          </Box>
-          <IconButton onClick={() => setOpenQuickClienteModal(false)}><CloseIcon /></IconButton>
-        </DialogTitle>
-        <DialogContent dividers sx={{ p: 2.5 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={7}>
-              <TextField
-                label="Razón Social / Nombre"
-                fullWidth
-                required
-                size="small"
-                value={quickClienteData.razonSocial}
-                onChange={(e) => setQuickClienteData({ ...quickClienteData, razonSocial: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={5}>
-              <TextField
-                label="CUIT / DNI"
-                fullWidth
-                required
-                size="small"
-                value={quickClienteData.cuit}
-                onChange={(e) => setQuickClienteData({ ...quickClienteData, cuit: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Persona de Contacto"
-                fullWidth
-                size="small"
-                value={quickClienteData.responsable}
-                onChange={(e) => setQuickClienteData({ ...quickClienteData, responsable: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Teléfono"
-                fullWidth
-                size="small"
-                value={quickClienteData.telefono}
-                onChange={(e) => setQuickClienteData({ ...quickClienteData, telefono: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Tipo de Cliente</InputLabel>
-                <Select
-                  value={quickClienteData.tipoCliente}
-                  label="Tipo de Cliente"
-                  onChange={(e) => setQuickClienteData({ ...quickClienteData, tipoCliente: e.target.value })}
-                >
-                  <MenuItem value="Mayorista (Restaurante / Semanal)">Mayorista (Restaurante / Semanal)</MenuItem>
-                  <MenuItem value="Mayorista (Supermercado / Fijo Semanal)">Mayorista (Supermercado)</MenuItem>
-                  <MenuItem value="Minorista / Frecuente">Minorista / Frecuente</MenuItem>
-                  <MenuItem value="Minorista (Mostrador)">Minorista (Mostrador)</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Localidad"
-                fullWidth
-                size="small"
-                value={quickClienteData.localidad}
-                onChange={(e) => setQuickClienteData({ ...quickClienteData, localidad: e.target.value })}
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setOpenQuickClienteModal(false)}>Cancelar</Button>
-          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSaveQuickCliente} sx={{ fontWeight: 700 }}>
-            Guardar y Seleccionar
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       {/* Modal Registrar Pago / Seña */}
       <Dialog open={openRegistrarPago} onClose={() => setOpenRegistrarPago(false)} maxWidth="xs" fullWidth>

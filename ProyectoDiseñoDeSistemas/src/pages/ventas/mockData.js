@@ -13,6 +13,8 @@
  * - CierreCaja: idCierreCaja (PK), fecha, estadoCaja, responsable, fondoInicial, totalIngresosEfectivo, totalIngresosDebito, totalIngresosMercadoPago, totalIngresosCuentaDNI, totalVentasDia, arqueoEfectivoFisico, diferenciaCaja, observaciones, historialCierres
  */
 
+export const DIAS_ENTREGA_SEMANAL = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
 // Medios de Pago Normalizados
 export const MEDIOS_DE_PAGO = [
   { idMedioDePagoCliente: 1, descripcion: 'Efectivo' },
