@@ -3,6 +3,7 @@ import { RecordIcon } from '../../components/shared/ModuleUI';
 import { useState, useMemo } from 'react';
 import {
   Box,
+  Alert,
   Paper,
   Typography,
   Button,
@@ -32,12 +33,12 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import PrintIcon from '@mui/icons-material/Print';
 
 import { INITIAL_PRESUPUESTOS, INITIAL_CLIENTES } from './mockData';
+import PresupuestoFormScreen from './PresupuestoFormScreen';
 import { DetalleItemsVentasTable, ComprobanteDocumentWrapper } from '../../components/ventas';
 
 
@@ -49,6 +50,8 @@ export const PresupuestosScreen = () => {
 
   // Modales
   const [openForm, setOpenForm] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [savedMessage, setSavedMessage] = useState('');
   const [openDetail, setOpenDetail] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
@@ -105,16 +108,24 @@ export const PresupuestosScreen = () => {
   // Handlers
   const handleOpenNewForm = () => {
     setIsEditing(false);
-    const nextNum = presupuestos.length + 1;
+    setFormError('');
+    setSavedMessage('');
+    const nextNum = Math.max(0, ...presupuestos.map(p => Number(p.nroPresupuesto.split('-').at(-1)) || 0)) + 1;
     const generatedNro = `PRE-2026-00${nextNum}`;
-    setFormData({ ...initialFormState, nroPresupuesto: generatedNro });
+    const hoy = new Date();
+    const vencimiento = new Date(hoy);
+    vencimiento.setDate(vencimiento.getDate() + 7);
+    const fechaLocal = fecha => new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    setFormData({ ...initialFormState, tipoPedido: 'Evento (Mayorista)', nroPresupuesto: generatedNro, fechaEmision: fechaLocal(hoy), validezHasta: fechaLocal(vencimiento), items: [] });
     setOpenForm(true);
   };
 
   const handleOpenEditForm = (item) => {
+    setFormError('');
+    setSavedMessage('');
     setIsEditing(true);
     setSelectedPresupuesto(item);
-    setFormData({ ...item });
+    setFormData({ ...item, items: item.items.map(producto => ({ ...producto })) });
     setOpenForm(true);
   };
 
@@ -130,8 +141,23 @@ export const PresupuestosScreen = () => {
 
   const handleSave = () => {
     const clienteObj = INITIAL_CLIENTES.find((c) => c.idCliente === formData.idCliente);
+    const descuento = Number(formData.descuentoPorcentaje);
+    if (!clienteObj || !formData.fechaEmision || !formData.validezHasta || formData.validezHasta < formData.fechaEmision) {
+      setFormError('Seleccioná un cliente y fechas válidas. La validez debe ser igual o posterior a la emisión.');
+      return;
+    }
+    if (!formData.items.length || formData.items.some(item => !item.idProductoCompuesto || !Number.isInteger(Number(item.cantidad)) || Number(item.cantidad) < 10 || !Number.isFinite(Number(item.precioUnitario)) || Number(item.precioUnitario) < 0)) {
+      setFormError('Agregá al menos un producto con una cantidad mínima de 10 y un precio válido.');
+      return;
+    }
+    if (!Number.isFinite(descuento) || descuento < 0 || descuento > 100) {
+      setFormError('El descuento debe estar entre 0 y 100%.');
+      return;
+    }
     const payload = {
       ...formData,
+      descuentoPorcentaje: descuento,
+      items: formData.items.map(item => ({ ...item, cantidad: Number(item.cantidad), precioUnitario: Number(item.precioUnitario) })),
       clienteNombre: clienteObj ? clienteObj.razonSocial : 'Cliente General',
       subtotal: subtotalForm,
       montoDescuento: (subtotalForm * (formData.descuentoPorcentaje || 0)) / 100,
@@ -147,6 +173,7 @@ export const PresupuestosScreen = () => {
       const newId = presupuestos.length > 0 ? Math.max(...presupuestos.map((p) => p.idPresupuestoCliente)) + 1 : 1;
       setPresupuestos((prev) => [...prev, { ...payload, idPresupuestoCliente: newId }]);
     }
+    setSavedMessage(isEditing ? 'Presupuesto actualizado.' : 'Presupuesto creado.');
     setOpenForm(false);
   };
 
@@ -175,6 +202,13 @@ export const PresupuestosScreen = () => {
     }
   };
 
+  if (openForm) {
+    return <PresupuestoFormScreen datos={formData} isEditing={isEditing}
+      onChange={datos => { setFormData(datos); setFormError(''); }}
+      onCancel={() => setOpenForm(false)} onSubmit={handleSave}
+      subtotal={subtotalForm} total={totalForm} adelanto={adelanto50Form} error={formError} />;
+  }
+
   return (
     <Box sx={{ p: { xs: 1.5, md: 3 } }}>
       {/* Header */}
@@ -198,6 +232,8 @@ export const PresupuestosScreen = () => {
           Nuevo Presupuesto
         </Button>
       </Box>
+
+      {savedMessage && <Alert severity="success" onClose={() => setSavedMessage('')} sx={{ mb: 2 }}>{savedMessage}</Alert>}
 
       {/* Buscador y Filtros */}
       <Paper elevation={1} sx={{ p: 2, mb: 3, borderRadius: '14px' }}>
@@ -300,145 +336,6 @@ export const PresupuestosScreen = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* Modal Formulario Estructurado de Presupuesto estilo Voucher / Comprobante */}
-      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
-        <DialogTitle sx={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <DescriptionOutlinedIcon color="primary" />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              {isEditing ? `Editar Presupuesto ${formData.nroPresupuesto}` : 'Formulario de Presupuesto / Cotización'}
-            </Typography>
-          </Box>
-          <IconButton onClick={() => setOpenForm(false)}><CloseIcon /></IconButton>
-        </DialogTitle>
-        <DialogContent dividers sx={{ maxHeight: '80vh', overflowY: 'auto', p: { xs: 1.5, sm: 2.5 } }}>
-          <ComprobanteDocumentWrapper
-            tipoDocTitle="Presupuesto"
-            nroDocumento={formData.nroPresupuesto || 'PRE-2026-0001'}
-            headerGrid={
-              <Grid container spacing={0}>
-                {/* Fila 1: Cliente & Fecha Emisión */}
-                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' }, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Cliente:</Typography>
-                  <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
-                    <InputLabel>Cliente Solicitante</InputLabel>
-                    <Select
-                      value={formData.idCliente}
-                      label="Cliente Solicitante"
-                      onChange={(e) => setFormData({ ...formData, idCliente: e.target.value })}
-                    >
-                      {INITIAL_CLIENTES.map((c) => (
-                        <MenuItem key={c.idCliente} value={c.idCliente}>
-                          {c.razonSocial} ({c.cuit})
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12} md={5} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Fecha de Emisión:</Typography>
-                  <TextField
-                    type="date"
-                    fullWidth
-                    size="small"
-                    sx={{ mt: 0.5 }}
-                    InputLabelProps={{ shrink: true }}
-                    value={formData.fechaEmision || ''}
-                    onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
-                  />
-                </Grid>
-
-                {/* Fila 2: Tipo de Pedido & Validez */}
-                <Grid item xs={12} md={7} sx={{ p: 1.5, borderRight: { md: '1px solid rgba(128,128,128,0.3)' } }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Tipo de Pedido / Evento:</Typography>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    sx={{ mt: 0.5 }}
-                    placeholder="Ej. Evento Especial (Cena 150 personas)"
-                    value={formData.tipoPedido || ''}
-                    onChange={(e) => setFormData({ ...formData, tipoPedido: e.target.value })}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={5} sx={{ p: 1.5 }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Validez Hasta:</Typography>
-                  <TextField
-                    type="date"
-                    fullWidth
-                    size="small"
-                    sx={{ mt: 0.5 }}
-                    InputLabelProps={{ shrink: true }}
-                    value={formData.validezHasta || ''}
-                    onChange={(e) => setFormData({ ...formData, validezHasta: e.target.value })}
-                  />
-                </Grid>
-              </Grid>
-            }
-            itemsTitle="Por favor suministrar lo siguiente"
-            itemsTable={
-              <DetalleItemsVentasTable
-                items={formData.items || []}
-                onChangeItems={(newItems) => setFormData({ ...formData, items: newItems })}
-              />
-            }
-            footerGrid={
-              <Grid container spacing={0}>
-                <Grid item xs={12} sm={6} sx={{ p: 1.5, borderRight: '1px solid rgba(128,128,128,0.3)', borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Descuento Aplicado (%):</Typography>
-                  <TextField
-                    type="number"
-                    fullWidth
-                    size="small"
-                    sx={{ mt: 0.5 }}
-                    value={formData.descuentoPorcentaje}
-                    onChange={(e) => setFormData({ ...formData, descuentoPorcentaje: parseFloat(e.target.value) || 0 })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} sx={{ p: 1.5, borderBottom: '1px solid rgba(128,128,128,0.3)' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Adelanto 50% Seña Requerida:</Typography>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#ed6c02', mt: 0.5 }}>
-                    $ {adelanto50Form.toLocaleString()}
-                  </Typography>
-                </Grid>
-              </Grid>
-            }
-            observacionesInput={
-              <Box>
-                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Observaciones / Condición de entrega:</Typography>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  size="small"
-                  sx={{ mt: 0.5 }}
-                  placeholder="Detalles de preparación, lugar o logística del evento..."
-                  value={formData.observaciones || ''}
-                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-                />
-              </Box>
-            }
-            totalLabel="Valor total cotizado:"
-            totalAmount={totalForm}
-            extraTotals={
-              <Box sx={{ mb: 1 }}>
-                <Typography variant="caption" color="text.secondary">Subtotal: ${subtotalForm.toLocaleString()}</Typography>
-                {formData.descuentoPorcentaje > 0 && (
-                  <Typography variant="caption" color="error" display="block">Descuento ({formData.descuentoPorcentaje}%): -${((subtotalForm * formData.descuentoPorcentaje) / 100).toLocaleString()}</Typography>
-                )}
-              </Box>
-            }
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setOpenForm(false)} color="inherit">Cancelar</Button>
-          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave} sx={{ px: 3, fontWeight: 700 }}>
-            Guardar Presupuesto
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       {/* Modal Vista Previa Documento Cotización */}
       <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="md" fullWidth>
