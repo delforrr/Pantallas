@@ -5,6 +5,7 @@ import {
 import { INITIAL_ORDENES_COMPRA } from "../compras/mockData.js";
 import { MATERIAS_PRIMAS_INICIALES } from "../produccion/mockData.js";
 import { INITIAL_MAQUINARIAS } from "../mantenimiento/mockData.js";
+import { COBROS_DEMO_POR_MES, PEDIDOS_DEMO_PROGRAMADOS } from "./mockData.js";
 
 export const FECHA_DEMO = "2026-09-26";
 const fechaLarga = new Intl.DateTimeFormat("es-AR", {
@@ -42,7 +43,10 @@ function esFechaValida(fecha) {
   );
 }
 
-const pedidosAbiertos = INITIAL_PEDIDOS.filter(
+const pedidosAbiertos = [
+  ...INITIAL_PEDIDOS,
+  ...PEDIDOS_DEMO_PROGRAMADOS,
+].filter(
   (pedido) =>
     !["Finalizado", "Cancelado"].includes(pedido.estadoPedido) &&
     esFechaValida(pedido.fechaEntregaEstimada),
@@ -109,7 +113,7 @@ export const alertas = [
 
 const [anio, mes, dia] = FECHA_DEMO.split("-").map(Number);
 
-export const entregas = Array.from({ length: 7 }, (_, indice) => {
+const diasEntrega = Array.from({ length: 14 }, (_, indice) => {
   const fecha = new Date(Date.UTC(anio, mes - 1, dia + indice));
   const iso = fecha.toISOString().slice(0, 10);
   return {
@@ -121,13 +125,33 @@ export const entregas = Array.from({ length: 7 }, (_, indice) => {
   };
 });
 
-export const mesesCobros = Array.from({ length: 3 }, (_, indice) => {
-  const fecha = new Date(Date.UTC(anio, mes - 1 - indice, 1));
+export const semanasEntrega = [0, 7].map((inicio) => {
+  const desde = fechaCorta.format(new Date(diasEntrega[inicio].fecha));
+  const hasta = fechaCorta.format(new Date(diasEntrega[inicio + 6].fecha));
   return {
-    valor: fecha.toISOString().slice(0, 7),
-    etiqueta: mesYAnio.format(fecha),
+    valor: inicio,
+    etiqueta: `${desde} – ${hasta}`,
   };
 });
+
+export function entregasPorSemana(inicio) {
+  return diasEntrega.slice(inicio, inicio + 7);
+}
+
+export const mesesCobros = Array.from(
+  new Set([
+    ...COBROS_DEMO_POR_MES.map(({ mes }) => mes),
+    ...INITIAL_COMPROBANTES_PAGO.filter((pago) =>
+      esFechaValida(pago.fechaEmision),
+    ).map((pago) => pago.fechaEmision.slice(0, 7)),
+  ]),
+)
+  .sort()
+  .reverse()
+  .map((valor) => ({
+    valor,
+    etiqueta: mesYAnio.format(new Date(`${valor}-01`)),
+  }));
 
 const tiposPedido = new Map([
   ["Mayorista Semanal Fijo", "Mayorista semanal"],
@@ -138,7 +162,14 @@ const tiposPedido = new Map([
 ]);
 
 export function cobrosPorTipo(periodo) {
-  const centavosPorTipo = new Map();
+  const montosDemo =
+    COBROS_DEMO_POR_MES.find(({ mes }) => mes === periodo)?.montos ?? {};
+  const centavosPorTipo = new Map(
+    Object.entries(montosDemo).map(([tipo, monto]) => [
+      tipo,
+      Math.round(monto * 100),
+    ]),
+  );
   for (const pago of INITIAL_COMPROBANTES_PAGO) {
     if (
       !esFechaValida(pago.fechaEmision) ||

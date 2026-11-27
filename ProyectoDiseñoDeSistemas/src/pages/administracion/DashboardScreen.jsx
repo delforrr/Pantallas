@@ -21,12 +21,13 @@ import { useApp } from "../../context/AppContext";
 import {
   alertas,
   cobrosPorTipo,
-  entregas,
+  entregasPorSemana,
   FECHA_DEMO,
   fechaVisible,
   mesesCobros,
   moneda,
   porcentaje,
+  semanasEntrega,
 } from "./dashboardData";
 
 const panel = {
@@ -43,13 +44,13 @@ const panelExpandido = {
   flexDirection: "column",
 };
 
-const coloresCobros = [
-  "primary.main",
-  "text.secondary",
-  "primary.dark",
-  "text.primary",
-  "action.disabled",
-];
+const coloresCobros = {
+  Eventos: "primary.main",
+  Mostrador: "text.secondary",
+  "Mayorista semanal": "info.main",
+  Canjes: "warning.main",
+  Donaciones: "text.primary",
+};
 const secciones = [
   { id: "indicadores", titulo: "Resumen" },
   { id: "pendientes", titulo: "Pendientes" },
@@ -370,8 +371,16 @@ function Pendientes({ filasPorPagina }) {
 }
 
 function Entregas({ compactarGrafico }) {
-  const maximo = Math.max(0, ...entregas.map((dia) => dia.cantidad));
-  const paso = Math.max(1, Math.ceil((maximo + 1) / 3));
+  const [semana, setSemana] = useState(semanasEntrega[0].valor);
+  const entregas = entregasPorSemana(semana);
+  const total = entregas.reduce((suma, dia) => suma + dia.cantidad, 0);
+  const maximo = Math.max(
+    0,
+    ...semanasEntrega.flatMap(({ valor }) =>
+      entregasPorSemana(valor).map((dia) => dia.cantidad),
+    ),
+  );
+  const paso = Math.ceil((maximo + 1) / 3);
   const marcas = [3, 2, 1, 0].map((indice) => indice * paso);
   const altura = compactarGrafico ? 84 : 136;
   return (
@@ -398,11 +407,25 @@ function Entregas({ compactarGrafico }) {
           >
             Próximas entregas
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Pedidos abiertos · próximos 7 días
+          <Typography variant="body2" color="text.secondary" aria-live="polite">
+            {total} {total === 1 ? "pedido abierto" : "pedidos abiertos"}
           </Typography>
         </Box>
-        <Acceso destino="pedidos">Ir a Pedidos</Acceso>
+        <TextField
+          select
+          label="Semana de entrega"
+          size="small"
+          value={semana}
+          onChange={(evento) => setSemana(Number(evento.target.value))}
+          sx={{ minWidth: 136 }}
+        >
+          {semanasEntrega.map(({ valor, etiqueta }) => (
+            <MenuItem key={valor} value={valor}>
+              {etiqueta}
+            </MenuItem>
+          ))}
+        </TextField>
+        <Acceso destino="pedidos">Pedidos</Acceso>
       </Stack>
       <Box
         sx={{
@@ -516,7 +539,7 @@ function Entregas({ compactarGrafico }) {
           </Box>
         </Box>
       </Box>
-      {!maximo && (
+      {!total && (
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           No hay entregas previstas.
         </Typography>
@@ -532,13 +555,13 @@ function Cobros({ compactarGrafico }) {
   const porciones = [];
   let inicio = 0;
   const diametro = compactarGrafico ? 112 : 132;
-  for (const [indice, cobro] of cobros.entries()) {
+  for (const cobro of cobros) {
     const proporcion = cobro.centavos / total;
     porciones.push({
       ...cobro,
       proporcion,
       inicio,
-      color: coloresCobros[indice % coloresCobros.length],
+      color: coloresCobros[cobro.tipo] ?? "action.disabled",
     });
     inicio += proporcion;
   }
@@ -708,11 +731,23 @@ function Cobros({ compactarGrafico }) {
                   />
                   <Typography variant="body2">{porcion.tipo}</Typography>
                 </Stack>
-                <Box sx={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                <Box
+                  sx={{
+                    display: { xs: "block", sm: "flex" },
+                    alignItems: "baseline",
+                    gap: 1,
+                    textAlign: "right",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>
                     {moneda.format(porcion.centavos / 100)}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ minWidth: "5ch" }}
+                  >
                     {porcentaje.format(porcion.proporcion)}
                   </Typography>
                 </Box>
