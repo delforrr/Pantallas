@@ -128,7 +128,7 @@ export default function PresupuestoFormScreen({ datos, clientes, onCreateCliente
             renderInput={params => <TextField {...params} label="Buscar producto" placeholder="Escribí el nombre del producto" size="small" />}
           />
           <Box sx={{ display: 'flex', alignItems: 'center', columnGap: 1.5, rowGap: 0.25, flexShrink: 0, maxWidth: '100%', flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
-            {!datos.items.length && <Typography color="text.secondary" variant="caption">{clienteSeleccionado ? 'Buscá un producto para comenzar.' : 'Seleccioná un cliente para cargar productos.'}</Typography>}
+            {!clienteSeleccionado && <Typography color="text.secondary" variant="caption">Seleccioná un cliente para cargar productos.</Typography>}
             <Typography variant="caption" color="text.secondary">Cantidad mínima: 10 por producto.</Typography>
           </Box>
           <Typography component="h2" variant="subtitle1" sx={{ fontWeight: 700, ml: 'auto', mr: { sm: 4 }, whiteSpace: 'nowrap' }}>Productos ({datos.items.length})</Typography>
