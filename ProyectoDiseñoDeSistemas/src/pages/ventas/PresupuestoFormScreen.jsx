@@ -72,10 +72,6 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
         <Tooltip title="Volver a presupuestos"><IconButton aria-label="Volver a presupuestos" onClick={onCancel}><ArrowBackIcon /></IconButton></Tooltip>
         <Typography component="h1" variant="h5" sx={{ fontWeight: 700, flex: 1 }}>{isEditing ? 'Editar presupuesto' : 'Nuevo presupuesto'}</Typography>
-        <Box sx={{ textAlign: 'right' }}>
-          <Typography variant="body2" color="text.secondary">{datos.nroPresupuesto}</Typography>
-          <Typography variant="caption" color="text.secondary">Emisión: {datos.fechaEmision.split('-').reverse().join('/')}</Typography>
-        </Box>
         <Button color="inherit" onClick={onCancel}>Cancelar</Button>
         <Button type="submit" variant="contained" startIcon={<SaveOutlinedIcon />}>{isEditing ? 'Guardar cambios' : 'Guardar presupuesto'}</Button>
       </Box>
@@ -120,10 +116,13 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
             onChange={(_, producto) => { agregarItem(producto); setBusquedaProducto(''); }}
             renderInput={params => <TextField {...params} label="Buscar producto" placeholder="Escribí el nombre del producto" size="small" />}
           />
+          <Box sx={{ display: 'grid', gap: 0.25 }}>
+            {!datos.items.length && <Typography color="text.secondary" variant="caption">Buscá un producto para comenzar.</Typography>}
+            <Typography variant="caption" color="text.secondary">Cantidad mínima: 10 por producto.</Typography>
+          </Box>
           <Typography component="h2" variant="subtitle1" sx={{ fontWeight: 700, ml: 'auto', mr: { sm: 4 }, whiteSpace: 'nowrap' }}>Productos ({datos.items.length})</Typography>
         </Box>
         <Box sx={{ display: 'grid', gap: 1 }}>
-          {!datos.items.length && <Typography color="text.secondary" variant="body2">Buscá un producto para comenzar.</Typography>}
           {datos.items.slice(inicio, inicio + 2).map((item, posicion) => {
             const index = inicio + posicion;
             return (
@@ -139,14 +138,11 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
             </Box>
           ); })}
         </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, mt: 0.5 }}>
-          <Typography variant="caption" color="text.secondary">Cantidad mínima: 10 por producto.</Typography>
-          {paginas > 1 && <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        {paginas > 1 && <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
             <Typography variant="caption" color="text.secondary">{inicio + 1}–{Math.min(inicio + 2, datos.items.length)} de {datos.items.length}</Typography>
             <IconButton aria-label="Productos anteriores" disabled={paginaActual === 0} onClick={() => setPagina(paginaActual - 1)}><ChevronLeftIcon /></IconButton>
             <IconButton aria-label="Productos siguientes" disabled={paginaActual === paginas - 1} onClick={() => setPagina(paginaActual + 1)}><ChevronRightIcon /></IconButton>
-          </Box>}
-        </Box>
+        </Box>}
       </Paper>
 
       <Paper variant="outlined" sx={{ ...panel, display: 'grid', gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: 'minmax(0, 1fr) repeat(3, minmax(110px, auto))' }, alignItems: 'center', gap: 1.5 }}>
