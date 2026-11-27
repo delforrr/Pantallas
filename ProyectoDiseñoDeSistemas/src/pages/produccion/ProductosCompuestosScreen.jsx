@@ -48,17 +48,24 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import NotesIcon from '@mui/icons-material/Notes';
 
-import { PRODUCTOS_INICIALES, RECETAS_INICIALES, PRODUCTOS_BASE, VARIEDADES, TIPOS_PRODUCTO } from './mockData';
+import { PRODUCTOS_INICIALES, RECETAS_INICIALES, SUBTIPOS_PRODUCTO, UNIDADES, TIPOS_PRODUCTO } from './mockData';
 import { useApp } from '../../context/AppContext';
 
-const CATEGORIAS = ['Todas', 'Pastas Rellenas', 'Pastas Simples', 'Otros'];
+const CATEGORIAS = ['Todas', ...TIPOS_PRODUCTO.map(tipo => tipo.tipoProducto)];
+const subtipoDe = producto => SUBTIPOS_PRODUCTO.find(sub => sub.idSubTipoProducto === producto.idSubTipoProducto);
+const tipoDe = producto => TIPOS_PRODUCTO.find(tipo => tipo.idTipoDeProducto === subtipoDe(producto)?.idTipoDeProducto);
+const nombreProducto = producto => `${subtipoDe(producto)?.subTipoProducto || ''} ${producto.variedad}`.trim();
 const ESTADOS = ['Todos', 'Activo', 'Inactivo'];
 
 export const ProductosCompuestosScreen = () => {
   const nombreEstado = useNombreEstado();
-  const { catalogos: { unidades } } = useApp();
+  const { catalogos } = useApp();
+  const unidades = useMemo(() => catalogos.unidades.map((unidad, index) => ({
+    ...unidad,
+    id: UNIDADES.find(base => base.unidad === unidad.id)?.idUnidad ?? 100 + index,
+  })), [catalogos.unidades]);
   const unidadInicial = opciones(unidades)[0]?.id ?? '';
-  const unidadProducto = producto => producto.unidadMedida || producto.unidad || 'kg';
+  const unidadProducto = producto => producto.idUnidad;
   const { navigate } = useApp();
 
   const [productos, setProductos] = useState(PRODUCTOS_INICIALES);
@@ -86,19 +93,14 @@ export const ProductosCompuestosScreen = () => {
   const [formState, setFormState] = useState({
     codigo: '',
     nombre: '',
-    idProducto: 1,
+    idSubTipoProducto: 1,
     idTipoDeProducto: 1,
-    idVariedad: 1,
+    variedad: '',
     idUnidad: unidadInicial,
-    idStock: 101,
-    categoria: 'Pastas Rellenas',
     recetaId: 'REC-001',
     precioUnitario: 5000,
-    precioVenta: 5000,
-    stockActual: 0,
+    cantidadActual: 0,
     stockMinimo: 15,
-    unidadMedida: unidadInicial,
-    unidad: unidadInicial,
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: '',
@@ -114,39 +116,38 @@ export const ProductosCompuestosScreen = () => {
   const stats = useMemo(() => {
     const total = productos.length;
     const activos = productos.filter((p) => p.estado === 'Activo').length;
-    const sinStock = productos.filter((p) => Number(p.stockActual) === 0).length;
-    const bajoStock = productos.filter((p) => Number(p.stockActual) > 0 && Number(p.stockActual) <= Number(p.stockMinimo || 10)).length;
+    const sinStock = productos.filter((p) => Number(p.cantidadActual) === 0).length;
+    const bajoStock = productos.filter((p) => Number(p.cantidadActual) > 0 && Number(p.cantidadActual) <= Number(p.stockMinimo ?? 10)).length;
     return { total, activos, sinStock, bajoStock };
   }, [productos]);
 
   // Helpers para normalizar campos de dominio
   const getTipoProductoNombre = (p) =>
-    TIPOS_PRODUCTO.find((t) => t.idTipoDeProducto === p.idTipoDeProducto)?.tipoProducto || p.categoria || '-';
+    tipoDe(p)?.tipoProducto || '-';
 
-  const getProductoBaseNombre = (p) =>
-    PRODUCTOS_BASE.find((pb) => pb.idProducto === p.idProducto)?.producto || p.nombre || '-';
+  const getSubtipoNombre = (p) =>
+    subtipoDe(p)?.subTipoProducto || p.nombre || '-';
 
   const getVariedadNombre = (p) =>
-    VARIEDADES.find((v) => v.idVariedad === p.idVariedad)?.variedad || '-';
+    p.variedad || '-';
 
   // Filtrado reactivo en memoria
   const filteredProductos = useMemo(() => {
     return productos.filter((p) => {
-      const matchCat = selectedCategoria === 'Todas' || p.categoria === selectedCategoria;
+      const matchCat = selectedCategoria === 'Todas' || tipoDe(p)?.tipoProducto === selectedCategoria;
       const matchEst = selectedEstado === 'Todos' || p.estado === selectedEstado;
       const term = searchTerm.toLowerCase();
       const matchSearch =
         p.nombre.toLowerCase().includes(term) ||
         p.codigo.toLowerCase().includes(term) ||
         getTipoProductoNombre(p).toLowerCase().includes(term) ||
-        getProductoBaseNombre(p).toLowerCase().includes(term) ||
+        getSubtipoNombre(p).toLowerCase().includes(term) ||
         getVariedadNombre(p).toLowerCase().includes(term) ||
         (p.recetaNombre && p.recetaNombre.toLowerCase().includes(term)) ||
-        (p.unidadMedida && p.unidadMedida.toLowerCase().includes(term)) ||
-        (p.unidad && p.unidad.toLowerCase().includes(term));
+        nombreCatalogo(unidades, p.idUnidad).toLowerCase().includes(term);
       return matchCat && matchEst && matchSearch;
     });
-  }, [productos, searchTerm, selectedCategoria, selectedEstado]);
+  }, [productos, searchTerm, selectedCategoria, selectedEstado, unidades]);
 
   // Abrir modal de receta
   const handleOpenRecetaModal = (prod) => {
@@ -173,7 +174,7 @@ export const ProductosCompuestosScreen = () => {
   const handleSaveStockAdjustment = () => {
     if (!stockModalProducto) return;
     const cant = Number(stockMovimiento.cantidad);
-    if (isNaN(cant) || (cant <= 0 && stockMovimiento.tipo !== 'Ajuste Directo')) {
+    if (!stockMovimiento.cantidad.trim() || !Number.isFinite(cant) || (cant <= 0 && stockMovimiento.tipo !== 'Ajuste Directo')) {
       setSnackbar({ open: true, message: 'Ingrese una cantidad válida mayor a 0.', severity: 'error' });
       return;
     }
@@ -182,7 +183,7 @@ export const ProductosCompuestosScreen = () => {
       return;
     }
 
-    const currentStock = Number(stockModalProducto.stockActual) || 0;
+    const currentStock = Number(stockModalProducto.cantidadActual) || 0;
     let nuevoStock = currentStock;
 
     if (stockMovimiento.tipo === 'Ingreso') {
@@ -202,10 +203,10 @@ export const ProductosCompuestosScreen = () => {
     }
 
     setProductos((prev) =>
-      prev.map((p) => (p.id === stockModalProducto.id ? { ...p, stockActual: nuevoStock } : p))
+      prev.map((p) => (p.id === stockModalProducto.id ? { ...p, cantidadActual: nuevoStock } : p))
     );
 
-    const unidad = stockModalProducto.unidadMedida || 'kg';
+    const unidad = nombreCatalogo(unidades, stockModalProducto.idUnidad);
     setSnackbar({
       open: true,
       message: `Stock de "${stockModalProducto.nombre}" actualizado a ${nuevoStock} ${unidad}.`,
@@ -217,7 +218,7 @@ export const ProductosCompuestosScreen = () => {
   // Cálculo del stock proyectado para preview en modal
   const proyectedStock = useMemo(() => {
     if (!stockModalProducto) return 0;
-    const current = Number(stockModalProducto.stockActual) || 0;
+    const current = Number(stockModalProducto.cantidadActual) || 0;
     const cant = Number(stockMovimiento.cantidad) || 0;
     if (stockMovimiento.tipo === 'Ingreso') return current + cant;
     if (stockMovimiento.tipo === 'Egreso') return Math.max(0, current - cant);
@@ -238,18 +239,13 @@ export const ProductosCompuestosScreen = () => {
     setFormState({
       codigo: nextCode,
       nombre: '',
-      idProducto: 1,
+      idSubTipoProducto: 1,
       idTipoDeProducto: 1,
-      idVariedad: 1,
+      variedad: '',
       idUnidad: unidadInicial,
-      idStock: 100 + nextNum,
-      categoria: 'Pastas Rellenas',
       precioUnitario: 5500,
-      precioVenta: 5500,
-      stockActual: 0,
+      cantidadActual: 0,
       stockMinimo: 15,
-      unidadMedida: unidadInicial,
-      unidad: unidadInicial,
       vidaUtil: '48 hs fresco / 90 días freezer',
       estado: 'Activo',
       descripcion: '',
@@ -263,18 +259,13 @@ export const ProductosCompuestosScreen = () => {
     setFormState({
       codigo: prod.codigo,
       nombre: prod.nombre,
-      idProducto: prod.idProducto || 1,
-      idTipoDeProducto: prod.idTipoDeProducto || 1,
-      idVariedad: prod.idVariedad || 1,
+      idSubTipoProducto: prod.idSubTipoProducto,
+      idTipoDeProducto: tipoDe(prod).idTipoDeProducto,
+      variedad: prod.variedad,
       idUnidad: unidadProducto(prod),
-      idStock: prod.idStock || 101,
-      categoria: prod.categoria,
-      precioUnitario: prod.precioUnitario || prod.precioVenta || 0,
-      precioVenta: prod.precioVenta || prod.precioUnitario || 0,
-      stockActual: prod.stockActual ?? 0,
+      precioUnitario: prod.precioUnitario ?? 0,
+      cantidadActual: prod.cantidadActual ?? 0,
       stockMinimo: prod.stockMinimo ?? 15,
-      unidadMedida: prod.unidadMedida || prod.unidad || 'kg',
-      unidad: prod.unidad || prod.unidadMedida || 'kg',
       vidaUtil: prod.vidaUtil || '48 hs fresco',
       estado: prod.estado || 'Activo',
       descripcion: prod.descripcion || '',
@@ -284,51 +275,63 @@ export const ProductosCompuestosScreen = () => {
 
   // Guardar alta o modificación
   const handleSave = () => {
-    if (!formState.idUnidad) {
+    if (!SUBTIPOS_PRODUCTO.some(sub => sub.idSubTipoProducto === formState.idSubTipoProducto && sub.idTipoDeProducto === formState.idTipoDeProducto) || !formState.variedad.trim()) {
+      setSnackbar({ open: true, message: 'Seleccioná un subtipo del tipo elegido e ingresá la variedad.', severity: 'error' });
+      return;
+    }
+    if (![formState.cantidadActual, formState.stockMinimo, formState.precioUnitario].every(valor => String(valor).trim() !== '' && Number.isFinite(Number(valor)) && Number(valor) >= 0)) {
+      setSnackbar({ open: true, message: 'La cantidad, el stock mínimo y el precio deben ser números mayores o iguales a cero.', severity: 'error' });
+      return;
+    }
+    if (!opciones(unidades, editingProducto?.idUnidad).some(unidad => unidad.id === formState.idUnidad)) {
       setSnackbar({ open: true, message: 'Seleccioná una unidad de medida.', severity: 'error' });
       return;
     }
-    if (!formState.nombre.trim() || !formState.codigo.trim()) {
+    if (!formState.codigo.trim()) {
       setSnackbar({ open: true, message: 'El código y el nombre son obligatorios.', severity: 'error' });
       return;
     }
 
-    const esOtros = formState.categoria === 'Otros';
+    const datosProducto = { ...formState, nombre: nombreProducto(formState), variedad: formState.variedad.trim() };
+    delete datosProducto.idTipoDeProducto;
+    const esOtros = formState.idTipoDeProducto !== 1;
 
     if (editingProducto) {
-      const recetaIdFinal = esOtros ? null : editingProducto.recetaId;
+      const mismaClasificacion = editingProducto.idSubTipoProducto === formState.idSubTipoProducto;
+      const recetaIdFinal = esOtros || !mismaClasificacion ? null : editingProducto.recetaId;
       const recetaNombreFinal = esOtros
         ? 'No requiere (Producto listo / reventa)'
-        : editingProducto.recetaNombre || 'Sin receta asignada';
+        : mismaClasificacion && editingProducto.recetaNombre || 'Sin receta asignada';
 
       setProductos((prev) =>
         prev.map((p) =>
           p.id === editingProducto.id
             ? {
                 ...p,
-                ...formState,
+                ...datosProducto,
                 recetaId: recetaIdFinal,
                 recetaNombre: recetaNombreFinal,
-                precioVenta: Number(formState.precioVenta) || 0,
-                stockActual: Number(formState.stockActual) || 0,
+                precioUnitario: Number(formState.precioUnitario),
+                cantidadActual: Number(formState.cantidadActual) || 0,
                 stockMinimo: Number(formState.stockMinimo) || 0,
               }
             : p
         )
       );
-      setSnackbar({ open: true, message: `Producto "${formState.nombre}" actualizado con éxito.`, severity: 'success' });
+      setSnackbar({ open: true, message: `Producto "${nombreProducto(formState)}" actualizado con éxito.`, severity: 'success' });
     } else {
       const nuevo = {
         id: formState.codigo,
-        ...formState,
+        ...datosProducto,
+        idProducto: Math.max(0, ...productos.map(p => p.idProducto)) + 1,
         recetaId: null,
         recetaNombre: esOtros ? 'No requiere (Producto listo / reventa)' : 'Sin receta asignada',
-        precioVenta: Number(formState.precioVenta) || 0,
-        stockActual: Number(formState.stockActual) || 0,
-        stockMinimo: Number(formState.stockMinimo) || 15,
+        precioUnitario: Number(formState.precioUnitario),
+        cantidadActual: Number(formState.cantidadActual) || 0,
+        stockMinimo: Number(formState.stockMinimo) || 0,
       };
       setProductos((prev) => [nuevo, ...prev]);
-      setSnackbar({ open: true, message: `Producto "${formState.nombre}" creado exitosamente.`, severity: 'success' });
+      setSnackbar({ open: true, message: `Producto "${nombreProducto(formState)}" creado exitosamente.`, severity: 'success' });
     }
     setModalOpen(false);
   };
@@ -376,11 +379,11 @@ export const ProductosCompuestosScreen = () => {
           />
 
           <FormControl size="small" sx={{ flex: { xs: '1 1 calc(50% - 6px)', sm: '0 0 auto' }, minWidth: { xs: 'calc(50% - 6px)', sm: 150 }, bgcolor: 'background.paper' }}>
-            <InputLabel id="filtro-categoria-label">Categoría</InputLabel>
+            <InputLabel id="filtro-categoria-label">Tipo de producto</InputLabel>
             <Select
               labelId="filtro-categoria-label"
               value={selectedCategoria}
-              label="Categoría"
+              label="Tipo de producto"
               onChange={(e) => setSelectedCategoria(e.target.value)}
             >
               {CATEGORIAS.map((cat) => (
@@ -501,12 +504,12 @@ export const ProductosCompuestosScreen = () => {
               <TableRow>
                 <TableCell sx={{ fontWeight: 700, width: 95, whiteSpace: 'nowrap' }}>Código</TableCell>
                 <TableCell sx={{ fontWeight: 700, width: 135, whiteSpace: 'nowrap' }}>Tipo de Producto</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 130, whiteSpace: 'nowrap' }}>Producto</TableCell>
-                <TableCell sx={{ fontWeight: 700, minWidth: 140 }}>Variedad</TableCell>
+                <TableCell sx={{ fontWeight: 700, width: 130, whiteSpace: 'nowrap' }}>Subtipo de producto</TableCell>
+                <TableCell sx={{ fontWeight: 700, minWidth: 140 }}>Producto (variedad)</TableCell>
                 <TableCell sx={{ fontWeight: 700, width: 130, whiteSpace: 'nowrap' }}>Receta</TableCell>
                 <TableCell sx={{ fontWeight: 700, width: 90, whiteSpace: 'nowrap' }}>Unidad</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 125, whiteSpace: 'nowrap' }}>Stock Actual</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 110, whiteSpace: 'nowrap' }}>Precio Sugerido</TableCell>
+                <TableCell sx={{ fontWeight: 700, width: 125, whiteSpace: 'nowrap' }}>Cantidad actual</TableCell>
+                <TableCell sx={{ fontWeight: 700, width: 110, whiteSpace: 'nowrap' }}>Precio unitario</TableCell>
                 <TableCell sx={{ fontWeight: 700, width: 105, whiteSpace: 'nowrap' }}>Estado</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700, width: 145, minWidth: 145, whiteSpace: 'nowrap' }}>
                   Acciones
@@ -531,7 +534,7 @@ export const ProductosCompuestosScreen = () => {
                     />
                   </TableCell>
                   <TableCell sx={{ py: 1.5, maxWidth: 180 }}>
-                    <Tooltip title={getProductoBaseNombre(prod)}>
+                    <Tooltip title={getSubtipoNombre(prod)}>
                       <Typography
                         variant="body2"
                         sx={{
@@ -542,7 +545,7 @@ export const ProductosCompuestosScreen = () => {
                           maxWidth: 170,
                         }}
                       >
-                        {getProductoBaseNombre(prod)}
+                        {getSubtipoNombre(prod)}
                       </Typography>
                     </Tooltip>
                     {prod.descripcion && (
@@ -560,7 +563,7 @@ export const ProductosCompuestosScreen = () => {
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
-                    {prod.categoria === 'Otros' ? (
+                    {tipoDe(prod)?.idTipoDeProducto !== 1 ? (
                       <Chip
                         size="small"
                         label="No requiere"
@@ -604,20 +607,20 @@ export const ProductosCompuestosScreen = () => {
                         sx={{
                           fontWeight: 700,
                           color:
-                            prod.stockActual === 0
+                            prod.cantidadActual === 0
                               ? 'error.main'
-                              : Number(prod.stockActual) <= Number(prod.stockMinimo || 10)
+                              : Number(prod.cantidadActual) <= Number(prod.stockMinimo ?? 10)
                               ? 'warning.main'
                               : 'text.primary',
                         }}
                       >
-                        {prod.stockActual ?? 0} {nombreCatalogo(unidades, unidadProducto(prod))}
+                        {prod.cantidadActual ?? 0} {nombreCatalogo(unidades, unidadProducto(prod))}
                       </Typography>
-                      {prod.stockActual === 0 ? (
+                      {prod.cantidadActual === 0 ? (
                         <Tooltip title="Sin stock disponible en fábrica">
                           <WarningAmberIcon color="error" sx={{ fontSize: 16 }} />
                         </Tooltip>
-                      ) : Number(prod.stockActual) <= Number(prod.stockMinimo || 10) ? (
+                      ) : Number(prod.cantidadActual) <= Number(prod.stockMinimo ?? 10) ? (
                         <Tooltip title="Stock en nivel crítico o por debajo del mínimo">
                           <WarningAmberIcon color="warning" sx={{ fontSize: 16 }} />
                         </Tooltip>
@@ -626,7 +629,7 @@ export const ProductosCompuestosScreen = () => {
                   </TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      ${prod.precioVenta?.toLocaleString('es-AR')}
+                      ${prod.precioUnitario?.toLocaleString('es-AR')}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap', py: 1.5 }}>
@@ -830,19 +833,7 @@ export const ProductosCompuestosScreen = () => {
       >
         <FormSection number={1} title="Identificación del producto">
           <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                label="Nombre del producto"
-                fullWidth
-                size="small"
-                value={formState.nombre}
-                onChange={(e) => setFormState({ ...formState, nombre: e.target.value })}
-                placeholder="Ej. Raviolones de Pollo y Verdura"
-                required
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 select
                 label="Tipo de producto"
@@ -851,11 +842,10 @@ export const ProductosCompuestosScreen = () => {
                 value={formState.idTipoDeProducto}
                 onChange={(e) => {
                   const val = Number(e.target.value);
-                  const tipoObj = TIPOS_PRODUCTO.find((t) => t.idTipoDeProducto === val);
                   setFormState({
                     ...formState,
                     idTipoDeProducto: val,
-                    categoria: tipoObj ? tipoObj.tipoProducto : formState.categoria,
+                    idSubTipoProducto: '',
                   });
                 }}
               >
@@ -866,32 +856,22 @@ export const ProductosCompuestosScreen = () => {
                 ))}
               </TextField>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                select
-                label="Variedad"
-                fullWidth
-                size="small"
-                value={formState.idVariedad}
-                onChange={(e) => {
-                  const val = Number(e.target.value);
-                  const varObj = VARIEDADES.find((v) => v.idVariedad === val);
-                  const prodObj = PRODUCTOS_BASE.find((p) => p.idProducto === formState.idProducto);
-                  setFormState({
-                    ...formState,
-                    idVariedad: val,
-                    nombre: prodObj ? `${prodObj.producto} ${varObj?.variedad || ''}`.trim() : formState.nombre,
-                  });
-                }}
-              >
-                {VARIEDADES.map((v) => (
-                  <MenuItem key={v.idVariedad} value={v.idVariedad}>
-                    {v.variedad}
-                  </MenuItem>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField select label="Subtipo de producto" fullWidth size="small" required
+                value={formState.idSubTipoProducto}
+                onChange={e => setFormState({ ...formState, idSubTipoProducto: Number(e.target.value) })}>
+                {SUBTIPOS_PRODUCTO.filter(sub => sub.idTipoDeProducto === formState.idTipoDeProducto).map(sub => (
+                  <MenuItem key={sub.idSubTipoProducto} value={sub.idSubTipoProducto}>{sub.subTipoProducto}</MenuItem>
                 ))}
               </TextField>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField label="Producto (variedad)" fullWidth size="small" required
+                value={formState.variedad}
+                onChange={e => setFormState({ ...formState, variedad: e.target.value })}
+                placeholder="Ej. Al huevo" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 select
                 label="Unidad"
@@ -899,8 +879,7 @@ export const ProductosCompuestosScreen = () => {
                 size="small"
                 value={formState.idUnidad}
                 onChange={(e) => {
-                  const unidad = e.target.value;
-                  setFormState({ ...formState, idUnidad: unidad, unidadMedida: unidad, unidad });
+                  setFormState({ ...formState, idUnidad: Number(e.target.value) });
                 }}
               >
                 {opciones(unidades, editingProducto && unidadProducto(editingProducto)).map(u => (
@@ -909,7 +888,7 @@ export const ProductosCompuestosScreen = () => {
               </TextField>
             </Grid>
             {editingProducto && (
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   select
                   label="Estado"
@@ -928,12 +907,12 @@ export const ProductosCompuestosScreen = () => {
         <FormSection number={2} title="Inventario y comercialización">
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, minmax(0, 1fr))' }, gap: 2 }}>
               <TextField
-                label="Stock actual en fábrica"
+                label="Cantidad actual"
                 type="number"
                 fullWidth
                 size="small"
-                value={formState.stockActual}
-                onChange={(e) => setFormState({ ...formState, stockActual: e.target.value })}
+                value={formState.cantidadActual}
+                onChange={(e) => setFormState({ ...formState, cantidadActual: e.target.value })}
               />
               <TextField
                 label="Stock mínimo de alerta"
@@ -953,7 +932,7 @@ export const ProductosCompuestosScreen = () => {
                   setFormState({
                     ...formState,
                     precioUnitario: Number(e.target.value),
-                    precioVenta: Number(e.target.value),
+
                   })
                 }
                 InputProps={{
@@ -1002,7 +981,7 @@ export const ProductosCompuestosScreen = () => {
                     Stock Actual:
                   </Typography>
                   <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                    {stockModalProducto.stockActual ?? 0} {nombreCatalogo(unidades, unidadProducto(stockModalProducto))}
+                    {stockModalProducto.cantidadActual ?? 0} {nombreCatalogo(unidades, unidadProducto(stockModalProducto))}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
@@ -1140,11 +1119,11 @@ export const ProductosCompuestosScreen = () => {
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>{getTipoProductoNombre(viewingProducto)}</Typography>
                   </Box>
                   <Box>
-                    <Typography variant="caption" color="text.secondary">Producto</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{getProductoBaseNombre(viewingProducto)}</Typography>
+                    <Typography variant="caption" color="text.secondary">Subtipo de producto</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{getSubtipoNombre(viewingProducto)}</Typography>
                   </Box>
                   <Box>
-                    <Typography variant="caption" color="text.secondary">Variedad</Typography>
+                    <Typography variant="caption" color="text.secondary">Producto (variedad)</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>{getVariedadNombre(viewingProducto)}</Typography>
                   </Box>
                   <Box>
@@ -1156,7 +1135,7 @@ export const ProductosCompuestosScreen = () => {
                       <AttachMoneyIcon fontSize="inherit" /> Precio unitario
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 800, color: 'primary.main' }}>
-                      ${(viewingProducto.precioUnitario || viewingProducto.precioVenta)?.toLocaleString('es-AR')}
+                      ${viewingProducto.precioUnitario?.toLocaleString('es-AR')}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Por {nombreCatalogo(unidades, unidadProducto(viewingProducto))}
@@ -1168,18 +1147,18 @@ export const ProductosCompuestosScreen = () => {
                     </Typography>
                     <Typography variant="body1" sx={{
                       fontWeight: 700,
-                      color: viewingProducto.stockActual === 0
+                      color: viewingProducto.cantidadActual === 0
                         ? 'error.main'
-                        : Number(viewingProducto.stockActual) <= Number(viewingProducto.stockMinimo || 10)
+                        : Number(viewingProducto.cantidadActual) <= Number(viewingProducto.stockMinimo ?? 10)
                           ? 'warning.main'
                           : 'text.primary',
                     }}>
-                      {viewingProducto.stockActual} {nombreCatalogo(unidades, unidadProducto(viewingProducto))}
+                      {viewingProducto.cantidadActual} {nombreCatalogo(unidades, unidadProducto(viewingProducto))}
                     </Typography>
                   </Box>
                   <Box>
                     <Typography variant="caption" color="text.secondary">Stock mínimo de seguridad</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewingProducto.stockMinimo || 15} {nombreCatalogo(unidades, unidadProducto(viewingProducto))}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewingProducto.stockMinimo ?? 15} {nombreCatalogo(unidades, unidadProducto(viewingProducto))}</Typography>
                   </Box>
                   <Box sx={{ gridColumn: { xs: '1 / -1', sm: 'span 2' }, borderTop: '1px solid', borderColor: 'divider', pt: 1 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Receta de producción</Typography>

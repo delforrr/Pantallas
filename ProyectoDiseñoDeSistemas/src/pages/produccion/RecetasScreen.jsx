@@ -35,13 +35,11 @@ import NotesIcon from '@mui/icons-material/Notes';
 import {
   RECETAS_INICIALES,
   PRODUCTOS_FABRICABLES,
-  TIPOS_PRODUCTO,
 } from './mockData';
 
 const CATEGORIAS = ['Todas', 'Pastas Rellenas', 'Pastas Simples'];
-const TIPOS_CON_PRODUCTOS = TIPOS_PRODUCTO.filter(tipo =>
-  PRODUCTOS_FABRICABLES.some(producto => producto.categoria === tipo.tipoProducto)
-);
+const TIPOS_CON_PRODUCTOS = [...new Set(PRODUCTOS_FABRICABLES.map(producto => producto.categoria))]
+  .map(categoria => ({ idTipoDeProducto: categoria, tipoProducto: categoria }));
 
 export const RecetasScreen = () => {
   const [recetas, setRecetas] = useState(RECETAS_INICIALES);
@@ -539,7 +537,7 @@ export const RecetasScreen = () => {
                 fullWidth
                 select
                 size="small"
-                label="Tipo de producto"
+                label="Clasificación de receta"
                 value={formState.categoria}
                 onChange={(event) => setFormState(prev => ({
                   ...prev,

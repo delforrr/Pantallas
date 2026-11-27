@@ -6,38 +6,24 @@
 
 // Clase: TipoDeProducto (IdTipoDeProducto, TipoProducto)
 export const TIPOS_PRODUCTO = [
-  { idTipoDeProducto: 1, tipoProducto: 'Pastas Rellenas' },
-  { idTipoDeProducto: 2, tipoProducto: 'Pastas Simples' },
-  { idTipoDeProducto: 3, tipoProducto: 'Otros' },
+  { idTipoDeProducto: 1, tipoProducto: 'Pasta' },
+  { idTipoDeProducto: 2, tipoProducto: 'Salsa' },
+  { idTipoDeProducto: 3, tipoProducto: 'Queso' },
+  { idTipoDeProducto: 4, tipoProducto: 'Postre' },
 ];
 
-// Clase: Producto (IdProducto, Producto)
-export const PRODUCTOS_BASE = [
-  { idProducto: 1, producto: 'Ravioles' },
-  { idProducto: 2, producto: 'Tallarines' },
-  { idProducto: 3, producto: 'Capeletis' },
-  { idProducto: 4, producto: 'Ñoquis' },
-  { idProducto: 5, producto: 'Sorrentinos' },
-  { idProducto: 6, producto: 'Cintas' },
-  { idProducto: 7, producto: 'Canelones' },
-  { idProducto: 8, producto: 'Salsa Filetto' },
-  { idProducto: 9, producto: 'Queso Reggianito' },
-  { idProducto: 10, producto: 'Tiramisú' },
-];
-
-// Clase: Variedad (IdVariedad, Variedad)
-export const VARIEDADES = [
-  { idVariedad: 1, variedad: 'Ricota y Parmesano' },
-  { idVariedad: 2, variedad: 'Al Huevo Clásicos' },
-  { idVariedad: 3, variedad: 'Espinaca y Ricota' },
-  { idVariedad: 4, variedad: 'Carne Braseada' },
-  { idVariedad: 5, variedad: 'De Papa Tradicionales' },
-  { idVariedad: 6, variedad: 'Jamón y Mozzarella' },
-  { idVariedad: 7, variedad: 'Con Espinaca' },
-  { idVariedad: 8, variedad: 'Verdura y Ricota' },
-  { idVariedad: 9, variedad: 'Artesanal' },
-  { idVariedad: 10, variedad: 'Rallado' },
-  { idVariedad: 11, variedad: 'Tradicional Italiano' },
+// Clase: SubTipoDeProducto (IdSubTipoProducto, IdTipoDeProducto, SubTipoProducto)
+export const SUBTIPOS_PRODUCTO = [
+  { idSubTipoProducto: 1, idTipoDeProducto: 1, subTipoProducto: 'Ravioles' },
+  { idSubTipoProducto: 2, idTipoDeProducto: 1, subTipoProducto: 'Tallarines' },
+  { idSubTipoProducto: 3, idTipoDeProducto: 1, subTipoProducto: 'Capeletis' },
+  { idSubTipoProducto: 4, idTipoDeProducto: 1, subTipoProducto: 'Ñoquis' },
+  { idSubTipoProducto: 5, idTipoDeProducto: 1, subTipoProducto: 'Sorrentinos' },
+  { idSubTipoProducto: 6, idTipoDeProducto: 1, subTipoProducto: 'Cintas' },
+  { idSubTipoProducto: 7, idTipoDeProducto: 1, subTipoProducto: 'Canelones' },
+  { idSubTipoProducto: 8, idTipoDeProducto: 2, subTipoProducto: 'Salsa Filetto' },
+  { idSubTipoProducto: 9, idTipoDeProducto: 3, subTipoProducto: 'Queso Reggianito' },
+  { idSubTipoProducto: 10, idTipoDeProducto: 4, subTipoProducto: 'Tiramisú' },
 ];
 
 // Clase: Unidad (IdUnidad, Unidad)
@@ -86,28 +72,22 @@ export const PRODUCTOS_FABRICABLES = [
 ];
 
 // -------------------------------------------------------------
-// Clase: ProductoCompuesto (IdProducto, IdStock, IdTipoDeProducto, IdUnidad, IdVariedad, PrecioUnitario)
+// Clase: Producto (IdProducto, IdSubTipoProducto, IdUnidad, Variedad, CantidadActual, PrecioUnitario, StockMinimo)
 // -------------------------------------------------------------
 export const PRODUCTOS_INICIALES = [
   {
     id: 'PRD-001',
     codigo: 'PRD-001',
-    idProductoCompuesto: 1,
-    idProducto: 1, // Ravioles
-    idTipoDeProducto: 1, // Pastas Rellenas
-    idVariedad: 1, // Ricota y Parmesano
+    idProducto: 1,
+    idSubTipoProducto: 1,
+    variedad: 'Ricota y Parmesano',
     idUnidad: 1, // kg
-    idStock: 101,
     precioUnitario: 5800,
-    precioVenta: 5800,
-    stockActual: 45,
+    cantidadActual: 45,
     stockMinimo: 15,
-    unidadMedida: 'kg',
     nombre: 'Ravioles de Ricota y Parmesano',
-    categoria: 'Pastas Rellenas',
     recetaId: 'REC-001',
     recetaNombre: 'Ravioles de Ricota y Parmesano (10 kg)',
-    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: 'Ravioles artesanales con masa al huevo rellenos de ricota fresca de campo y parmesano estacionado.',
@@ -115,22 +95,16 @@ export const PRODUCTOS_INICIALES = [
   {
     id: 'PRD-002',
     codigo: 'PRD-002',
-    idProductoCompuesto: 2,
-    idProducto: 2, // Tallarines
-    idTipoDeProducto: 2, // Pastas Simples
-    idVariedad: 2, // Al Huevo Clásicos
+    idProducto: 2,
+    idSubTipoProducto: 2,
+    variedad: 'Al Huevo Clásicos',
     idUnidad: 1, // kg
-    idStock: 102,
     precioUnitario: 4200,
-    precioVenta: 4200,
-    stockActual: 60,
+    cantidadActual: 60,
     stockMinimo: 20,
-    unidadMedida: 'kg',
     nombre: 'Tallarines al Huevo Clásicos',
-    categoria: 'Pastas Simples',
     recetaId: 'REC-002',
     recetaNombre: 'Tallarines al Huevo Clásicos (10 kg)',
-    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: 'Cintas tradicionales al huevo con sémola de trigo candeal de primera calidad.',
@@ -138,22 +112,16 @@ export const PRODUCTOS_INICIALES = [
   {
     id: 'PRD-003',
     codigo: 'PRD-003',
-    idProductoCompuesto: 3,
-    idProducto: 1, // Ravioles
-    idTipoDeProducto: 1, // Pastas Rellenas
-    idVariedad: 3, // Espinaca y Ricota
+    idProducto: 3,
+    idSubTipoProducto: 1,
+    variedad: 'Espinaca y Ricota',
     idUnidad: 1, // kg
-    idStock: 103,
     precioUnitario: 5600,
-    precioVenta: 5600,
-    stockActual: 30,
+    cantidadActual: 30,
     stockMinimo: 15,
-    unidadMedida: 'kg',
     nombre: 'Ravioles de Espinaca y Ricota',
-    categoria: 'Pastas Rellenas',
     recetaId: 'REC-003',
     recetaNombre: 'Ravioles de Espinaca y Ricota (10 kg)',
-    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: 'Ravioles con espinaca fresca de huerta seleccionada y ricota cremosa.',
@@ -161,22 +129,16 @@ export const PRODUCTOS_INICIALES = [
   {
     id: 'PRD-004',
     codigo: 'PRD-004',
-    idProductoCompuesto: 4,
-    idProducto: 3, // Capeletis
-    idTipoDeProducto: 1, // Pastas Rellenas
-    idVariedad: 4, // Carne Braseada
+    idProducto: 4,
+    idSubTipoProducto: 3,
+    variedad: 'Carne Braseada',
     idUnidad: 1, // kg
-    idStock: 104,
     precioUnitario: 6400,
-    precioVenta: 6400,
-    stockActual: 25,
+    cantidadActual: 25,
     stockMinimo: 10,
-    unidadMedida: 'kg',
     nombre: 'Capeletis de Carne Braseada',
-    categoria: 'Pastas Rellenas',
     recetaId: 'REC-004',
     recetaNombre: 'Capeletis de Carne Braseada (10 kg)',
-    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: 'Masa fina al huevo rellena de carne vacuna braseada lentamente con verduras.',
@@ -184,22 +146,16 @@ export const PRODUCTOS_INICIALES = [
   {
     id: 'PRD-005',
     codigo: 'PRD-005',
-    idProductoCompuesto: 5,
-    idProducto: 4, // Ñoquis
-    idTipoDeProducto: 2, // Pastas Simples
-    idVariedad: 5, // De Papa Tradicionales
+    idProducto: 5,
+    idSubTipoProducto: 4,
+    variedad: 'De Papa Tradicionales',
     idUnidad: 1, // kg
-    idStock: 105,
     precioUnitario: 4500,
-    precioVenta: 4500,
-    stockActual: 40,
+    cantidadActual: 40,
     stockMinimo: 15,
-    unidadMedida: 'kg',
     nombre: 'Ñoquis de Papa Tradicionales',
-    categoria: 'Pastas Simples',
     recetaId: 'REC-005',
     recetaNombre: 'Ñoquis de Papa Tradicionales (10 kg)',
-    unidad: 'kg',
     vidaUtil: '24 hs fresco / 60 días freezer',
     estado: 'Activo',
     descripcion: 'Ñoquis suaves y livianos elaborados con papa natural y harina de trigo 0000.',
@@ -207,22 +163,16 @@ export const PRODUCTOS_INICIALES = [
   {
     id: 'PRD-006',
     codigo: 'PRD-006',
-    idProductoCompuesto: 6,
-    idProducto: 5, // Sorrentinos
-    idTipoDeProducto: 1, // Pastas Rellenas
-    idVariedad: 6, // Jamón y Mozzarella
+    idProducto: 6,
+    idSubTipoProducto: 5,
+    variedad: 'Jamón y Mozzarella',
     idUnidad: 1, // kg
-    idStock: 106,
     precioUnitario: 6200,
-    precioVenta: 6200,
-    stockActual: 20,
+    cantidadActual: 20,
     stockMinimo: 15,
-    unidadMedida: 'kg',
     nombre: 'Sorrentinos de Jamón y Mozzarella',
-    categoria: 'Pastas Rellenas',
     recetaId: 'REC-006',
     recetaNombre: 'Sorrentinos de Jamón y Mozzarella (10 kg)',
-    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Activo',
     descripcion: 'Sorrentinos redondos con abundancia de jamón cocido seleccionado y mozzarella suave.',
@@ -230,22 +180,16 @@ export const PRODUCTOS_INICIALES = [
   {
     id: 'PRD-007',
     codigo: 'PRD-007',
-    idProductoCompuesto: 7,
-    idProducto: 6, // Cintas
-    idTipoDeProducto: 2, // Pastas Simples
-    idVariedad: 7, // Con Espinaca
+    idProducto: 7,
+    idSubTipoProducto: 6,
+    variedad: 'Con Espinaca',
     idUnidad: 1, // kg
-    idStock: 107,
     precioUnitario: 4400,
-    precioVenta: 4400,
-    stockActual: 15,
+    cantidadActual: 15,
     stockMinimo: 15,
-    unidadMedida: 'kg',
     nombre: 'Cintas al Huevo con Espinaca',
-    categoria: 'Pastas Simples',
     recetaId: null,
     recetaNombre: 'Sin receta asignada',
-    unidad: 'kg',
     vidaUtil: '48 hs fresco / 90 días freezer',
     estado: 'Inactivo',
     descripcion: 'Pasta cinta verde al huevo coloreada con espinaca natural molida.',
@@ -253,22 +197,16 @@ export const PRODUCTOS_INICIALES = [
   {
     id: 'PRD-008',
     codigo: 'PRD-008',
-    idProductoCompuesto: 8,
-    idProducto: 7, // Canelones
-    idTipoDeProducto: 1, // Pastas Rellenas
-    idVariedad: 8, // Verdura y Ricota
+    idProducto: 8,
+    idSubTipoProducto: 7,
+    variedad: 'Verdura y Ricota',
     idUnidad: 2, // unidades
-    idStock: 108,
     precioUnitario: 5900,
-    precioVenta: 5900,
-    stockActual: 0,
+    cantidadActual: 0,
     stockMinimo: 10,
-    unidadMedida: 'unidades',
     nombre: 'Canelones de Verdura y Ricota',
-    categoria: 'Pastas Rellenas',
     recetaId: null,
     recetaNombre: 'Sin receta asignada',
-    unidad: 'unidades',
     vidaUtil: '48 hs refrigerado',
     estado: 'Inactivo',
     descripcion: 'Canelones armados listos para hornear con salsa a elección.',
@@ -276,22 +214,16 @@ export const PRODUCTOS_INICIALES = [
   {
     id: 'PRD-009',
     codigo: 'PRD-009',
-    idProductoCompuesto: 9,
-    idProducto: 8, // Salsa Filetto
-    idTipoDeProducto: 3, // Otros
-    idVariedad: 9, // Artesanal
+    idProducto: 9,
+    idSubTipoProducto: 8,
+    variedad: 'Artesanal',
     idUnidad: 2, // unidades
-    idStock: 109,
     precioUnitario: 2800,
-    precioVenta: 2800,
-    stockActual: 35,
+    cantidadActual: 35,
     stockMinimo: 12,
-    unidadMedida: 'unidades',
     nombre: 'Salsa Filetto Artesanal',
-    categoria: 'Otros',
     recetaId: null,
     recetaNombre: 'No requiere (Producto listo / reventa)',
-    unidad: 'unidades',
     vidaUtil: '15 días refrigerado',
     estado: 'Activo',
     descripcion: 'Salsa de tomates frescos seleccionados con albahaca y aceite de oliva virgen extra.',
@@ -299,22 +231,16 @@ export const PRODUCTOS_INICIALES = [
   {
     id: 'PRD-010',
     codigo: 'PRD-010',
-    idProductoCompuesto: 10,
-    idProducto: 9, // Queso Reggianito
-    idTipoDeProducto: 3, // Otros
-    idVariedad: 10, // Rallado
+    idProducto: 10,
+    idSubTipoProducto: 9,
+    variedad: 'Rallado',
     idUnidad: 2, // unidades
-    idStock: 110,
     precioUnitario: 3500,
-    precioVenta: 3500,
-    stockActual: 50,
+    cantidadActual: 50,
     stockMinimo: 15,
-    unidadMedida: 'unidades',
     nombre: 'Queso Reggianito Rallado',
-    categoria: 'Otros',
     recetaId: null,
     recetaNombre: 'No requiere (Producto listo / reventa)',
-    unidad: 'unidades',
     vidaUtil: '60 días refrigerado',
     estado: 'Activo',
     descripcion: 'Queso reggianito de pasta dura estacionado, envasado al vacío en hebras.',
@@ -322,22 +248,16 @@ export const PRODUCTOS_INICIALES = [
   {
     id: 'PRD-011',
     codigo: 'PRD-011',
-    idProductoCompuesto: 11,
-    idProducto: 10, // Tiramisú
-    idTipoDeProducto: 3, // Otros
-    idVariedad: 11, // Tradicional Italiano
+    idProducto: 11,
+    idSubTipoProducto: 10,
+    variedad: 'Tradicional Italiano',
     idUnidad: 2, // unidades
-    idStock: 111,
     precioUnitario: 3200,
-    precioVenta: 3200,
-    stockActual: 18,
+    cantidadActual: 18,
     stockMinimo: 10,
-    unidadMedida: 'unidades',
     nombre: 'Tiramisú Tradicional Italiano',
-    categoria: 'Otros',
     recetaId: null,
     recetaNombre: 'No requiere (Producto listo / reventa)',
-    unidad: 'unidades',
     vidaUtil: '5 días refrigerado',
     estado: 'Activo',
     descripcion: 'Postre italiano con vainillas al café expreso, crema de mascarpone y cacao amargo.',
