@@ -2,6 +2,7 @@ import { catalogosBase } from '../pages/administracion/catalogos';
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const AppContext = createContext(null);
+const ADMIN_HOME = 'dashboard';
 
 const CLIENT_PAGES = ['catalogo', 'ingresar', 'registrarse', 'carrito', 'pedidos_cliente', 'medios_pago', 'mi_perfil'];
 const pageFromLocation = () => {
@@ -68,7 +69,7 @@ export const AppProvider = ({ children }) => {
   // Soporte para botones de atras/adelante del navegador sin cerrar sesion
   useEffect(() => {
     const handlePopState = (event) => {
-      const targetPage = event.state?.page || pageFromLocation() || (user?.role === 'admin' ? 'clientes' : 'catalogo');
+      const targetPage = event.state?.page || pageFromLocation() || (user?.role === 'admin' ? ADMIN_HOME : 'catalogo');
       if (targetPage) {
         setCurrentPage(targetPage);
         try {
@@ -77,7 +78,7 @@ export const AppProvider = ({ children }) => {
           // ignore storage errors
         }
       } else if (user) {
-        const fallback = user.role === 'cliente' ? 'catalogo' : 'clientes';
+        const fallback = user.role === 'cliente' ? 'catalogo' : ADMIN_HOME;
         setCurrentPage(fallback);
       }
       setSidebarOpen(false);
@@ -91,7 +92,7 @@ export const AppProvider = ({ children }) => {
       role === 'cliente'
         ? { name: 'María García', role: 'cliente', avatar: 'MG', email: 'maria.garcia@mail.com', ...profile }
         : { name: 'Carlos Rodríguez', role: 'admin', avatar: 'CR', email: 'c.rodriguez@pastafab.com' };
-    const defaultPage = role === 'cliente' ? (destination || 'catalogo') : 'clientes';
+    const defaultPage = role === 'cliente' ? (destination || 'catalogo') : ADMIN_HOME;
 
     setUser(newUser);
     setCurrentPage(defaultPage);

@@ -1,4 +1,5 @@
 import CatalogoAdmin from './pages/administracion/CatalogoScreen';
+import DashboardScreen from './pages/administracion/DashboardScreen';
 import React from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { Box, Typography, Fade, GlobalStyles } from '@mui/material';
@@ -42,6 +43,7 @@ import { PAGE_LABELS } from './config/navigation';
 const PedidosTienda = () => <><MayoristasTienda /><PedidosScreen /></>;
 
 const SCREEN_MAP = {
+  dashboard: DashboardScreen,
   admin_estados: () => <CatalogoAdmin tipo="estados" entidad="estado" soloNombre />,
   admin_iva: () => <CatalogoAdmin tipo="iva" entidad="tipo de IVA" />,
   admin_empleados: () => <CatalogoAdmin tipo="empleados" entidad="empleado" />,
@@ -88,7 +90,7 @@ const PageContent = () => {
           <GlobalStyles styles={{ '#notifications-btn': { display: 'none !important' } }} />
         )}
         {/* Page header */}
-        {!isCliente && <Box sx={{ mb: 3 }}>
+        {!isCliente && currentPage !== 'dashboard' && <Box sx={{ mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', letterSpacing: '-0.01em' }}>
             {label}
           </Typography>
