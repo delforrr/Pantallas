@@ -19,13 +19,6 @@ function esFechaValida(fecha) {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === fecha;
 }
 
-export const categorias = [
-  { destino: 'pedidos', titulo: 'Pedidos vencidos o para hoy' },
-  { destino: 'materia_prima', titulo: 'Materias primas en alerta' },
-  { destino: 'orden_compra', titulo: 'Recepciones atrasadas' },
-  { destino: 'maquinaria', titulo: 'Equipos fuera de servicio' },
-];
-
 const pedidosAbiertos = INITIAL_PEDIDOS.filter(
   (pedido) => !['Finalizado', 'Cancelado'].includes(pedido.estadoPedido) &&
     esFechaValida(pedido.fechaEntregaEstimada),

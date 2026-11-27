@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { Box, Button, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material';
+import { alpha, darken, lighten } from '@mui/material/styles';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import BuildCircleOutlinedIcon from '@mui/icons-material/BuildCircleOutlined';
+import GrassOutlinedIcon from '@mui/icons-material/GrassOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import { useApp } from '../../context/AppContext';
 import {
-  alertas, categorias, cobrosPorTipo, entregas, FECHA_DEMO,
+  alertas, cobrosPorTipo, entregas, FECHA_DEMO,
   fechaVisible, mesesCobros, moneda, porcentaje,
 } from './dashboardData';
 
@@ -17,6 +22,72 @@ const panel = {
 
 const coloresCobros = ['primary.main', 'text.secondary', 'primary.dark', 'text.primary', 'action.disabled'];
 const resumenPendientes = 4;
+
+const indicadores = [
+  { destino: 'pedidos', titulo: 'Pedidos vencidos o para hoy', modulo: 'Pedidos', tono: 'info', Icono: LocalShippingOutlinedIcon },
+  { destino: 'materia_prima', titulo: 'Materias primas en alerta', modulo: 'Materia Prima', tono: 'warning', Icono: GrassOutlinedIcon },
+  { destino: 'orden_compra', titulo: 'Recepciones atrasadas', modulo: 'Órdenes de Compra', tono: 'primary', Icono: Inventory2OutlinedIcon },
+  { destino: 'maquinaria', titulo: 'Equipos fuera de servicio', modulo: 'Maquinaria', tono: 'secondary', Icono: BuildCircleOutlinedIcon },
+];
+
+function Indicadores() {
+  const { navigate } = useApp();
+  return (
+    <Box component="section" aria-label="Indicadores operativos" sx={{
+      display: 'grid', gap: { xs: 1, sm: 2 },
+      gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: 'repeat(4, minmax(0, 1fr))' },
+    }}>
+      {indicadores.map(({ destino, titulo, modulo, tono, Icono }) => (
+        <Paper
+          key={destino}
+          component="a"
+          href={`/admin#${destino}`}
+          variant="outlined"
+          onClick={(evento) => {
+            if (evento.metaKey || evento.ctrlKey || evento.altKey || evento.shiftKey) return;
+            evento.preventDefault();
+            navigate(destino);
+          }}
+          sx={(theme) => {
+            const color = theme.palette[tono].main;
+            const oscuro = theme.palette.mode === 'dark';
+            return {
+              ...panel,
+              '--indicador-acento': oscuro ? lighten(color, 0.36) : darken(color, 0.42),
+              bgcolor: alpha(color, oscuro ? 0.1 : 0.055),
+              borderColor: alpha(color, oscuro ? 0.38 : 0.25),
+              borderTopColor: color,
+              borderTopWidth: 2,
+              p: { xs: 1.5, sm: 2 },
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: 0.75,
+              textDecoration: 'none',
+              '&:hover': { bgcolor: alpha(color, oscuro ? 0.18 : 0.10) },
+              '&:focus-visible': { outline: '2px solid var(--indicador-acento)', outlineOffset: 2 },
+            };
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', color: 'var(--indicador-acento)' }}>
+            <Icono sx={{ fontSize: 24 }} />
+            <Typography component="span" sx={{ fontSize: 30, fontWeight: 700, lineHeight: 1 }}>
+              {alertas.filter((alerta) => alerta.destino === destino).length}
+            </Typography>
+          </Box>
+          <Typography component="span" variant="body2" sx={{ fontWeight: 650, pb: 0.5 }}>{titulo}</Typography>
+          <Typography component="span" variant="caption" sx={{
+            mt: 'auto', display: 'inline-flex', alignItems: 'center', gap: 0.5,
+            color: 'var(--indicador-acento)', fontWeight: 600,
+            '.MuiPaper-root:hover &': { textDecoration: 'underline' },
+          }}>
+            {modulo}<ArrowForwardIcon sx={{ fontSize: 14, flexShrink: 0 }} />
+          </Typography>
+        </Paper>
+      ))}
+    </Box>
+  );
+}
 
 function Acceso({ destino, children, etiqueta }) {
   const { navigate } = useApp();
@@ -193,24 +264,7 @@ export default function DashboardScreen() {
         </Typography>
       </Box>
 
-      <Paper component="dl" aria-label="Indicadores operativos" variant="outlined" sx={{
-        ...panel, m: 0, p: 0, display: 'grid',
-        gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: 'repeat(4, minmax(0, 1fr))' },
-        '& > div': { p: { xs: 1.5, sm: 2 }, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderColor: 'divider' },
-        '& > div:nth-of-type(even), & > div:nth-of-type(3)': { borderLeftStyle: 'solid', borderLeftColor: 'divider' },
-        '& > div:nth-of-type(even)': { borderLeftWidth: 1 },
-        '& > div:nth-of-type(3)': { borderLeftWidth: { xs: 0, md: 1 } },
-        '& > div:nth-of-type(n+3)': { borderTopWidth: { xs: 1, md: 0 }, borderTopStyle: 'solid', borderTopColor: 'divider' },
-      }}>
-        {categorias.map((categoria) => (
-          <Box key={categoria.destino}>
-            <Typography component="dt" variant="body2" color="text.secondary">{categoria.titulo}</Typography>
-            <Typography component="dd" sx={{ m: 0, mt: 0.25, fontSize: 28, fontWeight: 600, lineHeight: 1.2 }}>
-              {alertas.filter((alerta) => alerta.destino === categoria.destino).length}
-            </Typography>
-          </Box>
-        ))}
-      </Paper>
+      <Indicadores />
 
       <Pendientes />
 
