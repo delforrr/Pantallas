@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import SaveOutlinedIcon from '@mui/icons-material/Save';
 import { CATALOGO_PRODUCTOS_VENTAS } from './mockData';
 import NuevoClientePresupuestoDialog from './NuevoClientePresupuestoDialog';
@@ -26,6 +27,34 @@ function Buscador({ onInputChange, listarAlEntrar = false, ...props }) {
     onClose={() => setMostrarResultados(false)}
     noOptionsText="No se encontraron coincidencias"
   />;
+}
+
+function CantidadProducto({ cantidad, producto, onChange }) {
+  const [editando, setEditando] = useState(false);
+  const [borrador, setBorrador] = useState('');
+  const inputRef = useRef(null);
+  const valida = Number.isInteger(Number(borrador)) && Number(borrador) >= 10;
+  const guardar = () => {
+    if (valida) onChange(Number(borrador));
+    setEditando(false);
+  };
+
+  return editando ? <TextField
+    variant="standard" type="number" size="small" autoFocus inputRef={inputRef}
+    value={borrador} onChange={event => setBorrador(event.target.value)} onBlur={guardar}
+    onKeyDown={event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (valida) guardar();
+        else inputRef.current?.reportValidity();
+      }
+      if (event.key === 'Escape') { event.preventDefault(); setEditando(false); }
+    }}
+    slotProps={{ input: { disableUnderline: true }, htmlInput: { min: 10, step: 1, required: true, 'aria-label': `Cantidad de ${producto}` } }}
+  /> : <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.25 }}>
+    <Typography variant="body2">{cantidad}</Typography>
+    <Tooltip title="Editar cantidad"><IconButton aria-label={`Editar cantidad de ${producto}`} onClick={() => { setBorrador(String(cantidad)); setEditando(true); }}><EditOutlinedIcon sx={{ fontSize: 16 }} /></IconButton></Tooltip>
+  </Box>;
 }
 
 export default function PresupuestoFormScreen({ datos, clientes, onCreateCliente, onChange, onCancel, onSubmit, isEditing, subtotal, descuento, total, error }) {
@@ -141,7 +170,7 @@ export default function PresupuestoFormScreen({ datos, clientes, onCreateCliente
             {datos.items.map((item, index) => (
               <Box key={item.idProductoCompuesto} role="listitem" sx={{ display: 'grid', gridTemplateColumns: 'var(--columnas-producto)', gap: 0.5, alignItems: 'center', px: 1, py: 0.5, minHeight: 40, borderBottom: '1px solid', borderColor: 'divider', '&:last-child': { borderBottom: 0 } }}>
                 <Typography variant="body2" sx={{ minWidth: 0, fontWeight: 500, overflowWrap: 'anywhere' }}>{item.productoNombre}</Typography>
-                <TextField type="number" size="small" required value={item.cantidad} onChange={event => cambiarItem(index, { cantidad: event.target.value })} slotProps={{ htmlInput: { min: 10, step: 1, 'aria-label': `Cantidad del producto ${index + 1}` } }} />
+                <CantidadProducto cantidad={item.cantidad} producto={item.productoNombre} onChange={cantidad => cambiarItem(index, { cantidad })} />
                 <Typography variant="body2" sx={{ textAlign: 'right', overflowWrap: 'anywhere' }}>{moneda(item.precioUnitario)}</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 700, textAlign: 'right', overflowWrap: 'anywhere' }}>{moneda(item.subtotal)}</Typography>
                 <Tooltip title="Quitar producto"><IconButton color="error" aria-label={`Quitar producto ${index + 1}`} onClick={() => cambiar({ items: datos.items.filter((_, i) => i !== index) })}><DeleteOutlineIcon fontSize="small" /></IconButton></Tooltip>
