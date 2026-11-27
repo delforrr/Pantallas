@@ -44,6 +44,13 @@ const panelExpandido = {
   flexDirection: "column",
 };
 
+const vistaIndicadoresMovil = "@media (max-width: 699px)";
+const rangosEntrega = [
+  { desde: 1, etiqueta: "1–2", nivel: "Baja", color: "primary.main" },
+  { desde: 3, etiqueta: "3–4", nivel: "Media", color: "warning.main" },
+  { desde: 5, etiqueta: "5+", nivel: "Alta", color: "error.main" },
+];
+
 const coloresCobros = {
   Eventos: "primary.main",
   Mostrador: "text.secondary",
@@ -104,6 +111,10 @@ function Indicadores() {
           xs: "repeat(2, minmax(0, 1fr))",
           md: "repeat(4, minmax(0, 1fr))",
         },
+        [vistaIndicadoresMovil]: {
+          gridTemplateColumns: "minmax(0, 1fr)",
+          gap: 1,
+        },
         "@media (min-width: 700px) and (max-height: 579px)": {
           gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
         },
@@ -144,6 +155,16 @@ function Indicadores() {
               alignItems: "flex-start",
               gap: 0.75,
               textDecoration: "none",
+              [vistaIndicadoresMovil]: {
+                display: "grid",
+                gridTemplateAreas: '"icono titulo total" "icono modulo total"',
+                gridTemplateColumns: "auto minmax(0, 1fr) auto",
+                alignContent: "center",
+                alignItems: "center",
+                columnGap: 1.5,
+                rowGap: 0.25,
+                p: 1.25,
+              },
               "&:hover": { bgcolor: alpha(color, oscuro ? 0.18 : 0.1) },
               "&:focus-visible": {
                 outline: "2px solid var(--indicador-acento)",
@@ -159,12 +180,18 @@ function Indicadores() {
               justifyContent: "space-between",
               width: "100%",
               color: "var(--indicador-acento)",
+              [vistaIndicadoresMovil]: { display: "contents" },
             }}
           >
-            <Icono sx={{ fontSize: 24 }} />
+            <Icono sx={{ fontSize: 24, gridArea: "icono" }} />
             <Typography
               component="span"
-              sx={{ fontSize: 30, fontWeight: 700, lineHeight: 1 }}
+              sx={{
+                fontSize: 30,
+                fontWeight: 700,
+                lineHeight: 1,
+                gridArea: "total",
+              }}
             >
               {alertas.filter((alerta) => alerta.destino === destino).length}
             </Typography>
@@ -172,7 +199,12 @@ function Indicadores() {
           <Typography
             component="span"
             variant="body2"
-            sx={{ my: "auto", fontWeight: 650 }}
+            sx={{
+              my: "auto",
+              fontWeight: 650,
+              gridArea: "titulo",
+              [vistaIndicadoresMovil]: { my: 0 },
+            }}
           >
             {titulo}
           </Typography>
@@ -185,6 +217,7 @@ function Indicadores() {
               gap: 0.5,
               color: "var(--indicador-acento)",
               fontWeight: 600,
+              gridArea: "modulo",
               ".MuiPaper-root:hover &": { textDecoration: "underline" },
             }}
           >
@@ -382,7 +415,7 @@ function Entregas({ compactarGrafico }) {
   );
   const paso = Math.ceil((maximo + 1) / 3);
   const marcas = [3, 2, 1, 0].map((indice) => indice * paso);
-  const altura = compactarGrafico ? 84 : 136;
+  const altura = compactarGrafico ? 52 : 136;
   return (
     <Paper
       component="section"
@@ -390,13 +423,12 @@ function Entregas({ compactarGrafico }) {
       aria-labelledby="entregas-titulo"
       sx={{ ...panelExpandido, ...(compactarGrafico && { p: 1.5 }) }}
     >
-      <Stack
-        direction="row"
+      <Box
         sx={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 1fr) auto",
           alignItems: "center",
-          justifyContent: "space-between",
-          gap: 0.5,
-          flexWrap: "wrap",
+          gap: 1,
         }}
       >
         <Box>
@@ -425,14 +457,13 @@ function Entregas({ compactarGrafico }) {
             </MenuItem>
           ))}
         </TextField>
-        <Acceso destino="pedidos">Pedidos</Acceso>
-      </Stack>
+      </Box>
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: "2ch minmax(0, 1fr)",
           columnGap: 1,
-          mt: 1.5,
+          mt: compactarGrafico ? 1 : 1.5,
           flex: "1 0 auto",
           minHeight: altura + 32,
           "--etiquetas-eje": "22px",
@@ -482,60 +513,65 @@ function Entregas({ compactarGrafico }) {
               gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
             }}
           >
-            {entregas.map((dia, indice) => (
-              <Box
-                component="li"
-                key={dia.fecha}
-                title={fechaVisible(dia.fecha)}
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  textAlign: "center",
-                  minWidth: 0,
-                }}
-              >
-                <Box sx={{ position: "relative", flex: 1, my: "5px" }}>
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      bottom: 0,
-                      insetInline: 0,
-                      mx: "auto",
-                      height: `${(dia.cantidad / marcas[0]) * 100}%`,
-                      width: "48%",
-                      maxWidth: 52,
-                      bgcolor: indice === 0 ? "primary.main" : "text.secondary",
-                      borderRadius: "3px 3px 0 0",
-                    }}
-                  >
-                    <Typography
-                      component="span"
-                      variant="caption"
-                      color={dia.cantidad ? "text.primary" : "text.secondary"}
-                      sx={{
-                        position: "absolute",
-                        bottom: "100%",
-                        insetInline: 0,
-                        fontWeight: dia.cantidad ? 700 : 400,
-                      }}
-                    >
-                      {dia.cantidad}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Typography
-                  component="time"
-                  dateTime={dia.fecha}
-                  variant="caption"
+            {entregas.map((dia) => {
+              const rango = rangosEntrega.findLast(
+                ({ desde }) => dia.cantidad >= desde,
+              );
+              return (
+                <Box
+                  component="li"
+                  key={dia.fecha}
+                  title={fechaVisible(dia.fecha)}
                   sx={{
-                    height: "var(--etiquetas-eje)",
-                    fontWeight: indice === 0 ? 700 : 400,
+                    display: "flex",
+                    flexDirection: "column",
+                    textAlign: "center",
+                    minWidth: 0,
                   }}
                 >
-                  {dia.etiqueta}
-                </Typography>
-              </Box>
-            ))}
+                  <Box sx={{ position: "relative", flex: 1, my: "5px" }}>
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        bottom: 0,
+                        insetInline: 0,
+                        mx: "auto",
+                        height: `${(dia.cantidad / marcas[0]) * 100}%`,
+                        width: "48%",
+                        maxWidth: 52,
+                        bgcolor: rango?.color,
+                        borderRadius: "3px 3px 0 0",
+                      }}
+                    >
+                      <Typography
+                        component="span"
+                        variant="caption"
+                        color={dia.cantidad ? "text.primary" : "text.secondary"}
+                        sx={{
+                          position: "absolute",
+                          bottom: "100%",
+                          insetInline: 0,
+                          fontWeight: dia.cantidad ? 700 : 400,
+                        }}
+                      >
+                        {dia.cantidad}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Typography
+                    component="time"
+                    dateTime={dia.fecha}
+                    variant="caption"
+                    sx={{
+                      height: "var(--etiquetas-eje)",
+                      fontWeight: dia.fecha === FECHA_DEMO ? 700 : 400,
+                    }}
+                  >
+                    {dia.etiqueta}
+                  </Typography>
+                </Box>
+              );
+            })}
           </Box>
         </Box>
       </Box>
@@ -544,6 +580,51 @@ function Entregas({ compactarGrafico }) {
           No hay entregas previstas.
         </Typography>
       )}
+      <Stack
+        direction="row"
+        sx={{
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 0.5,
+          flexWrap: "wrap",
+        }}
+      >
+        <Box
+          component="ul"
+          aria-label="Carga diaria por cantidad de pedidos"
+          sx={{
+            m: 0,
+            p: 0,
+            listStyle: "none",
+            display: "flex",
+            columnGap: 1,
+            rowGap: 0.25,
+            flexWrap: "wrap",
+          }}
+        >
+          {rangosEntrega.map(({ nivel, etiqueta, color }) => (
+            <Box
+              component="li"
+              key={nivel}
+              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+            >
+              <Box
+                aria-hidden="true"
+                sx={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  bgcolor: color,
+                }}
+              />
+              <Typography variant="caption" color="text.secondary">
+                {nivel} {etiqueta}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+        <Acceso destino="pedidos">Pedidos</Acceso>
+      </Stack>
     </Paper>
   );
 }

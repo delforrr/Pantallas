@@ -45,19 +45,19 @@ export const PEDIDOS_DEMO_PROGRAMADOS = [
   {
     nroPedido: "PED-DEMO-104",
     clienteNombre: "Mercado del Centro",
-    fechaEntregaEstimada: "2026-10-01",
+    fechaEntregaEstimada: "2026-09-28",
     estadoPedido: "Pendiente",
   },
   {
     nroPedido: "PED-DEMO-105",
     clienteNombre: "Salón Estación Sur",
-    fechaEntregaEstimada: "2026-10-04",
+    fechaEntregaEstimada: "2026-09-28",
     estadoPedido: "Pendiente",
   },
   {
     nroPedido: "PED-DEMO-106",
     clienteNombre: "Restaurante La Vereda",
-    fechaEntregaEstimada: "2026-10-04",
+    fechaEntregaEstimada: "2026-09-30",
     estadoPedido: "Pendiente",
   },
   {
@@ -69,7 +69,19 @@ export const PEDIDOS_DEMO_PROGRAMADOS = [
   {
     nroPedido: "PED-DEMO-108",
     clienteNombre: "Despensa Buen Sabor",
-    fechaEntregaEstimada: "2026-10-09",
+    fechaEntregaEstimada: "2026-10-04",
+    estadoPedido: "Pendiente",
+  },
+  {
+    nroPedido: "PED-DEMO-109",
+    clienteNombre: "Cocina del Barrio",
+    fechaEntregaEstimada: "2026-09-28",
+    estadoPedido: "En Preparación",
+  },
+  {
+    nroPedido: "PED-DEMO-110",
+    clienteNombre: "Mercado La Huerta",
+    fechaEntregaEstimada: "2026-09-30",
     estadoPedido: "Pendiente",
   },
 ];
