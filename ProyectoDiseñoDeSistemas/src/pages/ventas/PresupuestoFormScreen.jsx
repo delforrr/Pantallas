@@ -1,11 +1,13 @@
 import { Alert, Autocomplete, Box, Button, IconButton, MenuItem, Paper, TextField, Tooltip, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import SaveOutlinedIcon from '@mui/icons-material/Save';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { CATALOGO_PRODUCTOS_VENTAS, INITIAL_CLIENTES } from './mockData';
+import { CATALOGO_PRODUCTOS_VENTAS } from './mockData';
+import NuevoClientePresupuestoDialog from './NuevoClientePresupuestoDialog';
 
 const moneda = valor => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 2 }).format(valor);
 const panel = { p: 1.5, borderRadius: '14px', minWidth: 0 };
@@ -28,9 +30,11 @@ function Buscador({ onInputChange, listarAlEntrar = false, ...props }) {
   />;
 }
 
-export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSubmit, isEditing, subtotal, descuento, total, error }) {
+export default function PresupuestoFormScreen({ datos, clientes, onCreateCliente, onChange, onCancel, onSubmit, isEditing, subtotal, descuento, total, error }) {
   const errorRef = useRef(null);
   const [pagina, setPagina] = useState(0);
+  const [nuevoCliente, setNuevoCliente] = useState(false);
+  const clienteSeleccionado = clientes.some(cliente => cliente.idCliente === datos.idCliente);
   const [busquedaProducto, setBusquedaProducto] = useState('');
   const [tipoProducto, setTipoProducto] = useState('TODOS');
   const [subtipoProducto, setSubtipoProducto] = useState('TODOS');
@@ -50,7 +54,7 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
     }),
   });
   const agregarItem = producto => {
-    if (!producto) return;
+    if (!producto || !clienteSeleccionado) return;
     const existente = datos.items.findIndex(item => item.idProductoCompuesto === producto.idProductoCompuesto);
     if (existente !== -1) {
       cambiarItem(existente, { cantidad: Number(datos.items[existente].cantidad) + 10 });
@@ -68,26 +72,30 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
   };
 
   return (
-    <Box component="form" onSubmit={event => { event.preventDefault(); onSubmit(); }} sx={{ display: 'grid', gap: 1.5, minWidth: 0 }}>
+    <Box component="form" onSubmit={event => { event.preventDefault(); if (clienteSeleccionado && datos.items.length) onSubmit(); }} sx={{ display: 'grid', gap: 1.5, minWidth: 0 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
         <Tooltip title="Volver a presupuestos"><IconButton aria-label="Volver a presupuestos" onClick={onCancel}><ArrowBackIcon /></IconButton></Tooltip>
         <Typography component="h1" variant="h5" sx={{ fontWeight: 700, flex: 1 }}>{isEditing ? 'Editar presupuesto' : 'Nuevo presupuesto'}</Typography>
         <Button color="inherit" onClick={onCancel}>Cancelar</Button>
-        <Button type="submit" variant="contained" startIcon={<SaveOutlinedIcon />}>{isEditing ? 'Guardar cambios' : 'Guardar presupuesto'}</Button>
+        {clienteSeleccionado && datos.items.length > 0 && <Button type="submit" variant="contained" startIcon={<SaveOutlinedIcon />}>{isEditing ? 'Guardar cambios' : 'Guardar presupuesto'}</Button>}
       </Box>
 
       {error && <Alert ref={errorRef} severity="error" role="alert" tabIndex={-1}>{error}</Alert>}
 
       <Paper variant="outlined" sx={panel}>
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'minmax(0, 1fr) 220px' }, gap: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
           <Buscador
-            options={INITIAL_CLIENTES}
-            value={INITIAL_CLIENTES.find(cliente => cliente.idCliente === datos.idCliente) || null}
+            sx={{ flex: 1, minWidth: 0 }}
+            options={clientes}
+            value={clientes.find(cliente => cliente.idCliente === datos.idCliente) || null}
             getOptionLabel={cliente => cliente.razonSocial}
             isOptionEqualToValue={(a, b) => a.idCliente === b.idCliente}
             onChange={(_, cliente) => cambiar({ idCliente: cliente?.idCliente ?? '' })}
             renderInput={params => <TextField {...params} label="Cliente" placeholder="Escribí para buscar un cliente" required autoFocus size="small" />}
           />
+          {!clienteSeleccionado && <Tooltip title="Agregar cliente"><IconButton aria-label="Agregar cliente" onClick={() => setNuevoCliente(true)} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}><AddIcon /></IconButton></Tooltip>}
+          </Box>
           <TextField label="Válido hasta" type="date" required size="small" value={datos.validezHasta} onChange={event => cambiar({ validezHasta: event.target.value })} slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: datos.fechaEmision } }} />
         </Box>
       </Paper>
@@ -95,17 +103,20 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
       <Paper variant="outlined" sx={panel}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 1 }}>
           <TextField select size="small" label="Tipo de producto" value={tipoProducto}
+            disabled={!clienteSeleccionado}
             onChange={event => { setTipoProducto(event.target.value); setSubtipoProducto('TODOS'); }}
             sx={{ width: { xs: '100%', sm: 170 } }}>
             <MenuItem value="TODOS">Todos los tipos</MenuItem>
             {tiposProducto.map(tipo => <MenuItem key={tipo} value={tipo}>{tipo}</MenuItem>)}
           </TextField>
           <TextField select size="small" label="Subtipo" value={subtipoProducto}
+            disabled={!clienteSeleccionado}
             onChange={event => setSubtipoProducto(event.target.value)} sx={{ width: { xs: '100%', sm: 170 } }}>
             <MenuItem value="TODOS">Todos los subtipos</MenuItem>
             {subtiposProducto.map(subtipo => <MenuItem key={subtipo} value={subtipo}>{subtipo}</MenuItem>)}
           </TextField>
           <Buscador
+            disabled={!clienteSeleccionado}
             sx={{ width: { xs: '100%', sm: 400 }, minWidth: 0, maxWidth: '100%' }}
             options={productosDisponibles}
             listarAlEntrar={tipoProducto !== 'TODOS' || subtipoProducto !== 'TODOS'}
@@ -116,8 +127,8 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
             onChange={(_, producto) => { agregarItem(producto); setBusquedaProducto(''); }}
             renderInput={params => <TextField {...params} label="Buscar producto" placeholder="Escribí el nombre del producto" size="small" />}
           />
-          <Box sx={{ display: 'grid', gap: 0.25 }}>
-            {!datos.items.length && <Typography color="text.secondary" variant="caption">Buscá un producto para comenzar.</Typography>}
+          <Box sx={{ display: 'flex', alignItems: 'center', columnGap: 1.5, rowGap: 0.25, flexShrink: 0, maxWidth: '100%', flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+            {!datos.items.length && <Typography color="text.secondary" variant="caption">{clienteSeleccionado ? 'Buscá un producto para comenzar.' : 'Seleccioná un cliente para cargar productos.'}</Typography>}
             <Typography variant="caption" color="text.secondary">Cantidad mínima: 10 por producto.</Typography>
           </Box>
           <Typography component="h2" variant="subtitle1" sx={{ fontWeight: 700, ml: 'auto', mr: { sm: 4 }, whiteSpace: 'nowrap' }}>Productos ({datos.items.length})</Typography>
@@ -151,6 +162,7 @@ export default function PresupuestoFormScreen({ datos, onChange, onCancel, onSub
           <Box sx={{ textAlign: 'right' }}><Typography variant="caption" color="text.secondary">Mayorista ({descuento}%)</Typography><Typography variant="body2" sx={{ fontWeight: 600 }}>−{moneda(subtotal * descuento / 100)}</Typography></Box>
           <Box sx={{ textAlign: 'right' }}><Typography variant="caption" color="text.secondary">Total</Typography><Typography sx={{ fontWeight: 800, color: 'primary.main' }}>{moneda(total)}</Typography></Box>
       </Paper>
+      {nuevoCliente && <NuevoClientePresupuestoDialog clientes={clientes} onClose={() => setNuevoCliente(false)} onCreate={onCreateCliente} />}
     </Box>
   );
 }

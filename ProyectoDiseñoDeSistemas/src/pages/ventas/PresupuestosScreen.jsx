@@ -47,6 +47,7 @@ const DESCUENTO_MAYORISTA = 10;
 export const PresupuestosScreen = () => {
   const nombreEstado = useNombreEstado();
   const [presupuestos, setPresupuestos] = useState(INITIAL_PRESUPUESTOS);
+  const [clientes, setClientes] = useState(INITIAL_CLIENTES);
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('TODOS');
 
@@ -66,7 +67,7 @@ export const PresupuestosScreen = () => {
   // Form State Normalizado
   const initialFormState = {
     nroPresupuesto: '',
-    idCliente: 1,
+    idCliente: '',
     tipoPedido: 'Evento / Cena de Gala (150 personas)',
     fechaEmision: '2026-09-24',
     validezHasta: '2026-10-01',
@@ -124,6 +125,18 @@ export const PresupuestosScreen = () => {
     setOpenForm(true);
   };
 
+  const handleCreateCliente = datos => {
+    const cliente = {
+      ...datos,
+      idCliente: Math.max(0, ...clientes.map(c => c.idCliente)) + 1,
+      estado: 'Activo', aceptaCredito: false, limiteCredito: 0, creditoUsado: 0,
+      calle: '', altura: '', localidad: '', provincia: '',
+    };
+    setClientes(prev => [...prev, cliente]);
+    setFormData(prev => ({ ...prev, idCliente: cliente.idCliente }));
+    setFormError('');
+  };
+
   const handleOpenEditForm = (item) => {
     setFormError('');
     setSavedMessage('');
@@ -144,7 +157,7 @@ export const PresupuestosScreen = () => {
   };
 
   const handleSave = () => {
-    const clienteObj = INITIAL_CLIENTES.find((c) => c.idCliente === formData.idCliente);
+    const clienteObj = clientes.find((c) => c.idCliente === formData.idCliente);
     if (!clienteObj || !formData.fechaEmision || !formData.validezHasta || formData.validezHasta < formData.fechaEmision) {
       setFormError('Seleccioná un cliente y fechas válidas. La validez debe ser igual o posterior a la emisión.');
       return;
@@ -207,7 +220,7 @@ export const PresupuestosScreen = () => {
   };
 
   if (openForm) {
-    return <PresupuestoFormScreen datos={formData} isEditing={isEditing}
+    return <PresupuestoFormScreen datos={formData} clientes={clientes} onCreateCliente={handleCreateCliente} isEditing={isEditing}
       onChange={datos => { setFormData(datos); setFormError(''); }}
       onCancel={() => setOpenForm(false)} onSubmit={handleSave}
       subtotal={subtotalForm} descuento={DESCUENTO_MAYORISTA} total={totalForm} adelanto={adelanto50Form} error={formError} />;
